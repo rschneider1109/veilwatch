@@ -804,13 +804,15 @@ function nowClock(){
   const d=new Date();
   const hh=String(d.getHours()).padStart(2,"0");
   const mm=String(d.getMinutes()).padStart(2,"0");
-  document.getElementById("clockPill").textContent=hh+":"+mm;
+  const clockEl = document.getElementById("clockPill");
+  if(clockEl) clockEl.textContent=hh+":"+mm;
   const elapsed = Math.floor((Date.now()-SESSION.sessionStart)/1000);
   const m = String(Math.floor(elapsed/60)).padStart(2,"0");
   const s = String(elapsed%60).padStart(2,"0");
-  document.getElementById("sessionClockMini").textContent = m+":"+s;
+  const sessEl = document.getElementById("sessionClockMini");
+  if(sessEl) sessEl.textContent = m+":"+s;
 }
-setInterval(nowClock,1000); nowClock();
+setInterval(nowClock,1000); try{ nowClock(); } catch(e){}
 
 function renderTabs(tab){
   document.querySelectorAll(".nav .btn").forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
@@ -848,284 +850,26 @@ function loginInit(){
   roleSel.onchange=sync; sync();
 
   document.getElementById("loginBtn").onclick=async ()=>{
-    const name=document.getElementById("whoName").value.trim()||"DM";
-    const key=document.getElementById("dmKey").value.trim();
-    const res = await api("/api/dm/login",{method:"POST",body:JSON.stringify({name, key})});
-    if(!res.ok){ toast(res.error||"Denied"); return; }
-    SESSION.role="dm"; SESSION.name=name; SESSION.dmKey=key;
-    document.getElementById("whoPill").textContent="DM: "+name;
-    document.getElementById("loginOverlay").style.display="none";
-    setRoleUI();
-    await refreshAll();
-  };
-  document.getElementById("loginPlayerBtn").onclick=async ()=>{
-    const name=document.getElementById("whoName").value.trim()||"Player";
+    const role = roleSel.value;
+    const name=document.getElementById("whoName").value.trim()|| (role==="dm" ? "DM" : "Player");
+    if(role==="dm"){
+      const key=document.getElementById("dmKey").value.trim();
+      const res = await api("/api/dm/login",{method:"POST",body:JSON.stringify({name, key})});
+      if(!res.ok){ toast(res.error||"Denied"); return; }
+      SESSION.role="dm"; SESSION.name=name; SESSION.dmKey=key;
+      document.getElementById("whoPill").textContent="DM: "+name;
+      document.getElementById("loginOverlay").style.display="none";
+      setRoleUI();
+      await refreshAll();
+      return;
+    }
+    // player path (works even if the DM key row is still visible)
     SESSION.role="player"; SESSION.name=name;
     document.getElementById("whoPill").textContent="Player: "+name;
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
   };
-}
-loginInit();
-
-async function refreshAll(){
-  const st = await api("/api/state");
-  window.__STATE = st;
-  if(st?.settings?.theme?.accent) setAccent(st.settings.theme.accent);
-
-  const f = st?.settings?.features || {shop:true,intel:true,notifications:true};
-  document.getElementById("featurePill").textContent = "Features: " +
-    (f.shop?"Shop":"") + (f.intel? (f.shop?"+Intel":"Intel") : "") + (f.notifications? ((f.shop||f.intel)?"+Notif":"Notif") : "");
-
-  // characters
-  const sel=document.getElementById("charSel");
-  sel.innerHTML = "";
-  (st.characters||[]).forEach(c=>{
-    const o=document.createElement("option"); o.value=c.id; o.textContent=c.name;
-    sel.appendChild(o);
-  });
-  if(!SESSION.activeCharId && st.characters?.length) SESSION.activeCharId = st.characters[0].id;
-  if(SESSION.activeCharId){ sel.value = SESSION.activeCharId; }
-  sel.onchange=()=>{ SESSION.activeCharId=sel.value; renderCharacter(); };
-  document.getElementById("activeCharMini").textContent = SESSION.activeCharId ? (st.characters.find(c=>c.id===SESSION.activeCharId)?.name || "Unknown") : "None selected";
-
-  // shop / intel / dm panels / settings
-  renderShop();
-  renderDM();
-  renderIntel();
-  renderCharacter();
-  renderSettings();
-}
-
-function getChar(){
-  const st=window.__STATE||{};
-  return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
-}
-
-async function saveCharacter(c){
-  await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  document.getElementById("saveMini").textContent="Saved";
-}
-
-function renderCharacter(){
-  const c=getChar();
-  const weapBody=document.getElementById("weapBody");
-  const invBody=document.getElementById("invBody");
-  weapBody.innerHTML=""; invBody.innerHTML="";
-  if(!c){
-    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
-    invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
-    return;
-  }
-
-  // SHEET
-  const s = c.sheet || {};
-  const v = s.vitals || {};
-  const st = s.stats || {};
-  document.getElementById("hpCur").value = v.hp_current ?? "";
-  document.getElementById("hpMax").value = v.hp_max ?? "";
-  document.getElementById("hpTemp").value = v.temp_hp ?? "";
-  document.getElementById("acVal").value = v.ac ?? "";
-  document.getElementById("initVal").value = v.initiative ?? "";
-  document.getElementById("spdVal").value = v.speed ?? "";
-
-  document.getElementById("stStr").value = st.str ?? "";
-  document.getElementById("stDex").value = st.dex ?? "";
-  document.getElementById("stCon").value = st.con ?? "";
-  document.getElementById("stInt").value = st.int ?? "";
-  document.getElementById("stWis").value = st.wis ?? "";
-  document.getElementById("stCha").value = st.cha ?? "";
-
-  const money = s.money || {cash:0,bank:0};
-  document.getElementById("cashVal").value = money.cash ?? "";
-  document.getElementById("bankVal").value = money.bank ?? "";
-  document.getElementById("notesBox").value = s.notes || "";
-
-  const condRow = document.getElementById("condRow");
-  condRow.innerHTML = "";
-  const conds = Array.isArray(s.conditions) ? s.conditions : [];
-  // a small starter palette
-  const palette = ["Bleeding","Stunned","Poisoned","Grappled","Prone","Burning","Exhausted","Charmed","Frightened"];
-  const all = Array.from(new Set([...palette, ...conds]));
-  for(const name of all){
-    const on = conds.includes(name);
-    const b = document.createElement("button");
-    b.className = "btn smallbtn";
-    b.textContent = name;
-    if(on) b.classList.add("active");
-    b.onclick = async ()=>{
-      c.sheet ||= {};
-      c.sheet.conditions ||= [];
-      if(c.sheet.conditions.includes(name)){
-        c.sheet.conditions = c.sheet.conditions.filter(x=>x!==name);
-      } else {
-        c.sheet.conditions.push(name);
-      }
-      await saveCharacter(c);
-      toast("Condition updated");
-      await refreshAll();
-    };
-    condRow.appendChild(b);
-  }
-
-  // ammo table
-  const ammoBody = document.getElementById("ammoBody");
-  ammoBody.innerHTML = "";
-  const ammo = (c.sheet && c.sheet.ammo) ? c.sheet.ammo : {};
-  const keys = Object.keys(ammo);
-  if(!keys.length){
-    ammoBody.innerHTML = '<tr><td colspan="4" class="mini">No ammo tracked yet.</td></tr>';
-  } else {
-    keys.forEach((k)=>{
-      const row = ammo[k] || {};
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        '<td>'+esc(k)+'</td>'+
-        '<td><input class="input" style="min-width:120px;" value="'+esc(row.current ?? "")+'"/></td>'+
-        '<td><input class="input" style="min-width:120px;" value="'+esc(row.mags ?? "")+'"/></td>'+
-        '<td><button class="btn smallbtn">Del</button></td>';
-      const [curInp, magInp] = tr.querySelectorAll("input");
-      curInp.onchange = async ()=>{
-        c.sheet.ammo[k].current = curInp.value;
-        await saveCharacter(c);
-      };
-      magInp.onchange = async ()=>{
-        c.sheet.ammo[k].mags = magInp.value;
-        await saveCharacter(c);
-      };
-      tr.querySelector("button").onclick = async ()=>{
-        const ok = await vwModalConfirm({title:"Delete Ammo Type", message:'Delete "'+k+'"?'});
-        if(!ok) return;
-        delete c.sheet.ammo[k];
-        await saveCharacter(c);
-        toast("Ammo type deleted");
-        await refreshAll();
-      };
-      ammoBody.appendChild(tr);
-    });
-  }
-
-  document.getElementById("addAmmoBtn").onclick = async ()=>{
-    const k = await vwModalInput({title:"Add Ammo Type", label:"Ammo type key", placeholder:"e.g. 9mm"});
-    if(!k) return;
-    c.sheet ||= {}; c.sheet.ammo ||= {};
-    if(c.sheet.ammo[k]){ toast("Already exists"); return; }
-    c.sheet.ammo[k] = { current: "0", mags: "0" };
-    await saveCharacter(c);
-    toast("Ammo type added");
-    await refreshAll();
-  };
-
-  document.getElementById("addCondBtn").onclick = async ()=>{
-    const name = await vwModalInput({title:"Add Condition", label:"Condition name", placeholder:"e.g. Frozen"});
-    if(!name) return;
-    c.sheet ||= {}; c.sheet.conditions ||= [];
-    if(!c.sheet.conditions.includes(name)) c.sheet.conditions.push(name);
-    await saveCharacter(c);
-    toast("Condition added");
-    await refreshAll();
-  };
-
-  document.getElementById("saveSheetBtn").onclick = async ()=>{
-    c.sheet ||= {};
-    c.sheet.vitals = {
-      hp_current: document.getElementById("hpCur").value,
-      hp_max: document.getElementById("hpMax").value,
-      temp_hp: document.getElementById("hpTemp").value,
-      ac: document.getElementById("acVal").value,
-      initiative: document.getElementById("initVal").value,
-      speed: document.getElementById("spdVal").value
-    };
-    c.sheet.stats = {
-      str: document.getElementById("stStr").value,
-      dex: document.getElementById("stDex").value,
-      con: document.getElementById("stCon").value,
-      int: document.getElementById("stInt").value,
-      wis: document.getElementById("stWis").value,
-      cha: document.getElementById("stCha").value
-    };
-    c.sheet.money = {
-      cash: document.getElementById("cashVal").value,
-      bank: document.getElementById("bankVal").value
-    };
-    c.sheet.notes = document.getElementById("notesBox").value;
-    await saveCharacter(c);
-    toast("Sheet saved");
-  };
-
-  // weapons rows
-  (c.weapons||[]).forEach(w=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML = '<td>'+esc(w.name)+'</td><td>'+esc(w.range||"")+'</td><td>'+esc(w.hit||"")+'</td><td>'+esc(w.damage||"")+'</td><td><button class="btn smallbtn">Remove</button></td>';
-    tr.querySelector("button").onclick=async ()=>{
-      c.weapons = c.weapons.filter(x=>x.id!==w.id);
-      await saveCharacter(c);
-      toast("Removed weapon"); await refreshAll();
-    };
-    weapBody.appendChild(tr);
-    if(w.ammo){
-      const tr2=document.createElement("tr");
-      tr2.innerHTML = '<td colspan="5" class="mini">Ammo: '+esc(w.ammo.type)+' | Starting '+esc(w.ammo.starting)+' | Current '+esc(w.ammo.current)+' | Mags '+esc(w.ammo.mags||"—")+'</td>';
-      weapBody.appendChild(tr2);
-    }
-  });
-
-  // inventory rows (with delete)
-  (c.inventory||[]).forEach((it,idx)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML =
-      '<td><input class="input" value="'+esc(it.category||"")+'" data-k="category"/></td>'+
-      '<td><input class="input" value="'+esc(it.name||"")+'" data-k="name"/></td>'+
-      '<td><input class="input" value="'+esc(it.weight||"")+'" data-k="weight"/></td>'+
-      '<td><input class="input" value="'+esc(it.qty||"")+'" data-k="qty"/></td>'+
-      '<td><input class="input" value="'+esc(it.cost||"")+'" data-k="cost"/></td>'+
-      '<td><input class="input" value="'+esc(it.notes||"")+'" data-k="notes"/></td>'+
-      '<td><button class="btn smallbtn">Del</button></td>';
-    tr.querySelectorAll("input").forEach(inp=>{
-      inp.onchange=async ()=>{
-        const k=inp.dataset.k;
-        c.inventory[idx][k]=inp.value;
-        await saveCharacter(c);
-      };
-    });
-    tr.querySelector("button").onclick = async ()=>{
-      const ok = await vwModalConfirm({title:"Delete Inventory Row", message:'Delete "'+(it.name||"this item")+'"?'});
-      if(!ok) return;
-      c.inventory.splice(idx,1);
-      await saveCharacter(c);
-      toast("Inventory row deleted");
-      await refreshAll();
-    };
-    invBody.appendChild(tr);
-  });
-
-  // DM-only duplicate/delete buttons
-  document.getElementById("dupCharBtn").onclick = async ()=>{
-    if(SESSION.role!=="dm") return;
-    const name = await vwModalInput({title:"Duplicate Character", label:"New name", value: c.name + " (copy)"});
-    if(!name) return;
-    const r = await api("/api/character/duplicate",{method:"POST",body:JSON.stringify({charId:c.id, name})});
-    if(r.ok){ SESSION.activeCharId = r.id; toast("Duplicated"); await refreshAll(); }
-    else toast(r.error || "Failed");
-  };
-  document.getElementById("delCharBtn").onclick = async ()=>{
-    if(SESSION.role!=="dm") return;
-    const ok = await vwModalConfirm({title:"Delete Character", message:'Delete "'+c.name+'"? This cannot be undone.'});
-    if(!ok) return;
-    const r = await api("/api/character/delete",{method:"POST",body:JSON.stringify({charId:c.id})});
-    if(r.ok){ SESSION.activeCharId = null; toast("Deleted"); await refreshAll(); }
-    else toast(r.error || "Failed");
-  };
-}
-
-document.getElementById("addInvBtn").onclick=async ()=>{
-  const c=getChar(); if(!c){ toast("Create character first"); return; }
-  c.inventory ||= [];
-  c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-  await saveCharacter(c);
-  toast("Added inventory row"); await refreshAll();
-};
 
 document.getElementById("newCharBtn").onclick = async () => {
   const name = await vwModalInput({ title: "New Character", label: "Character name", placeholder: "e.g. Mara Kincaid" });
