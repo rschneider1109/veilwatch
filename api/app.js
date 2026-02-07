@@ -950,6 +950,9 @@ if(intelClear) intelClear.onclick=()=>{
 async function refreshAll(){
   const st = await api("/api/state");
   window.__STATE = st;
+  // force intel to render once state is available
+  if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+  if(typeof renderIntelDM==="function") renderIntelDM();
   // characters
   const sel=document.getElementById("charSel");
   sel.innerHTML = "";
@@ -1669,6 +1672,19 @@ async function pollState(){
   } catch(e){}
 }
 setInterval(pollState, AUTO_REFRESH_MS);
+
+// intelBtnImmediateRender: render intel right after switching tabs (covers cases where sig didn't change)
+(function(){
+  const btn = document.querySelector('#tabs .btn[data-tab="intel"]');
+  if(btn){
+    btn.addEventListener("click", ()=>{
+      setTimeout(()=>{
+        if(typeof renderIntelDM==="function") renderIntelDM();
+        if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+      }, 0);
+    });
+  }
+})();
 
 // initial refresh will occur after login
 </script>
