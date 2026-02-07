@@ -567,9 +567,9 @@ th{color:var(--muted);font-weight:600;}
         <hr/>
         <div class="row" style="gap:10px;align-items:center;">
           <div class="pill">Session Recaps</div>
-          <div class="mini">Last 5 revealed updates.</div>
+          <div class="mini">DM-written summaries only.</div>
         </div>
-        <div id="intelSession Recaps" class="mini" style="margin-top:8px;"></div>
+        <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
         <hr/>
         <table>
           <thead><tr><th>TITLE</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th>DETAILS</th></tr></thead>
@@ -1335,9 +1335,13 @@ function renderIntelPlayer(){
   if(dis) dis.classList.toggle("hidden", !!feat.intel);
   if(!feat.intel) return;
   const intelBody=document.getElementById("intelBody");
-  const recap=document.getElementById("intelSession Recaps");
+  const recap=document.getElementById("intelRecap");
   const reqBody=document.getElementById("playerReqBody");
   if(!intelBody || !recap || !reqBody) return;
+  if(!recap.dataset.vwInit){
+    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won\'t spam this panel.</p>';
+    recap.dataset.vwInit = "1";
+  }
 
   const q=(document.getElementById("intelSearch").value||"").toLowerCase().trim();
   const tag=(document.getElementById("intelTag").value||"").toLowerCase().trim();
