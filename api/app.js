@@ -364,6 +364,163 @@ th{color:var(--muted);font-weight:600;}
 <div class="toast" id="toast"></div>
 
 <script>
+function vwModalBaseSetup(title, okText, cancelText){
+  const modal = document.getElementById("vwModal");
+  const mTitle = document.getElementById("vwModalTitle");
+  const mBody  = document.getElementById("vwModalBody");
+  const btnOk  = document.getElementById("vwModalOk");
+  const btnCan = document.getElementById("vwModalCancel");
+
+  mTitle.textContent = title || "Modal";
+  btnOk.textContent = okText || "OK";
+  btnCan.textContent = cancelText || "Cancel";
+
+  return { modal, mBody, btnOk, btnCan };
+}
+
+function vwModalInput(opts){
+  opts ||= {};
+  const title = opts.title || "Input";
+  const label = opts.label || "Value";
+  const placeholder = String(opts.placeholder || "").replace(/"/g, "&quot;");
+  const okText = opts.okText || "OK";
+  const cancelText = opts.cancelText || "Cancel";
+  const value = String(opts.value || "");
+
+  return new Promise((resolve) => {
+    const ui = vwModalBaseSetup(title, okText, cancelText);
+
+    ui.mBody.innerHTML =
+      '<div style="margin-bottom:8px;opacity:.9">' + label + "</div>" +
+      '<input id="vwModalInput" placeholder="' + placeholder + '" ' +
+      'style="width:100%;padding:12px;border-radius:12px;border:1px solid #2b3a4d;' +
+      'background:rgba(255,255,255,.03);color:#e9f1ff;outline:none;" />';
+
+    const input = document.getElementById("vwModalInput");
+    input.value = value;
+
+    function close(val){
+      ui.modal.style.display = "none";
+      ui.btnOk.onclick = null;
+      ui.btnCan.onclick = null;
+      ui.modal.onclick = null;
+      document.onkeydown = null;
+      resolve(val);
+    }
+
+    ui.btnOk.onclick = () => close((input.value || "").trim());
+    ui.btnCan.onclick = () => close(null);
+
+    ui.modal.onclick = (e) => { if(e.target === ui.modal) close(null); };
+
+    document.onkeydown = (e) => {
+      if(e.key === "Escape") close(null);
+      if(e.key === "Enter") close((input.value || "").trim());
+    };
+
+    ui.modal.style.display = "flex";
+    setTimeout(() => input.focus(), 0);
+  });
+}
+
+function vwModalConfirm(opts){
+  opts ||= {};
+  const title = opts.title || "Confirm";
+  const message = opts.message || "Are you sure?";
+  const okText = opts.okText || "Yes";
+  const cancelText = opts.cancelText || "No";
+
+  return new Promise((resolve) => {
+    const ui = vwModalBaseSetup(title, okText, cancelText);
+
+    ui.mBody.innerHTML =
+      '<div style="line-height:1.5;opacity:.95">' + message + "</div>";
+
+    function close(val){
+      ui.modal.style.display = "none";
+      ui.btnOk.onclick = null;
+      ui.btnCan.onclick = null;
+      ui.modal.onclick = null;
+      document.onkeydown = null;
+      resolve(val);
+    }
+
+    ui.btnOk.onclick = () => close(true);
+    ui.btnCan.onclick = () => close(false);
+    ui.modal.onclick = (e) => { if(e.target === ui.modal) close(false); };
+
+    document.onkeydown = (e) => {
+      if(e.key === "Escape") close(false);
+      if(e.key === "Enter") close(true);
+    };
+
+    ui.modal.style.display = "flex";
+  });
+}
+
+function vwModalForm(opts){
+  opts ||= {};
+  const title = opts.title || "Form";
+  const fields = Array.isArray(opts.fields) ? opts.fields : [];
+  const okText = opts.okText || "Save";
+  const cancelText = opts.cancelText || "Cancel";
+
+  function escAttr(s){
+    return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  return new Promise((resolve) => {
+    const ui = vwModalBaseSetup(title, okText, cancelText);
+
+    let html = "";
+    for(const f of fields){
+      const key = f.key;
+      const label = f.label || key;
+      const placeholder = escAttr(f.placeholder || "");
+      const value = escAttr(f.value || "");
+      html +=
+        '<div style="margin:10px 0 6px;opacity:.9">' + label + "</div>" +
+        '<input class="vwFormInput" data-key="' + escAttr(key) + '" ' +
+        'placeholder="' + placeholder + '" value="' + value + '" ' +
+        'style="width:100%;padding:12px;border-radius:12px;border:1px solid #2b3a4d;' +
+        'background:rgba(255,255,255,.03);color:#e9f1ff;outline:none;" />';
+    }
+
+    ui.mBody.innerHTML = html || '<div style="opacity:.85">No fields</div>';
+
+    const inputs = Array.from(ui.mBody.querySelectorAll(".vwFormInput"));
+
+    function collect(){
+      const out = {};
+      for(const inp of inputs){
+        out[inp.dataset.key] = (inp.value || "").trim();
+      }
+      return out;
+    }
+
+    function close(val){
+      ui.modal.style.display = "none";
+      ui.btnOk.onclick = null;
+      ui.btnCan.onclick = null;
+      ui.modal.onclick = null;
+      document.onkeydown = null;
+      resolve(val);
+    }
+
+    ui.btnOk.onclick = () => close(collect());
+    ui.btnCan.onclick = () => close(null);
+    ui.modal.onclick = (e) => { if(e.target === ui.modal) close(null); };
+
+    document.onkeydown = (e) => {
+      if(e.key === "Escape") close(null);
+      if(e.key === "Enter") close(collect());
+    };
+
+    ui.modal.style.display = "flex";
+    if(inputs[0]) setTimeout(() => inputs[0].focus(), 0);
+  });
+}
+
 let SESSION = { role:null, name:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
 function esc(s){ return String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
 function toast(msg){
@@ -377,12 +534,17 @@ function setRoleUI(){
   document.getElementById("dmShopRow").classList.toggle("hidden", SESSION.role!=="dm");
   document.getElementById("editShopBtn").classList.toggle("hidden", SESSION.role!=="dm");
 }
-function api(path, opts={}){
+async function api(path, opts={}){
   opts.headers ||= {};
   opts.headers["Content-Type"]="application/json";
   if(SESSION.role==="dm" && SESSION.dmKey) opts.headers["X-DM-Key"]=SESSION.dmKey;
-  return fetch(path, opts).then(r=>r.json());
+
+  const r = await fetch(path, opts);
+  const txt = await r.text();
+  try { return JSON.parse(txt); }
+  catch { return { ok:false, error: txt || ("HTTP " + r.status) }; }
 }
+
 function nowClock(){
   const d=new Date();
   const hh=String(d.getHours()).padStart(2,"0");
@@ -532,11 +694,26 @@ document.getElementById("addInvBtn").onclick=async ()=>{
   toast("Added inventory row"); await refreshAll();
 };
 
-document.getElementById("newCharBtn").onclick=async ()=>{
-  const name=prompt("Character name?");
-  if(!name) return;
-  const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name})});
-  if(res.ok){ SESSION.activeCharId=res.id; toast("Character created"); await refreshAll(); }
+document.getElementById("newCharBtn").onclick = async () => {
+  const name = await vwModalInput({
+    title: "New Character",
+    label: "Character name",
+    placeholder: "e.g. Mara Kincaid"
+  });
+  if (!name) return;
+
+  const res = await api("/api/character/new", {
+    method: "POST",
+    body: JSON.stringify({ name })
+  });
+
+  if (res.ok) {
+    SESSION.activeCharId = res.id;
+    toast("Character created");
+    await refreshAll();
+  } else {
+    toast(res.error || "Failed to create character");
+  }
 };
 
 function renderShop(){
@@ -566,27 +743,41 @@ function renderShop(){
     toast("Shop toggled"); await refreshAll();
   };
   document.getElementById("addShopBtn").onclick = async ()=>{
-    if(SESSION.role!=="dm") return;
-    const n=prompt("Shop name?");
-    if(!n) return;
-    const id=("s_"+Math.random().toString(36).slice(2,8));
-    shops.list ||= [];
-    shops.list.push({id,name:n,items:[]});
-    shops.activeShopId=id;
-    await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
-    toast("Shop created"); await refreshAll();
+  if(SESSION.role!=="dm") return;
+
+  const n = await vwModalInput({
+    title: "New Shop",
+    label: "Shop name",
+    placeholder: "e.g. Riverside Armory"
+  });
+  if(!n) return;
+
+  const id=("s_"+Math.random().toString(36).slice(2,8));
+  shops.list ||= [];
+  shops.list.push({id:id, name:n, items:[]});
+  shops.activeShopId=id;
+
+  await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
+  toast("Shop created"); await refreshAll();
   };
   document.getElementById("editShopBtn").onclick = async ()=>{
-    if(SESSION.role!=="dm") return;
-    const curr=(shops.list||[]).find(s=>s.id===shops.activeShopId);
-    if(!curr) return;
-    const n=prompt("Rename shop:", curr.name);
-    if(!n) return;
-    curr.name=n;
-    await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
-    toast("Shop renamed"); await refreshAll();
-  };
+  if(SESSION.role!=="dm") return;
 
+  const curr=(shops.list||[]).find(s=>s.id===shops.activeShopId);
+  if(!curr) return;
+
+  const n = await vwModalInput({
+    title: "Rename Shop",
+    label: "Shop name",
+    value: curr.name,
+    placeholder: "Shop name"
+  });
+  if(!n) return;
+
+  curr.name=n;
+  await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
+  toast("Shop renamed"); await refreshAll();
+  };
   const body=document.getElementById("shopBody");
   body.innerHTML="";
   if(!enabled && SESSION.role!=="dm"){
@@ -608,22 +799,47 @@ function renderShop(){
     if(SESSION.role==="dm"){
       td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Del</button>';
       const [editBtn,delBtn]=td.querySelectorAll("button");
-      editBtn.onclick=async ()=>{
-        const name=prompt("Item name:", it.name)||it.name;
-        const category=prompt("Category:", it.category||"")||it.category||"";
-        const cost=prompt("Cost:", it.cost||"")||it.cost||"";
-        const weight=prompt("Weight:", it.weight||"")||it.weight||"";
-        const notes=prompt("Notes:", it.notes||"")||it.notes||"";
-        const stock=prompt("Stock (∞ or number):", it.stock||"∞")||it.stock||"∞";
-        Object.assign(it,{name,category,cost,weight,notes,stock});
-        await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
-        toast("Item saved"); await refreshAll();
-      };
-      delBtn.onclick=async ()=>{
-        shop.items.splice(idx,1);
-        await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
-        toast("Item deleted"); await refreshAll();
-      };
+      editBtn.onclick = async ()=>{
+  const result = await vwModalForm({
+    title: "Edit Item",
+    fields: [
+      { key:"name",     label:"Item name", value: it.name || "", placeholder:"Flashlight" },
+      { key:"category", label:"Category",  value: it.category || "", placeholder:"Gear" },
+      { key:"cost",     label:"Cost ($)",  value: String(it.cost ?? ""), placeholder:"35" },
+      { key:"weight",   label:"Weight",    value: String(it.weight ?? ""), placeholder:"1" },
+      { key:"notes",    label:"Notes",     value: it.notes || "", placeholder:"Unique / special" },
+      { key:"stock",    label:"Stock (∞ or number)", value: String(it.stock ?? "∞"), placeholder:"∞" },
+    ],
+    okText: "Save"
+  });
+
+  if(!result) return;
+
+  Object.assign(it, {
+    name: result.name,
+    category: result.category,
+    cost: result.cost,
+    weight: result.weight,
+    notes: result.notes,
+    stock: result.stock
+  });
+
+  await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
+  toast("Item saved"); await refreshAll();
+  };
+
+      delBtn.onclick = async ()=>{
+  const ok = await vwModalConfirm({
+    title: "Delete Item",
+    message: 'Delete "' + (it.name || "this item") + '"?'
+  });
+  if(!ok) return;
+
+  shop.items.splice(idx,1);
+  await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
+  toast("Item deleted"); await refreshAll();
+  };
+
     } else {
       td.innerHTML = '<button class="btn smallbtn">Add to Inventory</button>';
       td.querySelector("button").onclick=async ()=>{
@@ -649,19 +865,36 @@ function renderShop(){
     const tr=document.createElement("tr");
     tr.innerHTML = '<td colspan="7"><button class="btn smallbtn" id="addShopItemBtn">Add Item</button></td>';
     body.appendChild(tr);
-    tr.querySelector("#addShopItemBtn").onclick=async ()=>{
-      const name=prompt("Item name?");
-      if(!name) return;
-      const category=prompt("Category (Ammo/Gear/Medical/etc):","Gear")||"Gear";
-      const cost=prompt("Cost:", "0")||"0";
-      const weight=prompt("Weight:", "1")||"1";
-      const notes=prompt("Notes:", "")||"";
-      const stock=prompt("Stock (∞ or number):","∞")||"∞";
-      shop.items ||= [];
-      shop.items.push({id:"i_"+Math.random().toString(36).slice(2,8), name, category, cost, weight, notes, stock});
-      await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
-      toast("Item added"); await refreshAll();
-    };
+    tr.querySelector("#addShopItemBtn").onclick = async ()=>{
+  const result = await vwModalForm({
+    title: "Add Item",
+    fields: [
+      { key:"name",     label:"Item name", value:"", placeholder:"Flashlight" },
+      { key:"category", label:"Category",  value:"Gear", placeholder:"Gear" },
+      { key:"cost",     label:"Cost ($)",  value:"0", placeholder:"35" },
+      { key:"weight",   label:"Weight",    value:"1", placeholder:"1" },
+      { key:"notes",    label:"Notes",     value:"", placeholder:"Unique / special" },
+      { key:"stock",    label:"Stock (∞ or number)", value:"∞", placeholder:"∞" },
+    ],
+    okText: "Add"
+  });
+
+  if(!result || !result.name) return;
+
+  shop.items ||= [];
+  shop.items.push({
+    id:"i_"+Math.random().toString(36).slice(2,8),
+    name: result.name,
+    category: result.category,
+    cost: result.cost,
+    weight: result.weight,
+    notes: result.notes,
+    stock: result.stock
+  });
+
+  await api("/api/shops/save",{method:"POST",body:JSON.stringify({shops})});
+  toast("Item added"); await refreshAll();
+  };
   }
 }
 
@@ -704,6 +937,17 @@ function renderDM(){
 
 // initial refresh will occur after login
 </script>
+<!-- Veilwatch Modal -->
+<div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
+  <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;">
+    <div id="vwModalTitle" style="font-size:18px;margin-bottom:10px;">Modal</div>
+    <div id="vwModalBody"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button id="vwModalCancel" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:transparent;color:#e9f1ff;cursor:pointer;">Cancel</button>
+      <button id="vwModalOk" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:#19324f;color:#e9f1ff;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>`;
 
