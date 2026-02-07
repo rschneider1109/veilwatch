@@ -1236,8 +1236,8 @@ function renderIntelDM(){
       '<button class="btn smallbtn">Edit</button> '+
       '<button class="btn smallbtn">Reveal</button> '+
       '<button class="btn smallbtn">Hide</button> '+
-      '<button class="btn smallbtn">Archive</button>';
-    const [bEdit,bRev,bHide,bArc]=td.querySelectorAll("button");
+      '<button class="btn smallbtn">Archive</button> <button class="btn smallbtn">Delete</button>';
+    const [bEdit,bRev,bHide,bArc,bDel]=td.querySelectorAll("button");
 
     bEdit.onclick = async ()=>{
       const result = await vwModalForm({
@@ -1278,6 +1278,17 @@ function renderIntelDM(){
       const res = await api("/api/clues/archive",{method:"POST",body:JSON.stringify({id:cl.id})});
       if(res.ok){ toast("Archived"); await refreshAll(); } else toast(res.error||"Failed");
     };
+
+bDel && (bDel.onclick = async ()=>{
+  const ok = await vwModalConfirm({
+    title: "Delete Clue",
+    message: 'Delete clue #' + cl.id + ' "' + (cl.title||"") + '"? This cannot be undone.'
+  });
+  if(!ok) return;
+  const res = await api("/api/clues/delete", {method:"POST", body:JSON.stringify({id: cl.id})});
+  if(res.ok){ toast("Deleted"); await refreshAll(); }
+  else toast(res.error || "Failed");
+});
 
     body.appendChild(tr);
   });
@@ -1534,10 +1545,22 @@ function renderDM(){
   ab.innerHTML="";
   (st.clues?.archived||[]).forEach((c,idx)=>{
     const tr=document.createElement("tr");
-    tr.innerHTML = '<td>'+esc(c.title||"Clue")+'</td><td>'+esc(c.notes||"")+'</td><td><button class="btn smallbtn">Restore</button></td>';
+    tr.innerHTML = '<td>'+esc(c.title||"Clue")+'</td><td>'+esc(c.notes||"")+'</td><td><button class="btn smallbtn">Restore</button> <button class="btn smallbtn">Delete</button></td>';
     tr.querySelector("button").onclick=async ()=>{
       const res = await api("/api/clues/restoreActive",{method:"POST",body:JSON.stringify({id: c.id})});
       if(res.ok){ toast("Restored"); await refreshAll(); } else toast(res.error||"Failed");
+    };
+    if(del){
+      del.onclick = async ()=>{
+        const ok = await vwModalConfirm({
+          title: "Delete Clue",
+          message: 'Delete archived clue #' + c.id + ' "' + (c.title||"") + '"? This cannot be undone.'
+        });
+        if(!ok) return;
+        const r2 = await api("/api/clues/delete", {method:"POST", body:JSON.stringify({id: c.id})});
+        if(r2.ok){ toast("Deleted"); await refreshAll(); }
+        else toast(r2.error||"Failed");
+      };
     };
     ab.appendChild(tr);
   });
@@ -1795,6 +1818,24 @@ const server = http.createServer(async (req,res)=>{
     saveState(state);
     return json(res, 200, {ok:true});
   }
+if(p === "/api/clues/delete" && req.method==="POST"){
+  if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+  const body = JSON.parse(await readBody(req) || "{}");
+  const id = Number(body.id||0);
+  state.clues ||= structuredClone(DEFAULT_STATE.clues);
+  state.clues.items ||= [];
+  state.clues.archived ||= [];
+  let removed = false;
+  const idx = state.clues.items.findIndex(c=>c.id===id);
+  if(idx>=0){ state.clues.items.splice(idx,1); removed = true; }
+  const idxA = state.clues.archived.findIndex(c=>c.id===id);
+  if(idxA>=0){ state.clues.archived.splice(idxA,1); removed = true; }
+  if(!removed) return json(res, 404, {ok:false, error:"Not found"});
+  saveState(state);
+  return json(res, 200, {ok:true});
+}
+
+
 
 
 
