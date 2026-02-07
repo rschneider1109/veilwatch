@@ -910,7 +910,7 @@ let __vwStreamLastMsg = 0;
 let __vwStreamBackoff = 1000;
 
 function vwStartStream(){
-  if(!SESSION || !SESSION.role){ return; }
+  if(!SESSION || !SESSION.role) return;
   try{ if(__vwES){ __vwES.close(); __vwES=null; } }catch(e){}
   const qs = (SESSION.role==="dm" && SESSION.dmKey) ? ("?k="+encodeURIComponent(SESSION.dmKey)) : "";
   try{ __vwES = new EventSource("/api/stream"+qs); }catch(e){ __vwES=null; return; }
@@ -933,14 +933,11 @@ function vwStartStream(){
   });
 
   __vwES.onerror = ()=>{
-    // Browser will retry, but some proxies kill streams; we force a controlled reconnect.
     try{ __vwES.close(); }catch(e){}
     __vwES = null;
     const wait = Math.min(__vwStreamBackoff, 15000);
     __vwStreamBackoff = Math.min(__vwStreamBackoff * 2, 15000);
-    setTimeout(()=>{
-      vwStartStream();
-    }, wait);
+    setTimeout(()=>{ vwStartStream(); }, wait);
   };
 }
 
@@ -948,7 +945,6 @@ function vwStartStream(){
 setInterval(()=>{
   if(!SESSION || !SESSION.role) return;
   const now = Date.now();
-  // if tab is hidden, browsers may throttle; give it more slack
   const slack = document.hidden ? 60000 : 20000;
   if(__vwES && (now - __vwStreamLastMsg) > slack){
     try{ __vwES.close(); }catch(e){}
@@ -964,12 +960,7 @@ document.addEventListener("visibilitychange", ()=>{
   if(!document.hidden && SESSION && SESSION.role){
     vwStartStream();
   }
-});catch(e){}
-  });
-  __vwES.addEventListener("hello", ()=>{});
-  __vwES.onerror = ()=>{ /* browser auto-reconnects */ };
-}
-
+});
 
 function nowClock(){
   const d=new Date();
