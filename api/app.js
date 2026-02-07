@@ -1591,10 +1591,14 @@ function renderDM(){
   (st.clues?.archived||[]).forEach((c,idx)=>{
     const tr=document.createElement("tr");
     tr.innerHTML = '<td>'+esc(c.title||"Clue")+'</td><td>'+esc(c.notes||"")+'</td><td><button class="btn smallbtn">Restore</button> <button class="btn smallbtn">Delete</button></td>';
-    tr.querySelector("button").onclick=async ()=>{
-      const res = await api("/api/clues/restoreActive",{method:"POST",body:JSON.stringify({id: c.id})});
-      if(res.ok){ toast("Restored"); await refreshAll(); } else toast(res.error||"Failed");
-    };
+    
+const btns = tr.querySelectorAll("button");
+const restoreBtn = btns[0];
+const del = btns[1];
+restoreBtn && (restoreBtn.onclick = async ()=>{
+  const res = await api("/api/clues/restoreActive",{method:"POST",body:JSON.stringify({id: c.id})});
+  if(res.ok){ toast("Restored"); await refreshAll(); } else toast(res.error||"Failed");
+});
     if(del){
       del.onclick = async ()=>{
         const ok = await vwModalConfirm({
