@@ -155,13 +155,25 @@ async function loadState(){
 }
 
 function saveState(st){
+  try{ normalizeFeatures(st); }catch(e){}
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
 
   try{ sseBroadcast(); }catch(e){}
 }
 
-let state = structuredClone(DEFAULT_STATE);
+let state = normalizeFeatures(structuredClone(DEFAULT_STATE));
+
+function normalizeFeatures(st){
+  if(!st.settings) st.settings = {};
+  if(!st.settings.features) st.settings.features = {};
+  // Intel/Clues are always enabled (no settings toggle)
+  st.settings.features.intel = true;
+  // Shop feature always enabled; shop open/close is handled inside Shop tab
+  st.settings.features.shop = true;
+  return st;
+}
+
 
 const SSE_CLIENTS = new Set();
 function sseSend(res, event, data){
@@ -391,7 +403,7 @@ th{color:var(--muted);font-weight:600;}
           <div class="pill">Conditions</div>
           <div class="mini">Toggle active conditions.</div>
         </div>
-        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
+        
 
         <hr/>
 
@@ -493,7 +505,7 @@ th{color:var(--muted);font-weight:600;}
           <div class="pill">Conditions</div>
           <div class="mini">Toggle active conditions.</div>
         </div>
-        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
+        
 
         <hr/>
 
@@ -517,7 +529,7 @@ th{color:var(--muted);font-weight:600;}
 
   <section id="tab-intel" class="hidden">
     <div class="panel">
-      <div id="intelDisabledMsg" class="mini hidden">Intel feature is disabled.</div>
+      <div id="intelDisabledMsg" class="mini hidden"></div>
       <div class="row">
         <div class="pill">DM Tools</div>
         <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
@@ -638,7 +650,7 @@ th{color:var(--muted);font-weight:600;}
           <div class="pill">Conditions</div>
           <div class="mini">Toggle active conditions.</div>
         </div>
-        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
+        
 
         <hr/>
 
@@ -704,10 +716,7 @@ th{color:var(--muted);font-weight:600;}
         <button class="btn smallbtn" id="saveDmKeyBtn">Save DM Passkey</button>
       </div>
       <hr/>
-      <div class="row" style="gap:14px;flex-wrap:wrap;">
-        <label class="row" style="gap:8px;"><input type="checkbox" id="featShop"/> <span class="mini">Shop enabled</span></label>
-        <label class="row" style="gap:8px;"><input type="checkbox" id="featIntel"/> <span class="mini">Intel/Clues enabled</span></label>
-      </div>
+      
       <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: keep backups before imports. State is auto-saved.</div>
     </div>
   </section>
@@ -1338,8 +1347,15 @@ function renderIntelPlayer(){
   const recap=document.getElementById("intelRecap");
   const reqBody=document.getElementById("playerReqBody");
   if(!intelBody || !recap || !reqBody) return;
-  if(!recap.dataset.vwInit){
-    recap.innerHTML = "<p class='muted'>Session recaps will appear here (DM-written). Clue reveals won't spam this panel.</p>";
+  
+
+// Session Recaps (player) — DM-written only (no auto event feed)
+recap.innerHTML =
+  '<div class="row"><div class="pill">Session Recaps</div><div class="mini">DM-written summaries only.</div></div>' +
+  '<p class="muted">No recaps yet.</p>';
+
+if(!recap.dataset.vwInit){
+    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won\'t spam this panel.</p>';
     recap.dataset.vwInit = "1";
   }
 
@@ -1766,20 +1782,16 @@ function renderSettings(){
   if(SESSION.role!=="dm") return;
   // feature toggles
   const feat = (st.settings?.features) || {shop:true,intel:true};
-  const cShop=document.getElementById("featShop");
-  const cIntel=document.getElementById("featIntel");
   if(cShop) cShop.checked = !!feat.shop;
   if(cIntel) cIntel.checked = !!feat.intel;
 
   if(cShop) cShop.onchange = async ()=>{
     feat.shop = !!cShop.checked;
-    const res = await api("/api/settings/save",{method:"POST",body:JSON.stringify({features: feat})});
-    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
+    const res = await     if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
   };
   if(cIntel) cIntel.onchange = async ()=>{
     feat.intel = !!cIntel.checked;
-    const res = await api("/api/settings/save",{method:"POST",body:JSON.stringify({features: feat})});
-    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
+    const res = await     if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
   };
 
   const btnExp=document.getElementById("exportStateBtn");
@@ -1812,8 +1824,7 @@ function renderSettings(){
   if(btnKey) btnKey.onclick = async ()=>{
     const nk = (document.getElementById("dmKeyNew").value||"").trim();
     if(!nk) return toast("Enter a new key");
-    const res = await api("/api/settings/save",{method:"POST",body:JSON.stringify({dmKey: nk})});
-    if(res.ok){ toast("DM key saved"); SESSION.dmKey = nk; await refreshAll(); }
+    const res = await     if(res.ok){ toast("DM key saved"); SESSION.dmKey = nk; await refreshAll(); }
     else toast(res.error||"Failed");
   };
 }
