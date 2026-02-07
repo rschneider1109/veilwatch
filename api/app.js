@@ -908,6 +908,7 @@ async function api(path, opts={}){
 let __vwES = null;
 let __vwStreamLastMsg = 0;
 let __vwStreamBackoff = 1000;
+  if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
 
 function vwStartStream(){
   if(!SESSION || !SESSION.role) return;
@@ -939,6 +940,26 @@ function vwStartStream(){
     __vwStreamBackoff = Math.min(__vwStreamBackoff * 2, 15000);
     setTimeout(()=>{ vwStartStream(); }, wait);
   };
+}
+
+let __vwPollTimer = null;
+function vwStartFallbackPoller(){
+  if(__vwPollTimer) return;
+  __vwPollTimer = setInterval(async ()=>{
+    try{
+      if(!SESSION || !SESSION.role) return;
+      // If SSE is healthy, do nothing.
+      const now = Date.now();
+      const slack = document.hidden ? 60000 : 15000;
+      if(__vwES && (now - __vwStreamLastMsg) < slack) return;
+
+      const st = await api("/api/state");
+      window.__STATE = st;
+      if(typeof vwComputeUnseen==="function") vwComputeUnseen();
+      if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+      if(typeof renderIntelDM==="function") renderIntelDM();
+    }catch(e){}
+  }, 5000);
 }
 
 // Watchdog: if we haven't heard anything for a while, restart the stream.
@@ -1036,6 +1057,7 @@ function loginInit(){
     setRoleUI();
     await refreshAll();
     if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
+    if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
   }
 
   // Primary button: DM login if role=dm, otherwise Player login.
@@ -1084,6 +1106,7 @@ async function refreshAll(){
   if(!VW_INTEL_UNSEEN.armed){ vwSyncSeenBaseline(); VW_INTEL_UNSEEN.armed = true; }
   else { vwComputeUnseen(); }
   if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
+    if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
   // characters
   const sel=document.getElementById("charSel");
   sel.innerHTML = "";
@@ -1453,6 +1476,7 @@ document.getElementById("newCharBtn").onclick = async () => {
     toast("Character created");
     await refreshAll();
     if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
+    if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
   } else {
     toast(res.error || "Failed to create character");
   }
