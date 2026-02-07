@@ -1123,7 +1123,6 @@ function renderIntelPlayer(){
   const dis=document.getElementById("intelDisabledMsg");
   if(dis) dis.classList.toggle("hidden", !!feat.intel);
   if(!feat.intel) return;
-  const st=window.__STATE||{};
   const intelBody=document.getElementById("intelBody");
   const recap=document.getElementById("intelRecap");
   const reqBody=document.getElementById("playerReqBody");
@@ -1183,7 +1182,6 @@ function renderIntelDM(){
   const feat=(st.settings?.features)||{shop:true,intel:true};
   if(!feat.intel) return;
   if(SESSION.role!=="dm") return;
-  const st=window.__STATE||{};
   const body=document.getElementById("clueBody");
   if(!body) return;
   body.innerHTML="";
