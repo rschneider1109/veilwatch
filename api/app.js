@@ -157,9 +157,27 @@ async function loadState(){
 function saveState(st){
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
+
+  try{ sseBroadcast(); }catch(e){}
 }
 
 let state = structuredClone(DEFAULT_STATE);
+
+const SSE_CLIENTS = new Set();
+function sseSend(res, event, data){
+  try{
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  }catch(e){}
+}
+function sseBroadcast(){
+  const payload = { ts: Date.now() };
+  for(const client of Array.from(SSE_CLIENTS)){
+    if(client.res.writableEnded){ SSE_CLIENTS.delete(client); continue; }
+    sseSend(client.res, "update", payload);
+  }
+}
+
 
 function json(res, code, obj){
   const body = JSON.stringify(obj);
@@ -866,6 +884,27 @@ async function api(path, opts={}){
   catch { return { ok:false, error: txt || ("HTTP " + r.status) }; }
 }
 
+let __vwES = null;
+function vwStartStream(){
+  try{ if(__vwES){ __vwES.close(); __vwES=null; } }catch(e){}
+  // DM stream includes key in query because EventSource cannot set headers
+  const qs = (SESSION.role==="dm" && SESSION.dmKey) ? ("?k="+encodeURIComponent(SESSION.dmKey)) : "";
+  __vwES = new EventSource("/api/stream"+qs);
+  __vwES.addEventListener("update", async ()=>{
+    // pull latest safe state then render intel + notifications (instant-ish)
+    try{
+      const st = await api("/api/state");
+      window.__STATE = st;
+      if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+      if(typeof renderIntelDM==="function") renderIntelDM();
+      // if user is currently on shop/character, those will update on next interaction; keep light.
+    }catch(e){}
+  });
+  __vwES.addEventListener("hello", ()=>{});
+  __vwES.onerror = ()=>{ /* browser auto-reconnects */ };
+}
+
+
 function nowClock(){
   const d=new Date();
   const hh=String(d.getHours()).padStart(2,"0");
@@ -930,6 +969,7 @@ function loginInit(){
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
+    if(typeof vwStartStream==="function") vwStartStream();
   };
   document.getElementById("loginPlayerBtn").onclick=async ()=>{
     const name=document.getElementById("whoName").value.trim()||"Player";
@@ -938,6 +978,7 @@ function loginInit(){
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
+    if(typeof vwStartStream==="function") vwStartStream();
   };
 }
 loginInit();
@@ -958,10 +999,7 @@ if(intelClear) intelClear.onclick=()=>{
 async function refreshAll(){
   const st = await api("/api/state");
   window.__STATE = st;
-  // vw: keep intel DOM populated even when tab is closed
-  if(typeof renderIntelPlayer==="function") renderIntelPlayer();
-  if(typeof renderIntelDM==="function") renderIntelDM();
-  if(typeof vwStartPolling==="function") vwStartPolling();
+  if(typeof vwStartStream==="function") vwStartStream();
   // characters
   const sel=document.getElementById("charSel");
   sel.innerHTML = "";
@@ -1275,12 +1313,14 @@ function renderIntelDM(){
       if(res.ok){ toast("Revealed"); await refreshAll(); } else toast(res.error||"Failed");
     };
     bHide.onclick = async ()=>{
-      const res = await api("/api/clues/visibility",{method:"POST",body:JSON.stringify({id:cl.id, visibility: "revealed"})});
+      const res = await api("/api/clues/visibility",{method:"POST",body:JSON.stringify({id:cl.id, visibility:"hidden"})});
       if(res.ok){ toast("Hidden"); await refreshAll(); } else toast(res.error||"Failed");
     };
     bArc.onclick = async ()=>{
       const res = await api("/api/clues/archive",{method:"POST",body:JSON.stringify({id:cl.id})});
-      if(res.ok){ toast("Archived"); await refreshAll(); } else toast(res.error||"Failed");
+      if(res.ok){ toast("Archived (moved to Archived tab)"); await refreshAll();
+        const ab=document.querySelector('#dmPanels button[data-itab="archived"]'); if(ab) ab.click();
+      } else toast(res.error||"Failed");
     };
 
 bDel && (bDel.onclick = async ()=>{
@@ -1328,6 +1368,7 @@ document.getElementById("newCharBtn").onclick = async () => {
     SESSION.activeCharId = res.id;
     toast("Character created");
     await refreshAll();
+    if(typeof vwStartStream==="function") vwStartStream();
   } else {
     toast(res.error || "Failed to create character");
   }
@@ -1705,29 +1746,6 @@ async function pollState(){
 }
 setInterval(pollState, AUTO_REFRESH_MS);
 
-// vw polling: keeps player/DM state in sync without requiring tab clicks
-const VW_POLL_MS = 3000;
-let __vwPollTimer = null;
-function vwStartPolling(){
-  if(__vwPollTimer) return;
-  __vwPollTimer = setInterval(async ()=>{
-    try{
-      const st = await api("/api/state");
-      if(!st || st.ok === false) return;
-      window.__STATE = st;
-
-      // Update Intel in the background so it is ready when the player clicks the tab.
-      // Also refresh immediately if Intel is currently visible.
-      const intelTab = document.getElementById("tab-intel");
-      const intelVisible = intelTab && !intelTab.classList.contains("hidden");
-      if(intelVisible || true){
-        if(typeof renderIntelDM==="function") renderIntelDM();
-        if(typeof renderIntelPlayer==="function") renderIntelPlayer();
-      }
-    }catch(e){ /* ignore */ }
-  }, VW_POLL_MS);
-}
-
 // initial refresh will occur after login
 </script>
 <!-- Veilwatch Modal -->
@@ -1755,7 +1773,37 @@ const server = http.createServer(async (req,res)=>{
     return res.end();
   }
 
-  // API
+  
+// API
+if(p === "/api/stream" && req.method==="GET"){
+  // SSE stream. DM passes ?k=dmKey because EventSource can't set headers.
+  const parsed2 = url.parse(req.url, true);
+  const k = (parsed2.query||{}).k || "";
+  const isDmStream = k && k === state.settings.dmKey;
+
+  res.writeHead(200, {
+    "Content-Type":"text/event-stream",
+    "Cache-Control":"no-cache, no-transform",
+    "Connection":"keep-alive",
+    "X-Accel-Buffering":"no"
+  });
+  res.write("\\n");
+
+  const client = { res, isDmStream, started: Date.now() };
+  SSE_CLIENTS.add(client);
+
+  // Initial hello + one immediate update tick
+  sseSend(res, "hello", { ts: Date.now(), role: isDmStream ? "dm" : "player" });
+  sseSend(res, "update", { ts: Date.now() });
+
+  req.on("close", ()=>{
+    SSE_CLIENTS.delete(client);
+  });
+  return;
+}
+
+
+// API
   if(p === "/api/state" && req.method==="GET"){
     // Never leak DM key to players
     if(!isDM(req)){
@@ -1763,6 +1811,11 @@ const server = http.createServer(async (req,res)=>{
       const safe = (typeof structuredClone==="function") ? structuredClone(state) : JSON.parse(JSON.stringify(state));
       if(safe.settings){
         safe.settings = { theme: safe.settings.theme, features: safe.settings.features || DEFAULT_STATE.settings.features };
+      }
+      // Players only receive revealed clues
+      if(safe.clues){
+        safe.clues.items = (safe.clues.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
+        safe.clues.archived = [];
       }
       return json(res, 200, safe);
     }
