@@ -1355,7 +1355,7 @@ recap.innerHTML =
   '<p class="muted">No recaps yet.</p>';
 
 if(!recap.dataset.vwInit){
-    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won\'t spam this panel.</p>';
+    recap.innerHTML = "<p class='muted'>Session recaps will appear here (DM-written). Clue reveals won't spam this panel.</p>";
     recap.dataset.vwInit = "1";
   }
 
