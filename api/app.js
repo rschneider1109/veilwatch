@@ -178,6 +178,21 @@ function sseBroadcast(){
   }
 }
 
+const SSE_KEEPALIVE_MS = 20000;
+setInterval(()=>{
+  for(const client of Array.from(SSE_CLIENTS)){
+    try{
+      if(client.res.writableEnded){ SSE_CLIENTS.delete(client); continue; }
+      // comment ping to keep proxies from closing idle connection
+      client.res.write(`: ping ${Date.now()}\n\n`);
+    }catch(e){
+      SSE_CLIENTS.delete(client);
+    }
+  }
+}, SSE_KEEPALIVE_MS);
+
+
+
 
 function json(res, code, obj){
   const body = JSON.stringify(obj);
@@ -253,6 +268,12 @@ th{color:var(--muted);font-weight:600;}
 .loginCard{width:min(520px,92vw);}
 .loginTitle{display:flex;align-items:center;gap:10px;margin:0 0 8px 0;}
 .loginTitle span{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
+/* Intel live indicator */
+.intel-indicator{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:12px;line-height:18px;border:1px solid rgba(255,80,80,.45);background:rgba(255,60,60,.12);color:#ff6b6b;}
+.intel-indicator.hidden{display:none;}
+.intel-glow{box-shadow:0 0 0 rgba(255,60,60,0);animation:intelPulse 1.2s ease-in-out infinite;}
+@keyframes intelPulse{0%{box-shadow:0 0 0 rgba(255,60,60,.0);}50%{box-shadow:0 0 18px rgba(255,60,60,.55);}100%{box-shadow:0 0 0 rgba(255,60,60,.0);}}
 </style>
 </head>
 <body>
@@ -545,10 +566,10 @@ th{color:var(--muted);font-weight:600;}
         </div>
         <hr/>
         <div class="row" style="gap:10px;align-items:center;">
-          <div class="pill">Recap</div>
+          <div class="pill">Session Recaps</div>
           <div class="mini">Last 5 revealed updates.</div>
         </div>
-        <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
+        <div id="intelSession Recaps" class="mini" style="margin-top:8px;"></div>
         <hr/>
         <table>
           <thead><tr><th>TITLE</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th>DETAILS</th></tr></thead>
@@ -885,20 +906,65 @@ async function api(path, opts={}){
 }
 
 let __vwES = null;
+let __vwES = null;
+let __vwStreamLastMsg = 0;
+let __vwStreamBackoff = 1000;
+
 function vwStartStream(){
   try{ if(__vwES){ __vwES.close(); __vwES=null; } }catch(e){}
-  // DM stream includes key in query because EventSource cannot set headers
   const qs = (SESSION.role==="dm" && SESSION.dmKey) ? ("?k="+encodeURIComponent(SESSION.dmKey)) : "";
   __vwES = new EventSource("/api/stream"+qs);
+  __vwStreamLastMsg = Date.now();
+  __vwStreamBackoff = 1000;
+
   __vwES.addEventListener("update", async ()=>{
-    // pull latest safe state then render intel + notifications (instant-ish)
+    __vwStreamLastMsg = Date.now();
     try{
       const st = await api("/api/state");
       window.__STATE = st;
+      if(typeof vwComputeUnseen==="function") vwComputeUnseen();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
       if(typeof renderIntelDM==="function") renderIntelDM();
-      // if user is currently on shop/character, those will update on next interaction; keep light.
     }catch(e){}
+  });
+
+  __vwES.addEventListener("hello", ()=>{
+    __vwStreamLastMsg = Date.now();
+  });
+
+  __vwES.onerror = ()=>{
+    // Browser will retry, but some proxies kill streams; we force a controlled reconnect.
+    try{ __vwES.close(); }catch(e){}
+    __vwES = null;
+    const wait = Math.min(__vwStreamBackoff, 15000);
+    __vwStreamBackoff = Math.min(__vwStreamBackoff * 2, 15000);
+    setTimeout(()=>{
+      vwStartStream();
+    }, wait);
+  };
+}
+
+// Watchdog: if we haven't heard anything for a while, restart the stream.
+setInterval(()=>{
+  if(!SESSION || !SESSION.role) return;
+  const now = Date.now();
+  // if tab is hidden, browsers may throttle; give it more slack
+  const slack = document.hidden ? 60000 : 20000;
+  if(__vwES && (now - __vwStreamLastMsg) > slack){
+    try{ __vwES.close(); }catch(e){}
+    __vwES = null;
+    vwStartStream();
+  } else if(!__vwES && (now - __vwStreamLastMsg) > slack){
+    vwStartStream();
+  }
+}, 5000);
+
+// When tab becomes visible again, ensure stream is alive.
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden && SESSION && SESSION.role){
+    vwStartStream();
+  }
+});catch(e){}
   });
   __vwES.addEventListener("hello", ()=>{});
   __vwES.onerror = ()=>{ /* browser auto-reconnects */ };
@@ -924,6 +990,7 @@ function renderTabs(tab){
   });
   // When switching to Intel, render immediately so players don't need to type in search
   if(tab === "intel"){
+    vwAcknowledgeIntel && vwAcknowledgeIntel();
     setTimeout(()=>{
       if(typeof renderIntelDM==="function") renderIntelDM();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
@@ -999,6 +1066,9 @@ if(intelClear) intelClear.onclick=()=>{
 async function refreshAll(){
   const st = await api("/api/state");
   window.__STATE = st;
+  // intel indicator baseline
+  if(!VW_INTEL_UNSEEN.armed){ vwSyncSeenBaseline(); VW_INTEL_UNSEEN.armed = true; }
+  else { vwComputeUnseen(); }
   if(typeof vwStartStream==="function") vwStartStream();
   // characters
   const sel=document.getElementById("charSel");
@@ -1194,7 +1264,7 @@ function renderIntelPlayer(){
   if(dis) dis.classList.toggle("hidden", !!feat.intel);
   if(!feat.intel) return;
   const intelBody=document.getElementById("intelBody");
-  const recap=document.getElementById("intelRecap");
+  const recap=document.getElementById("intelSession Recaps");
   const reqBody=document.getElementById("playerReqBody");
   if(!intelBody || !recap || !reqBody) return;
 
