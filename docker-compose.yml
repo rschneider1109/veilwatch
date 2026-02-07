@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  veilwatch_api:
+    build:
+      context: ./api
+    container_name: veilwatch_api
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - SITE_DIR=/app/site
+      - DATA_DIR=/app/data
+      - DATABASE_URL=postgres://veilwatch:veilwatch_pw@veilwatch_db:5432/veilwatch
+      # DM key (change this!)
+      - VEILWATCH_DM_KEY=VEILWATCHDM
+    depends_on:
+      veilwatch_db:
+        condition: service_healthy
+    ports:
+      - "8099:8080"
+    volumes:
+      - veilwatch_app_data:/app/data
+    networks:
+      - veilwatch_net
+
+  veilwatch_db:
+    image: postgres:16-alpine
+    container_name: veilwatch_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=veilwatch
+      - POSTGRES_USER=veilwatch
+      - POSTGRES_PASSWORD=veilwatch_pw
+    volumes:
+      - veilwatch_db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veilwatch -d veilwatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      # Optional: expose DB to host tools like DBeaver/PGAdmin
+      - "5432:5432"
+    networks:
+      - veilwatch_net
+
+  # Optional DB UI. Visit http://localhost:8282
+  adminer:
+    image: adminer:4
+    container_name: veilwatch_adminer
+    restart: unless-stopped
+    depends_on:
+      veilwatch_db:
+        condition: service_healthy
+    environment:
+      - ADMINER_DEFAULT_SERVER=veilwatch_db
+    ports:
+      - "8282:8080"
+    networks:
+      - veilwatch_net
+
+networks:
+  veilwatch_net: {}
+
+volumes:
+  veilwatch_db_data: {}
+  veilwatch_app_data: {}
