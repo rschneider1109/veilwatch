@@ -715,6 +715,13 @@ const server = http.createServer(async (req,res)=>{
   }
 
   // API
+  if (p === "/api/health" && req.method === "GET") {
+  return json(res, 200, {
+    ok: true,
+    db: !!pool,
+    time: new Date().toISOString()
+  }
+
   if(p === "/api/state" && req.method==="GET"){
     return json(res, 200, state);
   }
@@ -778,7 +785,7 @@ const server = http.createServer(async (req,res)=>{
     saveState(state);
     return json(res, 200, {ok:true});
   }
-
+  
   return text(res, 404, "Not found");
 });
 
