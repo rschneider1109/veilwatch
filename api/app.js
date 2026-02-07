@@ -911,9 +911,10 @@ let __vwStreamLastMsg = 0;
 let __vwStreamBackoff = 1000;
 
 function vwStartStream(){
+  if(!SESSION || !SESSION.role){ return; }
   try{ if(__vwES){ __vwES.close(); __vwES=null; } }catch(e){}
   const qs = (SESSION.role==="dm" && SESSION.dmKey) ? ("?k="+encodeURIComponent(SESSION.dmKey)) : "";
-  __vwES = new EventSource("/api/stream"+qs);
+  try{ __vwES = new EventSource("/api/stream"+qs); }catch(e){ __vwES=null; return; }
   __vwStreamLastMsg = Date.now();
   __vwStreamBackoff = 1000;
 
@@ -1036,7 +1037,7 @@ function loginInit(){
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
-    if(typeof vwStartStream==="function") vwStartStream();
+    if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
   };
   document.getElementById("loginPlayerBtn").onclick=async ()=>{
     const name=document.getElementById("whoName").value.trim()||"Player";
@@ -1045,7 +1046,7 @@ function loginInit(){
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
-    if(typeof vwStartStream==="function") vwStartStream();
+    if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
   };
 }
 loginInit();
@@ -1069,7 +1070,7 @@ async function refreshAll(){
   // intel indicator baseline
   if(!VW_INTEL_UNSEEN.armed){ vwSyncSeenBaseline(); VW_INTEL_UNSEEN.armed = true; }
   else { vwComputeUnseen(); }
-  if(typeof vwStartStream==="function") vwStartStream();
+  if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
   // characters
   const sel=document.getElementById("charSel");
   sel.innerHTML = "";
@@ -1438,7 +1439,7 @@ document.getElementById("newCharBtn").onclick = async () => {
     SESSION.activeCharId = res.id;
     toast("Character created");
     await refreshAll();
-    if(typeof vwStartStream==="function") vwStartStream();
+    if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
   } else {
     toast(res.error || "Failed to create character");
   }
