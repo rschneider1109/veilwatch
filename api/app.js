@@ -906,7 +906,6 @@ async function api(path, opts={}){
 }
 
 let __vwES = null;
-let __vwES = null;
 let __vwStreamLastMsg = 0;
 let __vwStreamBackoff = 1000;
 
