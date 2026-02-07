@@ -1787,11 +1787,13 @@ function renderSettings(){
 
   if(cShop) cShop.onchange = async ()=>{
     feat.shop = !!cShop.checked;
-    const res = await     if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
+    const res = await
+    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
   };
   if(cIntel) cIntel.onchange = async ()=>{
     feat.intel = !!cIntel.checked;
-    const res = await     if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
+    const res = await
+    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
   };
 
   const btnExp=document.getElementById("exportStateBtn");
