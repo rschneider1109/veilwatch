@@ -53,6 +53,7 @@ const STATE_PATH = path.join(DATA_DIR, "state.json");
 function ensureDir(p){ try{ fs.mkdirSync(p,{recursive:true}); } catch(e){} }
 
 const DEFAULT_STATE = {
+  meta: { schemaVersion: 1, lastSaved: null },
   settings: { dmKey: DM_KEY, theme: { accent: "#00e5ff" } },
   shops: {
     enabled: true,
@@ -65,7 +66,7 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
-  clues: { archived: [] },
+  clues: { items: [], archived: [] },
   characters: [] // no example character
 };
 
@@ -128,6 +129,9 @@ async function loadState(){
 }
 
 function saveState(st){
+  st.meta ||= {};
+  st.meta.schemaVersion = 1;
+  st.meta.lastSaved = new Date().toISOString();
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
 }
@@ -315,6 +319,7 @@ th{color:var(--muted);font-weight:600;}
       <div id="dmPanels" class="hidden">
         <div class="row" style="margin-bottom:10px;">
           <button class="btn active" data-itab="notifications">Notifications</button>
+          <button class="btn" data-itab="clues">Clues</button>
           <button class="btn" data-itab="archived">Archived Clues</button>
         </div>
         <div id="itab-notifications">
@@ -324,6 +329,15 @@ th{color:var(--muted);font-weight:600;}
           </table>
           <button class="btn smallbtn" id="clearResolvedBtn" style="margin-top:10px;">Clear Resolved</button>
         </div>
+        <div id="itab-clues" class="hidden">
+          <div class="row" style="margin-bottom:10px; gap:8px;">
+            <button class="btn smallbtn" id="addClueBtn">New Clue</button>
+          </div>
+          <table>
+            <thead><tr><th>REVEALED</th><th>TITLE</th><th>DETAIL</th><th>TAGS</th><th></th></tr></thead>
+            <tbody id="clueBody"></tbody>
+          </table>
+        </div>
         <div id="itab-archived" class="hidden">
           <table>
             <thead><tr><th>CLUE</th><th>NOTES</th><th></th></tr></thead>
@@ -332,7 +346,34 @@ th{color:var(--muted);font-weight:600;}
         </div>
       </div>
       <div id="playerIntel">
-        <div class="mini">Player Intel panel coming next (clues, recap, etc.)</div>
+        <div class="row">
+          <div class="pill">Player Intel</div>
+          <div class="mini">Revealed clues + request help from DM.</div>
+        </div>
+        <hr/>
+        <div class="row" style="gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <div style="min-width:240px;">
+            <div class="mini">Request Type</div>
+            <select id="pReqType">
+              <option>Help</option>
+              <option>Medical</option>
+              <option>Ammo</option>
+              <option>Gear</option>
+              <option>Extraction</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="min-width:320px; flex:1;">
+            <div class="mini">Details</div>
+            <input id="pReqDetail" placeholder="What do you need?" />
+          </div>
+          <button class="btn smallbtn" id="pReqSend">Send Request</button>
+        </div>
+        <div class="mini" style="margin-top:12px;">Revealed Clues</div>
+        <table style="margin-top:6px;">
+          <thead><tr><th>TITLE</th><th>DETAIL</th><th>TAGS</th></tr></thead>
+          <tbody id="pClueBody"></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -377,11 +418,14 @@ function setRoleUI(){
   document.getElementById("dmShopRow").classList.toggle("hidden", SESSION.role!=="dm");
   document.getElementById("editShopBtn").classList.toggle("hidden", SESSION.role!=="dm");
 }
-function api(path, opts={}){
+async function api(path, opts={}){
   opts.headers ||= {};
   opts.headers["Content-Type"]="application/json";
   if(SESSION.role==="dm" && SESSION.dmKey) opts.headers["X-DM-Key"]=SESSION.dmKey;
-  return fetch(path, opts).then(r=>r.json());
+  const r = await fetch(path, opts);
+  const txt = await r.text();
+  try{ return JSON.parse(txt); }
+  catch{ return { ok:false, error: txt || ("HTTP "+r.status) }; }
 }
 function nowClock(){
   const d=new Date();
@@ -413,6 +457,7 @@ document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));
   document.getElementById("itab-notifications").classList.toggle("hidden", b.dataset.itab!=="notifications");
+  document.getElementById("itab-clues").classList.toggle("hidden", b.dataset.itab!=="clues");
   document.getElementById("itab-archived").classList.toggle("hidden", b.dataset.itab!=="archived");
 });
 
@@ -459,16 +504,18 @@ async function refreshAll(){
     const o=document.createElement("option"); o.value=c.id; o.textContent=c.name;
     sel.appendChild(o);
   });
+  const savedChar = localStorage.getItem("vw_activeCharId");
+  if(savedChar) SESSION.activeCharId = savedChar;
   if(!SESSION.activeCharId && st.characters?.length) SESSION.activeCharId = st.characters[0].id;
   if(SESSION.activeCharId){
     sel.value = SESSION.activeCharId;
   }
-  sel.onchange=()=>{ SESSION.activeCharId=sel.value; renderCharacter(); };
+  sel.onchange=()=>{ SESSION.activeCharId=sel.value; localStorage.setItem("vw_activeCharId", SESSION.activeCharId); renderCharacter(); };
   document.getElementById("activeCharMini").textContent = SESSION.activeCharId ? (st.characters.find(c=>c.id===SESSION.activeCharId)?.name || "Unknown") : "None selected";
   // shop
   renderShop();
-  // DM panels
-  renderDM();
+  // DM / Player Intel panels
+  if(SESSION.role==="dm") renderDM(); else renderPlayerIntel();
   renderCharacter();
 }
 
@@ -536,7 +583,7 @@ document.getElementById("newCharBtn").onclick=async ()=>{
   const name=prompt("Character name?");
   if(!name) return;
   const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name})});
-  if(res.ok){ SESSION.activeCharId=res.id; toast("Character created"); await refreshAll(); }
+  if(res.ok){ SESSION.activeCharId=res.id; localStorage.setItem("vw_activeCharId", SESSION.activeCharId); toast("Character created"); await refreshAll(); }
 };
 
 function renderShop(){
@@ -635,11 +682,9 @@ function renderShop(){
         if(isUnique && c.inventory.some(x=>String(x.name||"").toLowerCase()===String(it.name||"").toLowerCase())){
           toast("Already owned"); return;
         }
-        c.inventory.push({category:it.category||"", name:it.name, weight:String(it.weight||""), qty:"1", cost:String(it.cost||""), notes:it.notes||""});
-        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        // create notification request for DM
-        await api("/api/notify",{method:"POST",body:JSON.stringify({type:"Shop Purchase", detail: it.name + " ($" + it.cost + ")", from: SESSION.name||"Player"})});
-        toast("Added to inventory"); await refreshAll();
+        const res = await api("/api/shop/buy",{method:"POST",body:JSON.stringify({charId:c.id, shopId:activeId, itemId:it.id, qty:1})});
+        if(!res.ok){ toast(res.error||"Purchase failed"); return; }
+        toast("Purchased + added to inventory"); await refreshAll();
       };
     }
     body.appendChild(tr);
@@ -688,6 +733,49 @@ function renderDM(){
     toast("Cleared"); await refreshAll();
   };
 
+  // active clues
+  st.clues ||= { items: [], archived: [] };
+  const cb=document.getElementById("clueBody");
+  if(cb){
+    cb.innerHTML="";
+    (st.clues.items||[]).forEach((c,idx)=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = '<td><input type="checkbox"/></td><td>'+esc(c.title||"")+'</td><td>'+esc(c.text||"")+'</td><td>'+esc((c.tags||[]).join(", "))+'</td><td></td>';
+      const chk=tr.querySelector("input"); chk.checked=!!c.revealed;
+      chk.onchange=async ()=>{ c.revealed=chk.checked; await api("/api/clues/save",{method:"POST",body:JSON.stringify({clues: st.clues})}); toast("Saved"); await refreshAll(); };
+      const td=tr.lastChild;
+      td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Archive</button>';
+      const [eb,abtn]=td.querySelectorAll("button");
+      eb.onclick=async ()=>{
+        const title=prompt("Clue title", c.title||"") ?? c.title;
+        const text=prompt("Clue detail", c.text||"") ?? c.text;
+        const tags=prompt("Tags (comma separated)", (c.tags||[]).join(",")) ?? (c.tags||[]).join(",");
+        c.title=title; c.text=text; c.tags=String(tags).split(",").map(s=>s.trim()).filter(Boolean);
+        await api("/api/clues/save",{method:"POST",body:JSON.stringify({clues: st.clues})});
+        toast("Updated"); await refreshAll();
+      };
+      abtn.onclick=async ()=>{
+        st.clues.items.splice(idx,1);
+        st.clues.archived ||= [];
+        st.clues.archived.unshift(c);
+        await api("/api/clues/save",{method:"POST",body:JSON.stringify({clues: st.clues})});
+        toast("Archived"); await refreshAll();
+      };
+      cb.appendChild(tr);
+    });
+    const addBtn=document.getElementById("addClueBtn");
+    if(addBtn) addBtn.onclick=async ()=>{
+      const title=prompt("Clue title?");
+      if(!title) return;
+      const text=prompt("Clue detail?")||"";
+      const tags=prompt("Tags (comma separated)")||"";
+      st.clues.items ||= [];
+      st.clues.items.unshift({ id:"clue_"+Math.random().toString(36).slice(2,10), title, text, tags: tags.split(",").map(s=>s.trim()).filter(Boolean), revealed:false, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() });
+      await api("/api/clues/save",{method:"POST",body:JSON.stringify({clues: st.clues})});
+      toast("Clue added"); await refreshAll();
+    };
+  }
+
   const ab=document.getElementById("archBody");
   ab.innerHTML="";
   (st.clues?.archived||[]).forEach((c,idx)=>{
@@ -700,6 +788,39 @@ function renderDM(){
     };
     ab.appendChild(tr);
   });
+function renderPlayerIntel(){
+  if(SESSION.role==="dm") return;
+  const st=window.__STATE||{};
+  // request button
+  const btn=document.getElementById("pReqSend");
+  if(btn){
+    btn.onclick=async ()=>{
+      const type=document.getElementById("pReqType").value;
+      const detail=document.getElementById("pReqDetail").value.trim();
+      if(!detail){ toast("Add details"); return; }
+      await api("/api/notify",{method:"POST",body:JSON.stringify({type, detail, from: SESSION.name||"Player"})});
+      document.getElementById("pReqDetail").value="";
+      toast("Sent to DM");
+    };
+  }
+  // revealed clues list
+  const body=document.getElementById("pClueBody");
+  if(body){
+    body.innerHTML="";
+    const clues=(st.clues?.items||[]).filter(c=>c.revealed);
+    if(!clues.length){
+      body.innerHTML = '<tr><td colspan="3" class="mini">No revealed clues yet.</td></tr>';
+    } else {
+      clues.forEach(c=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML = '<td>'+esc(c.title||"")+'</td><td>'+esc(c.text||"")+'</td><td>'+esc((c.tags||[]).join(", "))+'</td>';
+        body.appendChild(tr);
+      });
+    }
+  }
+}
+
+
 }
 
 // initial refresh will occur after login
@@ -715,13 +836,6 @@ const server = http.createServer(async (req,res)=>{
   }
 
   // API
-  if (p === "/api/health" && req.method === "GET") {
-  return json(res, 200, {
-    ok: true,
-    db: !!pool,
-    time: new Date().toISOString()
-  }
-
   if(p === "/api/state" && req.method==="GET"){
     return json(res, 200, state);
   }
@@ -737,7 +851,7 @@ const server = http.createServer(async (req,res)=>{
     const body = JSON.parse(await readBody(req) || "{}");
     const name = String(body.name||"").trim().slice(0,40) || "Unnamed";
     const id = "c_" + Math.random().toString(36).slice(2,10);
-    const c = { id, name, weapons: [], inventory: [] };
+    const c = { id, name, hp: 10, ac: 10, notes: "", weapons: [], inventory: [] };
     state.characters.push(c);
     saveState(state);
     return json(res, 200, {ok:true, id});
@@ -754,7 +868,74 @@ const server = http.createServer(async (req,res)=>{
     return json(res, 200, {ok:true});
   }
 
-  if(p === "/api/shops/save" && req.method==="POST"){
+  if(p === "/api/shop/buy" && req.method==="POST"){
+  const body = JSON.parse(await readBody(req) || "{}");
+  const charId = String(body.charId||"");
+  const shopId = String(body.shopId||"");
+  const itemId = String(body.itemId||"");
+  const qty = Math.max(1, parseInt(body.qty||"1",10));
+
+  const shop = (state.shops?.list||[]).find(s=>s.id===shopId);
+  if(!shop) return json(res, 404, {ok:false, error:"Shop not found"});
+
+  const item = (shop.items||[]).find(i=>i.id===itemId);
+  if(!item) return json(res, 404, {ok:false, error:"Item not found"});
+
+  const c = (state.characters||[]).find(x=>x.id===charId);
+  if(!c) return json(res, 404, {ok:false, error:"Character not found"});
+
+  c.inventory ||= [];
+
+  // Unique rule: if notes includes "unique", block duplicates
+  const isUnique = String(item.notes||"").toLowerCase().includes("unique");
+  if(isUnique && c.inventory.some(x=>String(x.name||"").toLowerCase()===String(item.name||"").toLowerCase())){
+    return json(res, 200, {ok:false, error:"Already owned"});
+  }
+
+  // Stock handling (∞ means unlimited)
+  const stockRaw = item.stock;
+  if(stockRaw !== "∞" && stockRaw !== Infinity && stockRaw !== "inf"){
+    const n = parseInt(String(stockRaw||""),10);
+    if(!Number.isFinite(n)) return json(res, 200, {ok:false, error:"Bad stock value"});
+    if(n < qty) return json(res, 200, {ok:false, error:"Not enough stock"});
+    item.stock = String(n - qty);
+  }
+
+  // Add to inventory
+  c.inventory.push({
+    category: item.category||"",
+    name: item.name,
+    weight: String(item.weight||""),
+    qty: String(qty),
+    cost: String(item.cost||""),
+    notes: item.notes||"",
+    from: shop.name
+  });
+
+  // Auto-notify DM
+  state.notifications ||= { nextId: 1, items: [] };
+  state.notifications.items ||= [];
+  const nid = state.notifications.nextId || 1;
+  state.notifications.nextId = nid + 1;
+  state.notifications.items.push({
+    id: nid,
+    type: "Shop Purchase",
+    detail: item.name + " ($" + item.cost + ") x" + qty,
+    from: String(body.from||"Player"),
+    status: "open",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+
+  // Optional purchase log
+  state.logs ||= [];
+  state.logs.push({ t: new Date().toISOString(), type:"purchase", charId, shopId, itemId, qty });
+
+  saveState(state);
+  return json(res, 200, {ok:true});
+}
+
+if(p === "/api/shops/save" && req.method==="POST"){
     if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
     state.shops = body.shops;
@@ -773,7 +954,11 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/notifications/save" && req.method==="POST"){
     if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
-    state.notifications = body.notifications;
+    state.notifications = body.notifications || state.notifications;
+    (state.notifications.items||[]).forEach(n=>{
+      if(!n.createdAt) n.createdAt = new Date().toISOString();
+      n.updatedAt = new Date().toISOString();
+    });
     saveState(state);
     return json(res, 200, {ok:true});
   }
@@ -781,11 +966,16 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/clues/save" && req.method==="POST"){
     if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
-    state.clues = body.clues;
+    state.clues = body.clues || state.clues || { items: [], archived: [] };
+    state.clues.items ||= [];
+    state.clues.archived ||= [];
+    const now = new Date().toISOString();
+    state.clues.items.forEach(c=>{ c.id ||= ("clue_"+Math.random().toString(36).slice(2,10)); c.tags ||= []; c.revealed = !!c.revealed; c.createdAt ||= now; c.updatedAt = now; });
+    state.clues.archived.forEach(c=>{ c.id ||= ("clue_"+Math.random().toString(36).slice(2,10)); c.tags ||= []; c.revealed = !!c.revealed; c.createdAt ||= now; c.updatedAt = now; });
     saveState(state);
     return json(res, 200, {ok:true});
   }
-  
+
   return text(res, 404, "Not found");
 });
 
