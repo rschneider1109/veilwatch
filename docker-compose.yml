@@ -3,7 +3,6 @@ version: "3.8"
 services:
   veilwatch_db:
     image: postgres:16-alpine
-    container_name: veilwatch_db
     restart: unless-stopped
     environment:
       POSTGRES_DB: veilwatch
@@ -16,54 +15,37 @@ services:
       test: ["CMD-SHELL", "pg_isready -U veilwatch -d veilwatch"]
       interval: 5s
       timeout: 3s
-      retries: 20
-    networks:
-      - veilwatch_net
+      retries: 60
+      start_period: 45s
     ports:
-      # Optional: expose DB to host tools (DBeaver/PGAdmin/etc)
       - "5432:5432"
 
   veilwatch_app:
     build:
       context: ./api
-    container_name: veilwatch_app
     restart: unless-stopped
     environment:
       PORT: "8080"
       SITE_DIR: "/app/site"
       DATA_DIR: "/app/data"
-
-      # IMPORTANT: Must match veilwatch_db credentials above
       DATABASE_URL: "postgres://veilwatch:veilwatch_pw@veilwatch_db:5432/veilwatch"
-
-      # Change this to whatever you want
       VEILWATCH_DM_KEY: "VEILWATCHDM"
     depends_on:
-      veilwatch_db:
-        condition: service_healthy
+      - veilwatch_db
     ports:
       - "8099:8080"
     volumes:
       - veilwatch_app_data:/app/data
-    networks:
-      - veilwatch_net
 
-  adminer:
+  veilwatch_adminer:
     image: adminer:4
-    container_name: veilwatch_adminer
     restart: unless-stopped
-    depends_on:
-      veilwatch_db:
-        condition: service_healthy
     environment:
       ADMINER_DEFAULT_SERVER: veilwatch_db
+    depends_on:
+      - veilwatch_db
     ports:
       - "8282:8080"
-    networks:
-      - veilwatch_net
-
-networks:
-  veilwatch_net: {}
 
 volumes:
   veilwatch_db_data: {}
