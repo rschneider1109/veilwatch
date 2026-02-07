@@ -14,13 +14,17 @@
     </header>
 
     <main class="grid">
+      <!-- LOGIN + CHANGE PASSWORD -->
       <section class="panel">
         <h2>Login</h2>
+
         <form id="loginForm">
           <label>Username</label>
           <input id="username" autocomplete="username" />
+
           <label>Password</label>
           <input id="password" type="password" autocomplete="current-password" />
+
           <button type="submit">Authenticate</button>
         </form>
 
@@ -30,20 +34,42 @@
         </div>
 
         <pre class="log" id="authOut"></pre>
+
+        <hr style="border:0;border-top:1px solid rgba(26,43,49,.8);margin:14px 0">
+
+        <h2>Change Password</h2>
+
+        <form id="pwForm">
+          <label>Old Password</label>
+          <input id="oldPassword" type="password" autocomplete="current-password" />
+
+          <label>New Password</label>
+          <input id="newPassword" type="password" autocomplete="new-password" />
+
+          <label>Confirm New Password</label>
+          <input id="newPassword2" type="password" autocomplete="new-password" />
+
+          <button type="submit">Update Password</button>
+        </form>
+
+        <pre class="log" id="pwOut"></pre>
       </section>
 
+      <!-- QUICKREF -->
       <section class="panel">
         <h2>QuickRef</h2>
         <button id="qrBtn" type="button">Load /api/quickref</button>
         <pre class="log" id="qrOut"></pre>
       </section>
 
+      <!-- CHARACTER -->
       <section class="panel">
         <h2>Character</h2>
         <button id="chBtn" type="button">Load /api/character</button>
         <pre class="log" id="chOut"></pre>
       </section>
 
+      <!-- ADMIN -->
       <section class="panel">
         <h2>Admin</h2>
         <div class="row">
