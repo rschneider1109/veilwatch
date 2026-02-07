@@ -68,6 +68,21 @@ const DEFAULT_STATE = {
   clues: { nextId: 1, items: [], archived: [] },
   characters: [] // no example character
 };
+function normalizeCluesShape(st){
+  st.clues ||= structuredClone(DEFAULT_STATE.clues);
+  // Support older shapes
+  if(Array.isArray(st.clues)){
+    st.clues = { nextId: (st.clues.reduce((mx,c)=>Math.max(mx, Number(c.id||0)),0) + 1) || 1, items: st.clues, archived: [] };
+  }
+  st.clues.nextId ||= 1;
+  st.clues.items ||= [];
+  st.clues.archived ||= [];
+  // Ensure ids are numbers
+  st.clues.items.forEach(c=>{ if(typeof c.id==="string" && /^\d+$/.test(c.id)) c.id = Number(c.id); });
+  st.clues.archived.forEach(c=>{ if(typeof c.id==="string" && /^\d+$/.test(c.id)) c.id = Number(c.id); });
+  return st;
+}
+
 
 function fileLoadState(){
   ensureDir(DATA_DIR);
@@ -92,6 +107,7 @@ function fileLoadState(){
     st.clues.nextId ||= 1;
     st.clues.items ||= [];
     st.clues.archived ||= [];
+    normalizeCluesShape(st);
     fileSaveState(st);
     return st;
   } catch(e){
@@ -123,6 +139,7 @@ async function loadState(){
       fromDb.clues.nextId ||= 1;
       fromDb.clues.items ||= [];
       fromDb.clues.archived ||= [];
+      normalizeCluesShape(fromDb);
       fromDb.characters ||= [];
       fileSaveState(fromDb);
       return fromDb;
@@ -1132,7 +1149,8 @@ function renderIntelPlayer(){
   const tag=(document.getElementById("intelTag").value||"").toLowerCase().trim();
   const dist=(document.getElementById("intelDistrict").value||"").toLowerCase().trim();
 
-  const clues = (st.clues?.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
+  const clueItems = Array.isArray(st.clues) ? st.clues : (st.clues?.items || st.clues?.active || st.clues?.revealed || []);
+  const clues = (clueItems||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
   const filtered = clues.filter(c=>{
     const hay = (c.title||"")+" "+(c.details||"")+" "+(c.tags||"").join?.(",")+" "+(c.district||"");
     if(q && !hay.toLowerCase().includes(q)) return false;
@@ -1185,7 +1203,7 @@ function renderIntelDM(){
   const body=document.getElementById("clueBody");
   if(!body) return;
   body.innerHTML="";
-  const items = (st.clues?.items||[]);
+  const items = Array.isArray(st.clues) ? st.clues : (st.clues?.items || st.clues?.active || []);
   if(!items.length){
     body.innerHTML = '<tr><td colspan="7" class="mini">No active clues yet.</td></tr>';
     return;
@@ -1641,7 +1659,8 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/state" && req.method==="GET"){
     // Never leak DM key to players
     if(!isDM(req)){
-      const safe = structuredClone(state);
+      normalizeCluesShape(state);
+      const safe = (typeof structuredClone==="function") ? structuredClone(state) : JSON.parse(JSON.stringify(state));
       if(safe.settings){
         safe.settings = { theme: safe.settings.theme, features: safe.settings.features || DEFAULT_STATE.settings.features };
       }
