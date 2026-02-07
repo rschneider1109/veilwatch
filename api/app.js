@@ -74,8 +74,8 @@ const DEFAULT_STATE = {
     activeShopId: "hq",
     list: [
       { id:"hq", name:"Cock & Dagger HQ", items: [
-        { id:"ammo_9mm", name:"9mm Ammo (box)", category:"Ammo", cost:20, weight:1, notes:"50 rounds (reserve)", stock:"∞" },
-        { id:"flashlight", name:"Flashlight (high lumen)", category:"Gear", cost:35, weight:1, notes:"Unique", stock:"∞" },
+        { id:"ammo_9mm", name:"9mm Ammo (box)", category:"Ammo", cost:20, weight:1, notes:"50 rounds (reserve)", stock:"INF" },
+        { id:"flashlight", name:"Flashlight (high lumen)", category:"Gear", cost:35, weight:1, notes:"Unique", stock:"INF" },
       ]},
     ]
   },
@@ -952,7 +952,7 @@ function renderShop(){
     const tr=document.createElement("tr");
     tr.innerHTML =
       '<td>'+esc(it.name)+'</td><td>'+esc(it.category||"")+'</td><td>$'+esc(it.cost||"")+'</td>'+
-      '<td>'+esc(it.weight||"")+'</td><td>'+esc(it.notes||"")+'</td><td>'+esc(it.stock||"∞")+'</td>'+
+      '<td>'+esc(it.weight||"")+'</td><td>'+esc(it.notes||"")+'</td><td>'+esc(it.stock||"INF")+'</td>'+
       '<td></td>';
     const td=tr.lastChild;
     if(SESSION.role==="dm"){
@@ -967,7 +967,7 @@ function renderShop(){
             { key:"cost",     label:"Cost ($)",  value: String(it.cost ?? ""), placeholder:"35" },
             { key:"weight",   label:"Weight",    value: String(it.weight ?? ""), placeholder:"1" },
             { key:"notes",    label:"Notes",     value: it.notes || "", placeholder:"Unique / special" },
-            { key:"stock",    label:"Stock (∞ or number)", value: String(it.stock ?? "∞"), placeholder:"∞" },
+            { key:"stock",    label:"Stock (INF or number)", value: String(it.stock ?? "INF"), placeholder:"INF" },
           ],
           okText: "Save"
         });
@@ -1026,7 +1026,7 @@ function renderShop(){
           { key:"cost",     label:"Cost ($)",  value:"0", placeholder:"35" },
           { key:"weight",   label:"Weight",    value:"1", placeholder:"1" },
           { key:"notes",    label:"Notes",     value:"", placeholder:"Unique / special" },
-          { key:"stock",    label:"Stock (∞ or number)", value:"∞", placeholder:"∞" },
+          { key:"stock",    label:"Stock (INF or number)", value:"INF", placeholder:"INF" },
         ],
         okText: "Add"
       });
@@ -1059,7 +1059,7 @@ function renderIntel(){
 
   const revealed = (st.clues?.revealed || st.clues?.list || []).filter(c=>c.visibility==="revealed" || c.visibility==="revealed");
   // recap (last 5)
-  const recap = revealed.slice(0,5).map(c => "• " + c.title).join("\n");
+  const recap = revealed.slice(0,5).map(c => "- " + c.title).join("\n");
   document.getElementById("intelRecap").textContent = recap || "No revealed intel yet.";
 
   function applyFilters(){
@@ -1696,6 +1696,12 @@ const server = http.createServer(async (req,res)=>{
     state.settings.dmKey = DM_KEY; // env
     saveState(state);
     return json(res, 200, {ok:true});
+  }
+
+
+  if(p === "/favicon.ico"){
+    res.writeHead(204, {"Cache-Control":"no-store"});
+    return res.end();
   }
 
   return text(res, 404, "Not found");
