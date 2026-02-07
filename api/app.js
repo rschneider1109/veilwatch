@@ -1355,7 +1355,7 @@ recap.innerHTML =
   '<p class="muted">No recaps yet.</p>';
 
 if(!recap.dataset.vwInit){
-    recap.innerHTML = "<p class='muted'>Session recaps will appear here (DM-written). Clue reveals won't spam this panel.</p>";
+    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won\'t spam this panel.</p>';
     recap.dataset.vwInit = "1";
   }
 
@@ -1780,21 +1780,6 @@ restoreBtn && (restoreBtn.onclick = async ()=>{
 function renderSettings(){
   const st=window.__STATE||{};
   if(SESSION.role!=="dm") return;
-  // feature toggles
-  const feat = (st.settings?.features) || {shop:true,intel:true};
-  if(cShop) cShop.checked = !!feat.shop;
-  if(cIntel) cIntel.checked = !!feat.intel;
-
-  if(cShop) cShop.onchange = async ()=>{
-    feat.shop = !!cShop.checked;
-    const res = await
-    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
-  };
-  if(cIntel) cIntel.onchange = async ()=>{
-    feat.intel = !!cIntel.checked;
-    const res = await
-    if(res.ok){ toast("Saved"); await refreshAll(); } else toast(res.error||"Failed");
-  };
 
   const btnExp=document.getElementById("exportStateBtn");
   if(btnExp) btnExp.onclick = async ()=>{
@@ -1826,7 +1811,8 @@ function renderSettings(){
   if(btnKey) btnKey.onclick = async ()=>{
     const nk = (document.getElementById("dmKeyNew").value||"").trim();
     if(!nk) return toast("Enter a new key");
-    const res = await     if(res.ok){ toast("DM key saved"); SESSION.dmKey = nk; await refreshAll(); }
+    const res = await api("/api/settings/save",{method:"POST",body:JSON.stringify({dmKey:nk})});
+    if(res.ok){ toast("DM key saved"); SESSION.dmKey = nk; await refreshAll(); }
     else toast(res.error||"Failed");
   };
 }
