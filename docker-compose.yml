@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: veilwatch_app
+    environment:
+      PORT: "8080"
+    ports:
+      - "8099:8080"
