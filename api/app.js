@@ -958,6 +958,10 @@ if(intelClear) intelClear.onclick=()=>{
 async function refreshAll(){
   const st = await api("/api/state");
   window.__STATE = st;
+  // vw: keep intel DOM populated even when tab is closed
+  if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+  if(typeof renderIntelDM==="function") renderIntelDM();
+  if(typeof vwStartPolling==="function") vwStartPolling();
   // characters
   const sel=document.getElementById("charSel");
   sel.innerHTML = "";
@@ -1700,6 +1704,29 @@ async function pollState(){
   } catch(e){}
 }
 setInterval(pollState, AUTO_REFRESH_MS);
+
+// vw polling: keeps player/DM state in sync without requiring tab clicks
+const VW_POLL_MS = 3000;
+let __vwPollTimer = null;
+function vwStartPolling(){
+  if(__vwPollTimer) return;
+  __vwPollTimer = setInterval(async ()=>{
+    try{
+      const st = await api("/api/state");
+      if(!st || st.ok === false) return;
+      window.__STATE = st;
+
+      // Update Intel in the background so it is ready when the player clicks the tab.
+      // Also refresh immediately if Intel is currently visible.
+      const intelTab = document.getElementById("tab-intel");
+      const intelVisible = intelTab && !intelTab.classList.contains("hidden");
+      if(intelVisible || true){
+        if(typeof renderIntelDM==="function") renderIntelDM();
+        if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+      }
+    }catch(e){ /* ignore */ }
+  }, VW_POLL_MS);
+}
 
 // initial refresh will occur after login
 </script>
