@@ -880,6 +880,38 @@ function vwModalForm(opts){
 }
 
 let SESSION = { role:null, name:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
+// --- Intel indicator safety stubs (prevents runtime errors if blocks move during patching) ---
+if(typeof window.VW_INTEL_UNSEEN === "undefined"){
+  window.VW_INTEL_UNSEEN = { count: 0, seenIds: new Set(), armed: false };
+}
+if(typeof window.vwGetRevealedClueIds !== "function"){
+  window.vwGetRevealedClueIds = ()=>{
+    const st = window.__STATE || {};
+    const items = (st.clues?.items || []);
+    return items
+      .filter(c=>String(c.visibility||"hidden")==="revealed")
+      .map(c=>Number(c.id||0))
+      .filter(Boolean);
+  };
+}
+if(typeof window.vwUpdateIntelIndicator !== "function"){
+  window.vwUpdateIntelIndicator = ()=>{};
+}
+if(typeof window.vwSyncSeenBaseline !== "function"){
+  window.vwSyncSeenBaseline = ()=>{
+    window.VW_INTEL_UNSEEN.seenIds = new Set(window.vwGetRevealedClueIds());
+    window.VW_INTEL_UNSEEN.count = 0;
+    window.vwUpdateIntelIndicator();
+  };
+}
+if(typeof window.vwComputeUnseen !== "function"){
+  window.vwComputeUnseen = ()=>{};
+}
+if(typeof window.vwAcknowledgeIntel !== "function"){
+  window.vwAcknowledgeIntel = ()=>{ window.vwSyncSeenBaseline(); };
+}
+// --- end stubs ---
+
 function esc(s){ return String(s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
 function toast(msg){
   const t=document.getElementById("toast");
@@ -1004,7 +1036,7 @@ function renderTabs(tab){
   });
   // When switching to Intel, render immediately so players don't need to type in search
   if(tab === "intel"){
-    vwAcknowledgeIntel && vwAcknowledgeIntel();
+    if(typeof vwAcknowledgeIntel==='function') vwAcknowledgeIntel();
     setTimeout(()=>{
       if(typeof renderIntelDM==="function") renderIntelDM();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
@@ -1105,8 +1137,8 @@ async function refreshAll(){
   const st = await api("/api/state");
   window.__STATE = st;
   // intel indicator baseline
-  if(!VW_INTEL_UNSEEN.armed){ vwSyncSeenBaseline(); VW_INTEL_UNSEEN.armed = true; }
-  else { vwComputeUnseen(); }
+  if(window.VW_INTEL_UNSEEN && !window.VW_INTEL_UNSEEN.armed){ vwSyncSeenBaseline(); window.VW_INTEL_UNSEEN.armed = true; }
+  else { if(typeof vwComputeUnseen==='function') vwComputeUnseen(); }
   if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
     if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
   // characters
