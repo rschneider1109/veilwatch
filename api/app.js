@@ -951,8 +951,8 @@ async function refreshAll(){
   if(typeof renderIntelDM==='function') renderIntelDM();
   if(typeof renderIntelPlayer==='function') renderIntelPlayer();
   renderCharacter();
-  renderSheet();
-  renderSettings();
+  if(typeof renderSheet==='function') renderSheet();
+  if(typeof renderSettings==='function') renderSettings();
 }
 
 function getChar(){
@@ -1068,6 +1068,7 @@ function renderSheet(){
   document.getElementById("dupCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
   document.getElementById("delCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
 }
+window.renderSheet = renderSheet;
 
 document.getElementById("saveSheetBtn").onclick = async ()=>{
   const c=getChar(); if(!c){ toast("No character"); return; }
@@ -1705,6 +1706,88 @@ const server = http.createServer(async (req,res)=>{
     saveState(state);
     return json(res, 200, {ok:true});
   }
+
+  if(p === "/api/clues/create" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    state.clues ||= structuredClone(DEFAULT_STATE.clues);
+    state.clues.nextId ||= 1;
+    state.clues.items ||= [];
+    state.clues.archived ||= [];
+    const id = state.clues.nextId++;
+    const clue = {
+      id,
+      title: String(body.title||"").slice(0,120),
+      details: String(body.details||"").slice(0,4000),
+      source: String(body.source||"").slice(0,120),
+      tags: Array.isArray(body.tags) ? body.tags.slice(0,12).map(t=>String(t).slice(0,24)) : [],
+      district: String(body.district||"").slice(0,80),
+      date: String(body.date||"").slice(0,32),
+      visibility: "hidden",
+      createdAt: Date.now()
+    };
+    state.clues.items.push(clue);
+    saveState(state);
+    return json(res, 200, {ok:true, id});
+  }
+  if(p === "/api/clues/update" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    const id = Number(body.id||0);
+    const clue = (state.clues?.items||[]).find(c=>c.id===id);
+    if(!clue) return json(res, 404, {ok:false, error:"Not found"});
+    clue.title = String(body.title||"").slice(0,120);
+    clue.details = String(body.details||"").slice(0,4000);
+    clue.source = String(body.source||"").slice(0,120);
+    clue.tags = Array.isArray(body.tags) ? body.tags.slice(0,12).map(t=>String(t).slice(0,24)) : [];
+    clue.district = String(body.district||"").slice(0,80);
+    clue.date = String(body.date||"").slice(0,32);
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+  if(p === "/api/clues/visibility" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    const id = Number(body.id||0);
+    const vis = String(body.visibility||"hidden");
+    const clue = (state.clues?.items||[]).find(c=>c.id===id);
+    if(!clue) return json(res, 404, {ok:false, error:"Not found"});
+    clue.visibility = (vis==="revealed") ? "revealed" : "hidden";
+    if(clue.visibility==="revealed") clue.revealedAt = Date.now();
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+  if(p === "/api/clues/archive" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    const id = Number(body.id||0);
+    state.clues ||= structuredClone(DEFAULT_STATE.clues);
+    state.clues.items ||= [];
+    state.clues.archived ||= [];
+    const idx = state.clues.items.findIndex(c=>c.id===id);
+    if(idx<0) return json(res, 404, {ok:false, error:"Not found"});
+    const clue = state.clues.items.splice(idx,1)[0];
+    clue.archivedAt = Date.now();
+    state.clues.archived.unshift(clue);
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+  if(p === "/api/clues/restoreActive" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    const id = Number(body.id||0);
+    state.clues ||= structuredClone(DEFAULT_STATE.clues);
+    state.clues.items ||= [];
+    state.clues.archived ||= [];
+    const idx = state.clues.archived.findIndex(c=>c.id===id);
+    if(idx<0) return json(res, 404, {ok:false, error:"Not found"});
+    const clue = state.clues.archived.splice(idx,1)[0];
+    state.clues.items.unshift(clue);
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
+
 
   if(p === "/api/clues/save" && req.method==="POST"){
     if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
