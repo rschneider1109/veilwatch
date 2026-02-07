@@ -942,8 +942,10 @@ function vwStartStream(){
   };
 }
 
-let __vwPollTimer = null;
+var __vwPollTimer = null;
 function vwStartFallbackPoller(){
+  try{ if(typeof __vwPollTimer === 'undefined') __vwPollTimer = null; }catch(e){}
+
   if(__vwPollTimer) return;
   __vwPollTimer = setInterval(async ()=>{
     try{
