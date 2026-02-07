@@ -1653,13 +1653,22 @@ async function pollState(){
       ch:(st.characters||[]).length,
       cv:(st.clues?.items||[]).map(x=>String(x.id)+":"+String(x.visibility)).join("|")
     });
-    if(sig !== __lastSig){
-      __lastSig = sig;
-      // re-render active tab
+    __lastSig = sig;
+    // Always refresh Intel when viewing it (so Hide/Reveal shows up without typing)
       const activeTab = document.querySelector('#tabs .btn.active')?.dataset?.tab || "home";
       if(activeTab === "intel"){
         if(typeof renderIntelDM==="function") renderIntelDM();
         if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+      } else if(sig !== __lastSig){
+        __lastSig = sig;
+        if(activeTab === "character"){
+          renderCharacter();
+          if(typeof renderSheet==="function") renderSheet();
+        } else if(activeTab === "shop"){
+          renderShop();
+        } else if(activeTab === "home"){
+          renderDM();
+        }
       } else if(activeTab === "character"){
         renderCharacter();
         if(typeof renderSheet==="function") renderSheet();
@@ -1685,6 +1694,18 @@ setInterval(pollState, AUTO_REFRESH_MS);
     });
   }
 })();
+
+// intelTabDelegationRender: catch any tab click patterns
+document.addEventListener("click", (e)=>{
+  const btn = e.target?.closest?.('button[data-tab]');
+  if(!btn) return;
+  if(btn.dataset.tab === "intel"){
+    setTimeout(()=>{
+      if(typeof renderIntelDM==="function") renderIntelDM();
+      if(typeof renderIntelPlayer==="function") renderIntelPlayer();
+    }, 0);
+  }
+});
 
 // initial refresh will occur after login
 </script>
