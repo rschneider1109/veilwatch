@@ -1019,34 +1019,57 @@ function loginInit(){
   const roleSel=document.getElementById("whoRole");
   const dmRow=document.getElementById("dmKeyRow");
   const playerRow=document.getElementById("playerBtnRow");
-  function sync(){
-    const isDM = roleSel.value==="dm";
-    dmRow.classList.toggle("hidden", !isDM);
-    playerRow.classList.toggle("hidden", isDM);
-  }
-  roleSel.onchange=sync; sync();
+  const dmKeyInput=document.getElementById("dmKey");
+  const dmBtn=document.getElementById("loginBtn");
+  const playerBtn=document.getElementById("loginPlayerBtn");
 
-  document.getElementById("loginBtn").onclick=async ()=>{
-    const name=document.getElementById("whoName").value.trim()||"DM";
-    const key=document.getElementById("dmKey").value.trim();
-    const res = await api("/api/dm/login",{method:"POST",body:JSON.stringify({name, key})});
-    if(!res.ok){ toast(res.error||"Denied"); return; }
-    SESSION.role="dm"; SESSION.name=name; SESSION.dmKey=key;
-    document.getElementById("whoPill").textContent="DM: "+name;
+  function applyRoleUI(){
+    const isDM = roleSel && roleSel.value==="dm";
+    if(dmRow) dmRow.classList.toggle("hidden", !isDM);
+    // If the old "player button row" doesn't exist in this build, don't crash.
+    if(playerRow) playerRow.classList.toggle("hidden", isDM);
+    // Make the primary button work either way (prevents "can't login" even if UI doesn't toggle perfectly)
+    if(dmBtn) dmBtn.textContent = isDM ? "Login" : "Continue";
+    if(dmKeyInput) dmKeyInput.disabled = !isDM;
+    if(dmKeyInput && !isDM) dmKeyInput.value = "";
+  }
+  if(roleSel) roleSel.onchange=applyRoleUI;
+  applyRoleUI();
+
+  async function finishLogin(role, name, dmKey){
+    SESSION.role=role;
+    SESSION.name=name;
+    SESSION.dmKey=dmKey||"";
+    document.getElementById("whoPill").textContent = (role==="dm" ? "DM: " : "Player: ") + name;
     document.getElementById("loginOverlay").style.display="none";
     setRoleUI();
     await refreshAll();
     if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
-  };
-  document.getElementById("loginPlayerBtn").onclick=async ()=>{
-    const name=document.getElementById("whoName").value.trim()||"Player";
-    SESSION.role="player"; SESSION.name=name;
-    document.getElementById("whoPill").textContent="Player: "+name;
-    document.getElementById("loginOverlay").style.display="none";
-    setRoleUI();
-    await refreshAll();
-    if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
-  };
+  }
+
+  // Primary button: DM login if role=dm, otherwise Player login.
+  if(dmBtn){
+    dmBtn.onclick=async ()=>{
+      const role = (roleSel && roleSel.value) || "player";
+      const name=(document.getElementById("whoName").value.trim() || (role==="dm" ? "DM" : "Player"));
+      if(role==="dm"){
+        const key=document.getElementById("dmKey").value.trim();
+        const res = await api("/api/dm/login",{method:"POST",body:JSON.stringify({name, key})});
+        if(!res.ok){ toast(res.error||"Denied"); return; }
+        await finishLogin("dm", name, key);
+      } else {
+        await finishLogin("player", name, "");
+      }
+    };
+  }
+
+  // If a separate player button exists, wire it too (optional).
+  if(playerBtn){
+    playerBtn.onclick=async ()=>{
+      const name=document.getElementById("whoName").value.trim()||"Player";
+      await finishLogin("player", name, "");
+    };
+  }
 }
 loginInit();
 
