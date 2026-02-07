@@ -1,13 +1,60 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Veilwatch</title>
-  </head>
-  <body style="font-family:system-ui;background:#05080a;color:#d7f4ff;padding:20px">
-    <h1>Veilwatch OS</h1>
-    <p>If you see this, the app is serving static files ✅</p>
-    <p>Try <code>/api/health</code>.</p>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Veilwatch OS</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">VEILWATCH OS</div>
+      <div class="status" id="status">ONLINE</div>
+    </header>
+
+    <main class="grid">
+      <section class="panel">
+        <h2>Login</h2>
+        <form id="loginForm">
+          <label>Username</label>
+          <input id="username" autocomplete="username" />
+          <label>Password</label>
+          <input id="password" type="password" autocomplete="current-password" />
+          <button type="submit">Authenticate</button>
+        </form>
+
+        <div class="row">
+          <button id="logoutBtn" type="button">Logout</button>
+          <button id="meBtn" type="button">/api/me</button>
+        </div>
+
+        <pre class="log" id="authOut"></pre>
+      </section>
+
+      <section class="panel">
+        <h2>QuickRef</h2>
+        <button id="qrBtn" type="button">Load /api/quickref</button>
+        <pre class="log" id="qrOut"></pre>
+      </section>
+
+      <section class="panel">
+        <h2>Character</h2>
+        <button id="chBtn" type="button">Load /api/character</button>
+        <pre class="log" id="chOut"></pre>
+      </section>
+
+      <section class="panel">
+        <h2>Admin</h2>
+        <div class="row">
+          <button id="adminLoginBtn" type="button">Admin Login</button>
+          <button id="usersBtn" type="button">List Users</button>
+        </div>
+        <pre class="log" id="adminOut"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
 </html>
