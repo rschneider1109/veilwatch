@@ -68,6 +68,18 @@ const DEFAULT_STATE = {
   clues: { nextId: 1, items: [], archived: [] },
   characters: [] // no example character
 };
+function normalizeCluesShape(st){
+  st.clues ||= structuredClone(DEFAULT_STATE.clues);
+  // Support older shapes
+  if(Array.isArray(st.clues)){
+    st.clues = { nextId: (st.clues.reduce((mx,c)=>Math.max(mx, Number(c.id||0)),0) + 1) || 1, items: st.clues, archived: [] };
+  }
+  st.clues.nextId ||= 1;
+  st.clues.items ||= [];
+  st.clues.archived ||= [];
+  return st;
+}
+
 
 function fileLoadState(){
   ensureDir(DATA_DIR);
@@ -92,6 +104,7 @@ function fileLoadState(){
     st.clues.nextId ||= 1;
     st.clues.items ||= [];
     st.clues.archived ||= [];
+    normalizeCluesShape(st);
     fileSaveState(st);
     return st;
   } catch(e){
@@ -123,6 +136,7 @@ async function loadState(){
       fromDb.clues.nextId ||= 1;
       fromDb.clues.items ||= [];
       fromDb.clues.archived ||= [];
+      normalizeCluesShape(fromDb);
       fromDb.characters ||= [];
       fileSaveState(fromDb);
       return fromDb;
@@ -1133,7 +1147,8 @@ function renderIntelPlayer(){
   const tag=(document.getElementById("intelTag").value||"").toLowerCase().trim();
   const dist=(document.getElementById("intelDistrict").value||"").toLowerCase().trim();
 
-  const clues = (st.clues?.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
+  const clueItems = Array.isArray(st.clues) ? st.clues : (st.clues?.items || st.clues?.active || []);
+  const clues = (clueItems||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
   const filtered = clues.filter(c=>{
     const hay = (c.title||"")+" "+(c.details||"")+" "+(c.tags||"").join?.(",")+" "+(c.district||"");
     if(q && !hay.toLowerCase().includes(q)) return false;
@@ -1243,7 +1258,7 @@ function renderIntelDM(){
       if(res.ok){ toast("Revealed"); await refreshAll(); } else toast(res.error||"Failed");
     };
     bHide.onclick = async ()=>{
-      const res = await api("/api/clues/visibility",{method:"POST",body:JSON.stringify({id:cl.id, visibility:"hidden"})});
+      const res = await api("/api/clues/visibility",{method:"POST",body:JSON.stringify({id:cl.id, visibility: "revealed"})});
       if(res.ok){ toast("Hidden"); await refreshAll(); } else toast(res.error||"Failed");
     };
     bArc.onclick = async ()=>{
@@ -1646,6 +1661,7 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/state" && req.method==="GET"){
     // Never leak DM key to players
     if(!isDM(req)){
+      normalizeCluesShape(state);
       const safe = (typeof structuredClone==="function") ? structuredClone(state) : JSON.parse(JSON.stringify(state));
       if(safe.settings){
         safe.settings = { theme: safe.settings.theme, features: safe.settings.features || DEFAULT_STATE.settings.features };
@@ -1706,6 +1722,33 @@ const server = http.createServer(async (req,res)=>{
     saveState(state);
     return json(res, 200, {ok:true});
   }
+  if(p === "/api/settings/save" && req.method==="POST"){
+    if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    state.settings ||= {};
+    state.settings.features ||= DEFAULT_STATE.settings.features;
+
+    if(body.features){
+      state.settings.features = {
+        shop: !!body.features.shop,
+        intel: !!body.features.intel
+      };
+    }
+
+    if(body.dmKey){
+      if(process.env.VEILWATCH_DM_KEY){
+        return json(res, 200, {ok:false, error:"DM key locked by env var"});
+      }
+      const nk = String(body.dmKey||"").trim();
+      if(nk.length < 4 || nk.length > 64) return json(res, 200, {ok:false, error:"DM key must be 4-64 chars"});
+      state.settings.dmKey = nk;
+    }
+
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
+
 
   if(p === "/api/clues/create" && req.method==="POST"){
     if(!isDM(req)) return json(res, 403, {ok:false, error:"DM only"});
