@@ -50,7 +50,7 @@ Open:
 
 DM login
 --------
-Use the DM key set by VEILWATCH_DM_KEY in docker-compose.yml.
+Use the VEILWATCH_DM_KEY: "VEILWATCHDM"
 
 Notes
 -----
