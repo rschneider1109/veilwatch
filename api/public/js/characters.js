@@ -56,7 +56,8 @@ function renderCharacter(){
   });
 }
 
-const CONDITIONS = ["bleeding","blinded","charmed","deafened","frightened","grappled","incapacitated","invisible","paralyzed","poisoned","prone","restrained","stunned","unconscious","exhaustion"];
+window.CONDITIONS = window.CONDITIONS || ["bleeding","blinded","charmed","deafened","frightened","grappled","incapacitated","invisible","paralyzed","poisoned","prone","restrained","stunned","unconscious","exhaustion"];
+const CONDITIONS = window.CONDITIONS;
 
 
 // --- Autosave (discord-like live updates) ---
@@ -425,3 +426,34 @@ function renderDMActiveParty(){
 
 // Wire autosave inputs once the DOM exists.
 try{ vwWireSheetAutosave(); }catch(e){}
+
+
+// ---- Buttons: add inventory row + new character (kept here so intel.js stays intel-only) ----
+document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
+  const c = (typeof getChar==="function") ? getChar() : null;
+  if(!c){ toast("Create character first"); return; }
+  c.inventory ||= [];
+  c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
+  else toast(res.error||"Failed");
+});
+
+document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
+  const name = await vwModalInput({
+    title: "New Character",
+    label: "Character name",
+    placeholder: "e.g. Mara Kincaid"
+  });
+  if(!name) return;
+
+  // DM can optionally create unassigned characters via Import workflow; this button creates under the current user by default.
+  const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
+  if(res && res.ok){
+    SESSION.activeCharId = res.id;
+    toast("Character created");
+    await refreshAll();
+  }else{
+    toast((res && res.error) ? res.error : "Failed to create character");
+  }
+});
