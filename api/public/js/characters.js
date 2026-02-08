@@ -1,3 +1,70 @@
+
+/** 
+ * Add Inventory Item (dropdown)
+ * Uses catalog inventoryItemsByCategory if available; otherwise falls back to manual entry.
+ */
+async function vwAddInventoryItemDropdown() {
+  const c = getChar();
+  if (!c) return toast("Create/select a character first");
+
+  const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
+  const groups =
+    cat?.inventoryItemsByCategory ||
+    cat?.inventory_items_by_category ||
+    cat?.inventoryByCategory ||
+    null;
+
+  const categories = groups ? Object.keys(groups) : ["General"];
+  const safeCats = categories.length ? categories : ["General"];
+
+  if (typeof vwModalForm !== "function") {
+    // hard fallback: just add an empty row
+    c.inventory = c.inventory || [];
+    c.inventory.push({ category:"", name:"", qty:"1", notes:"" });
+    await saveChar(c);
+    await refreshAll?.();
+    return;
+  }
+
+  // Step 1: choose category
+  const step1 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Next",
+    fields: [
+      { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
+    ]
+  });
+  if (!step1) return;
+
+  const items = groups ? (groups[step1.category] || []) : [];
+  const itemOptions = items.length ? items.map(n=>({ value:n, label:n })) : [{ value:"", label:"(type item name)" }];
+
+  // Step 2: choose item + qty
+  const step2 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Add",
+    fields: [
+      ...(items.length
+        ? [{ key:"name", label:"Item", type:"select", options: itemOptions }]
+        : [{ key:"name", label:"Item", placeholder:"Item name" }]),
+      { key:"qty", label:"Qty", placeholder:"1" },
+      { key:"notes", label:"Notes", placeholder:"Optional" }
+    ]
+  });
+  if (!step2) return;
+
+  c.inventory = c.inventory || [];
+  c.inventory.push({
+    category: step1.category || "",
+    name: step2.name || "",
+    qty: step2.qty || "1",
+    notes: step2.notes || ""
+  });
+
+  await saveChar(c);
+  await refreshAll?.();
+  toast("Inventory item added");
+}
 function getChar(){
   const st=window.__STATE||{};
   return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
@@ -725,11 +792,69 @@ try{ vwWireSheetAutosave(); }catch(e){}
 document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
   const c = (typeof getChar==="function") ? getChar() : null;
   if(!c){ toast("Create character first"); return; }
+
+  const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+  const groups =
+    cat?.inventoryItemsByCategory ||
+    cat?.inventory_items_by_category ||
+    cat?.inventoryByCategory ||
+    null;
+
+  const categories = groups ? Object.keys(groups) : [];
+  const safeCats = categories.length ? categories : ["General"];
+
+  if(typeof vwModalForm !== "function"){
+    // fallback: old behavior
+    c.inventory ||= [];
+    c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
+    else toast(res.error||"Failed");
+    return;
+  }
+
+  // Step 1: choose category
+  const step1 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Next",
+    fields: [
+      { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
+    ]
+  });
+  if(!step1) return;
+
+  const items = groups ? (groups[step1.category] || []) : [];
+  const hasItems = Array.isArray(items) && items.length;
+
+  // Step 2: choose item (dropdown when possible) + details
+  const step2 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Add",
+    fields: [
+      ...(hasItems
+        ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
+        : [{ key:"name", label:"Item", placeholder:"Item name" }]),
+      { key:"qty", label:"Qty", placeholder:"1" },
+      { key:"weight", label:"Weight", placeholder:"" },
+      { key:"cost", label:"Cost ($)", placeholder:"" },
+      { key:"notes", label:"Notes", placeholder:"Optional" }
+    ]
+  });
+  if(!step2) return;
+
   c.inventory ||= [];
-  c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+  c.inventory.push({
+    category: step1.category || "",
+    name: step2.name || "",
+    weight: step2.weight || "",
+    qty: step2.qty || "1",
+    cost: step2.cost || "",
+    notes: step2.notes || ""
+  });
+
   const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
-  else toast(res.error||"Failed");
+  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
+  else toast(res?.error || "Failed");
 });
 
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
@@ -856,4 +981,33 @@ document.getElementById("addSpellBtn")?.addEventListener("click", async ()=>{
   }else{
     toast((res && res.error) ? res.error : "Failed to create character");
   }
+});
+
+bInv.__vwBound = true;
+  }
+  if (bAb && !bAb.__vwBound) {
+    bAb.addEventListener("click", (e)=>{ e.preventDefault(); vwAddAbility?.(); });
+    bAb.__vwBound = true;
+  }
+  if (bSp && !bSp.__vwBound) {
+    bSp.addEventListener("click", (e)=>{ e.preventDefault(); vwAddSpell?.(); });
+    bSp.__vwBound = true;
+  }
+  if (bWeap && !bWeap.__vwBound) {
+    bWeap.addEventListener("click", (e)=>{ e.preventDefault(); vwAddWeaponFromCatalog?.(); });
+    bWeap.__vwBound = true;
+  }
+  if (bInvCat && !bInvCat.__vwBound) {
+    bInvCat.addEventListener("click", (e)=>{ e.preventDefault(); vwAddInventoryFromCatalog?.(); });
+    bInvCat.__vwBound = true;
+  }
+  if (bNew && !bNew.__vwBound) {
+    bNew.addEventListener("click", (e)=>{ e.preventDefault(); vwNewCharacterWizard?.(); });
+    bNew.__vwBound = true;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Bind once after DOM is ready; tab switches can recreate content, so we re-run on render too.
+  vwBindCharacterButtons_v2();
 });
