@@ -503,6 +503,7 @@ function renderCharacter(){
     };
     invBody.appendChild(tr);
   });
+}
 
 const CONDITIONS = ["bleeding","blinded","charmed","deafened","frightened","grappled","incapacitated","invisible","paralyzed","poisoned","prone","restrained","stunned","unconscious","exhaustion"];
 
@@ -774,10 +775,6 @@ bDel && (bDel.onclick = async ()=>{
   });
 }
 window.renderIntelDM = renderIntelDM;
-
-
-
-}
 
 document.getElementById("addInvBtn").onclick=async ()=>{
   const c=getChar(); if(!c){ toast("Create character first"); return; }
