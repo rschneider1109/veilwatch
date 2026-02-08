@@ -93,43 +93,58 @@
 
   <section id="tab-character" class="hidden">
     <div class="panel">
-      <div class="row" style="gap:10px;flex-wrap:wrap;">
-        <select id="charSel" style="min-width:240px;flex:1;"></select>
+      <div class="row">
+        <select id="charSel"></select>
         <button class="btn smallbtn" id="newCharBtn">New Character</button>
         <button class="btn smallbtn hidden" id="importPlayerBtn">Import Player</button>
       </div>
       <hr/>
-      <div class="row" style="gap:10px;flex-wrap:wrap;">
-        <button class="btn active" data-ctab="overview">Overview</button>
-        <button class="btn" data-ctab="inventory">Inventory</button>
-        <button class="btn" data-ctab="actions">Actions</button>
-        <button class="btn" data-ctab="conditions">Conditions</button>
-        <button class="btn" data-ctab="notes">Notes</button>
+      <div class="row">
+<div class="row">
+  <button class="btn active" data-ctab="actions">Actions</button>
+  <button class="btn" data-ctab="inventory">Inventory</button>
+  <button class="btn" data-ctab="abilities">Abilities</button>
+  <button class="btn" data-ctab="spells">Spells</button>
+  <button class="btn" data-ctab="sheet">Sheet</button>
+</div>
+
+      <div id="ctab-actions" style="margin-top:12px;">
+        <table>
+          <thead><tr><th>WEAPON</th><th>RANGE</th><th>HIT/DC</th><th>DAMAGE</th><th></th></tr></thead>
+          <tbody id="weapBody"></tbody>
+        </table>
+        <button class="btn smallbtn" id="addWeaponBtn" style="margin-top:10px;">Add Weapon</button>
+        <div class="mini" style="margin-top:8px;">Weapons live here. Ammo lines under weapons track starting/current. Purchases go to Inventory.</div>
       </div>
 
-      <!-- OVERVIEW -->
-      <div id="ctab-overview" style="margin-top:12px;">
-        <div class="card" style="margin-bottom:12px;">
-          <div class="row" style="gap:10px;flex-wrap:wrap;">
-            <div style="min-width:180px;flex:1;">
-              <div class="mini" style="margin-bottom:6px;">Class</div>
-              <input class="input readonly" id="profClass" placeholder="—" disabled />
-            </div>
-            <div style="min-width:220px;flex:1;">
-              <div class="mini" style="margin-bottom:6px;">Subclass</div>
-              <input class="input readonly" id="profSubclass" placeholder="—" disabled />
-            </div>
-            <div style="min-width:220px;flex:2;">
-              <div class="mini" style="margin-bottom:6px;">Background</div>
-              <input class="input readonly" id="profBackground" placeholder="—" disabled />
-            </div>
-            <div style="min-width:220px;flex:1;">
-              <div class="mini" style="margin-bottom:6px;">Starter Pack</div>
-              <input class="input readonly" id="profKit" placeholder="—" disabled />
-            </div>
-          </div>
+      <div id="ctab-inventory" class="hidden" style="margin-top:12px;">
+        <table>
+          <thead><tr><th>CATEGORY</th><th>EQUIPMENT NAME</th><th>WEIGHT</th><th>QTY</th><th>COST ($)</th><th>NOTES</th><th></th></tr></thead>
+          <tbody id="invBody"></tbody>
+        </table>
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="addInvBtn">Add Inventory Item</button>
+          <button class="btn smallbtn" id="addInvFromCatalogBtn">Add From Catalog</button>
         </div>
+      
+<div id="ctab-abilities" class="hidden" style="margin-top:12px;">
+  <table>
+    <thead><tr><th>ABILITY</th><th>TYPE</th><th>HIT/DC</th><th>EFFECT</th><th>COOLDOWN</th><th></th></tr></thead>
+    <tbody id="abilityBody"></tbody>
+  </table>
+  <button class="btn smallbtn" id="addAbilityBtn" style="margin-top:10px;">Add Ability</button>
+</div>
 
+<div id="ctab-spells" class="hidden" style="margin-top:12px;">
+  <table>
+    <thead><tr><th>SPELL</th><th>TIER</th><th>CAST</th><th>CONC</th><th>SUMMARY</th><th></th></tr></thead>
+    <tbody id="spellBody"></tbody>
+  </table>
+  <button class="btn smallbtn" id="addSpellBtn" style="margin-top:10px;">Add Spell</button>
+</div>
+</div>
+
+      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
         <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
           <div style="min-width:160px;">
             <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
@@ -148,97 +163,59 @@
             <div class="mini" style="margin-bottom:6px;">Initiative</div>
             <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
           </div>
-          <div style="min-width:110px;">
+          <div style="min-width:140px;">
             <div class="mini" style="margin-bottom:6px;">Speed</div>
-            <input class="input" id="spdVal" placeholder="30" style="width:90px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Cash</div>
-            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Bank</div>
-            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
+            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
           </div>
           <div style="min-width:160px;">
-            <div class="mini" style="margin-bottom:6px;">Save</div>
-            <div class="row" style="gap:10px;">
-              <button class="btn smallbtn" id="saveSheetBtn">Save Now</button>
-              <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate</button>
-              <button class="btn smallbtn hidden" id="delCharBtn">Delete</button>
-            </div>
+            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
+            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
           </div>
         </div>
 
-        <div class="grid cards" style="grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px;">
-          <div class="card" style="grid-column:span 12;">
-            <h3 style="margin:0 0 8px 0;">Attributes <span class="mini" style="opacity:.8;">(set at creation)</span></h3>
-            <div class="row" style="gap:10px;flex-wrap:wrap;">
-              <div><div class="mini">STR</div><input class="input readonly" id="statSTR" disabled style="width:90px;"/></div>
-              <div><div class="mini">DEX</div><input class="input readonly" id="statDEX" disabled style="width:90px;"/></div>
-              <div><div class="mini">CON</div><input class="input readonly" id="statCON" disabled style="width:90px;"/></div>
-              <div><div class="mini">INT</div><input class="input readonly" id="statINT" disabled style="width:90px;"/></div>
-              <div><div class="mini">WIS</div><input class="input readonly" id="statWIS" disabled style="width:90px;"/></div>
-              <div><div class="mini">CHA</div><input class="input readonly" id="statCHA" disabled style="width:90px;"/></div>
-            </div>
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Stats</div>
+          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
+        </div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
+          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
+          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
+          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
+          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
+          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Conditions</div>
+          <div class="mini">Toggle active conditions.</div>
+        </div>
+        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
+            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
           </div>
         </div>
-      </div>
 
-      <!-- INVENTORY -->
-      <div id="ctab-inventory" class="hidden" style="margin-top:12px;">
-        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
-          <button class="btn smallbtn" id="addInvBtn">Add Inventory Item</button>
-          <button class="btn smallbtn" id="addInvFromCatalogBtn">Add From Catalog</button>
-          <div class="mini" style="color:var(--muted);">Ammo purchases live in Inventory (Category: Ammo).</div>
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
+          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
+          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
         </div>
-        <table>
-          <thead><tr><th>CATEGORY</th><th>EQUIPMENT NAME</th><th>WEIGHT</th><th>QTY</th><th>COST ($)</th><th>NOTES</th><th></th></tr></thead>
-          <tbody id="invBody"></tbody>
-        </table>
-      </div>
 
-      <!-- ACTIONS -->
-      <div id="ctab-actions" class="hidden" style="margin-top:12px;">
-        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
-          <button class="btn smallbtn" id="addWeaponBtn">Add Weapon</button>
-          <button class="btn smallbtn" id="addAbilityBtn">Add Ability</button>
-          <button class="btn smallbtn" id="addSpellBtn">Add Spell</button>
-        </div>
-        <h3 style="margin:0 0 8px 0;">Weapons</h3>
-        <table>
-          <thead><tr><th>WEAPON</th><th>RANGE</th><th>HIT/DC</th><th>DAMAGE</th><th></th></tr></thead>
-          <tbody id="weapBody"></tbody>
-        </table>
-        <div class="mini" style="margin-top:8px;">Ammo lines under weapons track starting/current. Purchases go to Inventory.</div>
-
-        <h3 style="margin:14px 0 8px 0;">Abilities</h3>
-        <table>
-          <thead><tr><th>ABILITY</th><th>TYPE</th><th>HIT/DC</th><th>EFFECT</th><th></th></tr></thead>
-          <tbody id="abilBody"></tbody>
-        </table>
-
-        <h3 style="margin:14px 0 8px 0;">Spells</h3>
-        <table>
-          <thead><tr><th>SPELL</th><th>LVL</th><th>CAST</th><th>EFFECT</th><th></th></tr></thead>
-          <tbody id="spellBody"></tbody>
-        </table>
-      </div>
-
-      <!-- CONDITIONS -->
-      <div id="ctab-conditions" class="hidden" style="margin-top:12px;">
-        <div class="mini" style="margin-bottom:8px;">Toggle active conditions (auto-saves).</div>
-        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;"></div>
-      </div>
-
-      <!-- NOTES -->
-      <div id="ctab-notes" class="hidden" style="margin-top:12px;">
-        <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
-        <textarea class="input" id="notesBio" placeholder="Bio, hooks, session notes…" style="min-height:160px;"></textarea>
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Delete/Duplicate are DM-only.</div>
       </div>
     </div>
   </section>
-
 
   <section id="tab-intel" class="hidden">
     <div class="panel">
@@ -378,9 +355,10 @@
   </div>
 </div>
 
-<script src="/js/veilwatch_catalog.js" defer></script>
 <script src="/js/core.js" defer></script>
 <script src="/js/state.js" defer></script>
+<script src="/js/veilwatch_catalog_v2.js" defer></script>
+<script src="/js/veilwatch_catalog_helpers_v1.js" defer></script>
 <script src="/js/stream.js" defer></script>
 <script src="/js/characters.js" defer></script>
 <script src="/js/shop.js" defer></script>
