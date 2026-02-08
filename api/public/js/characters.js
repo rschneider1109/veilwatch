@@ -45,7 +45,7 @@ function vwItemsToInventory(items){
 
 async function vwNewCharacterWizard(){
   const cat = vwGetCatalog();
-  if(!cat){ toast("Catalog not loaded. Check /js/veilwatch_catalog_v1.js"); return null; }
+  if(!cat){ toast("Catalog not loaded. Check /js/veilwatch_catalog.js"); return null; }
 
   // Step 1: Identity + Class
   const step1 = await vwModalForm({
@@ -397,7 +397,9 @@ function renderSheet(){
   const elB = document.getElementById("profBackground"); if(elB) elB.value = prof.background || "—";
   const elK = document.getElementById("profKit"); if(elK) elK.value = prof.kit || "—";
 
-  // lock stats on the sheet (set at creation)    const el=document.getElementById(id);
+  // lock stats on the sheet (set at creation)
+  ["statSTR","statDEX","statCON","statINT","statWIS","statCHA"].forEach((id)=>{
+    const el = document.getElementById(id);
     if(el){ el.disabled = true; el.classList.add("readonly"); }
   });
 
@@ -437,368 +439,81 @@ document.getElementById("saveSheetBtn").onclick = async ()=>{
   await refreshAll();
 };
 
-document.getElementById("dupCharBtn").onclick = async ()=>{
+
+// --- Duplicate Character (DM) ---
+document.getElementById("dupCharBtn")?.addEventListener("click", async ()=>{
   if(SESSION.role!=="dm") return;
-  const c=getChar(); if(!c) return;
-  const name = await vwModalInput({ title:"Duplicate Character", label:"New name", value: c.name + " (Copy)" });
+  const c = (typeof getChar==="function") ? getChar() : null;
+  if(!c){ toast("No character selected"); return; }
+  const name = await vwModalInput({ title:"Duplicate Character", label:"New name", value: (c.name||"Character") + " (Copy)" });
   if(!name) return;
-  const res = await api("/api/character/duplicate",{method:"POST",body:JSON.stringify({charId:c.id, name})});
-  if(res.ok){ SESSION.activeCharId=res.id; toast("Duplicated"); await refreshAll(); }
-  else toast(res.error||"Failed");
-};
+  const res = await api("/api/character/duplicate", { method:"POST", body: JSON.stringify({ charId: c.id, name }) });
+  if(res && res.ok){
+    SESSION.activeCharId = res.id;
+    toast("Character duplicated");
+    await refreshAll();
+  }else{
+    toast((res && res.error) ? res.error : "Failed to duplicate");
+  }
+});
 
-document.getElementById("delCharBtn").onclick = async ()=>{
-  if(SESSION.role!=="dm") return;
-  const c=getChar(); if(!c) return;
-  const ok = await vwModalConfirm({ title:"Delete Character", message:'Delete "' + c.name + '"? This cannot be undone.' });
-  if(!ok) return;
-  const res = await api("/api/character/delete",{method:"POST",body:JSON.stringify({charId:c.id})});
-  if(res.ok){ SESSION.activeCharId=null; toast("Deleted"); await refreshAll(); }
-  else toast(res.error||"Failed");
-};
-
-
-
-// --- DM Active Party (Home screen) ---
+// Minimal DM Active Party renderer (no tap-to-edit yet).
 function renderDMActiveParty(){
-  const panel=document.getElementById("dmActivePartyPanel");
-  if(!panel) return;
-
-  panel.classList.toggle("hidden", SESSION.role!=="dm");
-  if(SESSION.role!=="dm") return;
-
-  const st = window.__STATE || {};
-  const chars = Array.isArray(st.characters) ? st.characters : [];
-  const active = Array.isArray(st.activeParty) ? st.activeParty : [];
-
-  // Populate add dropdown
-  const addSel = document.getElementById("dmActiveAddSel");
-  if(addSel){
-    const opts = ['<option value="">Select character…</option>']
-      .concat(chars.map(c=>'<option value="'+String(c.id).replace(/"/g,'&quot;')+'">'+esc(c.name)+'</option>'));
-    addSel.innerHTML = opts.join("");
-  }
-
-  const cardsHost = document.getElementById("dmActivePartyCards");
-  if(!cardsHost) return;
-
-  if(active.length===0){
-    cardsHost.innerHTML = '<div class="card" style="grid-column:span 12;"><div class="mini">No active characters yet.</div></div>';
-    return;
-  }
-
-  cardsHost.innerHTML = "";
-  active.forEach(entry=>{
-    const c = chars.find(x=>x.id===entry.charId);
-    if(!c) return;
-
-    const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
-    const s = (c.sheet && c.sheet.stats) ? c.sheet.stats : {};
-    const hp = (v.hpCur||"") + "/" + (v.hpMax||"");
-    const ac = (v.ac||"");
-    const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : "";
-
-        const card = document.createElement("div");
-    card.className = "card";
-    card.style.gridColumn = "span 4";
-
-    // ---- Tap-to-edit helpers (DM only) ----
-    function pillEditNumber(pill, opts){
-      opts ||= {};
-      const label = opts.label || "";
-      const value = (opts.value===0 || opts.value) ? String(opts.value) : "";
-      const placeholder = opts.placeholder || "--";
-      const minW = opts.minWidth || 56;
-
-      if(pill.dataset.editing==="1") return;
-      pill.dataset.editing="1";
-
-      const original = pill.innerHTML;
-      const input = document.createElement("input");
-      input.className = "input";
-      input.value = value;
-      input.placeholder = placeholder;
-      input.style.width = minW + "px";
-      input.style.padding = "6px 8px";
-      input.style.borderRadius = "10px";
-
-      pill.innerHTML = "";
-      if(label){
-        const sp = document.createElement("span");
-        sp.className = "mini";
-        sp.style.opacity = "0.9";
-        sp.textContent = label + " ";
-        pill.appendChild(sp);
-      }
-      pill.appendChild(input);
-
-      function cancel(){
-        pill.dataset.editing="0";
-        pill.innerHTML = original;
-      }
-
-      input.addEventListener("keydown",(e)=>{
-        if(e.key==="Enter"){ e.preventDefault(); input.blur(); }
-        if(e.key==="Escape"){ e.preventDefault(); cancel(); }
-      });
-
-      input.addEventListener("blur", async ()=>{
-        const newVal = input.value;
-        pill.dataset.editing="0";
-        try{
-          if(typeof opts.onSave === "function"){
-            const ok = await opts.onSave(newVal);
-            if(!ok) return cancel();
-          }
-        }catch(_){
-          return cancel();
-        }
-      });
-
-      setTimeout(()=>input.focus(), 0);
-      input.select();
-    }
-
-    function pillEditHP(pill, opts){
-      opts ||= {};
-      const cur = String(opts.cur ?? "");
-      const max = String(opts.max ?? "");
-      if(pill.dataset.editing==="1") return;
-      pill.dataset.editing="1";
-      const original = pill.innerHTML;
-
-      const inCur = document.createElement("input");
-      inCur.className="input";
-      inCur.value = cur;
-      inCur.placeholder="cur";
-      inCur.style.width="56px";
-      inCur.style.padding="6px 8px";
-      inCur.style.borderRadius="10px";
-
-      const inMax = document.createElement("input");
-      inMax.className="input";
-      inMax.value = max;
-      inMax.placeholder="max";
-      inMax.style.width="56px";
-      inMax.style.padding="6px 8px";
-      inMax.style.borderRadius="10px";
-
-      const slash = document.createElement("span");
-      slash.className="mini";
-      slash.style.opacity="0.9";
-      slash.textContent=" / ";
-
-      pill.innerHTML="";
-      const sp = document.createElement("span");
-      sp.className="mini";
-      sp.style.opacity="0.9";
-      sp.textContent="HP ";
-      pill.appendChild(sp);
-      pill.appendChild(inCur);
-      pill.appendChild(slash);
-      pill.appendChild(inMax);
-
-      let t = null;
-      async function commit(){
-        clearTimeout(t);
-        const vCur = inCur.value;
-        const vMax = inMax.value;
-        try{
-          if(typeof opts.onSave === "function"){
-            const ok = await opts.onSave(vCur, vMax);
-            if(!ok){
-              pill.dataset.editing="0";
-              pill.innerHTML = original;
-            }
-          }
-        }catch(_){
-          pill.dataset.editing="0";
-          pill.innerHTML = original;
-        }
-      }
-
-      function scheduleCommit(){
-        clearTimeout(t);
-        t = setTimeout(()=>commit(), 300);
-      }
-
-      function cancel(){
-        clearTimeout(t);
-        pill.dataset.editing="0";
-        pill.innerHTML = original;
-      }
-
-      [inCur,inMax].forEach(inp=>{
-        inp.addEventListener("input", scheduleCommit);
-        inp.addEventListener("keydown",(e)=>{
-          if(e.key==="Enter"){ e.preventDefault(); inp.blur(); commit(); }
-          if(e.key==="Escape"){ e.preventDefault(); cancel(); }
-        });
-        inp.addEventListener("blur", scheduleCommit);
-      });
-
-      setTimeout(()=>inCur.focus(), 0);
-      inCur.select();
-    }
-
-    function upsertCharInState(updatedChar){
-      const st = window.__STATE || {};
-      st.characters ||= [];
-      const idx = st.characters.findIndex(x=>x.id===updatedChar.id);
-      if(idx>=0) st.characters[idx] = updatedChar;
-      else st.characters.push(updatedChar);
-      window.__STATE = st;
-    }
-
-    async function patchCharSheet(patch){
-      const res = await api("/api/character/patch", { method:"POST", body: JSON.stringify({ charId: c.id, patch }) });
-      if(res && res.ok && res.character){
-        upsertCharInState(res.character);
-        // refresh local views if this is also the selected character
-        try{
-          if(SESSION.activeCharId === c.id){
-            if(typeof renderCharacter==="function") renderCharacter();
-            if(typeof renderSheet==="function") renderSheet();
-          }
-        }catch(_){}
-        // re-render the active party cards so everything stays consistent
-        try{ renderDMActiveParty(); }catch(_){}
-        return true;
-      }
-      toast((res && res.error) ? res.error : "Save failed");
-      return false;
-    }
-
-    card.innerHTML = `
-      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;">
-        <div>
-          <div style="font-weight:700;">${esc(c.name)}</div>
-          <div class="mini">${esc(entry.playerLabel||"")}</div>
+  try{
+    if(SESSION.role!=="dm") return;
+    const host = document.getElementById("dmActivePartyCards");
+    if(!host) return;
+    const st = window.__STATE || {};
+    const active = Array.isArray(st.activeParty) ? st.activeParty : [];
+    const chars = Array.isArray(st.characters) ? st.characters : [];
+    host.innerHTML = "";
+    for(const entry of active){
+      const c = chars.find(x=>x.id===entry.charId);
+      if(!c) continue;
+      const card = document.createElement("div");
+      card.className = "card";
+      const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
+      const s = (c.sheet && c.sheet.stats) ? c.sheet.stats : {};
+      card.innerHTML = `
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <div style="font-weight:700;">${esc(c.name)}</div>
+            <div class="mini">${esc(entry.playerLabel||"")}</div>
+          </div>
+          <button class="btn smallbtn" data-act="open">Open Sheet</button>
         </div>
-        <button class="btn smallbtn" data-act="open">Open Sheet</button>
-      </div>
-      <hr/>
-      <div class="row" style="gap:10px;flex-wrap:wrap;">
-        <div class="pill vwTapEdit" data-k="hp">HP: ${esc(hp)}</div>
-        <div class="pill vwTapEdit" data-k="ac">AC: ${esc(ac||"--")}</div>
-        <div class="pill vwTapEdit" data-k="init">Init: ${esc(String(init||"--"))}</div>
-      </div>
-      <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px;">
-        <div class="pill vwTapEdit" data-k="STR">STR ${esc(s.STR||"--")}</div>
-        <div class="pill vwTapEdit" data-k="DEX">DEX ${esc(s.DEX||"--")}</div>
-        <div class="pill vwTapEdit" data-k="CON">CON ${esc(s.CON||"--")}</div>
-        <div class="pill vwTapEdit" data-k="INT">INT ${esc(s.INT||"--")}</div>
-        <div class="pill vwTapEdit" data-k="WIS">WIS ${esc(s.WIS||"--")}</div>
-        <div class="pill vwTapEdit" data-k="CHA">CHA ${esc(s.CHA||"--")}</div>
-      </div>
-      <div class="row" style="margin-top:10px;justify-content:space-between;">
-        <button class="btn smallbtn" data-act="remove">Remove</button>
-      </div>
-    `;
-
-    const btnOpen = card.querySelector('button[data-act="open"]');
-    btnOpen.onclick = async ()=>{
-      SESSION.activeCharId = c.id;
-      renderTabs("character");
-      // Switch character sub-tab to sheet
-      document.querySelectorAll('[data-ctab]').forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
-      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
-      await refreshAll();
-    };
-
-    // Tap-to-edit wiring
-    card.querySelectorAll(".vwTapEdit").forEach(pill=>{
-      pill.addEventListener("click",(e)=>{
-        e.preventDefault(); e.stopPropagation();
-
-        const k = pill.dataset.k;
-
-        if(k === "hp"){
-          const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
-          pillEditHP(pill, {
-            cur: v.hpCur ?? "",
-            max: v.hpMax ?? "",
-            onSave: async (hpCur, hpMax)=>{
-              c.sheet ||= {}; c.sheet.vitals ||= {};
-              c.sheet.vitals.hpCur = hpCur;
-              c.sheet.vitals.hpMax = hpMax;
-              return await patchCharSheet({ sheet: { vitals: { hpCur, hpMax } } });
-            }
-          });
-          return;
-        }
-
-        if(k === "ac"){
-          const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
-          pillEditNumber(pill, {
-            label: "AC",
-            value: v.ac ?? "",
-            minWidth: 56,
-            onSave: async (ac)=>{
-              c.sheet ||= {}; c.sheet.vitals ||= {};
-              c.sheet.vitals.ac = ac;
-              return await patchCharSheet({ sheet: { vitals: { ac } } });
-            }
-          });
-          return;
-        }
-
-        if(k === "init"){
-          pillEditNumber(pill, {
-            label: "Init",
-            value: (entry.initiative===0 || entry.initiative) ? entry.initiative : "",
-            minWidth: 72,
-            onSave: async (initiative)=>{
-              const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative })});
-              if(res && res.ok){
-                // update local state
-                const st = window.__STATE || {};
-                st.activeParty ||= [];
-                const ix = st.activeParty.findIndex(x=>x.charId===c.id);
-                if(ix>=0) st.activeParty[ix].initiative = initiative;
-                window.__STATE = st;
-                try{ renderDMActiveParty(); }catch(_){}
-                return true;
-              }
-              toast((res && res.error) ? res.error : "Failed");
-              return false;
-            }
-          });
-          return;
-        }
-
-        // Abilities
-        if(["STR","DEX","CON","INT","WIS","CHA"].includes(k)){
-          const curVal = (c.sheet && c.sheet.stats) ? (c.sheet.stats[k] ?? "") : "";
-          pillEditNumber(pill, {
-            label: k,
-            value: curVal,
-            minWidth: 56,
-            onSave: async (val)=>{
-              c.sheet ||= {}; c.sheet.stats ||= {};
-              c.sheet.stats[k] = val;
-              const patch = { sheet: { stats: { [k]: val } } };
-              return await patchCharSheet(patch);
-            }
-          });
-          return;
-        }
+        <hr/>
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">HP: ${esc(v.hpCur??"--")}/${esc(v.hpMax??"--")}</div>
+          <div class="pill">AC: ${esc(v.ac??"--")}</div>
+          <div class="pill">Init: ${esc((entry.initiative===0||entry.initiative)?String(entry.initiative):"--")}</div>
+        </div>
+        <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px;">
+          <div class="pill">STR ${esc(s.STR||"--")}</div>
+          <div class="pill">DEX ${esc(s.DEX||"--")}</div>
+          <div class="pill">CON ${esc(s.CON||"--")}</div>
+          <div class="pill">INT ${esc(s.INT||"--")}</div>
+          <div class="pill">WIS ${esc(s.WIS||"--")}</div>
+          <div class="pill">CHA ${esc(s.CHA||"--")}</div>
+        </div>
+        <div class="row" style="margin-top:10px;justify-content:space-between;">
+          <button class="btn smallbtn" data-act="remove">Remove</button>
+        </div>
+      `;
+      card.querySelector('button[data-act="open"]')?.addEventListener("click", async ()=>{
+        SESSION.activeCharId = c.id;
+        try{ renderTabs("character"); }catch(_){ }
+        await refreshAll();
       });
-    });
-
-    const btnRemove = card.querySelector('button[data-act="remove"]');
-    btnRemove.onclick = async ()=>{
-      const res = await api("/api/dm/activeParty/remove", { method:"POST", body: JSON.stringify({ charId: c.id })});
-      if(res.ok) await refreshAll();
-      else toast(res.error||"Failed");
-    };
-
-    cardsHost.appendChild(card);
-  });
+      card.querySelector('button[data-act="remove"]')?.addEventListener("click", async ()=>{
+        const res = await api("/api/dm/activeParty/remove", { method:"POST", body: JSON.stringify({ charId: c.id })});
+        if(res && res.ok) await refreshAll();
+        else toast((res && res.error) ? res.error : "Failed");
+      });
+      host.appendChild(card);
+    }
+  }catch(_){ }
 }
-
 
 (async function wireDmActivePartyButtons(){
   try{
@@ -836,6 +551,8 @@ function renderDMActiveParty(){
 })();
 
 // --- Import Player (DM) ---
+
+// --- Import Player (DM) ---
 (async function wireImportPlayer(){
   try{
     const btn = document.getElementById("importPlayerBtn");
@@ -858,7 +575,7 @@ function renderDMActiveParty(){
       }
 
       const created = await api("/api/character/new",{method:"POST",body:JSON.stringify({name, ownerUserId})});
-      if(!created.ok){ toast(created.error||"Failed"); return; }
+      if(!created || !created.ok){ toast((created && created.error) ? created.error : "Failed"); return; }
 
       const add = await vwModalConfirm({ title:"Add to Active?", message:"Add this character to the Active list?" });
       if(add){
@@ -872,21 +589,7 @@ function renderDMActiveParty(){
   }catch(e){}
 })();
 
-// Wire autosave inputs once the DOM exists.
-try{ vwWireSheetAutosave(); }catch(e){}
-
-
-// ---- Buttons: add inventory row + new character (kept here so intel.js stays intel-only) ----
-document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
-  c.inventory ||= [];
-  c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
-  else toast(res.error||"Failed");
-});
-
+// --- New Character Wizard ---
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
   const id = await vwNewCharacterWizard();
   if(!id) return;
@@ -894,19 +597,6 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
   toast("Character created");
   await refreshAll();
 });
-if(!name) return;
-
-  // DM can optionally create unassigned characters via Import workflow; this button creates under the current user by default.
-  const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
-  if(res && res.ok){
-    SESSION.activeCharId = res.id;
-    toast("Character created");
-    await refreshAll();
-  }else{
-    toast((res && res.error) ? res.error : "Failed to create character");
-  }
-});
-
 
 // --- Add buttons (catalog assisted) ---
 document.getElementById("addWeaponBtn")?.addEventListener("click", async ()=>{
