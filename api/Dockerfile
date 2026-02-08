@@ -6,7 +6,10 @@ COPY package.json ./
 RUN npm install --omit=dev
 
 # App code
-COPY app.js ./app.js
+WORKDIR /app
+COPY api/app.js ./
+COPY api/public ./public
+CMD ["node","app.js"]
 
 ENV PORT=8080
 EXPOSE 8080
