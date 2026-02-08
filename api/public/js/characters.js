@@ -1,3 +1,570 @@
+// ---- Character creation catalog (edit freely) ----
+const VW_CHAR_CATALOG = {
+  rulesets: [
+    { id:"veilwatch_ops", name:"Veilwatch Ops" },
+    { id:"dnd_core", name:"D&D Core" }
+  ],
+  classes: {
+    veilwatch_ops: [
+      { id:"operator", name:"Operator", subclasses:["Assault","Recon","Breacher"] },
+      { id:"medic", name:"Medic", subclasses:["Trauma Surgeon","Field Paramedic","Combat Doc"] },
+      { id:"tech", name:"Tech", subclasses:["Hacker","Engineer","Drone Wrangler"] },
+      { id:"face", name:"Face", subclasses:["Fixer","Con Artist","Diplomat"] },
+      { id:"mystic", name:"Mystic", subclasses:["Seer","Wardbinder","Void-Touched"] },
+      { id:"heavy", name:"Heavy", subclasses:["Gunner","Shield","Demolitions"] }
+    ],
+    dnd_core: [
+      { id:"barbarian", name:"Barbarian", subclasses:["Berserker","Totem","Zealot"] },
+      { id:"bard", name:"Bard", subclasses:["Lore","Valor","Glamour"] },
+      { id:"cleric", name:"Cleric", subclasses:["Life","War","Trickery"] },
+      { id:"druid", name:"Druid", subclasses:["Land","Moon","Spores"] },
+      { id:"fighter", name:"Fighter", subclasses:["Champion","Battle Master","Eldritch Knight"] },
+      { id:"monk", name:"Monk", subclasses:["Open Hand","Shadow","Kensei"] },
+      { id:"paladin", name:"Paladin", subclasses:["Devotion","Vengeance","Ancients"] },
+      { id:"ranger", name:"Ranger", subclasses:["Hunter","Beast Master","Gloom Stalker"] },
+      { id:"rogue", name:"Rogue", subclasses:["Thief","Assassin","Arcane Trickster"] },
+      { id:"sorcerer", name:"Sorcerer", subclasses:["Draconic","Wild","Shadow"] },
+      { id:"warlock", name:"Warlock", subclasses:["Fiend","Great Old One","Hexblade"] },
+      { id:"wizard", name:"Wizard", subclasses:["Evocation","Illusion","Necromancy"] }
+    ]
+  },
+  backgrounds: {
+    veilwatch_ops: [
+      "ECHO Operative","Street Runner","Corporate Defector","Underground Medic","Rift Researcher","Dockside Brawler","Data Courier","Ex-Cop","Fixer","Cult Escapee"
+    ],
+    dnd_core: [
+      "Acolyte","Charlatan","Criminal","Entertainer","Folk Hero","Guild Artisan","Hermit","Noble","Outlander","Sage","Soldier","Urchin"
+    ]
+  },
+  kits: {
+    veilwatch_ops: [
+      {
+        id:"field_ops",
+        name:"Field Ops Kit",
+        inventory:[
+          {category:"Kit", name:"Field pack", weight:"", qty:"1", cost:"", notes:"Basic gear, tape, rope, flashlight"},
+          {category:"Tools", name:"Multitool", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Consumable", name:"Ration bar", weight:"", qty:"6", cost:"", notes:""},
+          {category:"Consumable", name:"Water bottle", weight:"", qty:"2", cost:"", notes:""}
+        ]
+      },
+      {
+        id:"med_kit",
+        name:"Medic Kit",
+        inventory:[
+          {category:"Kit", name:"Med kit", weight:"", qty:"1", cost:"", notes:"Bandages, disinfectant, wraps"},
+          {category:"Consumable", name:"Painkiller tabs", weight:"", qty:"10", cost:"", notes:""},
+          {category:"Tool", name:"Trauma shears", weight:"", qty:"1", cost:"", notes:""}
+        ]
+      },
+      {
+        id:"hacker_kit",
+        name:"Hacker Kit",
+        inventory:[
+          {category:"Kit", name:"Hacker rig", weight:"", qty:"1", cost:"", notes:"Tablet, cables, adapters"},
+          {category:"Tool", name:"Lock bypass set", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Consumable", name:"Spare batteries", weight:"", qty:"6", cost:"", notes:""}
+        ]
+      }
+    ],
+    dnd_core: [
+      {
+        id:"adventurers_pack",
+        name:"Adventurer's Pack",
+        inventory:[
+          {category:"Gear", name:"Backpack", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Bedroll", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Rations", weight:"", qty:"10", cost:"", notes:""},
+          {category:"Gear", name:"Waterskin", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Tools", name:"Tinderbox", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Torch", weight:"", qty:"10", cost:"", notes:""},
+          {category:"Gear", name:"Rope (50 ft)", weight:"", qty:"1", cost:"", notes:""}
+        ]
+      },
+      {
+        id:"explorers_pack",
+        name:"Explorer's Pack",
+        inventory:[
+          {category:"Gear", name:"Backpack", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Bedroll", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Mess kit", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Rations", weight:"", qty:"10", cost:"", notes:""},
+          {category:"Gear", name:"Waterskin", weight:"", qty:"1", cost:"", notes:""},
+          {category:"Gear", name:"Rope (50 ft)", weight:"", qty:"1", cost:"", notes:""}
+        ]
+      }
+    ]
+  },
+  weapons: {
+    veilwatch_ops: [
+      { name:"Sidearm", range:"30 ft", hit:"+", damage:"1d6", ammo:{type:"9mm", starting:"45", current:"45", mags:"3"} },
+      { name:"SMG", range:"60 ft", hit:"+", damage:"1d8", ammo:{type:"9mm", starting:"90", current:"90", mags:"3"} },
+      { name:"Rifle", range:"150 ft", hit:"+", damage:"1d10", ammo:{type:"5.56", starting:"120", current:"120", mags:"4"} },
+      { name:"Shotgun", range:"30 ft", hit:"+", damage:"1d10", ammo:{type:"12ga", starting:"30", current:"30", mags:"—"} },
+      { name:"Combat Knife", range:"Melee", hit:"+", damage:"1d4", ammo:null },
+      { name:"Taser", range:"15 ft", hit:"+", damage:"Stun", ammo:{type:"cartridge", starting:"2", current:"2", mags:"—"} }
+    ],
+    dnd_core: [
+      { name:"Dagger", range:"20/60", hit:"+", damage:"1d4", ammo:null },
+      { name:"Shortsword", range:"Melee", hit:"+", damage:"1d6", ammo:null },
+      { name:"Longsword", range:"Melee", hit:"+", damage:"1d8", ammo:null },
+      { name:"Greatsword", range:"Melee", hit:"+", damage:"2d6", ammo:null },
+      { name:"Shortbow", range:"80/320", hit:"+", damage:"1d6", ammo:{type:"arrows", starting:"20", current:"20", mags:"—"} },
+      { name:"Longbow", range:"150/600", hit:"+", damage:"1d8", ammo:{type:"arrows", starting:"20", current:"20", mags:"—"} },
+      { name:"Light Crossbow", range:"80/320", hit:"+", damage:"1d8", ammo:{type:"bolts", starting:"20", current:"20", mags:"—"} },
+      { name:"Quarterstaff", range:"Melee", hit:"+", damage:"1d6", ammo:null }
+    ]
+  },
+  starterPowers: {
+    veilwatch_ops: {
+      operator:["Suppressive Fire","Breach & Clear","Adrenal Surge"],
+      medic:["Stabilize","Field Triage","Revive Protocol"],
+      tech:["Quick Hack","Overclock","Drone Ping"],
+      face:["Silver Tongue","Get a Contact","Distraction"],
+      mystic:["Sense Rift","Ward Sigil","Echo Whisper"],
+      heavy:["Covering Fire","Brace","Shock Charge"]
+    },
+    dnd_core: {
+      barbarian:["Rage"],
+      bard:["Bardic Inspiration"],
+      cleric:["Channel Divinity"],
+      druid:["Wild Shape"],
+      fighter:["Second Wind"],
+      monk:["Ki"],
+      paladin:["Divine Sense","Lay on Hands"],
+      ranger:["Favored Enemy"],
+      rogue:["Sneak Attack"],
+      sorcerer:["Sorcery Points"],
+      warlock:["Pact Magic"],
+      wizard:["Arcane Recovery"]
+    }
+  },
+  starterSpells: {
+    dnd_core: {
+      cleric:["Cure Wounds","Guiding Bolt","Bless","Sanctuary"],
+      druid:["Goodberry","Entangle","Healing Word","Faerie Fire"],
+      bard:["Healing Word","Dissonant Whispers","Charm Person","Faerie Fire"],
+      sorcerer:["Magic Missile","Shield","Chromatic Orb","Sleep"],
+      warlock:["Hex","Armor of Agathys","Eldritch Blast","Witch Bolt"],
+      wizard:["Magic Missile","Shield","Sleep","Detect Magic"]
+    },
+    veilwatch_ops: {
+      mystic:["Ward","Pulse","Blink Step","Null Field"]
+    }
+  }
+};
+
+function vwId(prefix){
+  prefix ||= "id";
+  return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+}
+
+function vwClampInt(x, minV, maxV){
+  const n = parseInt(String(x), 10);
+  if(Number.isNaN(n)) return minV;
+  return Math.max(minV, Math.min(maxV, n));
+}
+
+function vwGetRulesetClasses(rulesetId){
+  return (VW_CHAR_CATALOG.classes[rulesetId] || []).slice();
+}
+function vwGetBackgrounds(rulesetId){
+  return (VW_CHAR_CATALOG.backgrounds[rulesetId] || []).slice();
+}
+function vwGetKits(rulesetId){
+  return (VW_CHAR_CATALOG.kits[rulesetId] || []).slice();
+}
+function vwGetWeapons(rulesetId){
+  return (VW_CHAR_CATALOG.weapons[rulesetId] || []).slice();
+}
+
+async function vwNewCharacterWizard(){
+  const ui = vwModalBaseSetup("New Character", "Next", "Cancel");
+
+  const state = {
+    step: 0,
+    ruleset: (VW_CHAR_CATALOG.rulesets[0]?.id || "veilwatch_ops"),
+    name: "",
+    level: 1,
+    pronouns: "",
+    classId: "",
+    subclass: "",
+    background: "",
+    stats: { STR:10, DEX:10, CON:10, INT:10, WIS:10, CHA:10 },
+    vitals: { hpMax:10, hpCur:10, hpTemp:"", ac:10, init:"+0", speed:30 },
+    kitId: "",
+    weaponNames: [],
+    powers: [],
+    spells: [],
+    bio: ""
+  };
+
+  function close(val){
+    ui.modal.style.display = "none";
+    ui.btnOk.onclick = null;
+    ui.btnCan.onclick = null;
+    ui.modal.onclick = null;
+    resolvePromise(val);
+  }
+
+  let resolvePromise;
+  const p = new Promise((resolve)=>{ resolvePromise = resolve; });
+
+  function optionHTML(items, selected, placeholder){
+    const ph = placeholder ? '<option value="">'+esc(placeholder)+'</option>' : '';
+    return ph + items.map(it=>{
+      const val = typeof it === "string" ? it : it.id;
+      const label = typeof it === "string" ? it : it.name;
+      const sel = (String(val) === String(selected)) ? " selected" : "";
+      return '<option value="'+esc(val)+'"'+sel+'>'+esc(label)+'</option>';
+    }).join("");
+  }
+
+  function render(){
+    const rulesets = VW_CHAR_CATALOG.rulesets;
+    const classes = vwGetRulesetClasses(state.ruleset);
+    const backgrounds = vwGetBackgrounds(state.ruleset);
+    const kits = vwGetKits(state.ruleset);
+    const weapons = vwGetWeapons(state.ruleset);
+
+    const cls = classes.find(c=>c.id===state.classId) || classes[0] || null;
+    if(!state.classId && cls) state.classId = cls.id;
+    const subclasses = (cls && Array.isArray(cls.subclasses)) ? cls.subclasses : [];
+    if(!state.subclass && subclasses.length) state.subclass = subclasses[0];
+
+    const starterPowers = (VW_CHAR_CATALOG.starterPowers[state.ruleset]||{})[state.classId] || [];
+    const starterSpells = (VW_CHAR_CATALOG.starterSpells[state.ruleset]||{})[state.classId] || [];
+    const derivedPowers = starterPowers.slice();
+    const derivedSpells = starterSpells.slice();
+
+    ui.mBody.innerHTML = "";
+
+    // stepper
+    const stepper = document.createElement("div");
+    stepper.className = "mini";
+    stepper.style.opacity = ".9";
+    stepper.style.marginBottom = "10px";
+    stepper.innerHTML = 'Step <b>'+(state.step+1)+'</b> of <b>5</b>';
+    ui.mBody.appendChild(stepper);
+
+    // body
+    const wrap = document.createElement("div");
+    wrap.style.display = "grid";
+    wrap.style.gap = "10px";
+    ui.mBody.appendChild(wrap);
+
+    if(state.step === 0){
+      ui.btnOk.textContent = "Next";
+      wrap.innerHTML =
+        '<div class="row" style="gap:10px;flex-wrap:wrap;">' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Ruleset</div>' +
+            '<select id="nc_ruleset" style="width:100%;">'+ optionHTML(rulesets, state.ruleset) +'</select>' +
+          '</div>' +
+          '<div style="width:120px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Level</div>' +
+            '<input id="nc_level" class="input" value="'+esc(state.level)+'" style="width:100%;"/>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Character name</div>' +
+          '<input id="nc_name" class="input" placeholder="e.g. Mara Kincaid" value="'+esc(state.name)+'" style="width:100%;"/>' +
+        '</div>' +
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Pronouns (optional)</div>' +
+          '<input id="nc_pronouns" class="input" placeholder="e.g. she/her" value="'+esc(state.pronouns)+'" style="width:100%;"/>' +
+        '</div>' +
+        '<div class="mini" style="opacity:.8;line-height:1.35;">This wizard sets creation-only attributes, background, starter kit, weapons, and starter powers/spells. Sheet stats become read-only after creation.</div>';
+
+      document.getElementById("nc_ruleset").onchange = (e)=>{ state.ruleset = e.target.value; state.classId=""; state.subclass=""; state.background=""; state.kitId=""; state.weaponNames=[]; state.powers=[]; state.spells=[]; render(); };
+      document.getElementById("nc_level").oninput = (e)=>{ state.level = vwClampInt(e.target.value, 1, 20); };
+      document.getElementById("nc_name").oninput = (e)=>{ state.name = e.target.value; };
+      document.getElementById("nc_pronouns").oninput = (e)=>{ state.pronouns = e.target.value; };
+
+    } else if(state.step === 1){
+      ui.btnOk.textContent = "Next";
+      wrap.innerHTML =
+        '<div class="row" style="gap:10px;flex-wrap:wrap;">' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Class</div>' +
+            '<select id="nc_class" style="width:100%;">'+ optionHTML(classes, state.classId, "Select class") +'</select>' +
+          '</div>' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Subclass</div>' +
+            '<select id="nc_subclass" style="width:100%;">'+ optionHTML(subclasses, state.subclass, "Select subclass") +'</select>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Background</div>' +
+          '<select id="nc_bg" style="width:100%;">'+ optionHTML(backgrounds, state.background, "Select background") +'</select>' +
+        '</div>' +
+        '<div class="mini" style="opacity:.8;line-height:1.35;">Background text goes to Notes/Bio by default. We can later split Background into its own tab.</div>';
+
+      document.getElementById("nc_class").onchange = (e)=>{ state.classId = e.target.value; state.subclass=""; render(); };
+      document.getElementById("nc_subclass").onchange = (e)=>{ state.subclass = e.target.value; };
+      document.getElementById("nc_bg").onchange = (e)=>{ state.background = e.target.value; };
+
+    } else if(state.step === 2){
+      ui.btnOk.textContent = "Next";
+      const s = state.stats;
+      wrap.innerHTML =
+        '<div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
+          '<button class="btn smallbtn" id="nc_stdArray">Standard Array</button>' +
+          '<button class="btn smallbtn" id="nc_reset10">Reset to 10s</button>' +
+          '<div class="mini" style="opacity:.8;">Set attributes here; they lock after creation.</div>' +
+        '</div>' +
+        '<div class="row" style="gap:10px;flex-wrap:wrap;">' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">STR</div><input id="nc_STR" class="input" value="'+esc(s.STR)+'" style="width:100%;"/></div>' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">DEX</div><input id="nc_DEX" class="input" value="'+esc(s.DEX)+'" style="width:100%;"/></div>' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">CON</div><input id="nc_CON" class="input" value="'+esc(s.CON)+'" style="width:100%;"/></div>' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">INT</div><input id="nc_INT" class="input" value="'+esc(s.INT)+'" style="width:100%;"/></div>' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">WIS</div><input id="nc_WIS" class="input" value="'+esc(s.WIS)+'" style="width:100%;"/></div>' +
+          '<div style="width:90px;"><div class="mini" style="margin-bottom:6px;">CHA</div><input id="nc_CHA" class="input" value="'+esc(s.CHA)+'" style="width:100%;"/></div>' +
+        '</div>' +
+        '<hr/>' +
+        '<div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
+          '<div style="width:130px;"><div class="mini" style="margin-bottom:6px;">HP Max</div><input id="nc_hpMax" class="input" value="'+esc(state.vitals.hpMax)+'" style="width:100%;"/></div>' +
+          '<div style="width:110px;"><div class="mini" style="margin-bottom:6px;">AC</div><input id="nc_ac" class="input" value="'+esc(state.vitals.ac)+'" style="width:100%;"/></div>' +
+          '<div style="width:130px;"><div class="mini" style="margin-bottom:6px;">Speed</div><input id="nc_speed" class="input" value="'+esc(state.vitals.speed)+'" style="width:100%;"/></div>' +
+        '</div>';
+
+      document.getElementById("nc_stdArray").onclick = ()=>{
+        state.stats = { STR:15, DEX:14, CON:13, INT:12, WIS:10, CHA:8 };
+        render();
+      };
+      document.getElementById("nc_reset10").onclick = ()=>{
+        state.stats = { STR:10, DEX:10, CON:10, INT:10, WIS:10, CHA:10 };
+        render();
+      };
+      ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
+        document.getElementById("nc_"+k).oninput = (e)=>{ state.stats[k] = vwClampInt(e.target.value, 1, 30); };
+      });
+      document.getElementById("nc_hpMax").oninput = (e)=>{ state.vitals.hpMax = vwClampInt(e.target.value, 1, 999); state.vitals.hpCur = state.vitals.hpMax; };
+      document.getElementById("nc_ac").oninput = (e)=>{ state.vitals.ac = vwClampInt(e.target.value, 0, 99); };
+      document.getElementById("nc_speed").oninput = (e)=>{ state.vitals.speed = vwClampInt(e.target.value, 0, 999); };
+
+    } else if(state.step === 3){
+      ui.btnOk.textContent = "Next";
+      const kitOpts = kits.map(k=>({id:k.id,name:k.name}));
+      wrap.innerHTML =
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Starter Kit</div>' +
+          '<select id="nc_kit" style="width:100%;">'+ optionHTML(kitOpts, state.kitId, "Select kit") +'</select>' +
+        '</div>' +
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Starting Weapons</div>' +
+          '<div id="nc_weaponList" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;"></div>' +
+        '</div>' +
+        '<hr/>' +
+        '<div class="row" style="gap:10px;flex-wrap:wrap;">' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Starter Powers</div>' +
+            '<div id="nc_powerList" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;"></div>' +
+          '</div>' +
+          '<div style="flex:1;min-width:220px;">' +
+            '<div class="mini" style="margin-bottom:6px;">Starter Spells</div>' +
+            '<div id="nc_spellList" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mini" style="opacity:.8;line-height:1.35;">Powers/spells here are starter suggestions. You can add custom ones later in the Actions tab once we add an Abilities table.</div>';
+
+      document.getElementById("nc_kit").onchange = (e)=>{ state.kitId = e.target.value; };
+
+      const weaponHost = document.getElementById("nc_weaponList");
+      weaponHost.innerHTML="";
+      weapons.forEach(w=>{
+        const key = w.name;
+        const checked = state.weaponNames.includes(key);
+        const lab = document.createElement("label");
+        lab.className="row";
+        lab.style.gap="8px";
+        lab.innerHTML = '<input type="checkbox" '+(checked?"checked":"")+'/> <span class="mini">'+esc(w.name)+'</span>';
+        lab.querySelector("input").onchange = (e)=>{
+          if(e.target.checked){ if(!state.weaponNames.includes(key)) state.weaponNames.push(key); }
+          else state.weaponNames = state.weaponNames.filter(x=>x!==key);
+        };
+        weaponHost.appendChild(lab);
+      });
+
+      const powerHost = document.getElementById("nc_powerList");
+      powerHost.innerHTML="";
+      derivedPowers.forEach(pw=>{
+        const checked = state.powers.includes(pw) || state.powers.length===0; // default select all
+        if(state.powers.length===0) state.powers = derivedPowers.slice();
+        const lab=document.createElement("label");
+        lab.className="row";
+        lab.style.gap="8px";
+        lab.innerHTML = '<input type="checkbox" '+(checked?"checked":"")+'/> <span class="mini">'+esc(pw)+'</span>';
+        lab.querySelector("input").onchange=(e)=>{
+          if(e.target.checked){ if(!state.powers.includes(pw)) state.powers.push(pw); }
+          else state.powers = state.powers.filter(x=>x!==pw);
+        };
+        powerHost.appendChild(lab);
+      });
+
+      const spellHost = document.getElementById("nc_spellList");
+      spellHost.innerHTML="";
+      derivedSpells.forEach(sp=>{
+        const checked = state.spells.includes(sp) || state.spells.length===0;
+        if(state.spells.length===0) state.spells = derivedSpells.slice();
+        const lab=document.createElement("label");
+        lab.className="row";
+        lab.style.gap="8px";
+        lab.innerHTML = '<input type="checkbox" '+(checked?"checked":"")+'/> <span class="mini">'+esc(sp)+'</span>';
+        lab.querySelector("input").onchange=(e)=>{
+          if(e.target.checked){ if(!state.spells.includes(sp)) state.spells.push(sp); }
+          else state.spells = state.spells.filter(x=>x!==sp);
+        };
+        spellHost.appendChild(lab);
+      });
+
+    } else if(state.step === 4){
+      ui.btnOk.textContent = "Create";
+      // summarize + bio
+      const kit = kits.find(k=>k.id===state.kitId) || null;
+      const weaponObjs = weapons.filter(w=>state.weaponNames.includes(w.name));
+      wrap.innerHTML =
+        '<div class="mini" style="opacity:.9;line-height:1.5;">' +
+          '<div><b>Name:</b> '+esc(state.name||"—")+'</div>' +
+          '<div><b>Ruleset:</b> '+esc((rulesets.find(r=>r.id===state.ruleset)||{}).name||state.ruleset)+'</div>' +
+          '<div><b>Class:</b> '+esc((cls?cls.name:state.classId)||"—")+' / '+esc(state.subclass||"—")+'</div>' +
+          '<div><b>Background:</b> '+esc(state.background||"—")+'</div>' +
+          '<div><b>Kit:</b> '+esc(kit?kit.name:"—")+'</div>' +
+          '<div><b>Weapons:</b> '+esc(weaponObjs.map(w=>w.name).join(", ")||"—")+'</div>' +
+          '<div><b>Powers:</b> '+esc((state.powers||[]).join(", ")||"—")+'</div>' +
+          '<div><b>Spells:</b> '+esc((state.spells||[]).join(", ")||"—")+'</div>' +
+        '</div>' +
+        '<hr/>' +
+        '<div>' +
+          '<div class="mini" style="margin-bottom:6px;">Background / Bio</div>' +
+          '<textarea id="nc_bio" class="input" style="width:100%;min-height:120px;resize:vertical;" placeholder="Paste your background here...">'+esc(state.bio || (state.background ? ("Background: "+state.background+"\n") : ""))+'</textarea>' +
+        '</div>' +
+        '<div class="mini" style="opacity:.8;line-height:1.35;">Creation sets attributes, class, and starting loadout. After creation, attribute scores are read-only and should only change via DM tools (if you enable them later).</div>';
+
+      document.getElementById("nc_bio").oninput = (e)=>{ state.bio = e.target.value; };
+    }
+
+    // footer: back button
+    let back = document.getElementById("nc_backBtn");
+    if(!back){
+      back = document.createElement("button");
+      back.id = "nc_backBtn";
+      back.className = "btn smallbtn";
+      back.textContent = "Back";
+      back.style.marginRight = "auto";
+      // insert before cancel/ok via DOM
+      ui.btnCan.parentElement.insertBefore(back, ui.btnCan);
+    }
+    back.style.display = (state.step===0) ? "none" : "inline-flex";
+    back.onclick = ()=>{ state.step = Math.max(0, state.step-1); render(); };
+  }
+
+  ui.btnCan.onclick = ()=>{ ui.modal.style.display="none"; resolvePromise(null); };
+  ui.modal.onclick = (e)=>{ if(e.target === ui.modal){ ui.modal.style.display="none"; resolvePromise(null);} };
+
+  ui.btnOk.onclick = async ()=>{
+    if(state.step < 4){
+      if(state.step === 0 && !String(state.name||"").trim()){
+        toast("Name is required");
+        return;
+      }
+      state.step += 1;
+      render();
+      return;
+    }
+
+    // create
+    if(!String(state.name||"").trim()){
+      toast("Name is required");
+      return;
+    }
+
+    const rulesetId = state.ruleset;
+    const classes = vwGetRulesetClasses(rulesetId);
+    const cls = classes.find(c=>c.id===state.classId) || classes[0] || null;
+    const kits = vwGetKits(rulesetId);
+    const kit = kits.find(k=>k.id===state.kitId) || null;
+    const weapons = vwGetWeapons(rulesetId);
+    const weaponObjs = weapons.filter(w=>state.weaponNames.includes(w.name));
+
+    ui.btnOk.disabled = true;
+    ui.btnOk.textContent = "Creating...";
+
+    const createRes = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name: state.name }) });
+    if(!(createRes && createRes.ok)){
+      ui.btnOk.disabled = false;
+      ui.btnOk.textContent = "Create";
+      toast((createRes && createRes.error) ? createRes.error : "Failed to create character");
+      return;
+    }
+
+    const charId = createRes.id;
+
+    const character = {
+      id: charId,
+      name: state.name,
+      weapons: weaponObjs.map(w=>({
+        id: vwId("w"),
+        name: w.name,
+        range: w.range || "",
+        hit: w.hit || "",
+        damage: w.damage || "",
+        ammo: w.ammo ? { ...w.ammo } : null
+      })),
+      inventory: (kit && Array.isArray(kit.inventory)) ? kit.inventory.map(it=>({ ...it })) : [],
+      abilities: (state.powers||[]).map(x=>({ id: vwId("ab"), name: x, notes:"" })),
+      spells: (state.spells||[]).map(x=>({ id: vwId("sp"), name: x, notes:"" })),
+      sheet: {
+        vitals: {
+          hpCur: String(state.vitals.hpMax ?? ""),
+          hpMax: String(state.vitals.hpMax ?? ""),
+          hpTemp: String(state.vitals.hpTemp ?? ""),
+          ac: String(state.vitals.ac ?? ""),
+          init: String(state.vitals.init ?? ""),
+          speed: String(state.vitals.speed ?? "")
+        },
+        money: { cash:"", bank:"" },
+        stats: {
+          STR: String(state.stats.STR ?? ""),
+          DEX: String(state.stats.DEX ?? ""),
+          CON: String(state.stats.CON ?? ""),
+          INT: String(state.stats.INT ?? ""),
+          WIS: String(state.stats.WIS ?? ""),
+          CHA: String(state.stats.CHA ?? "")
+        },
+        conditions: [],
+        notes: state.bio || "",
+        profile: {
+          ruleset: rulesetId,
+          level: state.level,
+          pronouns: state.pronouns || "",
+          class: cls ? cls.name : state.classId,
+          classId: state.classId,
+          subclass: state.subclass || "",
+          background: state.background || ""
+        }
+      }
+    };
+
+    const saveRes = await api("/api/character/save", { method:"POST", body: JSON.stringify({ charId, character }) });
+    if(!(saveRes && saveRes.ok)){
+      // Still proceed; at minimum the char exists. But tell user.
+      toast((saveRes && saveRes.error) ? ("Created, but failed to save sheet: " + saveRes.error) : "Created, but failed to save sheet");
+    }else{
+      toast("Character created");
+    }
+
+    ui.modal.style.display = "none";
+    SESSION.activeCharId = charId;
+    await refreshAll();
+    resolvePromise(charId);
+  };
+
+  ui.modal.style.display = "flex";
+  render();
+  return p;
+}
+
 function getChar(){
   const st=window.__STATE||{};
   return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
@@ -6,10 +573,17 @@ function renderCharacter(){
   const c=getChar();
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
-  weapBody.innerHTML=""; invBody.innerHTML="";
+  const abilBody=document.getElementById("abilBody");
+  const spellBody=document.getElementById("spellBody");
+  if(weapBody) weapBody.innerHTML="";
+  if(invBody) invBody.innerHTML="";
+  if(abilBody) abilBody.innerHTML="";
+  if(spellBody) spellBody.innerHTML="";
   if(!c){
-    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
-    invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
+    if(weapBody) weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
+    if(invBody) invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
+    if(abilBody) abilBody.innerHTML = '<tr><td colspan="3" class="mini">No character.</td></tr>';
+    if(spellBody) spellBody.innerHTML = '<tr><td colspan="3" class="mini">No character.</td></tr>';
     return;
   }
   // weapons rows
@@ -28,6 +602,57 @@ function renderCharacter(){
       weapBody.appendChild(tr2);
     }
   });
+
+  // abilities rows (optional)
+  if(abilBody){
+    (c.abilities||[]).forEach(ab=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML =
+        '<td>'+esc(ab.name||"")+'</td>'+
+        '<td><input class="input" value="'+esc(ab.notes||"")+'" data-k="notes" style="width:100%;"/></td>'+
+        '<td><button class="btn smallbtn">Del</button></td>';
+      tr.querySelector("input").onchange=async (e)=>{
+        ab.notes = e.target.value;
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Saved"); await refreshAll();
+      };
+      tr.querySelector("button").onclick=async ()=>{
+        c.abilities = (c.abilities||[]).filter(x=>x.id!==ab.id);
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Removed ability"); await refreshAll();
+      };
+      abilBody.appendChild(tr);
+    });
+    if(!(c.abilities||[]).length){
+      abilBody.innerHTML = '<tr><td colspan="3" class="mini">No abilities yet.</td></tr>';
+    }
+  }
+
+  // spells rows (optional)
+  if(spellBody){
+    (c.spells||[]).forEach(sp=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML =
+        '<td>'+esc(sp.name||"")+'</td>'+
+        '<td><input class="input" value="'+esc(sp.notes||"")+'" data-k="notes" style="width:100%;"/></td>'+
+        '<td><button class="btn smallbtn">Del</button></td>';
+      tr.querySelector("input").onchange=async (e)=>{
+        sp.notes = e.target.value;
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Saved"); await refreshAll();
+      };
+      tr.querySelector("button").onclick=async ()=>{
+        c.spells = (c.spells||[]).filter(x=>x.id!==sp.id);
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Removed spell"); await refreshAll();
+      };
+      spellBody.appendChild(tr);
+    });
+    if(!(c.spells||[]).length){
+      spellBody.innerHTML = '<tr><td colspan="3" class="mini">No spells yet.</td></tr>';
+    }
+  }
+
   // inventory rows
   (c.inventory||[]).forEach((it,idx)=>{
     const tr=document.createElement("tr");
@@ -190,6 +815,16 @@ function renderSheet(){
   document.getElementById("statINT").value = (c.sheet.stats.INT ?? "");
   document.getElementById("statWIS").value = (c.sheet.stats.WIS ?? "");
   document.getElementById("statCHA").value = (c.sheet.stats.CHA ?? "");
+  // Attributes are set during creation and are read-only in the live sheet.
+  ["statSTR","statDEX","statCON","statINT","statWIS","statCHA"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = true;
+    el.setAttribute("data-locked","1");
+    el.title = "Set at character creation";
+    el.classList.add("vwLockedField");
+  });
+
 
   document.getElementById("notesBio").value = (c.sheet.notes ?? "");
 
@@ -678,20 +1313,5 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
 });
 
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
-  const name = await vwModalInput({
-    title: "New Character",
-    label: "Character name",
-    placeholder: "e.g. Mara Kincaid"
-  });
-  if(!name) return;
-
-  // DM can optionally create unassigned characters via Import workflow; this button creates under the current user by default.
-  const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
-  if(res && res.ok){
-    SESSION.activeCharId = res.id;
-    toast("Character created");
-    await refreshAll();
-  }else{
-    toast((res && res.error) ? res.error : "Failed to create character");
-  }
+  await vwNewCharacterWizard();
 });
