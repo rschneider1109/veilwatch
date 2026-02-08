@@ -7,7 +7,7 @@ RUN npm install --omit=dev
 
 # App code
 WORKDIR /app
-COPY api/app.js ./
+COPY app.js ./
 COPY public ./public
 CMD ["node","app.js"]
 
