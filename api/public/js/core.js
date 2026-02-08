@@ -229,7 +229,7 @@ window.setRoleUI = setRoleUI;
 
 // ---- Tabs ----
 function renderTabs(tab){
-  const tabs = ["home","characters","shop","intel","settings"];
+  const tabs = ["home","character","intel","shop","settings"];
   tabs.forEach(t=>{
     const el = document.getElementById("tab-"+t);
     if(el) el.classList.toggle("hidden", t !== tab);

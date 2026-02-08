@@ -195,6 +195,7 @@ function renderSheet(){
 
   // conditions
   const row=document.getElementById("condRow");
+  if(!row) return;
   row.innerHTML="";
   const active = new Set((c.sheet.conditions||[]).map(x=>String(x).toLowerCase()));
   CONDITIONS.forEach(name=>{
@@ -287,9 +288,176 @@ function renderDMActiveParty(){
     const ac = (v.ac||"");
     const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : "";
 
-    const card = document.createElement("div");
+        const card = document.createElement("div");
     card.className = "card";
     card.style.gridColumn = "span 4";
+
+    // ---- Tap-to-edit helpers (DM only) ----
+    function pillEditNumber(pill, opts){
+      opts ||= {};
+      const label = opts.label || "";
+      const value = (opts.value===0 || opts.value) ? String(opts.value) : "";
+      const placeholder = opts.placeholder || "--";
+      const minW = opts.minWidth || 56;
+
+      if(pill.dataset.editing==="1") return;
+      pill.dataset.editing="1";
+
+      const original = pill.innerHTML;
+      const input = document.createElement("input");
+      input.className = "input";
+      input.value = value;
+      input.placeholder = placeholder;
+      input.style.width = minW + "px";
+      input.style.padding = "6px 8px";
+      input.style.borderRadius = "10px";
+
+      pill.innerHTML = "";
+      if(label){
+        const sp = document.createElement("span");
+        sp.className = "mini";
+        sp.style.opacity = "0.9";
+        sp.textContent = label + " ";
+        pill.appendChild(sp);
+      }
+      pill.appendChild(input);
+
+      function cancel(){
+        pill.dataset.editing="0";
+        pill.innerHTML = original;
+      }
+
+      input.addEventListener("keydown",(e)=>{
+        if(e.key==="Enter"){ e.preventDefault(); input.blur(); }
+        if(e.key==="Escape"){ e.preventDefault(); cancel(); }
+      });
+
+      input.addEventListener("blur", async ()=>{
+        const newVal = input.value;
+        pill.dataset.editing="0";
+        try{
+          if(typeof opts.onSave === "function"){
+            const ok = await opts.onSave(newVal);
+            if(!ok) return cancel();
+          }
+        }catch(_){
+          return cancel();
+        }
+      });
+
+      setTimeout(()=>input.focus(), 0);
+      input.select();
+    }
+
+    function pillEditHP(pill, opts){
+      opts ||= {};
+      const cur = String(opts.cur ?? "");
+      const max = String(opts.max ?? "");
+      if(pill.dataset.editing==="1") return;
+      pill.dataset.editing="1";
+      const original = pill.innerHTML;
+
+      const inCur = document.createElement("input");
+      inCur.className="input";
+      inCur.value = cur;
+      inCur.placeholder="cur";
+      inCur.style.width="56px";
+      inCur.style.padding="6px 8px";
+      inCur.style.borderRadius="10px";
+
+      const inMax = document.createElement("input");
+      inMax.className="input";
+      inMax.value = max;
+      inMax.placeholder="max";
+      inMax.style.width="56px";
+      inMax.style.padding="6px 8px";
+      inMax.style.borderRadius="10px";
+
+      const slash = document.createElement("span");
+      slash.className="mini";
+      slash.style.opacity="0.9";
+      slash.textContent=" / ";
+
+      pill.innerHTML="";
+      const sp = document.createElement("span");
+      sp.className="mini";
+      sp.style.opacity="0.9";
+      sp.textContent="HP ";
+      pill.appendChild(sp);
+      pill.appendChild(inCur);
+      pill.appendChild(slash);
+      pill.appendChild(inMax);
+
+      let t = null;
+      async function commit(){
+        clearTimeout(t);
+        const vCur = inCur.value;
+        const vMax = inMax.value;
+        try{
+          if(typeof opts.onSave === "function"){
+            const ok = await opts.onSave(vCur, vMax);
+            if(!ok){
+              pill.dataset.editing="0";
+              pill.innerHTML = original;
+            }
+          }
+        }catch(_){
+          pill.dataset.editing="0";
+          pill.innerHTML = original;
+        }
+      }
+
+      function scheduleCommit(){
+        clearTimeout(t);
+        t = setTimeout(()=>commit(), 300);
+      }
+
+      function cancel(){
+        clearTimeout(t);
+        pill.dataset.editing="0";
+        pill.innerHTML = original;
+      }
+
+      [inCur,inMax].forEach(inp=>{
+        inp.addEventListener("input", scheduleCommit);
+        inp.addEventListener("keydown",(e)=>{
+          if(e.key==="Enter"){ e.preventDefault(); inp.blur(); commit(); }
+          if(e.key==="Escape"){ e.preventDefault(); cancel(); }
+        });
+        inp.addEventListener("blur", scheduleCommit);
+      });
+
+      setTimeout(()=>inCur.focus(), 0);
+      inCur.select();
+    }
+
+    function upsertCharInState(updatedChar){
+      const st = window.__STATE || {};
+      st.characters ||= [];
+      const idx = st.characters.findIndex(x=>x.id===updatedChar.id);
+      if(idx>=0) st.characters[idx] = updatedChar;
+      else st.characters.push(updatedChar);
+      window.__STATE = st;
+    }
+
+    async function patchCharSheet(patch){
+      const res = await api("/api/character/patch", { method:"POST", body: JSON.stringify({ charId: c.id, patch }) });
+      if(res && res.ok && res.character){
+        upsertCharInState(res.character);
+        // refresh local views if this is also the selected character
+        try{
+          if(SESSION.activeCharId === c.id){
+            if(typeof renderCharacter==="function") renderCharacter();
+            if(typeof renderSheet==="function") renderSheet();
+          }
+        }catch(_){}
+        // re-render the active party cards so everything stays consistent
+        try{ renderDMActiveParty(); }catch(_){}
+        return true;
+      }
+      toast((res && res.error) ? res.error : "Save failed");
+      return false;
+    }
 
     card.innerHTML = `
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;">
@@ -301,20 +469,17 @@ function renderDMActiveParty(){
       </div>
       <hr/>
       <div class="row" style="gap:10px;flex-wrap:wrap;">
-        <div class="pill">HP: ${esc(hp)}</div>
-        <div class="pill">AC: ${esc(ac)}</div>
-        <div style="min-width:120px;">
-          <div class="mini" style="margin-bottom:6px;">Init</div>
-          <input class="input" data-act="init" value="${String(init).replace(/"/g,'&quot;')}" placeholder="--" style="width:120px;"/>
-        </div>
+        <div class="pill vwTapEdit" data-k="hp">HP: ${esc(hp)}</div>
+        <div class="pill vwTapEdit" data-k="ac">AC: ${esc(ac||"--")}</div>
+        <div class="pill vwTapEdit" data-k="init">Init: ${esc(String(init||"--"))}</div>
       </div>
       <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px;">
-        <div class="pill">STR ${esc(s.STR||"")}</div>
-        <div class="pill">DEX ${esc(s.DEX||"")}</div>
-        <div class="pill">CON ${esc(s.CON||"")}</div>
-        <div class="pill">INT ${esc(s.INT||"")}</div>
-        <div class="pill">WIS ${esc(s.WIS||"")}</div>
-        <div class="pill">CHA ${esc(s.CHA||"")}</div>
+        <div class="pill vwTapEdit" data-k="STR">STR ${esc(s.STR||"--")}</div>
+        <div class="pill vwTapEdit" data-k="DEX">DEX ${esc(s.DEX||"--")}</div>
+        <div class="pill vwTapEdit" data-k="CON">CON ${esc(s.CON||"--")}</div>
+        <div class="pill vwTapEdit" data-k="INT">INT ${esc(s.INT||"--")}</div>
+        <div class="pill vwTapEdit" data-k="WIS">WIS ${esc(s.WIS||"--")}</div>
+        <div class="pill vwTapEdit" data-k="CHA">CHA ${esc(s.CHA||"--")}</div>
       </div>
       <div class="row" style="margin-top:10px;justify-content:space-between;">
         <button class="btn smallbtn" data-act="remove">Remove</button>
@@ -324,22 +489,94 @@ function renderDMActiveParty(){
     const btnOpen = card.querySelector('button[data-act="open"]');
     btnOpen.onclick = async ()=>{
       SESSION.activeCharId = c.id;
-      // Jump to Character tab + Sheet
-      document.querySelectorAll(".nav .btn").forEach(b=>b.classList.toggle("active", b.dataset.tab==="character"));
-      document.querySelectorAll("main section").forEach(sec=>sec.classList.toggle("hidden", sec.id!=="tab-character"));
+      renderTabs("character");
       // Switch character sub-tab to sheet
       document.querySelectorAll('[data-ctab]').forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
-      document.getElementById("ctab-actions").classList.toggle("hidden", true);
-      document.getElementById("ctab-inventory").classList.toggle("hidden", true);
-      document.getElementById("ctab-sheet").classList.toggle("hidden", false);
+      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
       await refreshAll();
     };
 
-    const initEl = card.querySelector('input[data-act="init"]');
-    initEl.onchange = async ()=>{
-      const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative: initEl.value })});
-      if(!res.ok) toast(res.error||"Failed");
-    };
+    // Tap-to-edit wiring
+    card.querySelectorAll(".vwTapEdit").forEach(pill=>{
+      pill.addEventListener("click",(e)=>{
+        e.preventDefault(); e.stopPropagation();
+
+        const k = pill.dataset.k;
+
+        if(k === "hp"){
+          const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
+          pillEditHP(pill, {
+            cur: v.hpCur ?? "",
+            max: v.hpMax ?? "",
+            onSave: async (hpCur, hpMax)=>{
+              c.sheet ||= {}; c.sheet.vitals ||= {};
+              c.sheet.vitals.hpCur = hpCur;
+              c.sheet.vitals.hpMax = hpMax;
+              return await patchCharSheet({ sheet: { vitals: { hpCur, hpMax } } });
+            }
+          });
+          return;
+        }
+
+        if(k === "ac"){
+          const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
+          pillEditNumber(pill, {
+            label: "AC",
+            value: v.ac ?? "",
+            minWidth: 56,
+            onSave: async (ac)=>{
+              c.sheet ||= {}; c.sheet.vitals ||= {};
+              c.sheet.vitals.ac = ac;
+              return await patchCharSheet({ sheet: { vitals: { ac } } });
+            }
+          });
+          return;
+        }
+
+        if(k === "init"){
+          pillEditNumber(pill, {
+            label: "Init",
+            value: (entry.initiative===0 || entry.initiative) ? entry.initiative : "",
+            minWidth: 72,
+            onSave: async (initiative)=>{
+              const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative })});
+              if(res && res.ok){
+                // update local state
+                const st = window.__STATE || {};
+                st.activeParty ||= [];
+                const ix = st.activeParty.findIndex(x=>x.charId===c.id);
+                if(ix>=0) st.activeParty[ix].initiative = initiative;
+                window.__STATE = st;
+                try{ renderDMActiveParty(); }catch(_){}
+                return true;
+              }
+              toast((res && res.error) ? res.error : "Failed");
+              return false;
+            }
+          });
+          return;
+        }
+
+        // Abilities
+        if(["STR","DEX","CON","INT","WIS","CHA"].includes(k)){
+          const curVal = (c.sheet && c.sheet.stats) ? (c.sheet.stats[k] ?? "") : "";
+          pillEditNumber(pill, {
+            label: k,
+            value: curVal,
+            minWidth: 56,
+            onSave: async (val)=>{
+              c.sheet ||= {}; c.sheet.stats ||= {};
+              c.sheet.stats[k] = val;
+              const patch = { sheet: { stats: { [k]: val } } };
+              return await patchCharSheet(patch);
+            }
+          });
+          return;
+        }
+      });
+    });
 
     const btnRemove = card.querySelector('button[data-act="remove"]');
     btnRemove.onclick = async ()=>{
@@ -351,6 +588,7 @@ function renderDMActiveParty(){
     cardsHost.appendChild(card);
   });
 }
+
 
 (async function wireDmActivePartyButtons(){
   try{
