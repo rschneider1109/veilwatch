@@ -9,32 +9,26 @@
 <body>
 <div id="loginOverlay">
   <div class="panel loginCard">
-    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.3</span></div>
-    <div class="mini">Choose a role. DM requires the passkey. Player is local to this browser.</div>
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.4</span></div>
+    <div class="mini">Log in or create an account. The <b>first</b> account created becomes the DM automatically.</div>
     <hr/>
     <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
       <div style="grid-column:span 12;" class="row">
-        <input class="input" id="whoName" placeholder="Display name" style="flex:1;min-width:220px;"/>
-        <select id="whoRole">
-          <option value="player">Player</option>
-          <option value="dm">DM</option>
-        </select>
+        <input class="input" id="authUser" placeholder="Username" style="flex:1;min-width:220px;"/>
       </div>
-      <div style="grid-column:span 12;" class="row" id="dmKeyRow">
-        <input class="input" id="dmKey" placeholder="DM passkey" style="flex:1;min-width:220px;"/>
+      <div style="grid-column:span 12;" class="row" style="gap:10px;flex-wrap:wrap;">
+        <input class="input" id="authPass" type="password" placeholder="Password" style="flex:1;min-width:220px;"/>
         <button class="btn smallbtn" id="loginBtn">Login</button>
+        <button class="btn smallbtn" id="registerBtn">Create</button>
       </div>
-      <div style="grid-column:span 12;" class="row hidden" id="playerBtnRow">
-        <button class="btn" id="loginPlayerBtn">Enter as Player</button>
-      </div>
+      <div style="grid-column:span 12;" class="mini" id="authHint" style="color:var(--muted);">Passwords must be 6+ chars.</div>
     </div>
-    <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: DM passkey is stored server-side in Settings.</div>
   </div>
 </div>
 
 <header>
   <div class="brand">VEILWATCH OS</div>
-  <div class="pill" id="whoPill">Not logged in</div>
+  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
@@ -62,7 +56,31 @@
       <h3>Session Clock</h3>
       <div class="mini" id="sessionClockMini">00:00</div>
     </div>
-    <div class="panel" style="grid-column:span 12;">
+    
+    <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters</h3>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="min-width:240px;flex:1;">
+          <div class="mini" style="margin-bottom:6px;">Add to Active</div>
+          <select id="dmActiveAddSel" style="width:100%;"></select>
+        </div>
+        <div style="min-width:220px;">
+          <div class="mini" style="margin-bottom:6px;">Player Label (optional)</div>
+          <input class="input" id="dmActivePlayerLabel" placeholder="e.g., Alex" style="width:100%;"/>
+        </div>
+        <div style="min-width:180px;">
+          <div class="mini" style="margin-bottom:6px;">&nbsp;</div>
+          <div class="row" style="gap:10px;">
+            <button class="btn smallbtn" id="dmActiveAddBtn">Add</button>
+            <button class="btn smallbtn" id="dmActiveClearBtn">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="grid cards" id="dmActivePartyCards" style="margin-top:12px;"></div>
+      <div class="mini" style="margin-top:8px;color:var(--muted);">Active = the characters currently being played at the table (DM controlled).</div>
+    </div>
+
+<div class="panel" style="grid-column:span 12;">
       <h3 style="margin:0 0 8px 0;color:var(--accent);">Quick Launch</h3>
       <div class="row">
         <button class="btn" data-go="character">Character</button>
@@ -148,6 +166,7 @@
       <div class="row">
         <select id="charSel"></select>
         <button class="btn smallbtn" id="newCharBtn">New Character</button>
+        <button class="btn smallbtn hidden" id="importPlayerBtn">Import Player</button>
       </div>
       <hr/>
       <div class="row">
@@ -442,7 +461,13 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="/client.js" defer></script>
+<script src="/js/core.js" defer></script>
+<script src="/js/state.js" defer></script>
+<script src="/js/stream.js" defer></script>
+<script src="/js/characters.js" defer></script>
+<script src="/js/shop.js" defer></script>
+<script src="/js/notifications.js" defer></script>
+<script src="/js/intel.js" defer></script>
 <!-- Veilwatch Modal -->
 <div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
   <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;">
