@@ -49,3 +49,17 @@ th{color:var(--muted);font-weight:600;}
 .intel-indicator.hidden{display:none;}
 .intel-glow{box-shadow:0 0 0 rgba(255,60,60,0);animation:intelPulse 1.2s ease-in-out infinite;}
 @keyframes intelPulse{0%{box-shadow:0 0 0 rgba(255,60,60,.0);}50%{box-shadow:0 0 18px rgba(255,60,60,.55);}100%{box-shadow:0 0 0 rgba(255,60,60,.0);}}
+
+/* Character sheet inner tabs */
+.sheetTabs{
+  border-bottom:1px solid var(--line);
+  padding-bottom:10px;
+}
+.sheetTabs .btn{
+  padding:8px 10px;
+  border-radius:999px;
+}
+@media (max-width: 520px){
+  .sheetTabs{flex-wrap:nowrap;overflow:auto;}
+  .sheetTabs .btn{white-space:nowrap;}
+}
