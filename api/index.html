@@ -1,0 +1,458 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Veilwatch OS</title>
+<link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+<div id="loginOverlay">
+  <div class="panel loginCard">
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.3</span></div>
+    <div class="mini">Choose a role. DM requires the passkey. Player is local to this browser.</div>
+    <hr/>
+    <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
+      <div style="grid-column:span 12;" class="row">
+        <input class="input" id="whoName" placeholder="Display name" style="flex:1;min-width:220px;"/>
+        <select id="whoRole">
+          <option value="player">Player</option>
+          <option value="dm">DM</option>
+        </select>
+      </div>
+      <div style="grid-column:span 12;" class="row" id="dmKeyRow">
+        <input class="input" id="dmKey" placeholder="DM passkey" style="flex:1;min-width:220px;"/>
+        <button class="btn smallbtn" id="loginBtn">Login</button>
+      </div>
+      <div style="grid-column:span 12;" class="row hidden" id="playerBtnRow">
+        <button class="btn" id="loginPlayerBtn">Enter as Player</button>
+      </div>
+    </div>
+    <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: DM passkey is stored server-side in Settings.</div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">VEILWATCH OS</div>
+  <div class="pill" id="whoPill">Not logged in</div>
+  <div class="pill" id="shopPill">Shop: --</div>
+  <div class="pill right" id="clockPill">--:--</div>
+</header>
+
+<main>
+  <div class="nav">
+    <button class="btn active" data-tab="home">Home</button>
+    <button class="btn" data-tab="character">Character</button>
+    <button class="btn" data-tab="intel">Intel</button>
+    <button class="btn" data-tab="shop">Shop</button>
+    <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
+  </div>
+
+  <section id="tab-home" class="grid cards">
+    <div class="card" style="grid-column:span 4;">
+      <h3>Active Character</h3>
+      <div class="mini" id="activeCharMini">None selected</div>
+    </div>
+    <div class="card" style="grid-column:span 4;">
+      <h3>Save State</h3>
+      <div class="mini">Auto-saved to server volume</div>
+      <div class="mini" id="saveMini">OK</div>
+    </div>
+    <div class="card" style="grid-column:span 4;">
+      <h3>Session Clock</h3>
+      <div class="mini" id="sessionClockMini">00:00</div>
+    </div>
+    <div class="panel" style="grid-column:span 12;">
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Quick Launch</h3>
+      <div class="row">
+        <button class="btn" data-go="character">Character</button>
+        <button class="btn" data-go="intel">Intel</button>
+        <button class="btn" data-go="shop">Shop</button>
+      </div>
+
+      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
+        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
+            <input class="input" id="hpCur" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="hpMax" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Temp HP</div>
+            <input class="input" id="hpTemp" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:110px;">
+            <div class="mini" style="margin-bottom:6px;">AC</div>
+            <input class="input" id="acVal" placeholder="0" style="width:90px;"/>
+          </div>
+          <div style="min-width:130px;">
+            <div class="mini" style="margin-bottom:6px;">Initiative</div>
+            <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Speed</div>
+            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
+          </div>
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
+            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Stats</div>
+          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
+        </div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
+          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
+          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
+          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
+          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
+          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Conditions</div>
+          <div class="mini">Toggle active conditions.</div>
+        </div>
+        
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
+            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
+          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
+          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
+        </div>
+
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-character" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <select id="charSel"></select>
+        <button class="btn smallbtn" id="newCharBtn">New Character</button>
+      </div>
+      <hr/>
+      <div class="row">
+        <button class="btn active" data-ctab="actions">Actions</button>
+        <button class="btn" data-ctab="inventory">Inventory</button>
+        <button class="btn" data-ctab="sheet">Sheet</button>
+      </div>
+
+      <div id="ctab-actions" style="margin-top:12px;">
+        <table>
+          <thead><tr><th>WEAPON</th><th>RANGE</th><th>HIT/DC</th><th>DAMAGE</th><th></th></tr></thead>
+          <tbody id="weapBody"></tbody>
+        </table>
+        <div class="mini" style="margin-top:8px;">Weapons live here. Ammo lines under weapons track starting/current. Purchases go to Inventory.</div>
+      </div>
+
+      <div id="ctab-inventory" class="hidden" style="margin-top:12px;">
+        <table>
+          <thead><tr><th>CATEGORY</th><th>EQUIPMENT NAME</th><th>WEIGHT</th><th>QTY</th><th>COST ($)</th><th>NOTES</th><th></th></tr></thead>
+          <tbody id="invBody"></tbody>
+        </table>
+        <button class="btn smallbtn" id="addInvBtn" style="margin-top:10px;">Add Inventory Item</button>
+      </div>
+
+      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
+        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
+            <input class="input" id="hpCur" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="hpMax" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Temp HP</div>
+            <input class="input" id="hpTemp" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:110px;">
+            <div class="mini" style="margin-bottom:6px;">AC</div>
+            <input class="input" id="acVal" placeholder="0" style="width:90px;"/>
+          </div>
+          <div style="min-width:130px;">
+            <div class="mini" style="margin-bottom:6px;">Initiative</div>
+            <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Speed</div>
+            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
+          </div>
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
+            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Stats</div>
+          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
+        </div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
+          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
+          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
+          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
+          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
+          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Conditions</div>
+          <div class="mini">Toggle active conditions.</div>
+        </div>
+        
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
+            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
+          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
+          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
+        </div>
+
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-intel" class="hidden">
+    <div class="panel">
+      <div id="intelDisabledMsg" class="mini hidden"></div>
+      <div class="row">
+        <div class="pill">DM Tools</div>
+        <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
+      </div>
+      <hr/>
+      <div id="dmPanels" class="hidden">
+        <div class="row" style="margin-bottom:10px;">
+          <button class="btn active" data-itab="notifications">Notifications</button>
+          <button class="btn" data-itab="clues">Clues</button>
+          <button class="btn" data-itab="archived">Archived</button>
+        </div>
+        <div id="itab-notifications">
+          <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="btn smallbtn" id="dmNewNotifBtn">New Notification</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>FROM</th><th>STATUS</th><th>NOTES</th><th></th></tr></thead>
+            <tbody id="notifBody"></tbody>
+          </table>
+          <button class="btn smallbtn" id="clearResolvedBtn" style="margin-top:10px;">Clear Resolved</button>
+        </div>
+        <div id="itab-clues" class="hidden">
+          <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="btn smallbtn" id="newClueBtn">New Clue</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>TITLE</th><th>VISIBILITY</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th></th></tr></thead>
+            <tbody id="clueBody"></tbody>
+          </table>
+          <div class="mini" style="margin-top:8px;color:var(--muted);">Hidden=DM only. Revealed=players see it. Archive moves it to Archived.</div>
+        </div>
+        <div id="itab-archived" class="hidden">
+          <table>
+            <thead><tr><th>CLUE</th><th>NOTES</th><th></th></tr></thead>
+            <tbody id="archBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="playerIntel">
+        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;">
+          <div class="pill">Intel</div>
+          <input class="input" id="intelSearch" placeholder="Search clues..." style="flex:1;min-width:220px;"/>
+          <input class="input" id="intelTag" placeholder="Tag filter (optional)" style="width:200px;"/>
+          <input class="input" id="intelDistrict" placeholder="District filter (optional)" style="width:200px;"/>
+          <button class="btn smallbtn" id="intelClearFilters">Clear</button>
+        </div>
+        <hr/>
+        <div class="row" style="gap:10px;align-items:center;">
+          <div class="pill">Session Recaps</div>
+          <div class="mini">DM-written summaries only.</div>
+        </div>
+        <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
+        <hr/>
+        <table>
+          <thead><tr><th>TITLE</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th>DETAILS</th></tr></thead>
+          <tbody id="intelBody"></tbody>
+        </table>
+
+        <hr/>
+        <div class="row" style="gap:10px;align-items:center;">
+          <div class="pill">Your Requests</div>
+          <div class="mini">What you have sent to the DM.</div>
+        </div>
+        <table style="margin-top:8px;">
+          <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>STATUS</th><th>DM NOTES</th></tr></thead>
+          <tbody id="playerReqBody"></tbody>
+        </table>
+      </div>
+
+      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
+        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
+            <input class="input" id="hpCur" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="hpMax" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Temp HP</div>
+            <input class="input" id="hpTemp" placeholder="0" style="width:120px;"/>
+          </div>
+          <div style="min-width:110px;">
+            <div class="mini" style="margin-bottom:6px;">AC</div>
+            <input class="input" id="acVal" placeholder="0" style="width:90px;"/>
+          </div>
+          <div style="min-width:130px;">
+            <div class="mini" style="margin-bottom:6px;">Initiative</div>
+            <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
+          </div>
+          <div style="min-width:140px;">
+            <div class="mini" style="margin-bottom:6px;">Speed</div>
+            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
+          </div>
+          <div style="min-width:160px;">
+            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
+            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
+            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Stats</div>
+          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
+        </div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
+          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
+          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
+          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
+          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
+          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
+        </div>
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div class="pill">Conditions</div>
+          <div class="mini">Toggle active conditions.</div>
+        </div>
+        
+
+        <hr/>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
+            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
+          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
+          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
+        </div>
+
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-shop" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <div class="pill" id="shopEnabledPill">Shop: --</div>
+        <div class="right row" id="dmShopRow" style="gap:8px;">
+          <button class="btn smallbtn" id="toggleShopBtn">Toggle Shop</button>
+          <button class="btn smallbtn" id="addShopBtn">New Shop</button>
+        </div>
+      </div>
+      <hr/>
+      <div class="row">
+        <select id="shopSel"></select>
+        <button class="btn smallbtn hidden" id="editShopBtn">Edit Shop</button>
+      </div>
+      <hr/>
+      <table>
+        <thead><tr><th>ITEM</th><th>CATEGORY</th><th>COST</th><th>WEIGHT</th><th>NOTES</th><th>STOCK</th><th></th></tr></thead>
+        <tbody id="shopBody"></tbody>
+      </table>
+      <div class="mini" style="margin-top:10px;">Players can add shop items to Inventory. DM can customize each shop.</div>
+    </div>
+  </section>
+
+  <section id="tab-settings" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <div class="pill">Admin / Settings</div>
+        <div class="mini">DM only. Export/import state, reset, feature toggles.</div>
+      </div>
+      <hr/>
+      <div class="row" style="gap:10px;flex-wrap:wrap;">
+        <button class="btn smallbtn" id="exportStateBtn">Export State JSON</button>
+        <button class="btn smallbtn" id="importStateBtn">Import State JSON</button>
+        <button class="btn smallbtn" id="resetStateBtn">Reset State</button>
+      </div>
+      <hr/>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="min-width:240px;">
+          <div class="mini" style="margin-bottom:6px;">DM Passkey (UI change only if env var is not set)</div>
+          <input class="input" id="dmKeyNew" placeholder="New DM passkey" style="width:100%;"/>
+        </div>
+        <button class="btn smallbtn" id="saveDmKeyBtn">Save DM Passkey</button>
+      </div>
+      <hr/>
+      
+      <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: keep backups before imports. State is auto-saved.</div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="/client.js" defer></script>
+<!-- Veilwatch Modal -->
+<div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
+  <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;">
+    <div id="vwModalTitle" style="font-size:18px;margin-bottom:10px;">Modal</div>
+    <div id="vwModalBody"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button id="vwModalCancel" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:transparent;color:#e9f1ff;cursor:pointer;">Cancel</button>
+      <button id="vwModalOk" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:#19324f;color:#e9f1ff;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
