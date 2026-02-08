@@ -789,225 +789,299 @@ try{ vwWireSheetAutosave(); }catch(e){}
 
 
 // ---- Buttons: add inventory row + new character (kept here so intel.js stays intel-only) ----
-document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
 
-  const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-  const groups =
-    cat?.inventoryItemsByCategory ||
-    cat?.inventory_items_by_category ||
-    cat?.inventoryByCategory ||
-    null;
+// ============================
+// Character Tab: Button Wiring
+// ============================
 
-  const categories = groups ? Object.keys(groups) : [];
-  const safeCats = categories.length ? categories : ["General"];
+async function vwSaveChar(c){
+  const res = await api("/api/character/save", { method:"POST", body: JSON.stringify({ charId: c.id, character: c }) });
+  if(!res || !res.ok) throw new Error(res?.error || "Save failed");
+  return res;
+}
 
-  if(typeof vwModalForm !== "function"){
-    // fallback: old behavior
-    c.inventory ||= [];
-    c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
-    else toast(res.error||"Failed");
-    return;
-  }
-
-  // Step 1: choose category
-  const step1 = await vwModalForm({
-    title: "Add Inventory Item",
-    okText: "Next",
-    fields: [
-      { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
-    ]
-  });
-  if(!step1) return;
-
-  const items = groups ? (groups[step1.category] || []) : [];
-  const hasItems = Array.isArray(items) && items.length;
-
-  // Step 2: choose item (dropdown when possible) + details
-  const step2 = await vwModalForm({
-    title: "Add Inventory Item",
-    okText: "Add",
-    fields: [
-      ...(hasItems
-        ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
-        : [{ key:"name", label:"Item", placeholder:"Item name" }]),
-      { key:"qty", label:"Qty", placeholder:"1" },
-      { key:"weight", label:"Weight", placeholder:"" },
-      { key:"cost", label:"Cost ($)", placeholder:"" },
-      { key:"notes", label:"Notes", placeholder:"Optional" }
-    ]
-  });
-  if(!step2) return;
-
-  c.inventory ||= [];
-  c.inventory.push({
-    category: step1.category || "",
-    name: step2.name || "",
-    weight: step2.weight || "",
-    qty: step2.qty || "1",
-    cost: step2.cost || "",
-    notes: step2.notes || ""
-  });
-
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
-  else toast(res?.error || "Failed");
-});
+function vwHasModal(){
+  return (typeof vwModalForm === "function") && (typeof vwModalInput === "function" || true);
+}
 
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
-  const name = await vwModalInput({
-    title: "New Character",
-    label: "Character name",
-    placeholder: "e.g. Mara Kincaid"
-  });
+  try{
+    if(typeof vwModalInput !== "function"){ toast("Modal input not available"); return; }
+    const name = await vwModalInput({
+      title: "New Character",
+      label: "Character name",
+      placeholder: "e.g. Mara Kincaid"
+    });
+    if(!name) return;
+
+    const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
+    if(res && res.ok){
+      window.SESSION ||= {};
+      SESSION.activeCharId = res.id;
+      toast("Character created");
+      await refreshAll();
+    }else{
+      toast((res && res.error) ? res.error : "Failed to create character");
+    }
+  }catch(e){
+    console.error(e);
+    toast("Failed to create character");
+  }
+});
+
+document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
+
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const groups =
+      cat?.inventoryItemsByCategory ||
+      cat?.inventory_items_by_category ||
+      cat?.inventoryByCategory ||
+      null;
+
+    const categories = groups ? Object.keys(groups) : [];
+    const safeCats = categories.length ? categories : ["General"];
+
+    if(typeof vwModalForm !== "function"){
+      // fallback: add blank row
+      c.inventory ||= [];
+      c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+      await vwSaveChar(c);
+      toast("Added inventory row");
+      await refreshAll();
+      return;
+    }
+
+    // Step 1: category dropdown
+    const step1 = await vwModalForm({
+      title: "Add Inventory Item",
+      okText: "Next",
+      fields: [
+        { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
+      ]
+    });
+    if(!step1) return;
+
+    const items = groups ? (groups[step1.category] || []) : [];
+    const hasItems = Array.isArray(items) && items.length;
+
+    // Step 2: item dropdown (or manual name) + details
+    const step2 = await vwModalForm({
+      title: "Add Inventory Item",
+      okText: "Add",
+      fields: [
+        ...(hasItems
+          ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
+          : [{ key:"name", label:"Item", placeholder:"Item name" }]),
+        { key:"qty", label:"Qty", placeholder:"1" },
+        { key:"weight", label:"Weight", placeholder:"" },
+        { key:"cost", label:"Cost ($)", placeholder:"" },
+        { key:"notes", label:"Notes", placeholder:"Optional" }
+      ]
+    });
+    if(!step2) return;
+
+    c.inventory ||= [];
+    c.inventory.push({
+      category: step1.category || "",
+      name: step2.name || "",
+      weight: step2.weight || "",
+      qty: step2.qty || "1",
+      cost: step2.cost || "",
+      notes: step2.notes || ""
+    });
+
+    await vwSaveChar(c);
+    toast("Inventory item added");
+    await refreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Failed to add inventory item");
+  }
+});
 
 document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
-  const cat = vwGetCatalog();
-  if(!cat || !cat.inventoryItemsByCategory){ toast("Catalog not loaded"); return; }
-  const categories = Object.keys(cat.inventoryItemsByCategory||{});
-  if(!categories.length){ toast("Catalog has no inventory"); return; }
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
 
-  const step1 = await vwModalForm({
-    title: "Add From Catalog",
-    okText: "Next",
-    fields: [{ key:"cat", label:"Category", type:"select", options: categories.map(x=>({value:x,label:x})) }]
-  });
-  if(!step1) return;
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const groups = cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory;
+    if(!groups){ toast("Catalog not loaded"); return; }
 
-  const items = (cat.inventoryItemsByCategory[step1.cat]||[]).slice();
-  if(!items.length){ toast("No items in that category"); return; }
+    const categories = Object.keys(groups||{});
+    if(!categories.length){ toast("Catalog has no inventory"); return; }
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
 
-  const step2 = await vwModalForm({
-    title: "Add From Catalog",
-    okText: "Add",
-    fields: [
-      { key:"name", label:"Item", type:"select", options: items.map(x=>({value:x,label:x})) },
-      { key:"qty", label:"Qty", placeholder:"1" }
-    ]
-  });
-  if(!step2) return;
+    const step1 = await vwModalForm({
+      title: "Add From Catalog",
+      okText: "Next",
+      fields: [{ key:"category", label:"Category", type:"select", options: categories.map(x=>({value:x,label:x})) }]
+    });
+    if(!step1) return;
 
-  c.inventory ||= [];
-  c.inventory.push({category: step1.cat, name: step2.name, weight:"", qty: step2.qty||"1", cost:"", notes:""});
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Item added"); await refreshAll(); }
-  else toast(res?.error || "Failed to add");
+    const items = (groups[step1.category] || []);
+    if(!items.length){ toast("No items in that category"); return; }
+
+    const step2 = await vwModalForm({
+      title: "Add From Catalog",
+      okText: "Add",
+      fields: [
+        { key:"name", label:"Item", type:"select", options: items.map(n=>({value:n,label:n})) },
+        { key:"qty", label:"Qty", placeholder:"1" }
+      ]
+    });
+    if(!step2) return;
+
+    c.inventory ||= [];
+    c.inventory.push({ category: step1.category, name: step2.name, weight:"", qty: step2.qty || "1", cost:"", notes:"" });
+    await vwSaveChar(c);
+    toast("Item added");
+    await refreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Failed to add from catalog");
+  }
 });
 
 document.getElementById("addWeaponBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
-  const cat = vwGetCatalog();
-  if(!cat || !cat.weapons){ toast("Catalog not loaded"); return; }
-  const all = [].concat(cat.weapons.sidearms||[], cat.weapons.primaries||[], cat.weapons.nonlethal||[], cat.weapons.melee||[], cat.weapons.heavy_restricted||[]);
-  if(!all.length){ toast("Catalog has no weapons"); return; }
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
 
-  const pick = await vwModalForm({
-    title: "Add Weapon",
-    okText: "Add",
-    fields: [{ key:"wid", label:"Weapon", type:"select", options: all.map(w=>({value:w.id,label:w.name})) }]
-  });
-  if(!pick) return;
-  const w = all.find(x=>String(x.id)===String(pick.wid));
-  if(!w){ toast("Weapon not found"); return; }
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const w = cat?.weapons;
+    const all = []
+      .concat(w?.sidearms || [])
+      .concat(w?.primaries || [])
+      .concat(w?.nonlethal || [])
+      .concat(w?.melee || []);
 
-  c.weapons ||= [];
-  // store a shallow copy for sheet display
-  c.weapons.push({ id: w.id, name: w.name, range: w.range||"", hit: w.hit||"", damage: w.damage||"", ammo: w.ammo||null });
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Weapon added"); await refreshAll(); }
-  else toast(res?.error || "Failed to add weapon");
+    if(!all.length){ toast("Catalog has no weapons"); return; }
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+
+    const pick = await vwModalForm({
+      title: "Add Weapon",
+      okText: "Add",
+      fields: [{ key:"wid", label:"Weapon", type:"select", options: all.map(x=>({value:x.id,label:x.name})) }]
+    });
+    if(!pick) return;
+
+    const weapon = all.find(x=>String(x.id)===String(pick.wid));
+    if(!weapon){ toast("Weapon not found"); return; }
+
+    c.weapons ||= [];
+    c.weapons.push({ ...weapon });
+    await vwSaveChar(c);
+    toast("Weapon added");
+    await refreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Failed to add weapon");
+  }
 });
 
 document.getElementById("addAbilityBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
-  const cat = vwGetCatalog();
-  const list = (cat && Array.isArray(cat.abilities)) ? cat.abilities : [];
-  if(!list.length){ toast("Catalog has no abilities"); return; }
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
 
-  const pick = await vwModalForm({
-    title: "Add Ability",
-    okText: "Add",
-    fields: [{ key:"aid", label:"Ability", type:"select", options: list.map(a=>({value:a.id,label:a.name})) }]
-  });
-  if(!pick) return;
-  const a = list.find(x=>String(x.id)===String(pick.aid));
-  if(!a){ toast("Ability not found"); return; }
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const list = Array.isArray(cat?.abilities) ? cat.abilities : [];
+    if(!list.length){
+      // fallback: manual
+      if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+      const out = await vwModalForm({
+        title:"Add Ability",
+        okText:"Add",
+        fields:[
+          {key:"name",label:"Ability Name",placeholder:"e.g. Adrenal Spike"},
+          {key:"type",label:"Type",placeholder:"passive / active / reaction"},
+          {key:"hit",label:"Hit/DC",placeholder:"—"},
+          {key:"effect",label:"Effect",placeholder:"Describe the effect"},
+          {key:"cooldown",label:"Cooldown",placeholder:"—"}
+        ]
+      });
+      if(!out) return;
+      c.abilities ||= [];
+      c.abilities.push({ id: crypto.randomUUID?.() || ("a_"+Math.random().toString(16).slice(2)), ...out });
+      await vwSaveChar(c);
+      toast("Ability added");
+      await refreshAll();
+      return;
+    }
 
-  c.abilities ||= [];
-  c.abilities.push({ ...a });
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Ability added"); await refreshAll(); }
-  else toast(res?.error || "Failed to add ability");
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+    const pick = await vwModalForm({
+      title: "Add Ability",
+      okText: "Add",
+      fields: [{ key:"aid", label:"Ability", type:"select", options: list.map(a=>({value:a.id,label:a.name})) }]
+    });
+    if(!pick) return;
+    const a = list.find(x=>String(x.id)===String(pick.aid));
+    if(!a){ toast("Ability not found"); return; }
+
+    c.abilities ||= [];
+    c.abilities.push({ ...a });
+    await vwSaveChar(c);
+    toast("Ability added");
+    await refreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Failed to add ability");
+  }
 });
 
 document.getElementById("addSpellBtn")?.addEventListener("click", async ()=>{
-  const c = (typeof getChar==="function") ? getChar() : null;
-  if(!c){ toast("Create character first"); return; }
-  const cat = vwGetCatalog();
-  const list = (cat && Array.isArray(cat.spells)) ? cat.spells : [];
-  if(!list.length){ toast("Catalog has no spells"); return; }
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
 
-  const pick = await vwModalForm({
-    title: "Add Spell",
-    okText: "Add",
-    fields: [{ key:"sid", label:"Spell", type:"select", options: list.map(s=>({value:s.id,label:(s.modernName||s.name)})) }]
-  });
-  if(!pick) return;
-  const s = list.find(x=>String(x.id)===String(pick.sid));
-  if(!s){ toast("Spell not found"); return; }
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const list = Array.isArray(cat?.spells) ? cat.spells : [];
+    if(!list.length){
+      // fallback: manual
+      if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+      const out = await vwModalForm({
+        title:"Add Spell",
+        okText:"Add",
+        fields:[
+          {key:"name",label:"Spell Name",placeholder:"e.g. Ghost Signal"},
+          {key:"tier",label:"Tier",placeholder:"0-8"},
+          {key:"castTime",label:"Cast Time",placeholder:"action / bonus / reaction"},
+          {key:"concentration",label:"Concentration",placeholder:"yes/no"},
+          {key:"summary",label:"Summary",placeholder:"Describe the effect"}
+        ]
+      });
+      if(!out) return;
+      c.spells ||= [];
+      c.spells.push({ id: crypto.randomUUID?.() || ("s_"+Math.random().toString(16).slice(2)), ...out });
+      await vwSaveChar(c);
+      toast("Spell added");
+      await refreshAll();
+      return;
+    }
 
-  c.spells ||= [];
-  c.spells.push({ ...s });
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Spell added"); await refreshAll(); }
-  else toast(res?.error || "Failed to add spell");
-});
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+    const pick = await vwModalForm({
+      title: "Add Spell",
+      okText: "Add",
+      fields: [{ key:"sid", label:"Spell", type:"select", options: list.map(s=>({value:s.id,label:(s.modernName||s.name)})) }]
+    });
+    if(!pick) return;
+    const s = list.find(x=>String(x.id)===String(pick.sid));
+    if(!s){ toast("Spell not found"); return; }
 
-  if(!name) return;
-
-  // DM can optionally create unassigned characters via Import workflow; this button creates under the current user by default.
-  const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
-  if(res && res.ok){
-    SESSION.activeCharId = res.id;
-    toast("Character created");
+    c.spells ||= [];
+    c.spells.push({ ...s });
+    await vwSaveChar(c);
+    toast("Spell added");
     await refreshAll();
-  }else{
-    toast((res && res.error) ? res.error : "Failed to create character");
+  }catch(e){
+    console.error(e);
+    toast("Failed to add spell");
   }
 });
 
-bInv.__vwBound = true;
-  }
-  if (bAb && !bAb.__vwBound) {
-    bAb.addEventListener("click", (e)=>{ e.preventDefault(); vwAddAbility?.(); });
-    bAb.__vwBound = true;
-  }
-  if (bSp && !bSp.__vwBound) {
-    bSp.addEventListener("click", (e)=>{ e.preventDefault(); vwAddSpell?.(); });
-    bSp.__vwBound = true;
-  }
-  if (bWeap && !bWeap.__vwBound) {
-    bWeap.addEventListener("click", (e)=>{ e.preventDefault(); vwAddWeaponFromCatalog?.(); });
-    bWeap.__vwBound = true;
-  }
-  if (bInvCat && !bInvCat.__vwBound) {
-    bInvCat.addEventListener("click", (e)=>{ e.preventDefault(); vwAddInventoryFromCatalog?.(); });
-    bInvCat.__vwBound = true;
-  }
-  if (bNew && !bNew.__vwBound) {
-    bNew.addEventListener("click", (e)=>{ e.preventDefault(); vwNewCharacterWizard?.(); });
-    bNew.__vwBound = true;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Bind once after DOM is ready; tab switches can recreate content, so we re-run on render too.
-  vwBindCharacterButtons_v2();
-});
