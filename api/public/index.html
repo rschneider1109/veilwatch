@@ -9,7 +9,7 @@
 <body>
 <div id="loginOverlay">
   <div class="panel loginCard">
-    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.4</span></div>
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.5</span></div>
     <div class="mini">Log in or create an account. The <b>first</b> account created becomes the DM automatically.</div>
     <hr/>
     <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
@@ -56,7 +56,7 @@
       <h3>Session Clock</h3>
       <div class="mini" id="sessionClockMini">00:00</div>
     </div>
-    
+
     <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
       <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters</h3>
       <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
@@ -77,86 +77,16 @@
         </div>
       </div>
       <div class="grid cards" id="dmActivePartyCards" style="margin-top:12px;"></div>
-      <div class="mini" style="margin-top:8px;color:var(--muted);">Active = the characters currently being played at the table (DM controlled).</div>
+      <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP/AC/Stats/Init pills to edit (autosaves).</div>
+      <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (DM controlled).</div>
     </div>
 
-<div class="panel" style="grid-column:span 12;">
+    <div class="panel" style="grid-column:span 12;">
       <h3 style="margin:0 0 8px 0;color:var(--accent);">Quick Launch</h3>
       <div class="row">
         <button class="btn" data-go="character">Character</button>
         <button class="btn" data-go="intel">Intel</button>
         <button class="btn" data-go="shop">Shop</button>
-      </div>
-
-      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
-        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-          <div style="min-width:160px;">
-            <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
-            <input class="input" id="hpCur" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
-            <input class="input" id="hpMax" placeholder="0" style="width:120px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Temp HP</div>
-            <input class="input" id="hpTemp" placeholder="0" style="width:120px;"/>
-          </div>
-          <div style="min-width:110px;">
-            <div class="mini" style="margin-bottom:6px;">AC</div>
-            <input class="input" id="acVal" placeholder="0" style="width:90px;"/>
-          </div>
-          <div style="min-width:130px;">
-            <div class="mini" style="margin-bottom:6px;">Initiative</div>
-            <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Speed</div>
-            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
-          </div>
-          <div style="min-width:160px;">
-            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
-            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
-            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
-          </div>
-        </div>
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div class="pill">Stats</div>
-          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
-        </div>
-        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
-          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
-          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
-          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
-          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
-          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
-          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
-        </div>
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div class="pill">Conditions</div>
-          <div class="mini">Toggle active conditions.</div>
-        </div>
-        
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:260px;">
-            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
-            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
-          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
-          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
-          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
-        </div>
-
-        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
       </div>
     </div>
   </section>
@@ -242,7 +172,7 @@
           <div class="pill">Conditions</div>
           <div class="mini">Toggle active conditions.</div>
         </div>
-        
+        <div class="row" id="condRow" style="gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
 
         <hr/>
 
@@ -259,7 +189,7 @@
           <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
         </div>
 
-        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Delete/Duplicate are DM-only.</div>
       </div>
     </div>
   </section>
@@ -305,6 +235,7 @@
           </table>
         </div>
       </div>
+
       <div id="playerIntel">
         <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;">
           <div class="pill">Intel</div>
@@ -334,77 +265,6 @@
           <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>STATUS</th><th>DM NOTES</th></tr></thead>
           <tbody id="playerReqBody"></tbody>
         </table>
-      </div>
-
-      <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
-        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-          <div style="min-width:160px;">
-            <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
-            <input class="input" id="hpCur" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
-            <input class="input" id="hpMax" placeholder="0" style="width:120px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Temp HP</div>
-            <input class="input" id="hpTemp" placeholder="0" style="width:120px;"/>
-          </div>
-          <div style="min-width:110px;">
-            <div class="mini" style="margin-bottom:6px;">AC</div>
-            <input class="input" id="acVal" placeholder="0" style="width:90px;"/>
-          </div>
-          <div style="min-width:130px;">
-            <div class="mini" style="margin-bottom:6px;">Initiative</div>
-            <input class="input" id="initVal" placeholder="+0" style="width:110px;"/>
-          </div>
-          <div style="min-width:140px;">
-            <div class="mini" style="margin-bottom:6px;">Speed</div>
-            <input class="input" id="spdVal" placeholder="30" style="width:110px;"/>
-          </div>
-          <div style="min-width:160px;">
-            <div class="mini" style="margin-bottom:6px;">Money (cash / bank)</div>
-            <input class="input" id="cashVal" placeholder="0" style="width:120px;"/> <span class="mini">/</span>
-            <input class="input" id="bankVal" placeholder="0" style="width:120px;"/>
-          </div>
-        </div>
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div class="pill">Stats</div>
-          <div class="mini">STR/DEX/CON/INT/WIS/CHA</div>
-        </div>
-        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px;">
-          <input class="input" id="statSTR" placeholder="STR" style="width:90px;"/>
-          <input class="input" id="statDEX" placeholder="DEX" style="width:90px;"/>
-          <input class="input" id="statCON" placeholder="CON" style="width:90px;"/>
-          <input class="input" id="statINT" placeholder="INT" style="width:90px;"/>
-          <input class="input" id="statWIS" placeholder="WIS" style="width:90px;"/>
-          <input class="input" id="statCHA" placeholder="CHA" style="width:90px;"/>
-        </div>
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div class="pill">Conditions</div>
-          <div class="mini">Toggle active conditions.</div>
-        </div>
-        
-
-        <hr/>
-
-        <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:260px;">
-            <div class="mini" style="margin-bottom:6px;">Notes / Bio</div>
-            <textarea class="input" id="notesBio" placeholder="Background, contacts, aliases..." style="width:100%;min-height:140px;resize:vertical;"></textarea>
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
-          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
-          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
-          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
-        </div>
-
-        <div class="mini" style="margin-top:8px;color:var(--muted);">Sheet is stored with the character. Delete/Duplicate are DM-only.</div>
       </div>
     </div>
   </section>
@@ -452,8 +312,7 @@
         </div>
         <button class="btn smallbtn" id="saveDmKeyBtn">Save DM Passkey</button>
       </div>
-      <hr/>
-      
+
       <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: keep backups before imports. State is auto-saved.</div>
     </div>
   </section>
@@ -461,13 +320,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="/js/core.js" defer></script>
-<script src="/js/state.js" defer></script>
-<script src="/js/stream.js" defer></script>
-<script src="/js/characters.js" defer></script>
-<script src="/js/shop.js" defer></script>
-<script src="/js/notifications.js" defer></script>
-<script src="/js/intel.js" defer></script>
 <!-- Veilwatch Modal -->
 <div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
   <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;">
@@ -479,5 +331,13 @@
     </div>
   </div>
 </div>
+
+<script src="/js/core.js" defer></script>
+<script src="/js/state.js" defer></script>
+<script src="/js/stream.js" defer></script>
+<script src="/js/characters.js" defer></script>
+<script src="/js/shop.js" defer></script>
+<script src="/js/notifications.js" defer></script>
+<script src="/js/intel.js" defer></script>
 </body>
 </html>
