@@ -466,7 +466,6 @@ async function refreshAll(){
   try{ await vwHydrateCharacterSelect(st); }catch(e){}
 
   const mini = document.getElementById("activeCharMini");
-  const mini = document.getElementById("activeCharMini");
   if(mini){
     const nm = SESSION.activeCharId ? (st.characters || []).find(c=>c.id===SESSION.activeCharId)?.name : null;
     mini.textContent = nm || "None selected";
