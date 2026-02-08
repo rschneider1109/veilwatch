@@ -51,12 +51,5 @@ th{color:var(--muted);font-weight:600;}
 @keyframes intelPulse{0%{box-shadow:0 0 0 rgba(255,60,60,.0);}50%{box-shadow:0 0 18px rgba(255,60,60,.55);}100%{box-shadow:0 0 0 rgba(255,60,60,.0);}}
 
 
-/* Character sheet: intentional locked attribute fields */
-.vwLockedField[disabled],
-.vwLockedField:disabled{
-  opacity: .75;
-  cursor: not-allowed;
-}
-.vwLockedField[disabled]{
-  background: rgba(255,255,255,.02);
-}
+/* Intentional read-only fields */
+.input.readonly{opacity:.85;cursor:not-allowed;}
