@@ -96,6 +96,28 @@ function vwModalForm(opts){
       const placeholder = String(f.placeholder || "").replace(/"/g, "&quot;");
       const value = String(f.value ?? "");
       const type = f.type || "text";
+      if(type === "select"){
+        const opts = Array.isArray(f.options) ? f.options : [];
+        const norm = opts.map(o=>{
+          if(typeof o === "string") return { value:o, label:o };
+          return { value: String(o.value ?? o.label ?? ""), label: String(o.label ?? o.value ?? "") };
+        });
+        const selected = String(f.value ?? "");
+        const optionsHtml = norm.map((o,i)=>{
+          const v = String(o.value).replace(/"/g,"&quot;");
+          const lab = String(o.label);
+          const sel = (selected && selected===o.value) ? " selected" : (!selected && i===0 ? " selected" : "");
+          return `<option value="${v}"${sel}>${lab}</option>`;
+        }).join("");
+        return (
+          '<div style="margin-bottom:10px">' +
+            '<div class="mini" style="margin-bottom:6px;opacity:.9">'+label+'</div>' +
+            '<select class="input" data-key="'+key+'" style="width:100%">' +
+              optionsHtml +
+            '</select>' +
+          '</div>'
+        );
+      }
       if(type === "textarea"){
         return (
           '<div style="margin-bottom:10px">' +

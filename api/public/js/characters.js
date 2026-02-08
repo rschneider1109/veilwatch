@@ -819,6 +819,14 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
       window.SESSION ||= {};
       SESSION.activeCharId = res.id;
       toast("Character created");
+      renderTabs("character");
+      // Switch character sub-tab to sheet
+      document.querySelectorAll("[data-ctab]").forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
+      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-abilities")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-spells")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
       await refreshAll();
     }else{
       toast((res && res.error) ? res.error : "Failed to create character");
@@ -830,76 +838,71 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
 });
 
 document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
-  try{
-    const c = (typeof getChar==="function") ? getChar() : null;
-    if(!c){ toast("Create character first"); return; }
+  const c = getChar();
+  if(!c){ toast("Create character first"); return; }
 
-    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const groups =
-      cat?.inventoryItemsByCategory ||
-      cat?.inventory_items_by_category ||
-      cat?.inventoryByCategory ||
-      null;
+  const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+  const groups =
+    cat?.inventoryItemsByCategory ||
+    cat?.inventory_items_by_category ||
+    cat?.inventoryByCategory ||
+    null;
 
-    const categories = groups ? Object.keys(groups) : [];
-    const safeCats = categories.length ? categories : ["General"];
+  const categories = groups ? Object.keys(groups) : [];
+  const safeCats = categories.length ? categories : ["General"];
 
-    if(typeof vwModalForm !== "function"){
-      // fallback: add blank row
-      c.inventory ||= [];
-      c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-      await vwSaveChar(c);
-      toast("Added inventory row");
-      await refreshAll();
-      return;
-    }
-
-    // Step 1: category dropdown
-    const step1 = await vwModalForm({
-      title: "Add Inventory Item",
-      okText: "Next",
-      fields: [
-        { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
-      ]
-    });
-    if(!step1) return;
-
-    const items = groups ? (groups[step1.category] || []) : [];
-    const hasItems = Array.isArray(items) && items.length;
-
-    // Step 2: item dropdown (or manual name) + details
-    const step2 = await vwModalForm({
-      title: "Add Inventory Item",
-      okText: "Add",
-      fields: [
-        ...(hasItems
-          ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
-          : [{ key:"name", label:"Item", placeholder:"Item name" }]),
-        { key:"qty", label:"Qty", placeholder:"1" },
-        { key:"weight", label:"Weight", placeholder:"" },
-        { key:"cost", label:"Cost ($)", placeholder:"" },
-        { key:"notes", label:"Notes", placeholder:"Optional" }
-      ]
-    });
-    if(!step2) return;
-
+  if(typeof vwModalForm !== "function"){
+    // fallback: old behavior
     c.inventory ||= [];
-    c.inventory.push({
-      category: step1.category || "",
-      name: step2.name || "",
-      weight: step2.weight || "",
-      qty: step2.qty || "1",
-      cost: step2.cost || "",
-      notes: step2.notes || ""
-    });
-
-    await vwSaveChar(c);
-    toast("Inventory item added");
-    await refreshAll();
-  }catch(e){
-    console.error(e);
-    toast("Failed to add inventory item");
+    c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
+    else toast(res.error||"Failed");
+    return;
   }
+
+  // Step 1: choose category
+  const step1 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Next",
+    fields: [
+      { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
+    ]
+  });
+  if(!step1) return;
+
+  const items = groups ? (groups[step1.category] || []) : [];
+  const hasItems = Array.isArray(items) && items.length;
+
+  // Step 2: choose item + details
+  const step2 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Add",
+    fields: [
+      ...(hasItems
+        ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
+        : [{ key:"name", label:"Item", placeholder:"Item name" }]),
+      { key:"qty", label:"Qty", placeholder:"1" },
+      { key:"weight", label:"Weight", placeholder:"" },
+      { key:"cost", label:"Cost ($)", placeholder:"" },
+      { key:"notes", label:"Notes", placeholder:"Optional" }
+    ]
+  });
+  if(!step2) return;
+
+  c.inventory ||= [];
+  c.inventory.push({
+    category: step1.category || "",
+    name: step2.name || "",
+    weight: step2.weight || "",
+    qty: step2.qty || "1",
+    cost: step2.cost || "",
+    notes: step2.notes || ""
+  });
+
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
+  else toast(res?.error || "Failed");
 });
 
 document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async ()=>{
