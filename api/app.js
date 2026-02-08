@@ -59,7 +59,10 @@ async function dbSaveState(st){
 // Persistence paths
 // -----------------------------
 const PORT = parseInt(process.env.PORT || "8080", 10);
-const DATA_DIR = "/app/data";
+// Data directory for persistent files (state/users).
+// - In Docker, set VEILWATCH_DATA_DIR=/app/data and mount that path as a volume.
+// - In local dev, default to ./api/data
+const DATA_DIR = process.env.VEILWATCH_DATA_DIR || path.join(__dirname, "data");
 const STATE_PATH = path.join(DATA_DIR, "state.json");
 const USERS_PATH = path.join(DATA_DIR, "users.json");
 
