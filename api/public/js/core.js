@@ -337,10 +337,6 @@ document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
       if(e.key==="Enter") doAuth("/api/auth/login");
     });
   }
-}"");
-    };
-  }
-}
 authInit();
 
 async function refreshAll(){
