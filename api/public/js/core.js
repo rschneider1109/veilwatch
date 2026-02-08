@@ -161,7 +161,7 @@ function vwModalForm(opts){
   });
 }
 
-let SESSION = { role:null, name:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
+let SESSION = { role:null, username:null, userId:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
 // --- Intel indicator safety stubs (prevents runtime errors if blocks move during patching) ---
 if(typeof window.VW_INTEL_UNSEEN === "undefined"){
   window.VW_INTEL_UNSEEN = { count: 0, seenIds: new Set(), armed: false };
@@ -207,6 +207,8 @@ function setRoleUI(){
   document.getElementById("editShopBtn").classList.toggle("hidden", SESSION.role!=="dm");
   document.getElementById("settingsTabBtn").classList.toggle("hidden", SESSION.role!=="dm");
   document.getElementById("tab-settings").classList.toggle("hidden", SESSION.role!=="dm");
+  const imp=document.getElementById("importPlayerBtn"); if(imp) imp.classList.toggle("hidden", SESSION.role!=="dm");
+  const logoutBtn=document.getElementById("logoutBtn"); if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 }
 async function api(path, opts={}){
   opts.headers ||= {};
@@ -260,67 +262,86 @@ document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));
   document.getElementById("itab-notifications").classList.toggle("hidden", b.dataset.itab!=="notifications");
   document.getElementById("itab-clues").classList.toggle("hidden", b.dataset.itab!=="clues");
-  document.getElementById("itab-archived").classList.toggle("hidden", b.dataset.itab!=="archived");
-});
+  document.getElementById("itab-archived").classList.toggle("hidden", b.dataset.itab!=="function authInit(){
+  const overlay=document.getElementById("loginOverlay");
+  const userEl=document.getElementById("authUser");
+  const passEl=document.getElementById("authPass");
+  const loginBtn=document.getElementById("loginBtn");
+  const regBtn=document.getElementById("registerBtn");
+  const hint=document.getElementById("authHint");
+  const logoutBtn=document.getElementById("logoutBtn");
 
-function loginInit(){
-  const roleSel=document.getElementById("whoRole");
-  const dmRow=document.getElementById("dmKeyRow");
-  const playerRow=document.getElementById("playerBtnRow");
-  const dmKeyInput=document.getElementById("dmKey");
-  const dmBtn=document.getElementById("loginBtn");
-  const playerBtn=document.getElementById("loginPlayerBtn");
+  async function hydrateSession(){
+    try{
+      const me = await api("/api/auth/me", { method:"GET", headers:{} });
+      if(me && me.loggedIn && me.user){
+        SESSION.role = me.user.role;
+        SESSION.username = me.user.username;
+        SESSION.userId = me.user.id;
+        if(me.user.activeCharId) SESSION.activeCharId = me.user.activeCharId;
 
-  function applyRoleUI(){
-    const isDM = roleSel && roleSel.value==="dm";
-    if(dmRow) dmRow.classList.toggle("hidden", !isDM);
-    // If the old "player button row" doesn't exist in this build, don't crash.
-    if(playerRow) playerRow.classList.toggle("hidden", isDM);
-    // Make the primary button work either way (prevents "can't login" even if UI doesn't toggle perfectly)
-    if(dmBtn) dmBtn.textContent = isDM ? "Login" : "Continue";
-    if(dmKeyInput) dmKeyInput.disabled = !isDM;
-    if(dmKeyInput && !isDM) dmKeyInput.value = "";
-  }
-  if(roleSel) roleSel.onchange=applyRoleUI;
-  applyRoleUI();
+        const who = document.getElementById("whoPill");
+        if(who) who.textContent = (SESSION.role==="dm" ? "DM: " : "Player: ") + (SESSION.username||"");
 
-  async function finishLogin(role, name, dmKey){
-    SESSION.role=role;
-    SESSION.name=name;
-    SESSION.dmKey=dmKey||"";
-    document.getElementById("whoPill").textContent = (role==="dm" ? "DM: " : "Player: ") + name;
-    document.getElementById("loginOverlay").style.display="none";
-    setRoleUI();
-    await refreshAll();
-    if(typeof vwStartStream==="function" && SESSION && SESSION.role) vwStartStream();
-    if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
-  }
+        if(overlay) overlay.style.display="none";
+        if(logoutBtn) logoutBtn.classList.remove("hidden");
 
-  // Primary button: DM login if role=dm, otherwise Player login.
-  if(dmBtn){
-    dmBtn.onclick=async ()=>{
-      const role = (roleSel && roleSel.value) || "player";
-      const name=(document.getElementById("whoName").value.trim() || (role==="dm" ? "DM" : "Player"));
-      if(role==="dm"){
-        const key=document.getElementById("dmKey").value.trim();
-        const res = await api("/api/dm/login",{method:"POST",body:JSON.stringify({name, key})});
-        if(!res.ok){ toast(res.error||"Denied"); return; }
-        await finishLogin("dm", name, key);
-      } else {
-        await finishLogin("player", name, "");
+        setRoleUI();
+        await refreshAll();
+        if(typeof vwStartStream==="function") vwStartStream();
+        if(typeof vwStartFallbackPoller==="function") vwStartFallbackPoller();
+        return true;
       }
-    };
+    }catch(e){}
+    return false;
   }
 
-  // If a separate player button exists, wire it too (optional).
-  if(playerBtn){
-    playerBtn.onclick=async ()=>{
-      const name=document.getElementById("whoName").value.trim()||"Player";
-      await finishLogin("player", name, "");
+  async function doAuth(path){
+    const username = (userEl && userEl.value ? userEl.value : "").trim();
+    const password = (passEl && passEl.value ? passEl.value : "");
+    if(!username || !password){
+      toast("Enter username + password");
+      return;
+    }
+    const res = await api(path,{method:"POST",body:JSON.stringify({username,password})});
+    if(!res.ok){
+      toast(res.error||"Denied");
+      return;
+    }
+    await hydrateSession();
+  }
+
+  if(loginBtn) loginBtn.onclick=()=>doAuth("/api/auth/login");
+  if(regBtn) regBtn.onclick=()=>doAuth("/api/auth/register");
+
+  if(logoutBtn) logoutBtn.onclick=async ()=>{
+    try{ await api("/api/auth/logout",{method:"POST",body:JSON.stringify({})}); }catch(e){}
+    SESSION.role=null; SESSION.username=null; SESSION.userId=null; SESSION.activeCharId=null;
+    const who = document.getElementById("whoPill");
+    if(who) who.textContent = "Not logged in";
+    if(logoutBtn) logoutBtn.classList.add("hidden");
+    if(overlay) overlay.style.display="flex";
+  };
+
+  // Try to auto-resume session via cookie
+  hydrateSession().then((ok)=>{
+    if(!ok){
+      if(overlay) overlay.style.display="flex";
+      if(hint) hint.textContent = "Login or create an account. First account becomes DM automatically.";
+    }
+  });
+
+  // Enter triggers login
+  if(passEl){
+    passEl.addEventListener("keydown",(e)=>{
+      if(e.key==="Enter") doAuth("/api/auth/login");
+    });
+  }
+}"");
     };
   }
 }
-loginInit();
+authInit();
 
 async function refreshAll(){
   const st = await api("/api/state");
@@ -347,6 +368,7 @@ async function refreshAll(){
   renderShop();
   // DM panels
   renderDM();
+  if(typeof renderDMActiveParty==="function") renderDMActiveParty();
   if(typeof renderIntelDM==='function') renderIntelDM();
   if(typeof renderIntelPlayer==='function') renderIntelPlayer();
   renderCharacter();
