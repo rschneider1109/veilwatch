@@ -96,6 +96,23 @@ function vwModalForm(opts){
       const placeholder = String(f.placeholder || "").replace(/"/g, "&quot;");
       const value = String(f.value ?? "");
       const type = f.type || "text";
+      if(type === "select"){
+        const opts = Array.isArray(f.options) ? f.options : [];
+        const optHtml = opts.map(o=>{
+          const val = String(o.value ?? o);
+          const lab = String(o.label ?? o);
+          const sel = (val === value) ? " selected" : "";
+          return '<option value="' + val.replace(/"/g,"&quot;") + '"' + sel + '>' + lab.replace(/</g,"&lt;") + '</option>';
+        }).join("");
+        return (
+          '<div style="margin-bottom:10px">' +
+            '<div class="mini" style="margin-bottom:6px;opacity:.9">'+label+'</div>' +
+            '<select class="input" data-key="'+key+'" style="width:100%;">' +
+              optHtml +
+            '</select>' +
+          '</div>'
+        );
+      }
       if(type === "textarea"){
         return (
           '<div style="margin-bottom:10px">' +
@@ -254,26 +271,14 @@ document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>renderTabs(b.dat
 // character sub-tabs
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
-  const a = document.getElementById("ctab-actions");
-  const i = document.getElementById("ctab-inventory");
-  const s = document.getElementById("ctab-sheet");
-  if(a) a.classList.toggle("hidden", b.dataset.ctab !== "actions");
-  if(i) i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
-  if(s) s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
-});
-
-// sheet sub-tabs (inside Character sheet)
-document.querySelectorAll("[data-stab]").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll("[data-stab]").forEach(x=>x.classList.toggle("active", x===b));
   const ids = ["overview","inventory","actions","conditions","notes"];
   ids.forEach(id=>{
-    const el = document.getElementById("stab-"+id);
-    if(el) el.classList.toggle("hidden", b.dataset.stab !== id);
+    const el = document.getElementById("ctab-"+id);
+    if(el) el.classList.toggle("hidden", b.dataset.ctab !== id);
   });
 });
 
-
-// intel sub-tabs (DM)
+// intel sub-tabs (DM) (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));
   const n = document.getElementById("itab-notifications");
