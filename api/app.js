@@ -228,7 +228,38 @@ function isDM(req){
   return key && key === state.settings.dmKey;
 }
 
-const INDEX_HTML = fs.readFileSync(path.join(__dirname,"public","index.html"),"utf8");
+
+    function loadIndexHtml(){
+      try{
+        return fs.readFileSync(path.join(__dirname,"public","index.html"),"utf8");
+      }catch(e){
+        console.warn("Veilwatch OS: public/index.html not found. Did you copy the /public folder into the container image?");
+        return `<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Veilwatch OS - Missing public/</title>
+<style>
+body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#d9e2ef;margin:0;padding:32px}
+.card{max-width:820px;margin:0 auto;background:#101826;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:22px}
+code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px}
+h1{margin:0 0 10px 0;font-size:22px}
+p{line-height:1.45}
+ul{line-height:1.6}
+</style></head>
+<body>
+<div class="card">
+  <h1>Missing <code>/public</code> folder in container</h1>
+  <p>Your server is running, but the UI files are not present inside the Docker image.</p>
+  <p>Fix:</p>
+  <ul>
+    <li>Make sure the repo includes the <code>public/</code> directory.</li>
+    <li>Update your Dockerfile to copy it, e.g. <code>COPY public ./public</code></li>
+    <li>Rebuild and redeploy.</li>
+  </ul>
+</div>
+</body></html>`;
+      }
+    }
+    const INDEX_HTML = loadIndexHtml();
 
 const server = http.createServer(async (req,res)=>{
   const parsed = url.parse(req.url, true);
@@ -262,6 +293,44 @@ if(p === "/client.js"){
 }
 
   
+
+// Static file server (for /public/*). Keeps modular UI working.
+// NOTE: must come before API routing.
+if(req.method === "GET"){
+  const pubRoot = path.join(__dirname, "public");
+  // Serve index for "/" and "/index.html"
+  if(p === "/" || p === "/index.html"){
+    return text(res, 200, INDEX_HTML, "text/html; charset=utf-8");
+  }
+  // Attempt to serve anything else from /public (styles, scripts, images)
+  if(!p.startsWith("/api/") && !p.startsWith("/ws")){
+    const safePath = path.normalize(p).replace(/^(\.\.(\/|\\|$))+/, "");
+    const filePath = path.join(pubRoot, safePath);
+    // prevent directory traversal
+    if(filePath.startsWith(pubRoot)){
+      try{
+        if(fs.existsSync(filePath) && fs.statSync(filePath).isFile()){
+          const ext = path.extname(filePath).toLowerCase();
+          const mime =
+            ext === ".css" ? "text/css; charset=utf-8" :
+            ext === ".js"  ? "application/javascript; charset=utf-8" :
+            ext === ".html"? "text/html; charset=utf-8" :
+            ext === ".png" ? "image/png" :
+            ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
+            ext === ".svg" ? "image/svg+xml; charset=utf-8" :
+            ext === ".ico" ? "image/x-icon" :
+            "application/octet-stream";
+          const buf = fs.readFileSync(filePath);
+          res.writeHead(200, {"Content-Type": mime, "Cache-Control":"no-store"});
+          return res.end(buf);
+        }
+      }catch(e){
+        // fallthrough to normal routing
+      }
+    }
+  }
+}
+
 // API
 if(p === "/api/stream" && req.method==="GET"){
   // SSE stream. DM passes ?k=dmKey because EventSource can't set headers.
