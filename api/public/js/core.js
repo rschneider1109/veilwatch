@@ -168,105 +168,6 @@ window.__STATE = window.__STATE || {};
 window.SESSION = window.SESSION || { role:null, username:null, userId:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
 const SESSION = window.SESSION;
 
-// ---- Character visibility helpers (player-first) ----
-window.__VW_DM_USERS = window.__VW_DM_USERS || { map:null, at:0 };
-
-async function vwGetDMUserMap(){
-  if(SESSION.role !== "dm") return null;
-  const now = Date.now();
-  if(window.__VW_DM_USERS.map && (now - window.__VW_DM_USERS.at) < 60000){
-    return window.__VW_DM_USERS.map;
-  }
-  try{
-    const res = await api("/api/dm/users");
-    if(res && res.ok && Array.isArray(res.users)){
-      const m = {};
-      res.users.forEach(u=>{ m[String(u.id)] = u.username || ("User "+u.id); });
-      window.__VW_DM_USERS = { map:m, at:now };
-      return m;
-    }
-  }catch(e){}
-  return window.__VW_DM_USERS.map;
-}
-
-function vwVisibleCharacters(st){
-  const all = Array.isArray(st.characters) ? st.characters : [];
-  if(SESSION.role === "dm") return all;
-  // Player: only show owned characters.
-  return all.filter(c => String(c.ownerUserId||"") === String(SESSION.userId||""));
-}
-
-async function vwHydrateCharacterSelect(st){
-  const sel = document.getElementById("charSel");
-  if(!sel) return;
-
-  const vis = vwVisibleCharacters(st);
-  const activeWas = SESSION.activeCharId;
-
-  // If current selection isn't visible anymore, fall back.
-  if(activeWas && !vis.some(c=>String(c.id)===String(activeWas))){
-    SESSION.activeCharId = vis.length ? vis[0].id : null;
-  }
-  if(!SESSION.activeCharId && vis.length) SESSION.activeCharId = vis[0].id;
-
-  sel.innerHTML = "";
-
-  if(SESSION.role === "dm"){
-    const userMap = await vwGetDMUserMap() || {};
-    const byOwner = {};
-    const unassigned = [];
-    vis.forEach(c=>{
-      const oid = c.ownerUserId ? String(c.ownerUserId) : "";
-      if(!oid) unassigned.push(c);
-      else (byOwner[oid] ||= []).push(c);
-    });
-
-    const ownerIds = Object.keys(byOwner).sort((a,b)=>{
-      const an = (userMap[a]||"").toLowerCase();
-      const bn = (userMap[b]||"").toLowerCase();
-      return an.localeCompare(bn);
-    });
-
-    ownerIds.forEach(oid=>{
-      const g = document.createElement("optgroup");
-      g.label = userMap[oid] || ("User " + oid);
-      (byOwner[oid]||[]).slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
-        const o = document.createElement("option");
-        o.value = c.id; o.textContent = c.name || ("Character " + c.id);
-        g.appendChild(o);
-      });
-      sel.appendChild(g);
-    });
-
-    if(unassigned.length){
-      const g = document.createElement("optgroup");
-      g.label = "Unassigned";
-      unassigned.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
-        const o = document.createElement("option");
-        o.value = c.id; o.textContent = c.name || ("Character " + c.id);
-        g.appendChild(o);
-      });
-      sel.appendChild(g);
-    }
-  }else{
-    vis.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
-      const o = document.createElement("option");
-      o.value = c.id; o.textContent = c.name || ("Character " + c.id);
-      sel.appendChild(o);
-    });
-  }
-
-  if(SESSION.activeCharId) sel.value = SESSION.activeCharId;
-
-  sel.onchange = ()=>{
-    SESSION.activeCharId = sel.value || null;
-    if(typeof renderCharacter === "function") renderCharacter();
-    if(typeof renderSheet === "function") renderSheet();
-  };
-}
-window.vwHydrateCharacterSelect = vwHydrateCharacterSelect;
-
-
 // ---- Intel indicator safety stubs (prevents runtime errors if blocks move) ----
 if(typeof window.vwSyncSeenBaseline !== "function") window.vwSyncSeenBaseline = ()=>{};
 if(typeof window.vwComputeUnseen !== "function") window.vwComputeUnseen = ()=>{};
@@ -360,6 +261,17 @@ document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   if(i) i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
   if(s) s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
 });
+
+// sheet sub-tabs (inside Character sheet)
+document.querySelectorAll("[data-stab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-stab]").forEach(x=>x.classList.toggle("active", x===b));
+  const ids = ["overview","inventory","actions","conditions","notes"];
+  ids.forEach(id=>{
+    const el = document.getElementById("stab-"+id);
+    if(el) el.classList.toggle("hidden", b.dataset.stab !== id);
+  });
+});
+
 
 // intel sub-tabs (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
@@ -462,8 +374,23 @@ async function refreshAll(){
   if(typeof vwStartStream === "function") vwStartStream();
   if(typeof vwStartFallbackPoller === "function") vwStartFallbackPoller();
 
-  // characters (player-first): DM sees grouped; players see only theirs
-  try{ await vwHydrateCharacterSelect(st); }catch(e){}
+  // characters dropdown
+  const sel = document.getElementById("charSel");
+  if(sel){
+    sel.innerHTML = "";
+    (st.characters || []).forEach(c=>{
+      const o = document.createElement("option");
+      o.value = c.id; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+    if(!SESSION.activeCharId && (st.characters || []).length) SESSION.activeCharId = st.characters[0].id;
+    if(SESSION.activeCharId) sel.value = SESSION.activeCharId;
+    sel.onchange = ()=>{
+      SESSION.activeCharId = sel.value;
+      if(typeof renderCharacter === "function") renderCharacter();
+      if(typeof renderSheet === "function") renderSheet();
+    };
+  }
 
   const mini = document.getElementById("activeCharMini");
   if(mini){
