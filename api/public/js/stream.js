@@ -1,3 +1,13 @@
+function vwIsEditingCharacterSheet(){
+  const ae = document.activeElement;
+  if(!ae) return false;
+  const tag = (ae.tagName||'').toUpperCase();
+  if(tag==='INPUT' || tag==='TEXTAREA'){
+    try{ if(ae.closest && ae.closest('#tab-character')) return true; }catch(e){}
+  }
+  return false;
+}
+
 let __vwES = null;
 let __vwStreamLastMsg = 0;
 let __vwStreamBackoff = 1000;
@@ -19,6 +29,16 @@ function vwStartStream(){
       if(typeof vwComputeUnseen==="function") vwComputeUnseen();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
       if(typeof renderIntelDM==="function") renderIntelDM();
+      try{ if(typeof vwHydrateCharacterSelect==="function") await vwHydrateCharacterSelect(st); }catch(e){}
+      if(!vwIsEditingCharacterSheet()){
+        if(typeof renderCharacter==="function") renderCharacter();
+        if(typeof renderSheet==="function") renderSheet();
+      }
+      try{ if(typeof vwHydrateCharacterSelect==="function") await vwHydrateCharacterSelect(st); }catch(e){}
+      if(!vwIsEditingCharacterSheet()){
+        if(typeof renderCharacter==="function") renderCharacter();
+        if(typeof renderSheet==="function") renderSheet();
+      }
     }catch(e){}
   });
 
