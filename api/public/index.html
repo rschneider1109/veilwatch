@@ -383,10 +383,14 @@
 
 <!-- Veilwatch Modal -->
 <div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
-  <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;">
-    <div id="vwModalTitle" style="font-size:18px;margin-bottom:10px;">Modal</div>
-    <div id="vwModalBody"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+  <!--
+    IMPORTANT: modal body can get tall (character creation). We keep the card within the viewport
+    and make only the body scrollable so the title + actions never disappear off-screen.
+  -->
+  <div style="width:min(560px,92vw);background:#0f1722;border:1px solid #2b3a4d;border-radius:14px;padding:16px;color:#e9f1ff;display:flex;flex-direction:column;max-height:90vh;overflow:hidden;">
+    <div id="vwModalTitle" style="font-size:18px;margin-bottom:10px;flex:0 0 auto;">Modal</div>
+    <div id="vwModalBody" style="flex:1 1 auto;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex:0 0 auto;">
       <button id="vwModalCancel" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:transparent;color:#e9f1ff;cursor:pointer;">Cancel</button>
       <button id="vwModalOk" style="padding:10px 14px;border-radius:12px;border:1px solid #2b3a4d;background:#19324f;color:#e9f1ff;cursor:pointer;">OK</button>
     </div>
