@@ -97,18 +97,49 @@ function vwModalForm(opts){
       const value = String(f.value ?? "");
       const type = f.type || "text";
       if(type === "select"){
-        const opts = Array.isArray(f.options) ? f.options : [];
-        const norm = opts.map(o=>{
+        const raw = Array.isArray(f.options) ? f.options : [];
+        const selected = String(f.value ?? "");
+
+        function normOne(o){
           if(typeof o === "string") return { value:o, label:o };
           return { value: String(o.value ?? o.label ?? ""), label: String(o.label ?? o.value ?? "") };
+        }
+
+        const flat = [];
+        const groups = [];
+
+        raw.forEach(o=>{
+          if(o && typeof o === "object" && !Array.isArray(o) && ("group" in o) && Array.isArray(o.options)){
+            const gLabel = String(o.group ?? "");
+            const gOpts = (o.options||[]).map(normOne);
+            groups.push({ label:gLabel, opts:gOpts });
+          }else{
+            flat.push(normOne(o));
+          }
         });
-        const selected = String(f.value ?? "");
-        const optionsHtml = norm.map((o,i)=>{
+
+        let firstValue = null;
+        const flatHtml = flat.map((o,i)=>{
+          if(firstValue===null) firstValue = o.value;
           const v = String(o.value).replace(/"/g,"&quot;");
           const lab = String(o.label);
           const sel = (selected && selected===o.value) ? " selected" : (!selected && i===0 ? " selected" : "");
           return `<option value="${v}"${sel}>${lab}</option>`;
         }).join("");
+
+        const groupsHtml = groups.map(g=>{
+          const inner = g.opts.map((o,i)=>{
+            const v = String(o.value).replace(/"/g,"&quot;");
+            const lab = String(o.label);
+            const sel = (selected && selected===o.value) ? " selected" : (!selected && !flat.length && firstValue===null && i===0 ? " selected" : "");
+            return `<option value="${v}"${sel}>${lab}</option>`;
+          }).join("");
+          const glab = String(g.label).replace(/"/g,"&quot;");
+          return `<optgroup label="${glab}">${inner}</optgroup>`;
+        }).join("");
+
+        const optionsHtml = flatHtml + groupsHtml;
+
         return (
           '<div style="margin-bottom:10px">' +
             '<div class="mini" style="margin-bottom:6px;opacity:.9">'+label+'</div>' +

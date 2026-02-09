@@ -70,6 +70,32 @@ function getChar(){
   return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
 }
 
+async function saveChar(character){
+  // Wrapper used in multiple flows
+  return api("/api/character/save",{
+    method:"POST",
+    body: JSON.stringify(character)
+  });
+}
+
+// Starter-kit recommendations by class (UI ordering only)
+const VW_KIT_RECOMMEND_BY_CLASS = {
+  "Professor": ["research_kit","electronics_repair_kit","battery_pack"],
+  "Priest": ["medkit_field","trauma_kit","radio_earpiece"],
+  "Soldier": ["weapon_maintenance_kit","radio_earpiece","flashlight"],
+  "Thief": ["lockpick_kit","disguise_kit","flashlight"],
+  "Rockstar": ["performance_gear","radio_earpiece","battery_pack"],
+  "Occultist": ["ritual_kit","battery_pack"],
+  "Inventor": ["electronics_repair_kit","hacker_kit","battery_pack"],
+  "Bouncer": ["flashlight","radio_earpiece"],
+  "Park Ranger": ["field_survival_kit","binoculars","flashlight"],
+  "Martial Artist": ["field_survival_kit","flashlight"],
+  "Detective": ["evidence_kit","forensics_kit","binoculars"],
+  "Hunter": ["field_survival_kit","weapon_maintenance_kit","binoculars"],
+  "Gifted": ["ritual_kit","battery_pack"]
+};
+
+
 
 function vwGetCatalog(){
   return window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG || null;
@@ -846,11 +872,29 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
     const subOpts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
 
     const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
-    const kitOpts = [{ value:"", label:"None" }].concat(
-      Object.values(kitsById)
-        .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
-        .sort((a,b)=>a.label.localeCompare(b.label))
-    );
+
+    // Recommended-first kit ordering (based on chosen class)
+    const className = (classes.find(x=>x.id===classId)?.name) || "";
+    const recIds = VW_KIT_RECOMMEND_BY_CLASS[className] || [];
+    const recSet = new Set(recIds);
+
+    const recOpts = recIds
+      .filter(id => kitsById[id])
+      .map(id=>{
+        const k = kitsById[id];
+        return { value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) };
+      });
+
+    const otherOpts = Object.values(kitsById)
+      .filter(k => !recSet.has(k.id))
+      .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
+      .sort((a,b)=>a.label.localeCompare(b.label));
+
+    const kitOpts = [
+      { value:"", label:"None" },
+      { group:"Recommended", options: recOpts },
+      { group:"All Kits", options: otherOpts }
+    ];
 
     const step2 = await vwModalForm({
       title: "Create Character",
@@ -914,7 +958,7 @@ document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
     if(!(window.SESSION && (SESSION.role==="dm" || (SESSION.userId && c && c.ownerUserId===SESSION.userId)))){ toast("Only the owner (or DM) can delete"); return; }
     const c = (typeof getChar==="function") ? getChar() : null;
     if(!c){ toast("Select a character first"); return; }
-
+    if(!(window.SESSION && (SESSION.role==="dm" || (SESSION.userId && c.ownerUserId===SESSION.userId)))){ toast("Only the owner (or DM) can delete"); return; }
     if(typeof vwModalConfirm === "function"){
       const ok = await vwModalConfirm({
         title: "Delete Character",
