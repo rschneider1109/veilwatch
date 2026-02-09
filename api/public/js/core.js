@@ -275,19 +275,28 @@ window.renderTabs = renderTabs;
 document.querySelectorAll(".nav .btn").forEach(b=>b.onclick=()=>renderTabs(b.dataset.tab));
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>renderTabs(b.dataset.go));
 
-// character sub-tabs
+// character sub-tabs (supports create-mode bar + sheet-mode bar)
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
-  const a = document.getElementById("ctab-actions");
-  const i = document.getElementById("ctab-inventory");
+  const bar = b.closest("#createCtabBar,#sheetCtabBar") || document;
+  bar.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
+
+  const a  = document.getElementById("ctab-actions");
+  const i  = document.getElementById("ctab-inventory");
   const ab = document.getElementById("ctab-abilities");
   const sp = document.getElementById("ctab-spells");
-  const s = document.getElementById("ctab-sheet");
-  if(a) a.classList.toggle("hidden", b.dataset.ctab !== "actions");
-  if(i) i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
+  const s  = document.getElementById("ctab-sheet");
+  const bg = document.getElementById("ctab-background");
+  const tr = document.getElementById("ctab-traits");
+  const nt = document.getElementById("ctab-notes");
+
+  if(a)  a.classList.toggle("hidden", b.dataset.ctab !== "actions");
+  if(i)  i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
   if(ab) ab.classList.toggle("hidden", b.dataset.ctab !== "abilities");
   if(sp) sp.classList.toggle("hidden", b.dataset.ctab !== "spells");
-  if(s) s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
+  if(s)  s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
+  if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
+  if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
+  if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
 });
 
 // intel sub-tabs (DM)

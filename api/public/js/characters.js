@@ -248,7 +248,7 @@ function vwWireSheetAutosave(){
     ["statINT",["stats","INT"]],
     ["statWIS",["stats","WIS"]],
     ["statCHA",["stats","CHA"]],
-    ["notesBio",["notes"]]
+    ["notesText",["notes"]]
   ];
 
   function ensureSheet(c){
@@ -293,6 +293,8 @@ function renderSheet(){
   c.sheet.money  ||= { cash:"", bank:"" };
   c.sheet.stats  ||= { STR:"",DEX:"",CON:"",INT:"",WIS:"",CHA:"" };
   c.sheet.conditions ||= [];
+  c.sheet.background ||= "";
+  c.sheet.traits ||= "";
   c.sheet.notes ||= "";
 
   const v=c.sheet.vitals;
@@ -302,6 +304,14 @@ function renderSheet(){
   document.getElementById("acVal").value = v.ac ?? "";
   document.getElementById("initVal").value = v.init ?? "";
   document.getElementById("spdVal").value = v.speed ?? "";
+
+// Extended text fields
+const bgEl = document.getElementById("bgText");
+if(bgEl) bgEl.value = c.sheet.background ?? "";
+const trEl = document.getElementById("traitsText");
+if(trEl) trEl.value = c.sheet.traits ?? "";
+const ntEl = document.getElementById("notesText");
+if(ntEl) ntEl.value = c.sheet.notes ?? "";
 
   document.getElementById("cashVal").value = (c.sheet.money.cash ?? "");
   document.getElementById("bankVal").value = (c.sheet.money.bank ?? "");
@@ -313,7 +323,7 @@ function renderSheet(){
   document.getElementById("statWIS").value = (c.sheet.stats.WIS ?? "");
   document.getElementById("statCHA").value = (c.sheet.stats.CHA ?? "");
 
-  document.getElementById("notesBio").value = (c.sheet.notes ?? "");
+  document.getElementById("notesText") && (document.getElementById("notesText").value = (c.sheet.notes ?? ""));
 
   // conditions
   const row=document.getElementById("condRow");
@@ -338,7 +348,7 @@ function renderSheet(){
 
   // DM-only buttons
   document.getElementById("dupCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
-  document.getElementById("delCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
+  document.getElementById("delCharBtn").classList.toggle("hidden", !(SESSION.role==="dm" || (SESSION.role==="player" && c && c.ownerUserId===SESSION.userId)));
 }
 window.renderSheet = renderSheet;
 
@@ -360,8 +370,9 @@ document.getElementById("dupCharBtn").onclick = async ()=>{
 };
 
 document.getElementById("delCharBtn").onclick = async ()=>{
-  if(SESSION.role!=="dm") return;
   const c=getChar(); if(!c) return;
+  const canDelete = (SESSION.role==="dm") || (SESSION.role==="player" && c.ownerUserId===SESSION.userId);
+  if(!canDelete){ toast("You can only delete your own character"); return; }
   const ok = await vwModalConfirm({ title:"Delete Character", message:'Delete "' + c.name + '"? This cannot be undone.' });
   if(!ok) return;
   const res = await api("/api/character/delete",{method:"POST",body:JSON.stringify({charId:c.id})});
@@ -985,20 +996,179 @@ document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async
   }
 });
 
-document.getElementById("addWeaponBtn")?.addEventListener("click", async ()=>{
+
+// ---- Character mode (Creation vs Sheet-only) ----
+function vwIsSetupComplete(c){
+  // If field missing (legacy), treat as complete so existing characters aren't forced back into creation flow.
+  return c && (c.setupComplete !== false);
+}
+function vwUpdateCharacterModeUI(){
+  const c = (typeof getChar==="function") ? getChar() : null;
+  const createBar = document.getElementById("createCtabBar");
+  const sheetBar  = document.getElementById("sheetCtabBar");
+  const finishBtn = document.getElementById("finishCharBtn");
+
+  if(!c){
+    if(createBar) createBar.classList.remove("hidden");
+    if(sheetBar) sheetBar.classList.add("hidden");
+    if(finishBtn) finishBtn.classList.add("hidden");
+    return;
+  }
+
+  const complete = vwIsSetupComplete(c);
+  if(createBar) createBar.classList.toggle("hidden", complete);
+  if(sheetBar)  sheetBar.classList.toggle("hidden", !complete);
+  if(finishBtn) finishBtn.classList.toggle("hidden", complete);
+
+  // Default landing tab per mode
+  if(complete){
+    const sheetBtn = document.querySelector('#sheetCtabBar [data-ctab="sheet"]');
+    if(sheetBtn && !sheetBtn.classList.contains("active")) sheetBtn.click();
+  }else{
+    const actBtn = document.querySelector('#createCtabBar [data-ctab="actions"]');
+    if(actBtn && !actBtn.classList.contains("active")) actBtn.click();
+  }
+}
+
+// Helper: replace node to clear old/bad listeners
+function vwRebindButton(id, handler){
+  const old = document.getElementById(id);
+  if(!old) return null;
+  const fresh = old.cloneNode(true);
+  old.parentNode.replaceChild(fresh, old);
+  fresh.addEventListener("click", handler);
+  return fresh;
+}
+
+// ---- Fix/Bind Abilities + Spells + Weapons + Save text tabs ----
+vwRebindButton("addWeaponBtn", async ()=>{
   try{
-    const c = (typeof getChar==="function") ? getChar() : null;
+    const c = getChar();
     if(!c){ toast("Create character first"); return; }
+    const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const w = cat?.weapons || {};
+    const buckets = [
+      ["Sidearms", w.sidearms || []],
+      ["Primaries", w.primaries || []],
+      ["Nonlethal", w.nonlethal || []],
+      ["Melee", w.melee || []],
+      ["Heavy (restricted)", w.heavy_restricted || []],
+    ];
+    const opts = [{ value:"__custom__", label:"(Custom Weapon…)" }];
+    buckets.forEach(([label, list])=>{
+      (list||[]).forEach(it=>{
+        const nm = it.name || it;
+        const id = it.id ? `id:${it.id}` : `name:${nm}`;
+        opts.push({ value:id, label:`${label}: ${nm}` });
+      });
+    });
+    if(opts.length<=1){ toast("Catalog has no weapons"); return; }
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
 
-    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const w = cat?.weapons;
-    const all = []
-      .concat(w?.sidearms || [])
-      .concat(w?.primaries || [])
-      .concat(w?.nonlethal || [])
-      .concat(w?.melee || []);
+    const pick = await vwModalForm({
+      title: "Add Weapon",
+      okText: "Next",
+      fields: [{ key:"pick", label:"Weapon", type:"select", options: opts }]
+    });
+    if(!pick) return;
 
-    if(!all.length){ toast("Catalog has no weapons"); return; }
+    let weapon = { name:"", range:"", hit:"", dmg:"" };
+
+    if(pick.pick === "__custom__"){
+      const det = await vwModalForm({
+        title:"Custom Weapon",
+        okText:"Add",
+        fields:[
+          { key:"name", label:"Weapon Name" },
+          { key:"range", label:"Range", placeholder:"e.g., 30/120" },
+          { key:"hit", label:"Hit/DC", placeholder:"e.g., +5 / DC 14" },
+          { key:"dmg", label:"Damage", placeholder:"e.g., 1d8+3" },
+          { key:"notes", label:"Notes", placeholder:"Optional" },
+        ]
+      });
+      if(!det) return;
+      weapon = { name:det.name||"", range:det.range||"", hit:det.hit||"", dmg:det.dmg||"", notes:det.notes||"" };
+    }else{
+      const val = pick.pick;
+      let chosen = null;
+      buckets.forEach(([_, list])=>{
+        (list||[]).forEach(it=>{
+          const nm = it.name || it;
+          const id = it.id ? `id:${it.id}` : `name:${nm}`;
+          if(id === val) chosen = it;
+        });
+      });
+      weapon.name = chosen?.name || (typeof chosen==="string" ? chosen : "");
+      weapon.ammoModel = chosen?.ammoModel || "";
+      weapon.ammoType  = chosen?.ammoTypeDefault || "";
+    }
+
+    c.weapons ||= [];
+    c.weapons.push(weapon);
+
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Weapon added"); await refreshAll(); }
+    else toast(res?.error || "Failed");
+  }catch(e){ console.error(e); toast("Failed"); }
+});
+
+vwRebindButton("addAbilityBtn", async ()=>{
+  try{
+    const c = getChar();
+    if(!c){ toast("Create character first"); return; }
+    const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const list = (cat?.abilities || []).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+
+    const pick = await vwModalForm({
+      title: "Add Ability",
+      okText: "Next",
+      fields: [{
+        key:"aid",
+        label:"Ability",
+        type:"select",
+        options: [{ value:"__custom__", label:"(Custom Ability…)" }].concat(list.map(a=>({ value:a.id||a.name, label:a.name })))
+      }]
+    });
+    if(!pick) return;
+
+    let ab = { name:"", type:"", hit:"", effect:"", cooldown:"" };
+
+    if(pick.aid === "__custom__"){
+      const det = await vwModalForm({
+        title:"Custom Ability",
+        okText:"Add",
+        fields:[
+          { key:"name", label:"Name" },
+          { key:"type", label:"Type", placeholder:"active / passive" },
+          { key:"hit", label:"Hit/DC", placeholder:"Optional" },
+          { key:"effect", label:"Effect" },
+          { key:"cooldown", label:"Cooldown", placeholder:"short rest / long rest / -"},
+        ]
+      });
+      if(!det) return;
+      ab = { name:det.name||"", type:det.type||"", hit:det.hit||"", effect:det.effect||"", cooldown:det.cooldown||"" };
+    }else{
+      const found = list.find(a=>(a.id||a.name)===pick.aid) || null;
+      if(!found){ toast("Ability not found"); return; }
+      ab = { name:found.name||"", type:found.type||"", hit:found.hit||"", effect:found.effect||found.summary||"", cooldown:found.cooldown||"" };
+    }
+
+    c.abilities ||= [];
+    c.abilities.push(ab);
+
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Ability added"); await refreshAll(); }
+    else toast(res?.error || "Failed");
+  }catch(e){ console.error(e); toast("Failed"); }
+});
+
+vwRebindButton("addSpellBtn", async ()=>{
+  try{
+    const c = getChar();
+    if(!c){ toast("Create character first"); return; }
+    const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const list = (cat?.spells || []).slice().sort((a,b)=>String(a.modernName||a.name||"").localeCompare(String(b.modernName||b.name||"")));
     if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
 
     const pick = await vwModalForm({
@@ -1008,50 +1178,93 @@ document.getElementById("addWeaponBtn")?.addEventListener("click", async ()=>{
         key:"sid",
         label:"Spell",
         type:"select",
-        options: [{ value:"__custom__", label:"(Custom Spell…)" }].concat(list.map(s=>({value:s.id,label:(s.modernName||s.name)})))
+        options: [{ value:"__custom__", label:"(Custom Spell…)" }].concat(list.map(s=>({ value:s.id||s.modernName||s.name, label:(s.modernName||s.name) })))
       }]
     });
     if(!pick) return;
 
-    if(String(pick.sid) === "__custom__"){
-      const out = await vwModalForm({
-        title:"Add Spell",
+    let sp = { modernName:"", tier:"", castTime:"", concentration:false, summary:"" };
+
+    if(pick.sid === "__custom__"){
+      const det = await vwModalForm({
+        title:"Custom Spell",
         okText:"Add",
         fields:[
-          {key:"name",label:"Spell Name",placeholder:"e.g. Ghost Signal"},
-          {key:"tier",label:"Tier/Level",placeholder:"0-8"},
-          {key:"castTime",label:"Cast Time",placeholder:"action / bonus / reaction"},
-          {key:"concentration",label:"Concentration",type:"select",options:[{value:"",label:"No"},{value:"Yes",label:"Yes"}]},
-          {key:"summary",label:"Summary",type:"textarea",placeholder:"Describe the spell effect"}
+          { key:"name", label:"Name" },
+          { key:"tier", label:"Tier", placeholder:"0-8" },
+          { key:"castTime", label:"Cast Time", placeholder:"Action / Bonus / Reaction" },
+          { key:"concentration", label:"Concentration", type:"select", options:[{value:"",label:"No"},{value:"yes",label:"Yes"}] },
+          { key:"summary", label:"Summary" },
         ]
       });
-      if(!out) return;
-      c.spells ||= [];
-      c.spells.push({
-        id: crypto.randomUUID?.() || ("s_"+Math.random().toString(16).slice(2)),
-        name: out.name || "",
-        tier: out.tier || "",
-        castTime: out.castTime || "",
-        concentration: String(out.concentration||"").toLowerCase()==="yes",
-        summary: out.summary || ""
-      });
-      await vwSaveChar(c);
-      toast("Spell added");
-      await refreshAll();
-      return;
+      if(!det) return;
+      sp = { modernName:det.name||"", tier:det.tier||"", castTime:det.castTime||"", concentration:(det.concentration==="yes"), summary:det.summary||"" };
+    }else{
+      const found = list.find(s=>(s.id||s.modernName||s.name)===pick.sid) || null;
+      if(!found){ toast("Spell not found"); return; }
+      sp = {
+        id: found.id,
+        modernName: found.modernName || found.name || "",
+        tier: (found.tier ?? found.level ?? ""),
+        castTime: found.castTime || found.cast || "",
+        concentration: !!found.concentration,
+        summary: found.summary || found.description || ""
+      };
     }
 
-    const s = list.find(x=>String(x.id)===String(pick.sid));
-    if(!s){ toast("Spell not found"); return; }
-
     c.spells ||= [];
-    c.spells.push({ ...s });
-    await vwSaveChar(c);
-    toast("Spell added");
-    await refreshAll();
-  }catch(e){
-    console.error(e);
-    toast("Failed to add spell");
-  }
+    c.spells.push(sp);
+
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Spell added"); await refreshAll(); }
+    else toast(res?.error || "Failed");
+  }catch(e){ console.error(e); toast("Failed"); }
 });
+
+// Save handlers for Background / Traits / Notes
+vwRebindButton("saveBgBtn", async ()=>{
+  const c=getChar(); if(!c) return;
+  c.sheet ||= {};
+  c.sheet.background = document.getElementById("bgText")?.value || "";
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Saved"); await refreshAll(); } else toast(res?.error||"Failed");
+});
+vwRebindButton("saveTraitsBtn", async ()=>{
+  const c=getChar(); if(!c) return;
+  c.sheet ||= {};
+  c.sheet.traits = document.getElementById("traitsText")?.value || "";
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Saved"); await refreshAll(); } else toast(res?.error||"Failed");
+});
+vwRebindButton("saveNotesBtn", async ()=>{
+  const c=getChar(); if(!c) return;
+  c.sheet ||= {};
+  c.sheet.notes = document.getElementById("notesText")?.value || "";
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Saved"); await refreshAll(); } else toast(res?.error||"Failed");
+});
+
+// Finish Creation
+vwRebindButton("finishCharBtn", async ()=>{
+  const c=getChar(); if(!c) return;
+  c.setupComplete = true;
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){
+    toast("Character created");
+    await refreshAll();
+    vwUpdateCharacterModeUI();
+  } else toast(res?.error||"Failed");
+});
+
+// Ensure mode UI is updated whenever we render
+const __vw_old_renderCharacter = (typeof renderCharacter === "function") ? renderCharacter : null;
+renderCharacter = window.renderCharacter = function(){
+  if(__vw_old_renderCharacter) __vw_old_renderCharacter();
+  try{ vwUpdateCharacterModeUI(); }catch(e){}
+};
+const __vw_old_renderSheet = (typeof renderSheet === "function") ? renderSheet : null;
+renderSheet = window.renderSheet = function(){
+  if(__vw_old_renderSheet) __vw_old_renderSheet();
+  try{ vwUpdateCharacterModeUI(); }catch(e){}
+};
 
