@@ -618,7 +618,11 @@ const server = http.createServer(async (req,res)=>{
       name,
       ownerUserId,
       setupComplete: false,
-      weapons: [],
+      
+      classId: "",
+      subclassId: "",
+      kits: [],
+weapons: [],
       inventory: [],
       abilities: [],
       spells: [],
