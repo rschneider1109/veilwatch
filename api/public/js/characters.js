@@ -75,8 +75,8 @@ function vwGetCatalog(){
   return window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG || null;
 }
 function renderCharacter(){
-  vwApplyCharacterMode();
   const c=getChar();
+  try{ vwBindCreationBlock(); vwRenderCreationBlock(c); }catch(e){}
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
   weapBody.innerHTML=""; invBody.innerHTML="";
@@ -284,7 +284,6 @@ function vwWireSheetAutosave(){
 }
 
 function renderSheet(){
-  try{ vwRenderCreationControls(); }catch(e){}
   const sheetHost = document.getElementById("sheetHost") || document.getElementById("sheet") || document.getElementById("sheetPanel");
   if(!sheetHost) return;
   const c=getChar();
@@ -817,22 +816,20 @@ function vwHasModal(){
   return (typeof vwModalForm === "function") && (typeof vwModalInput === "function" || true);
 }
 
-    if(!name) return;
-
-    const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
+document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
+  try{
+    const name = (typeof vwModalPrompt === "function")
+      ? await vwModalPrompt({ title:"New Character", message:"Character name:", placeholder:"e.g., Rob S", okText:"Create" })
+      : prompt("Character name:");
+    if(name === null) return;
+    const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name:String(name||"").trim()})});
     if(res && res.ok){
-      window.SESSION ||= {};
+      // Keep in creation mode
+      window.SESSION = window.SESSION || {};
       SESSION.activeCharId = res.id;
-      toast("Character created");
-      renderTabs("character");
-      // Switch character sub-tab to sheet
-      document.querySelectorAll("[data-ctab]").forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
-      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-abilities")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-spells")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
+      SESSION.activeCtab = "actions";
       await refreshAll();
+      toast("New character created");
     }else{
       toast((res && res.error) ? res.error : "Failed to create character");
     }
@@ -842,10 +839,9 @@ function vwHasModal(){
   }
 });
 
-
 document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
   try{
-    if(!(window.SESSION && SESSION.role === "dm")){ toast("DM only"); return; }
+    if(!(window.SESSION && (SESSION.role==="dm" || (SESSION.userId && c && c.ownerUserId===SESSION.userId)))){ toast("Only the owner (or DM) can delete"); return; }
     const c = (typeof getChar==="function") ? getChar() : null;
     if(!c){ toast("Select a character first"); return; }
 
@@ -997,31 +993,40 @@ function vwIsSetupComplete(c){
   return c && (c.setupComplete !== false);
 }
 function vwUpdateCharacterModeUI(){
-  const c = (typeof getChar==="function") ? getChar() : null;
+  const c = getChar();
+  const isComplete = !!(c && c.setupComplete);
+
   const createBar = document.getElementById("createCtabBar");
   const sheetBar  = document.getElementById("sheetCtabBar");
-  const finishBtn = document.getElementById("finishCharBtn");
+  if(createBar) createBar.classList.toggle("hidden", isComplete);
+  if(sheetBar)  sheetBar.classList.toggle("hidden", !isComplete);
 
-  if(!c){
-    if(createBar) createBar.classList.remove("hidden");
-    if(sheetBar) sheetBar.classList.add("hidden");
-    if(finishBtn) finishBtn.classList.add("hidden");
-    return;
+  // Mode tracking to avoid constantly snapping back to defaults during polling refreshes
+  window.SESSION = window.SESSION || {};
+  const mode = isComplete ? "sheet" : "create";
+  const allowed = isComplete
+    ? ["sheet","actions","inventory","abilities","spells","background","traits","notes"]
+    : ["actions","inventory","abilities","spells","sheet"];
+
+  let desired = SESSION.activeCtab || (isComplete ? "sheet" : "actions");
+  if(!allowed.includes(desired)) desired = (isComplete ? "sheet" : "actions");
+
+  const needApply = (SESSION._lastCharMode !== mode) || (SESSION._lastAppliedCtab !== desired);
+  SESSION._lastCharMode = mode;
+
+  if(needApply){
+    const bar = isComplete ? sheetBar : createBar;
+    const btn = bar ? bar.querySelector(`[data-ctab="${desired}"]`) : null;
+    if(btn){
+      SESSION._lastAppliedCtab = desired;
+      // Trigger the same logic as a real click (core.js handles showing/hiding)
+      btn.click();
+    }
   }
 
-  const complete = vwIsSetupComplete(c);
-  if(createBar) createBar.classList.toggle("hidden", complete);
-  if(sheetBar)  sheetBar.classList.toggle("hidden", !complete);
-  if(finishBtn) finishBtn.classList.toggle("hidden", complete);
-
-  // Default landing tab per mode
-  if(complete){
-    const sheetBtn = document.querySelector('#sheetCtabBar [data-ctab="sheet"]');
-    if(sheetBtn && !sheetBtn.classList.contains("active")) sheetBtn.click();
-  }else{
-    const actBtn = document.querySelector('#createCtabBar [data-ctab="actions"]');
-    if(actBtn && !actBtn.classList.contains("active")) actBtn.click();
-  }
+  // Creation-only block
+  const cb = document.getElementById("creationBlock");
+  if(cb) cb.classList.toggle("hidden", isComplete);
 }
 
 // Helper: replace node to clear old/bad listeners
@@ -1262,169 +1267,117 @@ renderSheet = window.renderSheet = function(){
   try{ vwUpdateCharacterModeUI(); }catch(e){}
 };
 
-
-
-function vwApplyCharacterMode(){
-  const c = getChar();
-  const createBar = document.getElementById("createCtabBar");
-  const sheetBar  = document.getElementById("sheetCtabBar");
-  const isCreate = c ? !c.setupComplete : true;
-
-  if(createBar) createBar.classList.toggle("hidden", !isCreate);
-  if(sheetBar)  sheetBar.classList.toggle("hidden", isCreate);
-
-  // default tab per mode if not set
-  if(!SESSION.activeCtab){
-    SESSION.activeCtab = isCreate ? "sheet" : "sheet";
-  }
-  // If in sheet mode and user is on create-only tabs, keep it sane
-  if(!isCreate && ["actions","inventory","abilities","spells","sheet","background","traits","notes"].indexOf(SESSION.activeCtab)===-1){
-    SESSION.activeCtab = "sheet";
-  }
-  try{ if(typeof vwApplyCtab==="function") vwApplyCtab(SESSION.activeCtab); }catch(e){}
+function vwGetCatalog(){
+  return window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG || null;
 }
-
-async function vwFinishCreation(){
-  const c = getChar();
-  if(!c) return;
-  c.setupComplete = true;
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){
-    toast("Character created");
-    SESSION.activeCtab = "sheet";
-    await refreshAll();
-    vwApplyCharacterMode();
-  }else toast(res?.error || "Failed");
+function vwFillSelect(sel, options, placeholder){
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = "";
+  const ph = document.createElement("option");
+  ph.value = "";
+  ph.textContent = placeholder || "Select...";
+  sel.appendChild(ph);
+  (options||[]).forEach(o=>{
+    const opt=document.createElement("option");
+    opt.value = o.value;
+    opt.textContent = o.label;
+    sel.appendChild(opt);
+  });
+  if(cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
 }
-
-
-function vwRenderCreationControls(){
-  const c = getChar();
-  const host = document.getElementById("creationControls");
-  if(!host) return;
-  if(!c){ host.innerHTML=""; return; }
-  if(c.setupComplete){ host.innerHTML=""; return; }
+function vwRenderCreationBlock(c){
+  const block = document.getElementById("creationBlock");
+  if(!block) return;
+  if(!c || c.setupComplete){ block.classList.add("hidden"); return; }
+  block.classList.remove("hidden");
 
   const cat = vwGetCatalog();
-  const classes = cat?.classes || [];
-  const subsBy = cat?.subclassesByClass || {};
-  const kitRecs = cat?.kitRecommendations || {};
-  const kitsById = cat?.kits?.byId || {};
+  const classSel = document.getElementById("classSelCreate");
+  const subSel   = document.getElementById("subclassSelCreate");
+  const kitSel   = document.getElementById("kitSelCreate");
+  const kitsHint = document.getElementById("kitsChosenHint");
 
-  // Build selects
-  const classOpts = classes.map(cl=>({value:cl.id,label:cl.name}));
-  const currentClass = c.classId || classOpts[0]?.value || "";
-  const subList = (subsBy[currentClass] || []).map(s=>({value:s.id,label:s.name}));
+  // Classes
+  const classes = (cat && Array.isArray(cat.classes)) ? cat.classes : [];
+  vwFillSelect(classSel, classes.map(x=>({value:x.id,label:x.name})), "Select class");
 
-  const recKitIds = (kitRecs[currentClass] || []);
-  const recKits = recKitIds.map(id=>kitsById[id]).filter(Boolean);
+  // Subclasses for selected class
+  const cid = (c.classId || classSel?.value || "");
+  if(classSel && !classSel.value && cid) classSel.value = cid;
 
-  host.innerHTML = `
-    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-      <div style="min-width:220px;flex:1;">
-        <div class="mini" style="margin-bottom:6px;">Class</div>
-        <select class="input" id="vwClassSel"></select>
-      </div>
-      <div style="min-width:240px;flex:1;">
-        <div class="mini" style="margin-bottom:6px;">Subclass</div>
-        <select class="input" id="vwSubSel"></select>
-      </div>
-      <div style="min-width:220px;flex:1;">
-        <div class="mini" style="margin-bottom:6px;">Kits</div>
-        <button class="btn smallbtn" id="vwAddKitBtn" type="button">Add Kit</button>
-      </div>
-      <div style="min-width:200px;">
-        <button class="btn smallbtn" id="vwFinishBtn" type="button">Finish Creation</button>
-      </div>
-    </div>
-    <div class="mini" style="margin-top:10px;">
-      ${recKits.length ? ("Recommended kits: " + recKits.map(k=>esc(k.name)).join(", ")) : "Recommended kits: (none listed)"} 
-    </div>
-  `;
+  const subs = (cat && cat.subclassesByClass && cid && Array.isArray(cat.subclassesByClass[cid])) ? cat.subclassesByClass[cid] : [];
+  vwFillSelect(subSel, subs.map(x=>({value:x.id,label:x.name})), "Select subclass");
+  if(subSel && c.subclassId) subSel.value = c.subclassId;
 
-  const classSel = document.getElementById("vwClassSel");
-  classOpts.forEach(o=>{
-    const opt=document.createElement("option"); opt.value=o.value; opt.textContent=o.label; classSel.appendChild(opt);
-  });
-  classSel.value = currentClass;
+  // Kits
+  const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
+  const kitOpts = Object.values(kitsById).map(k=>({value:k.id,label:(k.name + (k.category ? " ("+k.category+")" : ""))}));
+  kitOpts.sort((a,b)=>a.label.localeCompare(b.label));
+  vwFillSelect(kitSel, kitOpts, "Select kit");
 
-  const subSel = document.getElementById("vwSubSel");
-  function fillSubs(){
-    subSel.innerHTML="";
-    const cl = classSel.value;
-    (subsBy[cl] || []).forEach(s=>{
-      const opt=document.createElement("option"); opt.value=s.id; opt.textContent=s.name; subSel.appendChild(opt);
-    });
-    subSel.value = c.subclassId || subSel.options[0]?.value || "";
+  const chosen = Array.isArray(c.kits) ? c.kits : [];
+  if(kitsHint){
+    kitsHint.textContent = chosen.length ? ("Chosen kits: " + chosen.map(id => kitsById[id]?.name || id).join(", ")) : "No kits added yet.";
   }
-  fillSubs();
+}
+function vwBindCreationBlock(){
+  const classSel = document.getElementById("classSelCreate");
+  const subSel   = document.getElementById("subclassSelCreate");
+  const kitSel   = document.getElementById("kitSelCreate");
+  const addKitBtn= document.getElementById("addKitBtn");
 
-  classSel.onchange = async ()=>{
-    c.classId = classSel.value;
-    c.subclassId = "";
-    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    fillSubs();
-    toast("Class updated");
-  };
-
-  subSel.onchange = async ()=>{
-    c.subclassId = subSel.value;
-    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    toast("Subclass updated");
-  };
-
-  document.getElementById("vwAddKitBtn").onclick = async ()=>{
-    const cat = vwGetCatalog();
-    const kitsById = cat?.kits?.byId || {};
-    const kitCats = cat?.kits?.categories || [];
-    const kitList = Object.values(kitsById);
-    if(!kitList.length) return toast("No kits in catalog");
-
-    const step1 = await vwModalForm({
-      title:"Add Kit",
-      okText:"Next",
-      fields:[{key:"category",label:"Category",type:"select",options: kitCats.map(x=>({value:x,label:x}))}]
+  if(classSel && !classSel.dataset.bound){
+    classSel.dataset.bound="1";
+    classSel.addEventListener("change", async ()=>{
+      const c=getChar(); if(!c) return;
+      c.classId = classSel.value || null;
+      // Clear subclass when class changes
+      c.subclassId = null;
+      await saveChar(c);
+      await refreshAll();
     });
-    if(!step1) return;
-
-    const choices = kitList.filter(k=>k.category===step1.category);
-    const step2 = await vwModalForm({
-      title:"Add Kit",
-      okText:"Add",
-      fields:[{key:"kitId",label:"Kit",type:"select",options: choices.map(k=>({value:k.id,label:k.name}))}]
+  }
+  if(subSel && !subSel.dataset.bound){
+    subSel.dataset.bound="1";
+    subSel.addEventListener("change", async ()=>{
+      const c=getChar(); if(!c) return;
+      c.subclassId = subSel.value || null;
+      await saveChar(c);
+      await refreshAll();
     });
-    if(!step2) return;
+  }
+  if(addKitBtn && !addKitBtn.dataset.bound){
+    addKitBtn.dataset.bound="1";
+    addKitBtn.addEventListener("click", async ()=>{
+      const c=getChar(); if(!c) return;
+      const kitId = kitSel?.value || "";
+      if(!kitId){ toast("Select a kit"); return; }
+      c.kits = Array.isArray(c.kits) ? c.kits : [];
+      if(c.kits.includes(kitId)){ toast("Kit already added"); return; }
+      c.kits.push(kitId);
 
-    const kit = kitsById[step2.kitId];
-    if(!kit) return;
-
-    c.kits ||= [];
-    if(!c.kits.includes(kit.id)) c.kits.push(kit.id);
-
-    // push items into inventory (avoid dup exact name)
-    c.inventory ||= [];
-    (kit.items||[]).forEach(name=>{
-      c.inventory.push({category:kit.category||"", name, weight:"", qty:"1", cost:"", notes:"(from kit) "+kit.name});
+      // Apply kit items into inventory (best-effort)
+      const cat = vwGetCatalog();
+      const kit = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId[kitId] : null;
+      if(kit && Array.isArray(kit.items)){
+        c.inventory = Array.isArray(c.inventory) ? c.inventory : [];
+        kit.items.forEach(name=>{
+          c.inventory.push({
+            id: "inv_"+Math.random().toString(36).slice(2,9),
+            category: kit.category || "Kit",
+            name: String(name),
+            weight: "",
+            qty: "1",
+            cost: "",
+            notes: kit.name || ""
+          });
+        });
+      }
+      await saveChar(c);
+      toast("Kit added");
+      await refreshAll();
     });
-
-    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    toast("Kit added");
-    await refreshAll();
-  };
-
-  document.getElementById("vwFinishBtn").onclick = ()=>vwFinishCreation();
+  }
 }
 
-
-document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
-  const res = await api("/api/character/new",{method:"POST"});
-  if(res && res.ok){
-    SESSION.activeCharId = res.id;
-    SESSION.activeCtab = "sheet";
-    toast("New character created");
-    await refreshAll();
-    vwApplyCharacterMode();
-    // jump user to Character tab
-    try{ renderTabs("character"); }catch(e){}
-  }else toast(res?.error || "Failed");
-});

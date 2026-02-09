@@ -279,17 +279,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>renderTabs(b.dat
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   const bar = b.closest("#createCtabBar,#sheetCtabBar") || document;
   bar.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
-  try{ SESSION.activeCtab = b.dataset.ctab; }catch(e){}
-  vwApplyCtab(b.dataset.ctab);
-});
 
-
-
-// Remember and apply character subtab selection
-function vwApplyCtab(ctab){
-  if(!ctab) return;
-  const btns = document.querySelectorAll('#createCtabBar [data-ctab], #sheetCtabBar [data-ctab]');
-  btns.forEach(b=>b.classList.toggle("active", b.dataset.ctab===ctab));
   const a  = document.getElementById("ctab-actions");
   const i  = document.getElementById("ctab-inventory");
   const ab = document.getElementById("ctab-abilities");
@@ -299,15 +289,16 @@ function vwApplyCtab(ctab){
   const tr = document.getElementById("ctab-traits");
   const nt = document.getElementById("ctab-notes");
 
-  if(a)  a.classList.toggle("hidden", ctab !== "actions");
-  if(i)  i.classList.toggle("hidden", ctab !== "inventory");
-  if(ab) ab.classList.toggle("hidden", ctab !== "abilities");
-  if(sp) sp.classList.toggle("hidden", ctab !== "spells");
-  if(s)  s.classList.toggle("hidden", ctab !== "sheet");
-  if(bg) bg.classList.toggle("hidden", ctab !== "background");
-  if(tr) tr.classList.toggle("hidden", ctab !== "traits");
-  if(nt) nt.classList.toggle("hidden", ctab !== "notes");
-}
+  if(a)  a.classList.toggle("hidden", b.dataset.ctab !== "actions");
+  if(i)  i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
+  if(ab) ab.classList.toggle("hidden", b.dataset.ctab !== "abilities");
+  if(sp) sp.classList.toggle("hidden", b.dataset.ctab !== "spells");
+  if(s)  s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
+  if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
+  if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
+  if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
+});
+
 // intel sub-tabs (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));
@@ -442,7 +433,6 @@ async function refreshAll(){
   if(typeof renderCharacter === "function") renderCharacter();
   if(typeof renderSheet === "function") renderSheet();
   if(typeof renderSettings === "function") renderSettings();
-  try{ if(SESSION.activeCtab) vwApplyCtab(SESSION.activeCtab); }catch(e){}
 }
 window.refreshAll = refreshAll;
 
