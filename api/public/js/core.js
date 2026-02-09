@@ -297,8 +297,8 @@ document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
   if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
   if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
+  try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = b.dataset.ctab; }catch(e){}
 });
-
 // intel sub-tabs (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));

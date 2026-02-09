@@ -76,7 +76,6 @@ function vwGetCatalog(){
 }
 function renderCharacter(){
   const c=getChar();
-  try{ vwBindCreationBlock(); vwRenderCreationBlock(c); }catch(e){}
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
   weapBody.innerHTML=""; invBody.innerHTML="";
@@ -818,21 +817,92 @@ function vwHasModal(){
 
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
   try{
-    const name = (typeof vwModalPrompt === "function")
-      ? await vwModalPrompt({ title:"New Character", message:"Character name:", placeholder:"e.g., Rob S", okText:"Create" })
-      : prompt("Character name:");
-    if(name === null) return;
-    const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name:String(name||"").trim()})});
-    if(res && res.ok){
-      // Keep in creation mode
-      window.SESSION = window.SESSION || {};
-      SESSION.activeCharId = res.id;
-      SESSION.activeCtab = "actions";
-      await refreshAll();
-      toast("New character created");
-    }else{
-      toast((res && res.error) ? res.error : "Failed to create character");
+    const cat = vwGetCatalog();
+    const classes = (cat && Array.isArray(cat.classes)) ? cat.classes : [];
+    const classOpts = classes.map(x=>({ value:x.id, label:x.name }));
+
+    const step1 = (typeof vwModalForm === "function")
+      ? await vwModalForm({
+          title: "Create Character",
+          okText: "Next",
+          fields: [
+            { key:"name", label:"Character Name", placeholder:"e.g., Rob S" },
+            { key:"classId", label:"Class", type:"select", options: classOpts }
+          ]
+        })
+      : null;
+
+    if(!step1) return;
+
+    const name = String(step1.name || "").trim();
+    const classId = step1.classId || "";
+
+    if(!name){ toast("Name is required"); return; }
+    if(!classId){ toast("Class is required"); return; }
+
+    const subs = (cat && cat.subclassesByClass && Array.isArray(cat.subclassesByClass[classId]))
+      ? cat.subclassesByClass[classId]
+      : [];
+    const subOpts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
+
+    const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
+    const kitOpts = [{ value:"", label:"None" }].concat(
+      Object.values(kitsById)
+        .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
+        .sort((a,b)=>a.label.localeCompare(b.label))
+    );
+
+    const step2 = await vwModalForm({
+      title: "Create Character",
+      okText: "Create",
+      fields: [
+        { key:"subclassId", label:"Subclass", type:"select", options: subOpts },
+        { key:"kitId", label:"Starter Kit", type:"select", options: kitOpts }
+      ]
+    });
+    if(!step2) return;
+
+    const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name, classId, subclassId: step2.subclassId||null})});
+    if(!(res && res.ok)){ toast(res?.error || "Failed to create character"); return; }
+
+    window.SESSION = window.SESSION || {};
+    SESSION.activeCharId = res.id;
+    SESSION.activeCtab = "sheet";
+
+    await refreshAll();
+
+    let c = getChar();
+    if(!c){ toast("Character created, but could not load"); return; }
+
+    c.classId = classId;
+    c.subclassId = step2.subclassId || null;
+    c.kits = Array.isArray(c.kits) ? c.kits : [];
+    c.setupComplete = true;
+
+    const kitId = step2.kitId || "";
+    if(kitId){
+      if(!c.kits.includes(kitId)) c.kits.push(kitId);
+      const kit = kitsById[kitId];
+      if(kit && Array.isArray(kit.items)){
+        c.inventory = Array.isArray(c.inventory) ? c.inventory : [];
+        kit.items.forEach(itemName=>{
+          c.inventory.push({
+            id: "inv_"+Math.random().toString(36).slice(2,9),
+            category: kit.category || "Kit",
+            name: String(itemName),
+            weight: "",
+            qty: "1",
+            cost: "",
+            notes: kit.name || ""
+          });
+        });
+      }
     }
+
+    await saveChar(c);
+    toast("Character created");
+    await refreshAll();
+    vwRestoreCtab();
   }catch(e){
     console.error(e);
     toast("Failed to create character");
@@ -992,41 +1062,24 @@ function vwIsSetupComplete(c){
   // If field missing (legacy), treat as complete so existing characters aren't forced back into creation flow.
   return c && (c.setupComplete !== false);
 }
+
+function vwRestoreCtab(){
+  try{
+    window.SESSION = window.SESSION || {};
+    const desired = SESSION.activeCtab || "sheet";
+    const bar = document.getElementById("sheetCtabBar") || document;
+    const btn = bar.querySelector(`[data-ctab="${desired}"]`) || bar.querySelector('[data-ctab="sheet"]');
+    if(btn) btn.click();
+  }catch(e){}
+}
+
 function vwUpdateCharacterModeUI(){
-  const c = getChar();
-  const isComplete = !!(c && c.setupComplete);
-
+  const sheetBar = document.getElementById("sheetCtabBar");
   const createBar = document.getElementById("createCtabBar");
-  const sheetBar  = document.getElementById("sheetCtabBar");
-  if(createBar) createBar.classList.toggle("hidden", isComplete);
-  if(sheetBar)  sheetBar.classList.toggle("hidden", !isComplete);
-
-  // Mode tracking to avoid constantly snapping back to defaults during polling refreshes
-  window.SESSION = window.SESSION || {};
-  const mode = isComplete ? "sheet" : "create";
-  const allowed = isComplete
-    ? ["sheet","actions","inventory","abilities","spells","background","traits","notes"]
-    : ["actions","inventory","abilities","spells","sheet"];
-
-  let desired = SESSION.activeCtab || (isComplete ? "sheet" : "actions");
-  if(!allowed.includes(desired)) desired = (isComplete ? "sheet" : "actions");
-
-  const needApply = (SESSION._lastCharMode !== mode) || (SESSION._lastAppliedCtab !== desired);
-  SESSION._lastCharMode = mode;
-
-  if(needApply){
-    const bar = isComplete ? sheetBar : createBar;
-    const btn = bar ? bar.querySelector(`[data-ctab="${desired}"]`) : null;
-    if(btn){
-      SESSION._lastAppliedCtab = desired;
-      // Trigger the same logic as a real click (core.js handles showing/hiding)
-      btn.click();
-    }
-  }
-
-  // Creation-only block
+  if(sheetBar) sheetBar.classList.remove("hidden");
+  if(createBar) createBar.classList.add("hidden");
   const cb = document.getElementById("creationBlock");
-  if(cb) cb.classList.toggle("hidden", isComplete);
+  if(cb) cb.classList.add("hidden");
 }
 
 // Helper: replace node to clear old/bad listeners
@@ -1285,99 +1338,5 @@ function vwFillSelect(sel, options, placeholder){
     sel.appendChild(opt);
   });
   if(cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
-}
-function vwRenderCreationBlock(c){
-  const block = document.getElementById("creationBlock");
-  if(!block) return;
-  if(!c || c.setupComplete){ block.classList.add("hidden"); return; }
-  block.classList.remove("hidden");
-
-  const cat = vwGetCatalog();
-  const classSel = document.getElementById("classSelCreate");
-  const subSel   = document.getElementById("subclassSelCreate");
-  const kitSel   = document.getElementById("kitSelCreate");
-  const kitsHint = document.getElementById("kitsChosenHint");
-
-  // Classes
-  const classes = (cat && Array.isArray(cat.classes)) ? cat.classes : [];
-  vwFillSelect(classSel, classes.map(x=>({value:x.id,label:x.name})), "Select class");
-
-  // Subclasses for selected class
-  const cid = (c.classId || classSel?.value || "");
-  if(classSel && !classSel.value && cid) classSel.value = cid;
-
-  const subs = (cat && cat.subclassesByClass && cid && Array.isArray(cat.subclassesByClass[cid])) ? cat.subclassesByClass[cid] : [];
-  vwFillSelect(subSel, subs.map(x=>({value:x.id,label:x.name})), "Select subclass");
-  if(subSel && c.subclassId) subSel.value = c.subclassId;
-
-  // Kits
-  const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
-  const kitOpts = Object.values(kitsById).map(k=>({value:k.id,label:(k.name + (k.category ? " ("+k.category+")" : ""))}));
-  kitOpts.sort((a,b)=>a.label.localeCompare(b.label));
-  vwFillSelect(kitSel, kitOpts, "Select kit");
-
-  const chosen = Array.isArray(c.kits) ? c.kits : [];
-  if(kitsHint){
-    kitsHint.textContent = chosen.length ? ("Chosen kits: " + chosen.map(id => kitsById[id]?.name || id).join(", ")) : "No kits added yet.";
-  }
-}
-function vwBindCreationBlock(){
-  const classSel = document.getElementById("classSelCreate");
-  const subSel   = document.getElementById("subclassSelCreate");
-  const kitSel   = document.getElementById("kitSelCreate");
-  const addKitBtn= document.getElementById("addKitBtn");
-
-  if(classSel && !classSel.dataset.bound){
-    classSel.dataset.bound="1";
-    classSel.addEventListener("change", async ()=>{
-      const c=getChar(); if(!c) return;
-      c.classId = classSel.value || null;
-      // Clear subclass when class changes
-      c.subclassId = null;
-      await saveChar(c);
-      await refreshAll();
-    });
-  }
-  if(subSel && !subSel.dataset.bound){
-    subSel.dataset.bound="1";
-    subSel.addEventListener("change", async ()=>{
-      const c=getChar(); if(!c) return;
-      c.subclassId = subSel.value || null;
-      await saveChar(c);
-      await refreshAll();
-    });
-  }
-  if(addKitBtn && !addKitBtn.dataset.bound){
-    addKitBtn.dataset.bound="1";
-    addKitBtn.addEventListener("click", async ()=>{
-      const c=getChar(); if(!c) return;
-      const kitId = kitSel?.value || "";
-      if(!kitId){ toast("Select a kit"); return; }
-      c.kits = Array.isArray(c.kits) ? c.kits : [];
-      if(c.kits.includes(kitId)){ toast("Kit already added"); return; }
-      c.kits.push(kitId);
-
-      // Apply kit items into inventory (best-effort)
-      const cat = vwGetCatalog();
-      const kit = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId[kitId] : null;
-      if(kit && Array.isArray(kit.items)){
-        c.inventory = Array.isArray(c.inventory) ? c.inventory : [];
-        kit.items.forEach(name=>{
-          c.inventory.push({
-            id: "inv_"+Math.random().toString(36).slice(2,9),
-            category: kit.category || "Kit",
-            name: String(name),
-            weight: "",
-            qty: "1",
-            cost: "",
-            notes: kit.name || ""
-          });
-        });
-      }
-      await saveChar(c);
-      toast("Kit added");
-      await refreshAll();
-    });
-  }
 }
 
