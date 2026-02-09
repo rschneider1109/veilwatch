@@ -1,6 +1,20 @@
 // core.js — shared utilities, auth bootstrap, tab switching, and refreshAll()
 
 // ---- Modal helpers ----
+// Keep page from scrolling behind the modal (especially important now that the modal body scrolls).
+let __vwPrevBodyOverflow = null;
+function vwSetModalOpen(isOpen){
+  if(isOpen){
+    if(__vwPrevBodyOverflow === null) __vwPrevBodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
+    return;
+  }
+  if(__vwPrevBodyOverflow !== null){
+    document.body.style.overflow = __vwPrevBodyOverflow;
+    __vwPrevBodyOverflow = null;
+  }
+}
+
 function vwModalBaseSetup(title, okText, cancelText){
   const modal = document.getElementById("vwModal");
   const mTitle = document.getElementById("vwModalTitle");
@@ -11,6 +25,9 @@ function vwModalBaseSetup(title, okText, cancelText){
   mTitle.textContent = title || "Modal";
   btnOk.textContent = okText || "OK";
   btnCan.textContent = cancelText || "Cancel";
+
+  // When reusing the modal, always start at the top.
+  try{ mBody.scrollTop = 0; }catch(e){}
 
   return { modal, mBody, btnOk, btnCan };
 }
@@ -41,6 +58,7 @@ function vwModalInput(opts){
       ui.btnOk.onclick = null;
       ui.btnCan.onclick = null;
       ui.modal.onclick = null;
+      vwSetModalOpen(false);
       resolve(val);
     }
 
@@ -48,6 +66,7 @@ function vwModalInput(opts){
     ui.btnCan.onclick = ()=>close(null);
     ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
 
+    vwSetModalOpen(true);
     ui.modal.style.display = "flex";
     setTimeout(()=>input.focus(), 30);
   });
@@ -69,6 +88,7 @@ function vwModalConfirm(opts){
       ui.btnOk.onclick = null;
       ui.btnCan.onclick = null;
       ui.modal.onclick = null;
+      vwSetModalOpen(false);
       resolve(val);
     }
 
@@ -76,6 +96,7 @@ function vwModalConfirm(opts){
     ui.btnCan.onclick = ()=>close(false);
     ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(false); };
 
+    vwSetModalOpen(true);
     ui.modal.style.display = "flex";
   });
 }
@@ -174,6 +195,7 @@ function vwModalForm(opts){
       ui.btnOk.onclick = null;
       ui.btnCan.onclick = null;
       ui.modal.onclick = null;
+      vwSetModalOpen(false);
       resolve(val);
     }
 
@@ -187,6 +209,7 @@ function vwModalForm(opts){
     ui.btnCan.onclick = ()=>close(null);
     ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
 
+    vwSetModalOpen(true);
     ui.modal.style.display = "flex";
   });
 }

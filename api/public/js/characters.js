@@ -930,14 +930,67 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
       return maxTier;
     }
 
-    const result = await new Promise((resolve)=>{
-      const ui = vwModalBaseSetup("Character Creation", "Create", "Cancel");
-      let selectedTalents = [];
-      let selectedSpells  = [];
 
-      ui.mBody.innerHTML = `
-        <div class="mini" style="opacity:.9;margin-bottom:10px;">
-          Build the whole character here. When you hit <b>Create</b>, the Character tab becomes your completed sheet.
+const result = await new Promise((resolve)=>{
+  const ui = vwModalBaseSetup("Character Creation", "Next", "Cancel");
+
+  // Add a Back button to the footer (modal has only OK + Cancel by default)
+  let btnBack = document.getElementById("vwModalBack");
+  if(!btnBack){
+    btnBack = document.createElement("button");
+    btnBack.id = "vwModalBack";
+    btnBack.textContent = "Back";
+    btnBack.style.padding = "10px 14px";
+    btnBack.style.borderRadius = "12px";
+    btnBack.style.border = "1px solid #2b3a4d";
+    btnBack.style.background = "transparent";
+    btnBack.style.color = "#e9f1ff";
+    btnBack.style.cursor = "pointer";
+    // Insert Back before Cancel
+    ui.btnCan.parentElement.insertBefore(btnBack, ui.btnCan);
+  }
+
+  // Wizard state
+  let step = 1;
+  const state = {
+    name: "",
+    level: 3,
+    classId: "",
+    subclassId: "",
+    backgroundId: "",
+    species: "",
+    traits: "",
+    notes: "",
+    // gear
+    starterPackSel: "recommended",
+    kitId: "",
+    cash: "0",
+    bank: "0",
+    weapons: [],           // editable rows
+    invExtra: [],          // custom inventory rows
+    // stats + vitals
+    stats: { STR:"", DEX:"", CON:"", INT:"", WIS:"", CHA:"" },
+    vitals: { hpMax:"", ac:"", init:"", speed:"" },
+    // picks
+    selectedTalents: [],
+    selectedSpells: []
+  };
+
+  // Convenience
+  function qs(id){ return document.getElementById(id); }
+
+  // ---------- Build UI (all steps live in DOM; we swap visibility) ----------
+  ui.mBody.innerHTML = `
+    <div class="mini" id="vwWizardStepLabel" style="opacity:.9;margin-bottom:10px;">
+      Step 1 of 5
+    </div>
+
+    <div id="vwWizardSteps">
+
+      <!-- Step 1 -->
+      <div class="vwStep" data-step="1">
+        <div class="mini" style="opacity:.85;margin-bottom:10px;">
+          Name + Class first. This is your “D&amp;D Beyond” creation flow; the Character tab becomes your finished sheet.
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -951,33 +1004,129 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;">
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Class</div>
-            <select id="vwCreateClass" class="input" style="width:100%"></select>
-          </div>
+        <div style="margin-top:10px;">
+          <div class="mini" style="margin-bottom:6px;opacity:.9">Class</div>
+          <select id="vwCreateClass" class="input" style="width:100%"></select>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="vwStep" data-step="2" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Subclass</div>
             <select id="vwCreateSubclass" class="input" style="width:100%"></select>
           </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Background</div>
+            <select id="vwCreateBackground" class="input" style="width:100%"></select>
+          </div>
         </div>
 
-        <div style="margin-top:10px;">
-          <div class="mini" style="margin-bottom:6px;opacity:.9">Background</div>
-          <select id="vwCreateBackground" class="input" style="width:100%"></select>
+        <div style="margin-top:14px;">
+          <div style="font-weight:800;margin-bottom:8px;">Traits & Notes</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Traits</div>
+              <textarea id="vwCreateTraits" class="input" style="min-height:120px"></textarea>
+            </div>
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
+              <textarea id="vwCreateNotes" class="input" style="min-height:120px"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="vwStep" data-step="3" style="display:none;">
+        <div style="margin-bottom:10px;">
+          <div class="mini" style="margin-bottom:6px;opacity:.9">Species</div>
+          <input id="vwCreateSpecies" class="input" placeholder="e.g., Human / Elf / Synth / etc." />
+        </div>
+
+        <div style="padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Abilities (Talents)</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add talents available to your class at your starting level.</div>
+          <input id="vwCreateTalentSearch" class="input" placeholder="Search talents…" />
+          <div id="vwCreateTalentResults" style="margin-top:8px;max-height:240px;overflow:auto;padding-right:6px;"></div>
+
+          <div style="margin-top:10px;">
+            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
+            <div id="vwCreateSelectedTalents"></div>
+          </div>
+        </div>
+
+        <div id="vwCreateSpellsBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Spells</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add spells (filtered by your class, level, and tier unlocks).</div>
+          <input id="vwCreateSpellSearch" class="input" placeholder="Search spells…" />
+          <div id="vwCreateSpellResults" style="margin-top:8px;max-height:260px;overflow:auto;padding-right:6px;"></div>
+
+          <div style="margin-top:10px;">
+            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
+            <div id="vwCreateSelectedSpells"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="vwStep" data-step="4" style="display:none;">
+        <div style="font-weight:800;margin-bottom:8px;">Weapons & Gear</div>
+        <div class="mini" style="opacity:.8;margin-bottom:10px;">
+          Choose a Starter Pack (auto adds 1 sidearm + 1 primary), optionally add a Kit, then add any extra gear.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Pack</div>
+            <select id="vwCreateStarterPack" class="input" style="width:100%"></select>
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Kit</div>
+            <select id="vwCreateKit" class="input" style="width:100%"></select>
+          </div>
+        </div>
+
+        <div id="vwCreateGearPreview" class="mini" style="opacity:.85;margin-top:10px;"></div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Starting Money</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Cash</div><input id="vwCreateCash" class="input" placeholder="0" /></div>
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Bank</div><input id="vwCreateBank" class="input" placeholder="0" /></div>
+          </div>
         </div>
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
-          <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA now (these are treated as creation-locked).</div>
-          <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
-            ${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`
-              <div>
-                <div class="mini" style="opacity:.8;margin-bottom:4px;">${k}</div>
-                <input id="vwCreateStat_${k}" class="input" placeholder="10" />
-              </div>
-            `).join("")}
-          </div>
+          <div style="font-weight:800;margin-bottom:8px;">Weapons</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Starter Pack weapons will appear here. Edit details or add custom weapons.</div>
+          <div id="vwCreateWeapons"></div>
+          <button id="vwCreateAddWeapon" class="btn smallbtn" style="margin-top:10px;">Add Weapon</button>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Possessions & Inventory</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Kit and starter items are auto-added. Add extra items you want to start with.</div>
+          <div id="vwCreateInvAuto" class="mini" style="opacity:.85"></div>
+
+          <div id="vwCreateInvExtra" style="margin-top:10px;"></div>
+          <button id="vwCreateAddInv" class="btn smallbtn" style="margin-top:10px;">Add Inventory Item</button>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="vwStep" data-step="5" style="display:none;">
+        <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
+        <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA here (these are treated as creation-locked).</div>
+
+        <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
+          ${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${k}</div>
+              <input id="vwCreateStat_${k}" class="input" placeholder="10" />
+            </div>
+          `).join("")}
         </div>
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
@@ -990,549 +1139,908 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
           </div>
         </div>
 
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Money</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Cash</div><input id="vwCreateCash" class="input" placeholder="0" /></div>
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Bank</div><input id="vwCreateBank" class="input" placeholder="0" /></div>
-          </div>
+        <div class="mini" style="opacity:.8;margin-top:12px;">
+          When you click <b>Create</b>, this character becomes “sheet-only” and is meant to be played from the Character tab.
         </div>
+      </div>
 
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Starter Gear</div>
+    </div>
+  `;
 
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">
-            Pick a Starter Pack (auto-adds 1 sidearm + 1 primary + items), then optionally add a Starter Kit.
+  // ---------- Populate selects from catalog ----------
+  const cat = vwGetCatalog();
+  const classes = Array.isArray(cat.classes) ? cat.classes : [];
+  const classOpts = classes.map(x=>({ value:x.id, label:x.name }));
+  if(!classOpts.length){ toast("No classes in catalog"); resolve(null); return; }
+
+  // Precompute weapon lookup by id (name + ammo defaults)
+  const weaponBuckets = cat?.weapons || {};
+  const allWeapons = []
+    .concat(weaponBuckets.sidearms||[])
+    .concat(weaponBuckets.primaries||[])
+    .concat(weaponBuckets.nonlethal||[])
+    .concat(weaponBuckets.melee||[])
+    .concat(weaponBuckets.heavy_restricted||[]);
+  const weaponById = {};
+  allWeapons.forEach(w=>{ if(w && w.id) weaponById[w.id] = w; });
+
+  const backgrounds = Array.isArray(cat.backgrounds) ? cat.backgrounds : [];
+  const bgOpts = backgrounds
+    .map(b=>({ value:(b.id||b.name||""), label:(b.name||b.id||"") }))
+    .filter(o=>o.value);
+
+  // Kits
+  const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
+  const kitOptGroups = (classId)=>{
+    const className = (classes.find(x=>x.id===classId)?.name) || "";
+    const recIds = VW_KIT_RECOMMEND_BY_CLASS[className] || [];
+    const recSet = new Set(recIds);
+
+    const recOpts = recIds
+      .filter(id => kitsById[id])
+      .map(id=>{
+        const k = kitsById[id];
+        return { value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) };
+      });
+
+    const otherOpts = Object.values(kitsById)
+      .filter(k => !recSet.has(k.id))
+      .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
+      .sort((a,b)=>a.label.localeCompare(b.label));
+
+    return [
+      { value:"", label:"None" },
+      { group:"Recommended", options: recOpts },
+      { group:"All Kits", options: otherOpts }
+    ];
+  };
+
+  // Talents + Spells
+  const allTalents = Array.isArray(cat.talents) ? cat.talents : [];
+  const allSpells  = Array.isArray(cat.spells) ? cat.spells : [];
+  const spellcasting = cat.spellcasting || {};
+  const casterCfg = spellcasting.casters || {};
+  function isCasterClass(classId){ return !!casterCfg[classId]; }
+  function maxSpellTierFor(classId, level){
+    const cfg = casterCfg[classId];
+    if(!cfg) return -1;
+    const prog = cfg.progression;
+    const lvl = Math.max(1, Math.min(20, Number(level||1)));
+
+    if(prog === "half"){
+      let maxTier = 0;
+      const map = spellcasting.halfCasterTierUnlocks || {};
+      Object.keys(map).forEach(t=>{
+        const tier = Number(t);
+        const req = Number(map[t]);
+        if(lvl >= req) maxTier = Math.max(maxTier, tier);
+      });
+      return maxTier;
+    }
+
+    let maxTier = 0;
+    const map = spellcasting.fullCasterTierUnlocks || {};
+    Object.keys(map).forEach(t=>{
+      const tier = Number(t);
+      const req = Number(map[t]);
+      if(lvl >= req) maxTier = Math.max(maxTier, tier);
+    });
+    return maxTier;
+  }
+
+  // ---------- Step helpers ----------
+  function showStep(n){
+    step = n;
+    ui.mBody.scrollTop = 0;
+    qs("vwWizardStepLabel").textContent = `Step ${step} of 5`;
+
+    document.querySelectorAll(".vwStep").forEach(el=>{
+      el.style.display = (Number(el.getAttribute("data-step")) === step) ? "block" : "none";
+    });
+
+    // Footer buttons
+    btnBack.style.display = (step === 1) ? "none" : "inline-block";
+    ui.btnOk.textContent = (step === 5) ? "Create" : "Next";
+  }
+
+  function getClassId(){ return String(qs("vwCreateClass")?.value || state.classId || ""); }
+  function getLevel(){ return Number(String(qs("vwCreateLevel")?.value || state.level || 3).trim() || 3); }
+
+  function rebuildSubclass(){
+    const classId = getClassId();
+    const subs = (cat && cat.subclassesByClass && Array.isArray(cat.subclassesByClass[classId]))
+      ? cat.subclassesByClass[classId]
+      : [];
+    const subSel = qs("vwCreateSubclass");
+    if(!subSel) return;
+    const opts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
+    subSel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+    if(state.subclassId){ subSel.value = state.subclassId; }
+  }
+
+  function rebuildStarterPack(){
+    const classId = getClassId();
+    const packs = cat?.starterPacks || {};
+    const rec = packs.recommended ? [{ value:"recommended", label:(packs.recommended.name || "Recommended Starter Pack") }] : [];
+    const byClass = (packs.byClass && packs.byClass[classId]) ? [{ value:"class", label:"Class Starter Pack" }] : [];
+    const opts = [{ value:"none", label:"None / I will add manually" }].concat(rec).concat(byClass);
+
+    const sel = qs("vwCreateStarterPack");
+    if(!sel) return;
+    sel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+    // preserve prior selection if possible
+    const preferred = state.starterPackSel || (rec.length ? "recommended" : (byClass.length ? "class" : "none"));
+    sel.value = opts.some(o=>o.value===preferred) ? preferred : (rec.length ? "recommended" : (byClass.length ? "class" : "none"));
+  }
+
+  function rebuildKit(){
+    const classId = getClassId();
+    const sel = qs("vwCreateKit");
+    if(!sel) return;
+    const groups = kitOptGroups(classId);
+
+    let html = "";
+    groups.forEach(g=>{
+      if(g.group){
+        const inner = (g.options||[]).map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+        html += `<optgroup label="${esc(g.group)}">${inner}</optgroup>`;
+      }else{
+        html += `<option value="${esc(g.value)}">${esc(g.label)}</option>`;
+      }
+    });
+    sel.innerHTML = html;
+    if(state.kitId) sel.value = state.kitId;
+  }
+
+  function computeAutoGear(){
+    const classId = getClassId();
+    const packs = cat?.starterPacks || {};
+    const packSel = String(qs("vwCreateStarterPack")?.value || state.starterPackSel || "none");
+    let pack = null;
+    if(packSel === "recommended") pack = packs.recommended || null;
+    if(packSel === "class") pack = (packs.byClass && packs.byClass[classId]) ? packs.byClass[classId] : null;
+
+    const kitId = String(qs("vwCreateKit")?.value || state.kitId || "");
+    const kit = kitId ? kitsById[kitId] : null;
+
+    // Weapons: ensure starter weapons exist (editable)
+    const nextWeapons = [];
+    function ensureWeapon(wid){
+      if(!wid) return;
+      const def = weaponById[wid];
+      const baseName = def?.name || wid;
+      const ammoModel = def?.ammoModel || "";
+      const ammoType = def?.ammoTypeDefault || "";
+      // preserve existing edits if already present
+      const existing = state.weapons.find(w => String(w.id||"")===String(wid)) || state.weapons.find(w => String(w.name||"")===String(baseName));
+      if(existing){
+        nextWeapons.push(existing);
+        return;
+      }
+      nextWeapons.push({
+        id: def?.id || wid,
+        name: baseName,
+        range: "",
+        hit: "",
+        damage: "",
+        ammo: ammoType ? { type: ammoType, starting: "", current: "", mags: "" } : null
+      });
+    }
+    if(pack){
+      ensureWeapon(pack.sidearm);
+      ensureWeapon(pack.primary);
+    }
+    // Also include any existing custom weapons not part of starter pack
+    state.weapons.forEach(w=>{
+      const isStarter = pack && (String(w.id||"")===String(pack.sidearm) || String(w.id||"")===String(pack.primary));
+      if(!isStarter){
+        // keep customs
+        nextWeapons.push(w);
+      }
+    });
+    state.weapons = nextWeapons;
+
+    // Auto inventory (read-only display + included in payload)
+    const invAuto = [];
+    if(pack){
+      (pack.items||[]).forEach(itemName=>{
+        invAuto.push({
+          id: "inv_"+Math.random().toString(36).slice(2,9),
+          category: "Starter Pack",
+          name: String(itemName),
+          weight: "",
+          qty: "1",
+          cost: "",
+          notes: (pack.name || (packSel==="class" ? "Class Starter Pack" : "Starter Pack"))
+        });
+      });
+    }
+    if(kit && Array.isArray(kit.items)){
+      kit.items.forEach(itemName=>{
+        invAuto.push({
+          id: "inv_"+Math.random().toString(36).slice(2,9),
+          category: kit.category || "Kit",
+          name: String(itemName),
+          weight: "",
+          qty: "1",
+          cost: "",
+          notes: kit.name || ""
+        });
+      });
+    }
+
+    // Gear preview
+    const parts = [];
+    if(pack){
+      const s = pack.sidearm ? (weaponById[pack.sidearm]?.name || pack.sidearm) : "";
+      const pr = pack.primary ? (weaponById[pack.primary]?.name || pack.primary) : "";
+      parts.push(`<b>Starter Pack</b>: ${esc(s)} + ${esc(pr)}${Array.isArray(pack.items)&&pack.items.length?(" • "+esc(pack.items.join(", "))):""}`);
+    }else{
+      parts.push(`<b>Starter Pack</b>: None`);
+    }
+    if(kit){
+      parts.push(`<b>Kit</b>: ${esc(kit.name||kit.id)}${Array.isArray(kit.items)&&kit.items.length?(" • "+esc(kit.items.join(", "))):""}`);
+    }else{
+      parts.push(`<b>Kit</b>: None`);
+    }
+    const host = qs("vwCreateGearPreview");
+    if(host) host.innerHTML = parts.join("<br/>");
+
+    // Auto inventory display
+    const autoHost = qs("vwCreateInvAuto");
+    if(autoHost){
+      if(!invAuto.length){
+        autoHost.innerHTML = '<div style="opacity:.7">Auto-added: none</div>';
+      }else{
+        autoHost.innerHTML = '<div style="opacity:.85;margin-bottom:6px;"><b>Auto-added</b></div>' + invAuto.map(it=>`• ${esc(it.name)} <span style="opacity:.7">(${esc(it.category)})</span>`).join("<br/>");
+      }
+    }
+
+    return { packSel, kitId, invAuto };
+  }
+
+  function renderWeapons(){
+    const host = qs("vwCreateWeapons");
+    if(!host) return;
+
+    if(!state.weapons.length){
+      host.innerHTML = '<div class="mini" style="opacity:.7">No weapons yet.</div>';
+      return;
+    }
+
+    host.innerHTML = state.weapons.map((w,idx)=>{
+      const hasAmmo = !!w.ammo;
+      return `
+        <div style="margin:10px 0;padding:10px;border:1px solid #2b3a4d;border-radius:14px;background:rgba(0,0,0,.12);">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="flex:1;font-weight:800">${esc(w.name||"Weapon")}</div>
+            <button class="btn smallbtn" data-del-weap="${idx}">Remove</button>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
             <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Pack</div>
-              <select id="vwCreateStarterPack" class="input" style="width:100%"></select>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Name</div>
+              <input class="input" data-wk="name" data-idx="${idx}" value="${esc(w.name||"")}" />
             </div>
             <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Kit</div>
-              <select id="vwCreateKit" class="input" style="width:100%"></select>
-            </div>
-          </div>
-
-          <div id="vwCreateGearPreview" class="mini" style="opacity:.85;margin-top:10px;"></div>
-        </div>
-
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Traits & Notes</div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Traits</div>
-              <textarea id="vwCreateTraits" class="input" style="min-height:110px"></textarea>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Range</div>
+              <input class="input" data-wk="range" data-idx="${idx}" value="${esc(w.range||"")}" placeholder="e.g., 30 ft" />
             </div>
             <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
-              <textarea id="vwCreateNotes" class="input" style="min-height:110px"></textarea>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Hit / DC</div>
+              <input class="input" data-wk="hit" data-idx="${idx}" value="${esc(w.hit||"")}" placeholder="+5" />
+            </div>
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Damage</div>
+              <input class="input" data-wk="damage" data-idx="${idx}" value="${esc(w.damage||"")}" placeholder="2d6" />
             </div>
           </div>
-        </div>
 
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Talents</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add talents available to your class at your starting level.</div>
-          <input id="vwCreateTalentSearch" class="input" placeholder="Search talents…" />
-          <div id="vwCreateTalentResults" style="margin-top:8px;max-height:220px;overflow:auto;padding-right:6px;"></div>
-          <div style="margin-top:10px;">
-            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
-            <div id="vwCreateSelectedTalents"></div>
+          ${hasAmmo ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Ammo Type</div>
+              <input class="input" data-wammo="type" data-idx="${idx}" value="${esc(w.ammo.type||"")}" />
+            </div>
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Starting</div>
+              <input class="input" data-wammo="starting" data-idx="${idx}" value="${esc(w.ammo.starting||"")}" placeholder="full / 30 / etc" />
+            </div>
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Current</div>
+              <input class="input" data-wammo="current" data-idx="${idx}" value="${esc(w.ammo.current||"")}" placeholder="30" />
+            </div>
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Mags</div>
+              <input class="input" data-wammo="mags" data-idx="${idx}" value="${esc(w.ammo.mags||"")}" placeholder="2" />
+            </div>
           </div>
-        </div>
-
-        <div id="vwCreateSpellsBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Spells</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add spells (filtered by your class, level, and tier unlocks).</div>
-          <input id="vwCreateSpellSearch" class="input" placeholder="Search spells…" />
-          <div id="vwCreateSpellResults" style="margin-top:8px;max-height:240px;overflow:auto;padding-right:6px;"></div>
-          <div style="margin-top:10px;">
-            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
-            <div id="vwCreateSelectedSpells"></div>
-          </div>
+          ` : `
+          <div class="mini" style="opacity:.7;margin-top:10px;">(No ammo tracking on this weapon)</div>
+          `}
         </div>
       `;
+    }).join("");
 
-      const classSel = document.getElementById("vwCreateClass");
-      classSel.innerHTML = classOpts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-      classSel.value = classes[0]?.id || "";
-
-      const bgSel = document.getElementById("vwCreateBackground");
-      bgSel.innerHTML = (bgOpts.length ? bgOpts : [{value:"",label:"(none)"}])
-        .map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-      if(bgOpts[0]?.value) bgSel.value = bgOpts[0].value;
-
-      function renderSelected(kind){
-        if(kind === "talents"){
-          const host = document.getElementById("vwCreateSelectedTalents");
-          if(!host) return;
-          if(!selectedTalents.length){
-            host.innerHTML = '<div class="mini" style="opacity:.7">No talents selected.</div>';
-            return;
-          }
-          host.innerHTML = selectedTalents.map(t=>`
-            <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
-              <div style="flex:1">
-                <div style="font-weight:700">${esc(t.name||"")}</div>
-                <div class="mini" style="opacity:.8">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
-                <div class="mini" style="opacity:.85;margin-top:4px">${esc(t.description||"")}</div>
-              </div>
-              <button class="btn smallbtn" data-del-talent="${esc(t.id||t.name||"")}">Remove</button>
-            </div>
-          `).join("");
-          host.querySelectorAll("[data-del-talent]").forEach(btn=>{
-            btn.onclick = ()=>{
-              const id = btn.getAttribute("data-del-talent") || "";
-              selectedTalents = selectedTalents.filter(x => String(x.id||x.name) !== String(id));
-              renderSelected("talents");
-              rerenderTalentResults();
-            };
-          });
-        }
-
-        if(kind === "spells"){
-          const host = document.getElementById("vwCreateSelectedSpells");
-          if(!host) return;
-          if(!selectedSpells.length){
-            host.innerHTML = '<div class="mini" style="opacity:.7">No spells selected.</div>';
-            return;
-          }
-          host.innerHTML = selectedSpells.map(s=>`
-            <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
-              <div style="flex:1">
-                <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
-                <div class="mini" style="opacity:.8">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
-                <div class="mini" style="opacity:.85;margin-top:4px">${esc(s.effect||s.summary||s.description||"")}</div>
-              </div>
-              <button class="btn smallbtn" data-del-spell="${esc(s.id||s.modernName||s.name||"")}">Remove</button>
-            </div>
-          `).join("");
-          host.querySelectorAll("[data-del-spell]").forEach(btn=>{
-            btn.onclick = ()=>{
-              const id = btn.getAttribute("data-del-spell") || "";
-              selectedSpells = selectedSpells.filter(x => String(x.id||x.modernName||x.name) !== String(id));
-              renderSelected("spells");
-              rerenderSpellResults();
-            };
-          });
-        }
-      }
-
-      function rebuildSubclass(){
-        const classId = classSel.value || "";
-        const subs = (cat && cat.subclassesByClass && Array.isArray(cat.subclassesByClass[classId]))
-          ? cat.subclassesByClass[classId]
-          : [];
-        const subSel = document.getElementById("vwCreateSubclass");
-        const opts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
-        subSel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-      }
-
-      function rebuildStarterPack(){
-        const classId = classSel.value || "";
-        const packs = cat?.starterPacks || {};
-        const rec = packs.recommended ? [{ value:"recommended", label:(packs.recommended.name || "Recommended Starter Pack") }] : [];
-        const byClass = (packs.byClass && packs.byClass[classId]) ? [{ value:"class", label:"Class Starter Pack" }] : [];
-        const opts = [{ value:"none", label:"None / I will add manually" }].concat(rec).concat(byClass);
-
-        const sel = document.getElementById("vwCreateStarterPack");
-        sel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-        sel.value = rec.length ? "recommended" : (byClass.length ? "class" : "none");
-      }
-
-      function rebuildKit(){
-        const classId = classSel.value || "";
-        const sel = document.getElementById("vwCreateKit");
-        const groups = kitOptGroups(classId);
-
-        let html = "";
-        groups.forEach(g=>{
-          if(g.group){
-            const inner = (g.options||[]).map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-            html += `<optgroup label="${esc(g.group)}">${inner}</optgroup>`;
-          }else{
-            html += `<option value="${esc(g.value)}">${esc(g.label)}</option>`;
-          }
-        });
-        sel.innerHTML = html;
-      }
-
-      function gearPreview(){
-        const classId = classSel.value || "";
-        const packSel = document.getElementById("vwCreateStarterPack")?.value || "none";
-        const packs = cat?.starterPacks || {};
-        let p = null;
-        if(packSel === "recommended") p = packs.recommended || null;
-        if(packSel === "class") p = (packs.byClass && packs.byClass[classId]) ? packs.byClass[classId] : null;
-
-        const kitId = document.getElementById("vwCreateKit")?.value || "";
-        const kit = kitId ? kitsById[kitId] : null;
-
-        const parts = [];
-        if(p){
-          const s = p.sidearm ? (weaponById[p.sidearm]?.name || p.sidearm) : "";
-          const pr = p.primary ? (weaponById[p.primary]?.name || p.primary) : "";
-          parts.push(`<b>Starter Pack</b>: ${esc(s)} + ${esc(pr)}${Array.isArray(p.items)&&p.items.length?(" • "+esc(p.items.join(", "))):""}`);
-        }else{
-          parts.push(`<b>Starter Pack</b>: None`);
-        }
-        if(kit){
-          parts.push(`<b>Kit</b>: ${esc(kit.name||kit.id)}${Array.isArray(kit.items)&&kit.items.length?(" • "+esc(kit.items.join(", "))):""}`);
-        }else{
-          parts.push(`<b>Kit</b>: None`);
-        }
-        const host = document.getElementById("vwCreateGearPreview");
-        if(host) host.innerHTML = parts.join("<br/>");
-      }
-
-      // Talent results
-      const talentQ = document.getElementById("vwCreateTalentSearch");
-      const talentRes = document.getElementById("vwCreateTalentResults");
-
-      function rerenderTalentResults(){
-        if(!talentQ || !talentRes) return;
-        const classId = classSel.value || "";
-        const level = Number(document.getElementById("vwCreateLevel")?.value || 3);
-        const needle = String(talentQ.value||"").trim().toLowerCase();
-
-        const pool = allTalents.filter(t=>{
-          const okClass = !t.classId || t.classId === classId;
-          const okLevel = !t.minLevel || Number(t.minLevel) <= level;
-          return okClass && okLevel;
-        });
-
-        const filtered = needle
-          ? pool.filter(t=>{
-              const hay = (t.name+" "+(t.description||"")+" "+(t.tags||[]).join(" ")).toLowerCase();
-              return hay.includes(needle);
-            })
-          : pool;
-
-        const top = filtered.slice(0, 30);
-        talentRes.innerHTML = top.map(t=>{
-          const tid = String(t.id||t.name||"");
-          const already = selectedTalents.some(x=>String(x.id||x.name)===tid);
-          return `
-            <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
-              <div style="flex:1">
-                <div style="font-weight:700">${esc(t.name||"")}</div>
-                <div class="mini" style="opacity:.75">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
-              </div>
-              <button class="btn smallbtn" data-add-talent="${esc(tid)}" ${already?"disabled":""}>Add</button>
-            </div>
-          `;
-        }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
-
-        talentRes.querySelectorAll("[data-add-talent]").forEach(btn=>{
-          btn.onclick = ()=>{
-            const id = btn.getAttribute("data-add-talent");
-            const t = allTalents.find(x=>String(x.id||x.name)===String(id));
-            if(!t) return;
-            const tid = String(t.id||t.name||"");
-            if(selectedTalents.some(x=>String(x.id||x.name)===tid)) return;
-            selectedTalents.push(t);
-            renderSelected("talents");
-            rerenderTalentResults();
-          };
-        });
-      }
-
-      // Spell results
-      const spellQ = document.getElementById("vwCreateSpellSearch");
-      const spellRes = document.getElementById("vwCreateSpellResults");
-
-      function rerenderSpellResults(){
-        if(!spellQ || !spellRes) return;
-        const classId = classSel.value || "";
-        const level = Number(document.getElementById("vwCreateLevel")?.value || 3);
-        const needle = String(spellQ.value||"").trim().toLowerCase();
-        const maxTier = maxSpellTierFor(classId, level);
-
-        const pool = allSpells.filter(s=>{
-          const okClass = Array.isArray(s.classIds) ? s.classIds.includes(classId) : true;
-          const okLevel = !s.minLevel || Number(s.minLevel) <= level;
-          const okTier = (maxTier >= 0) ? (Number(s.tier ?? s.level ?? 0) <= maxTier) : true;
-          return okClass && okLevel && okTier;
-        });
-
-        const filtered = needle
-          ? pool.filter(s=>{
-              const hay = ((s.modernName||s.name||"")+" "+(s.effect||s.summary||s.description||"")+" "+(s.tags||[]).join(" ")).toLowerCase();
-              return hay.includes(needle);
-            })
-          : pool;
-
-        const top = filtered.slice(0, 40);
-        spellRes.innerHTML = top.map(s=>{
-          const sid = String(s.id||s.modernName||s.name||"");
-          const already = selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid);
-          return `
-            <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
-              <div style="flex:1">
-                <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
-                <div class="mini" style="opacity:.75">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
-              </div>
-              <button class="btn smallbtn" data-add-spell="${esc(sid)}" ${already?"disabled":""}>Add</button>
-            </div>
-          `;
-        }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
-
-        spellRes.querySelectorAll("[data-add-spell]").forEach(btn=>{
-          btn.onclick = ()=>{
-            const id = btn.getAttribute("data-add-spell");
-            const s = allSpells.find(x=>String(x.id||x.modernName||x.name)===String(id));
-            if(!s) return;
-            const sid = String(s.id||s.modernName||s.name||"");
-            if(selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid)) return;
-            selectedSpells.push(s);
-            renderSelected("spells");
-            rerenderSpellResults();
-          };
-        });
-      }
-
-      function toggleSpellsBlock(){
-        const block = document.getElementById("vwCreateSpellsBlock");
-        if(block){
-          block.style.display = isCasterClass(classSel.value) ? "block" : "none";
-        }
-      }
-
-      // initial build + wiring
-      rebuildSubclass();
-      rebuildStarterPack();
-      rebuildKit();
-      gearPreview();
-      toggleSpellsBlock();
-
-      classSel.addEventListener("change", ()=>{
-        selectedTalents = [];
-        selectedSpells = [];
-        rebuildSubclass();
-        rebuildStarterPack();
-        rebuildKit();
-        gearPreview();
-        toggleSpellsBlock();
-        renderSelected("talents");
-        renderSelected("spells");
-        rerenderTalentResults();
-        rerenderSpellResults();
-      });
-
-      document.getElementById("vwCreateStarterPack")?.addEventListener("change", gearPreview);
-      document.getElementById("vwCreateKit")?.addEventListener("change", gearPreview);
-      document.getElementById("vwCreateLevel")?.addEventListener("change", ()=>{
-        rerenderTalentResults();
-        rerenderSpellResults();
-      });
-
-      if(talentQ) talentQ.oninput = rerenderTalentResults;
-      if(spellQ) spellQ.oninput = rerenderSpellResults;
-
-      renderSelected("talents");
-      renderSelected("spells");
-      rerenderTalentResults();
-      rerenderSpellResults();
-
-      function close(val){
-        ui.modal.style.display = "none";
-        ui.btnOk.onclick = null;
-        ui.btnCan.onclick = null;
-        ui.modal.onclick = null;
-        resolve(val);
-      }
-
-      ui.btnCan.onclick = ()=>close(null);
-      ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
-
-      ui.btnOk.onclick = async ()=>{
-        const name = String(document.getElementById("vwCreateName")?.value||"").trim();
-        const level = Number(String(document.getElementById("vwCreateLevel")?.value||"3").trim() || 3);
-        const classId = String(classSel.value||"");
-        const subclassId = String(document.getElementById("vwCreateSubclass")?.value||"") || null;
-
-        const bgId = String(document.getElementById("vwCreateBackground")?.value||"");
-        const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
-        const bgName = (bgObj?.name || bgId || "");
-
-        const stats = {};
-        ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
-          stats[k] = String(document.getElementById("vwCreateStat_"+k)?.value||"").trim();
-        });
-
-        const hpMax = String(document.getElementById("vwCreateHpMax")?.value||"").trim();
-        const ac = String(document.getElementById("vwCreateAC")?.value||"").trim();
-        const init = String(document.getElementById("vwCreateInit")?.value||"").trim();
-        const speed = String(document.getElementById("vwCreateSpeed")?.value||"").trim();
-
-        const cash = String(document.getElementById("vwCreateCash")?.value||"").trim();
-        const bank = String(document.getElementById("vwCreateBank")?.value||"").trim();
-
-        const traits = String(document.getElementById("vwCreateTraits")?.value||"").trim();
-        const notes = String(document.getElementById("vwCreateNotes")?.value||"").trim();
-
-        if(!name){ toast("Name is required"); return; }
-        if(!classId){ toast("Class is required"); return; }
-        if(!bgName){ toast("Background is required"); return; }
-
-        const missingStat = Object.keys(stats).find(k=>!stats[k]);
-        if(missingStat){ toast("Set "+missingStat); return; }
-        if(!hpMax){ toast("Set HP Max"); return; }
-        if(!ac){ toast("Set AC"); return; }
-        if(!speed){ toast("Set Speed"); return; }
-
-        // Build starter gear
-        const weapons = [];
-        const inventory = [];
-        const kits = [];
-
-        const packs = cat?.starterPacks || {};
-        const packSel = String(document.getElementById("vwCreateStarterPack")?.value||"none");
-        let pack = null;
-        if(packSel === "recommended") pack = packs.recommended || null;
-        if(packSel === "class") pack = (packs.byClass && packs.byClass[classId]) ? packs.byClass[classId] : null;
-
-        function pushWeaponById(wid){
-          if(!wid) return;
-          const def = weaponById[wid];
-          if(def){
-            weapons.push({
-              id: def.id,
-              name: def.name || "",
-              ammoModel: def.ammoModel || "",
-              ammoType: def.ammoTypeDefault || ""
-            });
-          }else{
-            weapons.push({ id: wid, name: wid });
-          }
-        }
-
-        if(pack){
-          pushWeaponById(pack.sidearm);
-          pushWeaponById(pack.primary);
-          (pack.items||[]).forEach(itemName=>{
-            inventory.push({
-              id: "inv_"+Math.random().toString(36).slice(2,9),
-              category: "Starter Pack",
-              name: String(itemName),
-              weight: "",
-              qty: "1",
-              cost: "",
-              notes: (pack.name || (packSel==="class" ? "Class Starter Pack" : "Starter Pack"))
-            });
-          });
-        }
-
-        const kitId = String(document.getElementById("vwCreateKit")?.value||"");
-        if(kitId){
-          kits.push(kitId);
-          const kit = kitsById[kitId];
-          if(kit && Array.isArray(kit.items)){
-            kit.items.forEach(itemName=>{
-              inventory.push({
-                id: "inv_"+Math.random().toString(36).slice(2,9),
-                category: kit.category || "Kit",
-                name: String(itemName),
-                weight: "",
-                qty: "1",
-                cost: "",
-                notes: kit.name || ""
-              });
-            });
-          }
-        }
-
-        // Convert selected talents to abilities so the sheet is "complete"
-        const abilities = selectedTalents.map(t=>({
-          id: t.id,
-          name: t.name || "",
-          type: "Talent",
-          hit: "",
-          effect: t.description || "",
-          cooldown: ""
-        }));
-
-        // Convert selected spells to sheet spell objects
-        const spells = selectedSpells
-          .filter(s=>{
-            if(!isCasterClass(classId)) return false;
-            const maxTier = maxSpellTierFor(classId, level);
-            const tier = Number(s.tier ?? s.level ?? 0);
-            if(maxTier >= 0 && tier > maxTier) return false;
-            if(Array.isArray(s.classIds) && !s.classIds.includes(classId)) return false;
-            if(s.minLevel && Number(s.minLevel) > level) return false;
-            return true;
-          })
-          .map(s=>({
-            id: s.id,
-            modernName: s.modernName || s.name || "",
-            tier: (s.tier ?? s.level ?? ""),
-            castTime: s.castTime || s.cast || "",
-            concentration: !!s.concentration,
-            summary: s.summary || s.description || s.effect || ""
-          }));
-
-        const sheet = {
-          vitals: { hpCur: hpMax, hpMax, hpTemp: "", ac, init, speed },
-          money:  { cash, bank },
-          stats,
-          conditions: [],
-          background: bgName,
-          traits,
-          notes
-        };
-
-        ui.btnOk.textContent = "Creating…";
-        ui.btnOk.disabled = true;
-
-        try{
-          const res = await api("/api/character/new", {
-            method: "POST",
-            body: JSON.stringify({
-              name,
-              classId,
-              subclassId,
-              level,
-              setupComplete: true,
-              kits,
-              weapons,
-              inventory,
-              abilities,
-              spells,
-              sheet
-            })
-          });
-
-          if(!(res && res.ok)){
-            ui.btnOk.textContent = "Create";
-            ui.btnOk.disabled = false;
-            toast(res?.error || "Failed to create character");
-            return;
-          }
-
-          window.SESSION = window.SESSION || {};
-          SESSION.activeCharId = res.id;
-          SESSION.activeCtab = "sheet";
-
-          close(true);
-          toast("Character created");
-          await refreshAll();
-          vwRestoreCtab();
-        }catch(err){
-          console.error(err);
-          ui.btnOk.textContent = "Create";
-          ui.btnOk.disabled = false;
-          toast("Failed to create character");
-        }
+    // wire input changes
+    host.querySelectorAll("input[data-wk]").forEach(inp=>{
+      inp.oninput = ()=>{
+        const idx = Number(inp.getAttribute("data-idx"));
+        const k = inp.getAttribute("data-wk");
+        state.weapons[idx][k] = inp.value;
       };
-
-      ui.modal.style.display = "flex";
-      setTimeout(()=>document.getElementById("vwCreateName")?.focus(), 50);
     });
+
+    host.querySelectorAll("input[data-wammo]").forEach(inp=>{
+      inp.oninput = ()=>{
+        const idx = Number(inp.getAttribute("data-idx"));
+        const k = inp.getAttribute("data-wammo");
+        state.weapons[idx].ammo = state.weapons[idx].ammo || {};
+        state.weapons[idx].ammo[k] = inp.value;
+      };
+    });
+
+    host.querySelectorAll("[data-del-weap]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const idx = Number(btn.getAttribute("data-del-weap"));
+        state.weapons.splice(idx,1);
+        renderWeapons();
+      };
+    });
+  }
+
+  function renderInvExtra(){
+    const host = qs("vwCreateInvExtra");
+    if(!host) return;
+
+    if(!state.invExtra.length){
+      host.innerHTML = '<div class="mini" style="opacity:.7">No extra items.</div>';
+      return;
+    }
+
+    host.innerHTML = state.invExtra.map((it,idx)=>`
+      <div style="display:grid;grid-template-columns:1fr 2fr .8fr 1.2fr auto;gap:8px;align-items:end;margin:10px 0;">
+        <div>
+          <div class="mini" style="opacity:.8;margin-bottom:4px;">Category</div>
+          <input class="input" data-ik="category" data-idx="${idx}" value="${esc(it.category||"")}" />
+        </div>
+        <div>
+          <div class="mini" style="opacity:.8;margin-bottom:4px;">Item</div>
+          <input class="input" data-ik="name" data-idx="${idx}" value="${esc(it.name||"")}" placeholder="e.g., Rope, Laptop, Medkit" />
+        </div>
+        <div>
+          <div class="mini" style="opacity:.8;margin-bottom:4px;">Qty</div>
+          <input class="input" data-ik="qty" data-idx="${idx}" value="${esc(it.qty||"1")}" />
+        </div>
+        <div>
+          <div class="mini" style="opacity:.8;margin-bottom:4px;">Notes</div>
+          <input class="input" data-ik="notes" data-idx="${idx}" value="${esc(it.notes||"")}" />
+        </div>
+        <button class="btn smallbtn" data-del-inv="${idx}">Del</button>
+      </div>
+    `).join("");
+
+    host.querySelectorAll("input[data-ik]").forEach(inp=>{
+      inp.oninput = ()=>{
+        const idx = Number(inp.getAttribute("data-idx"));
+        const k = inp.getAttribute("data-ik");
+        state.invExtra[idx][k] = inp.value;
+      };
+    });
+
+    host.querySelectorAll("[data-del-inv]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const idx = Number(btn.getAttribute("data-del-inv"));
+        state.invExtra.splice(idx,1);
+        renderInvExtra();
+      };
+    });
+  }
+
+  function renderSelected(kind){
+    if(kind === "talents"){
+      const host = qs("vwCreateSelectedTalents");
+      if(!host) return;
+      if(!state.selectedTalents.length){
+        host.innerHTML = '<div class="mini" style="opacity:.7">No talents selected.</div>';
+        return;
+      }
+      host.innerHTML = state.selectedTalents.map(t=>`
+        <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(t.name||"")}</div>
+            <div class="mini" style="opacity:.8">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
+          </div>
+          <button class="btn smallbtn" data-del-talent="${esc(String(t.id||t.name||""))}">Remove</button>
+        </div>
+      `).join("");
+      host.querySelectorAll("[data-del-talent]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const id = btn.getAttribute("data-del-talent") || "";
+          state.selectedTalents = state.selectedTalents.filter(x => String(x.id||x.name) !== String(id));
+          renderSelected("talents");
+          rerenderTalentResults();
+        };
+      });
+    }
+
+    if(kind === "spells"){
+      const host = qs("vwCreateSelectedSpells");
+      if(!host) return;
+      if(!state.selectedSpells.length){
+        host.innerHTML = '<div class="mini" style="opacity:.7">No spells selected.</div>';
+        return;
+      }
+      host.innerHTML = state.selectedSpells.map(s=>`
+        <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
+            <div class="mini" style="opacity:.8">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
+          </div>
+          <button class="btn smallbtn" data-del-spell="${esc(String(s.id||s.modernName||s.name||""))}">Remove</button>
+        </div>
+      `).join("");
+      host.querySelectorAll("[data-del-spell]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const id = btn.getAttribute("data-del-spell") || "";
+          state.selectedSpells = state.selectedSpells.filter(x => String(x.id||x.modernName||x.name) !== String(id));
+          renderSelected("spells");
+          rerenderSpellResults();
+        };
+      });
+    }
+  }
+
+  // Talent results
+  function rerenderTalentResults(){
+    const talentQ = qs("vwCreateTalentSearch");
+    const talentRes = qs("vwCreateTalentResults");
+    if(!talentQ || !talentRes) return;
+
+    const classId = getClassId();
+    const level = getLevel();
+    const needle = String(talentQ.value||"").trim().toLowerCase();
+
+    const pool = allTalents.filter(t=>{
+      const okClass = !t.classId || t.classId === classId;
+      const okLevel = !t.minLevel || Number(t.minLevel) <= level;
+      return okClass && okLevel;
+    });
+
+    const filtered = needle
+      ? pool.filter(t=>{
+          const hay = (t.name+" "+(t.description||"")+" "+(t.tags||[]).join(" ")).toLowerCase();
+          return hay.includes(needle);
+        })
+      : pool;
+
+    const top = filtered.slice(0, 30);
+    talentRes.innerHTML = top.map(t=>{
+      const tid = String(t.id||t.name||"");
+      const already = state.selectedTalents.some(x=>String(x.id||x.name)===tid);
+      return `
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(t.name||"")}</div>
+            <div class="mini" style="opacity:.75">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
+          </div>
+          <button class="btn smallbtn" data-add-talent="${esc(tid)}" ${already?"disabled":""}>Add</button>
+        </div>
+      `;
+    }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
+
+    talentRes.querySelectorAll("[data-add-talent]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.getAttribute("data-add-talent");
+        const t = allTalents.find(x=>String(x.id||x.name)===String(id));
+        if(!t) return;
+        const tid = String(t.id||t.name||"");
+        if(state.selectedTalents.some(x=>String(x.id||x.name)===tid)) return;
+        state.selectedTalents.push(t);
+        renderSelected("talents");
+        rerenderTalentResults();
+      };
+    });
+  }
+
+  // Spell results
+  function rerenderSpellResults(){
+    const spellQ = qs("vwCreateSpellSearch");
+    const spellRes = qs("vwCreateSpellResults");
+    if(!spellQ || !spellRes) return;
+
+    const classId = getClassId();
+    const level = getLevel();
+    const needle = String(spellQ.value||"").trim().toLowerCase();
+    const maxTier = maxSpellTierFor(classId, level);
+
+    const pool = allSpells.filter(s=>{
+      const okClass = Array.isArray(s.classIds) ? s.classIds.includes(classId) : true;
+      const okLevel = !s.minLevel || Number(s.minLevel) <= level;
+      const okTier = (maxTier >= 0) ? (Number(s.tier ?? s.level ?? 0) <= maxTier) : true;
+      return okClass && okLevel && okTier;
+    });
+
+    const filtered = needle
+      ? pool.filter(s=>{
+          const hay = ((s.modernName||s.name||"")+" "+(s.effect||s.summary||s.description||"")+" "+(s.tags||[]).join(" ")).toLowerCase();
+          return hay.includes(needle);
+        })
+      : pool;
+
+    const top = filtered.slice(0, 40);
+    spellRes.innerHTML = top.map(s=>{
+      const sid = String(s.id||s.modernName||s.name||"");
+      const already = state.selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid);
+      return `
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
+            <div class="mini" style="opacity:.75">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
+          </div>
+          <button class="btn smallbtn" data-add-spell="${esc(sid)}" ${already?"disabled":""}>Add</button>
+        </div>
+      `;
+    }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
+
+    spellRes.querySelectorAll("[data-add-spell]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.getAttribute("data-add-spell");
+        const s = allSpells.find(x=>String(x.id||x.modernName||x.name)===String(id));
+        if(!s) return;
+        const sid = String(s.id||s.modernName||s.name||"");
+        if(state.selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid)) return;
+        state.selectedSpells.push(s);
+        renderSelected("spells");
+        rerenderSpellResults();
+      };
+    });
+  }
+
+  function toggleSpellsBlock(){
+    const block = qs("vwCreateSpellsBlock");
+    if(block) block.style.display = isCasterClass(getClassId()) ? "block" : "none";
+  }
+
+  // ---------- Initial values + wiring ----------
+  // Step 1: class options
+  const classSel = qs("vwCreateClass");
+  classSel.innerHTML = classOpts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+  classSel.value = classes[0]?.id || "";
+  state.classId = classSel.value;
+
+  // Step 2: backgrounds
+  const bgSel = qs("vwCreateBackground");
+  bgSel.innerHTML = (bgOpts.length ? bgOpts : [{value:"",label:"(none)"}])
+    .map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+  if(bgOpts[0]?.value) bgSel.value = bgOpts[0].value;
+
+  rebuildSubclass();
+
+  // Step 4: packs/kits
+  rebuildStarterPack();
+  rebuildKit();
+  computeAutoGear();
+  renderWeapons();
+  renderInvExtra();
+
+  // Step 3: picks
+  renderSelected("talents");
+  renderSelected("spells");
+  rerenderTalentResults();
+  rerenderSpellResults();
+  toggleSpellsBlock();
+
+  // Wiring changes
+  classSel.addEventListener("change", ()=>{
+    state.classId = classSel.value;
+    state.subclassId = "";
+    state.selectedTalents = [];
+    state.selectedSpells = [];
+    rebuildSubclass();
+    rebuildStarterPack();
+    rebuildKit();
+    computeAutoGear();
+    renderWeapons();
+    renderInvExtra();
+    renderSelected("talents");
+    renderSelected("spells");
+    rerenderTalentResults();
+    rerenderSpellResults();
+    toggleSpellsBlock();
+  });
+
+  qs("vwCreateLevel")?.addEventListener("change", ()=>{
+    state.level = getLevel();
+    rerenderTalentResults();
+    rerenderSpellResults();
+    toggleSpellsBlock();
+  });
+
+  qs("vwCreateStarterPack")?.addEventListener("change", ()=>{
+    state.starterPackSel = String(qs("vwCreateStarterPack")?.value||"none");
+    computeAutoGear();
+    renderWeapons();
+  });
+
+  qs("vwCreateKit")?.addEventListener("change", ()=>{
+    state.kitId = String(qs("vwCreateKit")?.value||"");
+    computeAutoGear();
+  });
+
+  qs("vwCreateTalentSearch") && (qs("vwCreateTalentSearch").oninput = rerenderTalentResults);
+  qs("vwCreateSpellSearch") && (qs("vwCreateSpellSearch").oninput = rerenderSpellResults);
+
+  qs("vwCreateAddWeapon")?.addEventListener("click", (e)=>{
+    e.preventDefault();
+    state.weapons.push({
+      id: "custom_"+Math.random().toString(36).slice(2,9),
+      name: "",
+      range: "",
+      hit: "",
+      damage: "",
+      ammo: null
+    });
+    renderWeapons();
+  });
+
+  qs("vwCreateAddInv")?.addEventListener("click", (e)=>{
+    e.preventDefault();
+    state.invExtra.push({ category:"General", name:"", qty:"1", notes:"" });
+    renderInvExtra();
+  });
+
+  // ---------- Validation + persistence per step ----------
+  function validateStep(n){
+    if(n === 1){
+      const name = String(qs("vwCreateName")?.value||"").trim();
+      const classId = getClassId();
+      const level = getLevel();
+
+      if(!name){ toast("Name is required"); return false; }
+      if(!classId){ toast("Class is required"); return false; }
+
+      state.name = name;
+      state.classId = classId;
+      state.level = level;
+      return true;
+    }
+
+    if(n === 2){
+      const subclassId = String(qs("vwCreateSubclass")?.value||"");
+      const bgId = String(qs("vwCreateBackground")?.value||"");
+      const traits = String(qs("vwCreateTraits")?.value||"").trim();
+      const notes = String(qs("vwCreateNotes")?.value||"").trim();
+
+      const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
+      const bgName = (bgObj?.name || bgId || "");
+
+      if(!bgName){ toast("Background is required"); return false; }
+
+      state.subclassId = subclassId;
+      state.backgroundId = bgId;
+      state.traits = traits;
+      state.notes = notes;
+      return true;
+    }
+
+    if(n === 3){
+      const species = String(qs("vwCreateSpecies")?.value||"").trim();
+      if(!species){ toast("Species is required"); return false; }
+      state.species = species;
+
+      // ensure spell block rules
+      toggleSpellsBlock();
+      return true;
+    }
+
+    if(n === 4){
+      state.cash = String(qs("vwCreateCash")?.value||"0").trim() || "0";
+      state.bank = String(qs("vwCreateBank")?.value||"0").trim() || "0";
+      state.starterPackSel = String(qs("vwCreateStarterPack")?.value||state.starterPackSel||"none");
+      state.kitId = String(qs("vwCreateKit")?.value||state.kitId||"");
+      // weapons + invExtra are already kept live
+      return true;
+    }
+
+    if(n === 5){
+      // Stats
+      const stats = {};
+      ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
+        stats[k] = String(qs("vwCreateStat_"+k)?.value||"").trim();
+      });
+      const missingStat = Object.keys(stats).find(k=>!stats[k]);
+      if(missingStat){ toast("Set "+missingStat); return false; }
+
+      const hpMax = String(qs("vwCreateHpMax")?.value||"").trim();
+      const ac = String(qs("vwCreateAC")?.value||"").trim();
+      const init = String(qs("vwCreateInit")?.value||"").trim();
+      const speed = String(qs("vwCreateSpeed")?.value||"").trim();
+
+      if(!hpMax){ toast("Set HP Max"); return false; }
+      if(!ac){ toast("Set AC"); return false; }
+      if(!speed){ toast("Set Speed"); return false; }
+
+      state.stats = stats;
+      state.vitals = { hpMax, ac, init, speed };
+      return true;
+    }
+
+    return true;
+  }
+
+  // ---------- Close ----------
+  function close(val){
+    ui.modal.style.display = "none";
+    ui.btnOk.onclick = null;
+    ui.btnCan.onclick = null;
+    btnBack.onclick = null;
+    ui.modal.onclick = null;
+    vwSetModalOpen(false);
+    resolve(val);
+  }
+
+  // Cancel
+  ui.btnCan.onclick = ()=>close(null);
+  ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
+
+  // Back
+  btnBack.onclick = ()=>{
+    if(step > 1){
+      showStep(step - 1);
+    }
+  };
+
+  // Next / Create
+  ui.btnOk.onclick = async ()=>{
+    if(!validateStep(step)) return;
+
+    if(step < 5){
+      showStep(step + 1);
+      return;
+    }
+
+    // Step 5: Create payload
+    const classId = state.classId;
+    const subclassId = state.subclassId ? state.subclassId : null;
+    const level = state.level;
+
+    const bgId = state.backgroundId;
+    const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
+    const bgName = (bgObj?.name || bgId || "");
+
+    // Auto gear (starter pack + kit)
+    const { invAuto } = computeAutoGear();
+
+    // Inventory final
+    const invExtra = (state.invExtra||[]).filter(it => (it.name||"").trim());
+    const inventory = invAuto.concat(invExtra.map(it=>({
+      id: it.id || ("inv_"+Math.random().toString(36).slice(2,9)),
+      category: it.category || "General",
+      name: String(it.name||""),
+      weight: "",
+      qty: String(it.qty||"1"),
+      cost: "",
+      notes: String(it.notes||"")
+    })));
+
+    // Weapons final
+    const weapons = (state.weapons||[]).filter(w => (w.name||"").trim()).map(w=>({
+      id: w.id || ("weap_"+Math.random().toString(36).slice(2,9)),
+      name: String(w.name||""),
+      range: String(w.range||""),
+      hit: String(w.hit||""),
+      damage: String(w.damage||""),
+      ammo: w.ammo ? {
+        type: String(w.ammo.type||""),
+        starting: String(w.ammo.starting||""),
+        current: String(w.ammo.current||""),
+        mags: String(w.ammo.mags||"")
+      } : null
+    }));
+
+    // Kits list
+    const kits = [];
+    if(state.kitId) kits.push(state.kitId);
+
+    // Abilities from talents
+    const abilities = (state.selectedTalents||[]).map(t=>({
+      id: t.id,
+      name: t.name || "",
+      type: "Talent",
+      hit: "",
+      effect: t.description || "",
+      cooldown: ""
+    }));
+
+    // Spells (filtered)
+    const spells = (state.selectedSpells||[])
+      .filter(s=>{
+        if(!isCasterClass(classId)) return false;
+        const maxTier = maxSpellTierFor(classId, level);
+        const tier = Number(s.tier ?? s.level ?? 0);
+        if(maxTier >= 0 && tier > maxTier) return false;
+        if(Array.isArray(s.classIds) && !s.classIds.includes(classId)) return false;
+        if(s.minLevel && Number(s.minLevel) > level) return false;
+        return true;
+      })
+      .map(s=>({
+        id: s.id,
+        modernName: s.modernName || s.name || "",
+        tier: (s.tier ?? s.level ?? ""),
+        castTime: s.castTime || s.cast || "",
+        concentration: !!s.concentration,
+        summary: s.summary || s.description || s.effect || ""
+      }));
+
+    const sheet = {
+      vitals: { hpCur: state.vitals.hpMax, hpMax: state.vitals.hpMax, hpTemp: "", ac: state.vitals.ac, init: state.vitals.init, speed: state.vitals.speed },
+      money:  { cash: state.cash, bank: state.bank },
+      stats: state.stats,
+      conditions: [],
+      background: bgName,
+      species: state.species,
+      traits: state.traits,
+      notes: state.notes
+    };
+
+    ui.btnOk.textContent = "Creating…";
+    ui.btnOk.disabled = true;
+    btnBack.disabled = true;
+    ui.btnCan.disabled = true;
+
+    try{
+      const res = await api("/api/character/new", {
+        method: "POST",
+        body: JSON.stringify({
+          name: state.name,
+          classId,
+          subclassId,
+          level,
+          setupComplete: true,
+          kits,
+          weapons,
+          inventory,
+          abilities,
+          spells,
+          sheet
+        })
+      });
+
+      if(!(res && res.ok)){
+        ui.btnOk.textContent = "Create";
+        ui.btnOk.disabled = false;
+        btnBack.disabled = false;
+        ui.btnCan.disabled = false;
+        toast(res?.error || "Failed to create character");
+        return;
+      }
+
+      window.SESSION = window.SESSION || {};
+      SESSION.activeCharId = res.id;
+      SESSION.activeCtab = "sheet";
+
+      close(true);
+      toast("Character created");
+      await refreshAll();
+      vwRestoreCtab();
+    }catch(err){
+      console.error(err);
+      ui.btnOk.textContent = "Create";
+      ui.btnOk.disabled = false;
+      btnBack.disabled = false;
+      ui.btnCan.disabled = false;
+      toast("Failed to create character");
+    }
+  };
+
+  vwSetModalOpen(true);
+  ui.modal.style.display = "flex";
+  showStep(1);
+  setTimeout(()=>qs("vwCreateName")?.focus(), 50);
+});
+
+
 
     if(!result) return;
 
