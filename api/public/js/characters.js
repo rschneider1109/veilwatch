@@ -309,8 +309,9 @@ function vwWireSheetAutosave(){
 }
 
 function renderSheet(){
-  const sheetHost = document.getElementById("sheetHost") || document.getElementById("sheet") || document.getElementById("sheetPanel");
-  if(!sheetHost) return;
+  // Sheet fields live directly in the DOM (ctab-sheet), so don't gate rendering on legacy host containers.
+  const ctab = document.getElementById("ctab-sheet");
+  if(!ctab) return;
   const c=getChar();
   if(!c) return;
 
@@ -841,115 +842,703 @@ function vwHasModal(){
   return (typeof vwModalForm === "function") && (typeof vwModalInput === "function" || true);
 }
 
+
 document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
   try{
     const cat = vwGetCatalog();
-    const classes = (cat && Array.isArray(cat.classes)) ? cat.classes : [];
+    if(!cat){ toast("Catalog not loaded"); return; }
+    if(typeof vwModalBaseSetup !== "function"){ toast("Modal not available"); return; }
+
+    const classes = Array.isArray(cat.classes) ? cat.classes : [];
     const classOpts = classes.map(x=>({ value:x.id, label:x.name }));
+    if(!classOpts.length){ toast("No classes in catalog"); return; }
 
-    const step1 = (typeof vwModalForm === "function")
-      ? await vwModalForm({
-          title: "Create Character",
-          okText: "Next",
-          fields: [
-            { key:"name", label:"Character Name", placeholder:"e.g., Rob S" },
-            { key:"classId", label:"Class", type:"select", options: classOpts }
-          ]
-        })
-      : null;
+    // Precompute weapon lookup by id
+    const weaponBuckets = cat?.weapons || {};
+    const allWeapons = []
+      .concat(weaponBuckets.sidearms||[])
+      .concat(weaponBuckets.primaries||[])
+      .concat(weaponBuckets.nonlethal||[])
+      .concat(weaponBuckets.melee||[])
+      .concat(weaponBuckets.heavy_restricted||[]);
+    const weaponById = {};
+    allWeapons.forEach(w=>{ if(w && w.id) weaponById[w.id] = w; });
 
-    if(!step1) return;
+    const backgrounds = Array.isArray(cat.backgrounds) ? cat.backgrounds : [];
+    const bgOpts = backgrounds
+      .map(b=>({ value:(b.id||b.name||""), label:(b.name||b.id||"") }))
+      .filter(o=>o.value);
 
-    const name = String(step1.name || "").trim();
-    const classId = step1.classId || "";
-
-    if(!name){ toast("Name is required"); return; }
-    if(!classId){ toast("Class is required"); return; }
-
-    const subs = (cat && cat.subclassesByClass && Array.isArray(cat.subclassesByClass[classId]))
-      ? cat.subclassesByClass[classId]
-      : [];
-    const subOpts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
-
+    // Kits (optional)
     const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
+    const kitOptGroups = (classId)=>{
+      const className = (classes.find(x=>x.id===classId)?.name) || "";
+      const recIds = VW_KIT_RECOMMEND_BY_CLASS[className] || [];
+      const recSet = new Set(recIds);
 
-    // Recommended-first kit ordering (based on chosen class)
-    const className = (classes.find(x=>x.id===classId)?.name) || "";
-    const recIds = VW_KIT_RECOMMEND_BY_CLASS[className] || [];
-    const recSet = new Set(recIds);
-
-    const recOpts = recIds
-      .filter(id => kitsById[id])
-      .map(id=>{
-        const k = kitsById[id];
-        return { value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) };
-      });
-
-    const otherOpts = Object.values(kitsById)
-      .filter(k => !recSet.has(k.id))
-      .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
-      .sort((a,b)=>a.label.localeCompare(b.label));
-
-    const kitOpts = [
-      { value:"", label:"None" },
-      { group:"Recommended", options: recOpts },
-      { group:"All Kits", options: otherOpts }
-    ];
-
-    const step2 = await vwModalForm({
-      title: "Create Character",
-      okText: "Create",
-      fields: [
-        { key:"subclassId", label:"Subclass", type:"select", options: subOpts },
-        { key:"kitId", label:"Starter Kit", type:"select", options: kitOpts }
-      ]
-    });
-    if(!step2) return;
-
-    const res = await api("/api/character/new",{method:"POST",body:JSON.stringify({name, classId, subclassId: step2.subclassId||null})});
-    if(!(res && res.ok)){ toast(res?.error || "Failed to create character"); return; }
-
-    window.SESSION = window.SESSION || {};
-    SESSION.activeCharId = res.id;
-    SESSION.activeCtab = "sheet";
-
-    await refreshAll();
-
-    let c = getChar();
-    if(!c){ toast("Character created, but could not load"); return; }
-
-    c.classId = classId;
-    c.subclassId = step2.subclassId || null;
-    c.kits = Array.isArray(c.kits) ? c.kits : [];
-    c.setupComplete = true;
-
-    const kitId = step2.kitId || "";
-    if(kitId){
-      if(!c.kits.includes(kitId)) c.kits.push(kitId);
-      const kit = kitsById[kitId];
-      if(kit && Array.isArray(kit.items)){
-        c.inventory = Array.isArray(c.inventory) ? c.inventory : [];
-        kit.items.forEach(itemName=>{
-          c.inventory.push({
-            id: "inv_"+Math.random().toString(36).slice(2,9),
-            category: kit.category || "Kit",
-            name: String(itemName),
-            weight: "",
-            qty: "1",
-            cost: "",
-            notes: kit.name || ""
-          });
+      const recOpts = recIds
+        .filter(id => kitsById[id])
+        .map(id=>{
+          const k = kitsById[id];
+          return { value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) };
         });
+
+      const otherOpts = Object.values(kitsById)
+        .filter(k => !recSet.has(k.id))
+        .map(k=>({ value:k.id, label:(k.name + (k.category ? " ("+k.category+")" : "")) }))
+        .sort((a,b)=>a.label.localeCompare(b.label));
+
+      return [
+        { value:"", label:"None" },
+        { group:"Recommended", options: recOpts },
+        { group:"All Kits", options: otherOpts }
+      ];
+    };
+
+    // Talent + Spell pickers (search + click-to-add)
+    const allTalents = Array.isArray(cat.talents) ? cat.talents : [];
+    const allSpells  = Array.isArray(cat.spells) ? cat.spells : [];
+    const spellcasting = cat.spellcasting || {};
+    const casterCfg = spellcasting.casters || {};
+
+    function isCasterClass(classId){ return !!casterCfg[classId]; }
+
+    function maxSpellTierFor(classId, level){
+      const cfg = casterCfg[classId];
+      if(!cfg) return -1;
+      const prog = cfg.progression; // "full" or "half"
+      const lvl = Math.max(1, Math.min(20, Number(level||1)));
+
+      if(prog === "half"){
+        let maxTier = 0;
+        const map = spellcasting.halfCasterTierUnlocks || {};
+        Object.keys(map).forEach(t=>{
+          const tier = Number(t);
+          const req = Number(map[t]);
+          if(lvl >= req) maxTier = Math.max(maxTier, tier);
+        });
+        return maxTier;
       }
+
+      let maxTier = 0;
+      const map = spellcasting.fullCasterTierUnlocks || {};
+      Object.keys(map).forEach(t=>{
+        const tier = Number(t);
+        const req = Number(map[t]);
+        if(lvl >= req) maxTier = Math.max(maxTier, tier);
+      });
+      return maxTier;
     }
 
-    await saveChar(c);
-    toast("Character created");
-    await refreshAll();
-    vwRestoreCtab();
+    const result = await new Promise((resolve)=>{
+      const ui = vwModalBaseSetup("Character Creation", "Create", "Cancel");
+      let selectedTalents = [];
+      let selectedSpells  = [];
+
+      ui.mBody.innerHTML = `
+        <div class="mini" style="opacity:.9;margin-bottom:10px;">
+          Build the whole character here. When you hit <b>Create</b>, the Character tab becomes your completed sheet.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Character Name</div>
+            <input id="vwCreateName" class="input" placeholder="e.g., Bob" />
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Starting Level</div>
+            <input id="vwCreateLevel" class="input" value="3" />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;">
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Class</div>
+            <select id="vwCreateClass" class="input" style="width:100%"></select>
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px;opacity:.9">Subclass</div>
+            <select id="vwCreateSubclass" class="input" style="width:100%"></select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="mini" style="margin-bottom:6px;opacity:.9">Background</div>
+          <select id="vwCreateBackground" class="input" style="width:100%"></select>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
+          <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA now (these are treated as creation-locked).</div>
+          <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
+            ${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`
+              <div>
+                <div class="mini" style="opacity:.8;margin-bottom:4px;">${k}</div>
+                <input id="vwCreateStat_${k}" class="input" placeholder="10" />
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Vitals</div>
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;">
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">HP Max</div><input id="vwCreateHpMax" class="input" placeholder="32" /></div>
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">AC</div><input id="vwCreateAC" class="input" placeholder="14" /></div>
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Init</div><input id="vwCreateInit" class="input" placeholder="+2" /></div>
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Speed</div><input id="vwCreateSpeed" class="input" placeholder="30" /></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Money</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Cash</div><input id="vwCreateCash" class="input" placeholder="0" /></div>
+            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Bank</div><input id="vwCreateBank" class="input" placeholder="0" /></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Starter Gear</div>
+
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">
+            Pick a Starter Pack (auto-adds 1 sidearm + 1 primary + items), then optionally add a Starter Kit.
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Pack</div>
+              <select id="vwCreateStarterPack" class="input" style="width:100%"></select>
+            </div>
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Kit</div>
+              <select id="vwCreateKit" class="input" style="width:100%"></select>
+            </div>
+          </div>
+
+          <div id="vwCreateGearPreview" class="mini" style="opacity:.85;margin-top:10px;"></div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Traits & Notes</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Traits</div>
+              <textarea id="vwCreateTraits" class="input" style="min-height:110px"></textarea>
+            </div>
+            <div>
+              <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
+              <textarea id="vwCreateNotes" class="input" style="min-height:110px"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Talents</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add talents available to your class at your starting level.</div>
+          <input id="vwCreateTalentSearch" class="input" placeholder="Search talents…" />
+          <div id="vwCreateTalentResults" style="margin-top:8px;max-height:220px;overflow:auto;padding-right:6px;"></div>
+          <div style="margin-top:10px;">
+            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
+            <div id="vwCreateSelectedTalents"></div>
+          </div>
+        </div>
+
+        <div id="vwCreateSpellsBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Spells</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add spells (filtered by your class, level, and tier unlocks).</div>
+          <input id="vwCreateSpellSearch" class="input" placeholder="Search spells…" />
+          <div id="vwCreateSpellResults" style="margin-top:8px;max-height:240px;overflow:auto;padding-right:6px;"></div>
+          <div style="margin-top:10px;">
+            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
+            <div id="vwCreateSelectedSpells"></div>
+          </div>
+        </div>
+      `;
+
+      const classSel = document.getElementById("vwCreateClass");
+      classSel.innerHTML = classOpts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+      classSel.value = classes[0]?.id || "";
+
+      const bgSel = document.getElementById("vwCreateBackground");
+      bgSel.innerHTML = (bgOpts.length ? bgOpts : [{value:"",label:"(none)"}])
+        .map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+      if(bgOpts[0]?.value) bgSel.value = bgOpts[0].value;
+
+      function renderSelected(kind){
+        if(kind === "talents"){
+          const host = document.getElementById("vwCreateSelectedTalents");
+          if(!host) return;
+          if(!selectedTalents.length){
+            host.innerHTML = '<div class="mini" style="opacity:.7">No talents selected.</div>';
+            return;
+          }
+          host.innerHTML = selectedTalents.map(t=>`
+            <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
+              <div style="flex:1">
+                <div style="font-weight:700">${esc(t.name||"")}</div>
+                <div class="mini" style="opacity:.8">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
+                <div class="mini" style="opacity:.85;margin-top:4px">${esc(t.description||"")}</div>
+              </div>
+              <button class="btn smallbtn" data-del-talent="${esc(t.id||t.name||"")}">Remove</button>
+            </div>
+          `).join("");
+          host.querySelectorAll("[data-del-talent]").forEach(btn=>{
+            btn.onclick = ()=>{
+              const id = btn.getAttribute("data-del-talent") || "";
+              selectedTalents = selectedTalents.filter(x => String(x.id||x.name) !== String(id));
+              renderSelected("talents");
+              rerenderTalentResults();
+            };
+          });
+        }
+
+        if(kind === "spells"){
+          const host = document.getElementById("vwCreateSelectedSpells");
+          if(!host) return;
+          if(!selectedSpells.length){
+            host.innerHTML = '<div class="mini" style="opacity:.7">No spells selected.</div>';
+            return;
+          }
+          host.innerHTML = selectedSpells.map(s=>`
+            <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(255,255,255,.02);">
+              <div style="flex:1">
+                <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
+                <div class="mini" style="opacity:.8">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
+                <div class="mini" style="opacity:.85;margin-top:4px">${esc(s.effect||s.summary||s.description||"")}</div>
+              </div>
+              <button class="btn smallbtn" data-del-spell="${esc(s.id||s.modernName||s.name||"")}">Remove</button>
+            </div>
+          `).join("");
+          host.querySelectorAll("[data-del-spell]").forEach(btn=>{
+            btn.onclick = ()=>{
+              const id = btn.getAttribute("data-del-spell") || "";
+              selectedSpells = selectedSpells.filter(x => String(x.id||x.modernName||x.name) !== String(id));
+              renderSelected("spells");
+              rerenderSpellResults();
+            };
+          });
+        }
+      }
+
+      function rebuildSubclass(){
+        const classId = classSel.value || "";
+        const subs = (cat && cat.subclassesByClass && Array.isArray(cat.subclassesByClass[classId]))
+          ? cat.subclassesByClass[classId]
+          : [];
+        const subSel = document.getElementById("vwCreateSubclass");
+        const opts = [{ value:"", label:"None" }].concat(subs.map(x=>({ value:x.id, label:x.name })));
+        subSel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+      }
+
+      function rebuildStarterPack(){
+        const classId = classSel.value || "";
+        const packs = cat?.starterPacks || {};
+        const rec = packs.recommended ? [{ value:"recommended", label:(packs.recommended.name || "Recommended Starter Pack") }] : [];
+        const byClass = (packs.byClass && packs.byClass[classId]) ? [{ value:"class", label:"Class Starter Pack" }] : [];
+        const opts = [{ value:"none", label:"None / I will add manually" }].concat(rec).concat(byClass);
+
+        const sel = document.getElementById("vwCreateStarterPack");
+        sel.innerHTML = opts.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+        sel.value = rec.length ? "recommended" : (byClass.length ? "class" : "none");
+      }
+
+      function rebuildKit(){
+        const classId = classSel.value || "";
+        const sel = document.getElementById("vwCreateKit");
+        const groups = kitOptGroups(classId);
+
+        let html = "";
+        groups.forEach(g=>{
+          if(g.group){
+            const inner = (g.options||[]).map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
+            html += `<optgroup label="${esc(g.group)}">${inner}</optgroup>`;
+          }else{
+            html += `<option value="${esc(g.value)}">${esc(g.label)}</option>`;
+          }
+        });
+        sel.innerHTML = html;
+      }
+
+      function gearPreview(){
+        const classId = classSel.value || "";
+        const packSel = document.getElementById("vwCreateStarterPack")?.value || "none";
+        const packs = cat?.starterPacks || {};
+        let p = null;
+        if(packSel === "recommended") p = packs.recommended || null;
+        if(packSel === "class") p = (packs.byClass && packs.byClass[classId]) ? packs.byClass[classId] : null;
+
+        const kitId = document.getElementById("vwCreateKit")?.value || "";
+        const kit = kitId ? kitsById[kitId] : null;
+
+        const parts = [];
+        if(p){
+          const s = p.sidearm ? (weaponById[p.sidearm]?.name || p.sidearm) : "";
+          const pr = p.primary ? (weaponById[p.primary]?.name || p.primary) : "";
+          parts.push(`<b>Starter Pack</b>: ${esc(s)} + ${esc(pr)}${Array.isArray(p.items)&&p.items.length?(" • "+esc(p.items.join(", "))):""}`);
+        }else{
+          parts.push(`<b>Starter Pack</b>: None`);
+        }
+        if(kit){
+          parts.push(`<b>Kit</b>: ${esc(kit.name||kit.id)}${Array.isArray(kit.items)&&kit.items.length?(" • "+esc(kit.items.join(", "))):""}`);
+        }else{
+          parts.push(`<b>Kit</b>: None`);
+        }
+        const host = document.getElementById("vwCreateGearPreview");
+        if(host) host.innerHTML = parts.join("<br/>");
+      }
+
+      // Talent results
+      const talentQ = document.getElementById("vwCreateTalentSearch");
+      const talentRes = document.getElementById("vwCreateTalentResults");
+
+      function rerenderTalentResults(){
+        if(!talentQ || !talentRes) return;
+        const classId = classSel.value || "";
+        const level = Number(document.getElementById("vwCreateLevel")?.value || 3);
+        const needle = String(talentQ.value||"").trim().toLowerCase();
+
+        const pool = allTalents.filter(t=>{
+          const okClass = !t.classId || t.classId === classId;
+          const okLevel = !t.minLevel || Number(t.minLevel) <= level;
+          return okClass && okLevel;
+        });
+
+        const filtered = needle
+          ? pool.filter(t=>{
+              const hay = (t.name+" "+(t.description||"")+" "+(t.tags||[]).join(" ")).toLowerCase();
+              return hay.includes(needle);
+            })
+          : pool;
+
+        const top = filtered.slice(0, 30);
+        talentRes.innerHTML = top.map(t=>{
+          const tid = String(t.id||t.name||"");
+          const already = selectedTalents.some(x=>String(x.id||x.name)===tid);
+          return `
+            <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
+              <div style="flex:1">
+                <div style="font-weight:700">${esc(t.name||"")}</div>
+                <div class="mini" style="opacity:.75">${esc((t.tags||[]).join(", "))}${t.minLevel?(" • min Lv "+t.minLevel):""}</div>
+              </div>
+              <button class="btn smallbtn" data-add-talent="${esc(tid)}" ${already?"disabled":""}>Add</button>
+            </div>
+          `;
+        }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
+
+        talentRes.querySelectorAll("[data-add-talent]").forEach(btn=>{
+          btn.onclick = ()=>{
+            const id = btn.getAttribute("data-add-talent");
+            const t = allTalents.find(x=>String(x.id||x.name)===String(id));
+            if(!t) return;
+            const tid = String(t.id||t.name||"");
+            if(selectedTalents.some(x=>String(x.id||x.name)===tid)) return;
+            selectedTalents.push(t);
+            renderSelected("talents");
+            rerenderTalentResults();
+          };
+        });
+      }
+
+      // Spell results
+      const spellQ = document.getElementById("vwCreateSpellSearch");
+      const spellRes = document.getElementById("vwCreateSpellResults");
+
+      function rerenderSpellResults(){
+        if(!spellQ || !spellRes) return;
+        const classId = classSel.value || "";
+        const level = Number(document.getElementById("vwCreateLevel")?.value || 3);
+        const needle = String(spellQ.value||"").trim().toLowerCase();
+        const maxTier = maxSpellTierFor(classId, level);
+
+        const pool = allSpells.filter(s=>{
+          const okClass = Array.isArray(s.classIds) ? s.classIds.includes(classId) : true;
+          const okLevel = !s.minLevel || Number(s.minLevel) <= level;
+          const okTier = (maxTier >= 0) ? (Number(s.tier ?? s.level ?? 0) <= maxTier) : true;
+          return okClass && okLevel && okTier;
+        });
+
+        const filtered = needle
+          ? pool.filter(s=>{
+              const hay = ((s.modernName||s.name||"")+" "+(s.effect||s.summary||s.description||"")+" "+(s.tags||[]).join(" ")).toLowerCase();
+              return hay.includes(needle);
+            })
+          : pool;
+
+        const top = filtered.slice(0, 40);
+        spellRes.innerHTML = top.map(s=>{
+          const sid = String(s.id||s.modernName||s.name||"");
+          const already = selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid);
+          return `
+            <div style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px;border:1px solid #2b3a4d;border-radius:12px;background:rgba(0,0,0,.15);">
+              <div style="flex:1">
+                <div style="font-weight:700">${esc(s.modernName||s.name||"")}</div>
+                <div class="mini" style="opacity:.75">Tier ${esc(s.tier ?? "")}${s.cast?(" • "+esc(s.cast)):""}${s.concentration?(" • Concentration"):""}</div>
+              </div>
+              <button class="btn smallbtn" data-add-spell="${esc(sid)}" ${already?"disabled":""}>Add</button>
+            </div>
+          `;
+        }).join("") || '<div class="mini" style="opacity:.7">No matches.</div>';
+
+        spellRes.querySelectorAll("[data-add-spell]").forEach(btn=>{
+          btn.onclick = ()=>{
+            const id = btn.getAttribute("data-add-spell");
+            const s = allSpells.find(x=>String(x.id||x.modernName||x.name)===String(id));
+            if(!s) return;
+            const sid = String(s.id||s.modernName||s.name||"");
+            if(selectedSpells.some(x=>String(x.id||x.modernName||x.name)===sid)) return;
+            selectedSpells.push(s);
+            renderSelected("spells");
+            rerenderSpellResults();
+          };
+        });
+      }
+
+      function toggleSpellsBlock(){
+        const block = document.getElementById("vwCreateSpellsBlock");
+        if(block){
+          block.style.display = isCasterClass(classSel.value) ? "block" : "none";
+        }
+      }
+
+      // initial build + wiring
+      rebuildSubclass();
+      rebuildStarterPack();
+      rebuildKit();
+      gearPreview();
+      toggleSpellsBlock();
+
+      classSel.addEventListener("change", ()=>{
+        selectedTalents = [];
+        selectedSpells = [];
+        rebuildSubclass();
+        rebuildStarterPack();
+        rebuildKit();
+        gearPreview();
+        toggleSpellsBlock();
+        renderSelected("talents");
+        renderSelected("spells");
+        rerenderTalentResults();
+        rerenderSpellResults();
+      });
+
+      document.getElementById("vwCreateStarterPack")?.addEventListener("change", gearPreview);
+      document.getElementById("vwCreateKit")?.addEventListener("change", gearPreview);
+      document.getElementById("vwCreateLevel")?.addEventListener("change", ()=>{
+        rerenderTalentResults();
+        rerenderSpellResults();
+      });
+
+      if(talentQ) talentQ.oninput = rerenderTalentResults;
+      if(spellQ) spellQ.oninput = rerenderSpellResults;
+
+      renderSelected("talents");
+      renderSelected("spells");
+      rerenderTalentResults();
+      rerenderSpellResults();
+
+      function close(val){
+        ui.modal.style.display = "none";
+        ui.btnOk.onclick = null;
+        ui.btnCan.onclick = null;
+        ui.modal.onclick = null;
+        resolve(val);
+      }
+
+      ui.btnCan.onclick = ()=>close(null);
+      ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
+
+      ui.btnOk.onclick = async ()=>{
+        const name = String(document.getElementById("vwCreateName")?.value||"").trim();
+        const level = Number(String(document.getElementById("vwCreateLevel")?.value||"3").trim() || 3);
+        const classId = String(classSel.value||"");
+        const subclassId = String(document.getElementById("vwCreateSubclass")?.value||"") || null;
+
+        const bgId = String(document.getElementById("vwCreateBackground")?.value||"");
+        const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
+        const bgName = (bgObj?.name || bgId || "");
+
+        const stats = {};
+        ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
+          stats[k] = String(document.getElementById("vwCreateStat_"+k)?.value||"").trim();
+        });
+
+        const hpMax = String(document.getElementById("vwCreateHpMax")?.value||"").trim();
+        const ac = String(document.getElementById("vwCreateAC")?.value||"").trim();
+        const init = String(document.getElementById("vwCreateInit")?.value||"").trim();
+        const speed = String(document.getElementById("vwCreateSpeed")?.value||"").trim();
+
+        const cash = String(document.getElementById("vwCreateCash")?.value||"").trim();
+        const bank = String(document.getElementById("vwCreateBank")?.value||"").trim();
+
+        const traits = String(document.getElementById("vwCreateTraits")?.value||"").trim();
+        const notes = String(document.getElementById("vwCreateNotes")?.value||"").trim();
+
+        if(!name){ toast("Name is required"); return; }
+        if(!classId){ toast("Class is required"); return; }
+        if(!bgName){ toast("Background is required"); return; }
+
+        const missingStat = Object.keys(stats).find(k=>!stats[k]);
+        if(missingStat){ toast("Set "+missingStat); return; }
+        if(!hpMax){ toast("Set HP Max"); return; }
+        if(!ac){ toast("Set AC"); return; }
+        if(!speed){ toast("Set Speed"); return; }
+
+        // Build starter gear
+        const weapons = [];
+        const inventory = [];
+        const kits = [];
+
+        const packs = cat?.starterPacks || {};
+        const packSel = String(document.getElementById("vwCreateStarterPack")?.value||"none");
+        let pack = null;
+        if(packSel === "recommended") pack = packs.recommended || null;
+        if(packSel === "class") pack = (packs.byClass && packs.byClass[classId]) ? packs.byClass[classId] : null;
+
+        function pushWeaponById(wid){
+          if(!wid) return;
+          const def = weaponById[wid];
+          if(def){
+            weapons.push({
+              id: def.id,
+              name: def.name || "",
+              ammoModel: def.ammoModel || "",
+              ammoType: def.ammoTypeDefault || ""
+            });
+          }else{
+            weapons.push({ id: wid, name: wid });
+          }
+        }
+
+        if(pack){
+          pushWeaponById(pack.sidearm);
+          pushWeaponById(pack.primary);
+          (pack.items||[]).forEach(itemName=>{
+            inventory.push({
+              id: "inv_"+Math.random().toString(36).slice(2,9),
+              category: "Starter Pack",
+              name: String(itemName),
+              weight: "",
+              qty: "1",
+              cost: "",
+              notes: (pack.name || (packSel==="class" ? "Class Starter Pack" : "Starter Pack"))
+            });
+          });
+        }
+
+        const kitId = String(document.getElementById("vwCreateKit")?.value||"");
+        if(kitId){
+          kits.push(kitId);
+          const kit = kitsById[kitId];
+          if(kit && Array.isArray(kit.items)){
+            kit.items.forEach(itemName=>{
+              inventory.push({
+                id: "inv_"+Math.random().toString(36).slice(2,9),
+                category: kit.category || "Kit",
+                name: String(itemName),
+                weight: "",
+                qty: "1",
+                cost: "",
+                notes: kit.name || ""
+              });
+            });
+          }
+        }
+
+        // Convert selected talents to abilities so the sheet is "complete"
+        const abilities = selectedTalents.map(t=>({
+          id: t.id,
+          name: t.name || "",
+          type: "Talent",
+          hit: "",
+          effect: t.description || "",
+          cooldown: ""
+        }));
+
+        // Convert selected spells to sheet spell objects
+        const spells = selectedSpells
+          .filter(s=>{
+            if(!isCasterClass(classId)) return false;
+            const maxTier = maxSpellTierFor(classId, level);
+            const tier = Number(s.tier ?? s.level ?? 0);
+            if(maxTier >= 0 && tier > maxTier) return false;
+            if(Array.isArray(s.classIds) && !s.classIds.includes(classId)) return false;
+            if(s.minLevel && Number(s.minLevel) > level) return false;
+            return true;
+          })
+          .map(s=>({
+            id: s.id,
+            modernName: s.modernName || s.name || "",
+            tier: (s.tier ?? s.level ?? ""),
+            castTime: s.castTime || s.cast || "",
+            concentration: !!s.concentration,
+            summary: s.summary || s.description || s.effect || ""
+          }));
+
+        const sheet = {
+          vitals: { hpCur: hpMax, hpMax, hpTemp: "", ac, init, speed },
+          money:  { cash, bank },
+          stats,
+          conditions: [],
+          background: bgName,
+          traits,
+          notes
+        };
+
+        ui.btnOk.textContent = "Creating…";
+        ui.btnOk.disabled = true;
+
+        try{
+          const res = await api("/api/character/new", {
+            method: "POST",
+            body: JSON.stringify({
+              name,
+              classId,
+              subclassId,
+              level,
+              setupComplete: true,
+              kits,
+              weapons,
+              inventory,
+              abilities,
+              spells,
+              sheet
+            })
+          });
+
+          if(!(res && res.ok)){
+            ui.btnOk.textContent = "Create";
+            ui.btnOk.disabled = false;
+            toast(res?.error || "Failed to create character");
+            return;
+          }
+
+          window.SESSION = window.SESSION || {};
+          SESSION.activeCharId = res.id;
+          SESSION.activeCtab = "sheet";
+
+          close(true);
+          toast("Character created");
+          await refreshAll();
+          vwRestoreCtab();
+        }catch(err){
+          console.error(err);
+          ui.btnOk.textContent = "Create";
+          ui.btnOk.disabled = false;
+          toast("Failed to create character");
+        }
+      };
+
+      ui.modal.style.display = "flex";
+      setTimeout(()=>document.getElementById("vwCreateName")?.focus(), 50);
+    });
+
+    if(!result) return;
+
   }catch(e){
     console.error(e);
-    toast("Failed to create character");
+    toast("Failed to open character creation");
   }
 });
 
