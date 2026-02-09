@@ -303,6 +303,8 @@ function vwWireSheetAutosave(){
       const c = getChar(); if(!c) return;
       ensureSheet(c);
       setPath(c, pathArr, el.value);
+      // Keep the always-visible summary pills in sync while the user types.
+      try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
       vwScheduleCharAutosave();
     });
   });
