@@ -576,6 +576,68 @@ const server = http.createServer(async (req,res)=>{
     return json(res, 200, state);
   }
 
+
+
+  // -------------------------
+  // State export/import/reset (DM only)
+  // -------------------------
+  if(p === "/api/state/export" && req.method==="GET"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    // Return as plain text so the UI can show it in a copy box
+    return text(res, 200, JSON.stringify(state, null, 2), "application/json");
+  }
+
+  if(p === "/api/state/import" && req.method==="POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    let body = {};
+    try{ body = JSON.parse(await readBody(req) || "{}"); }catch(e){ body = {}; }
+    const raw = body.json;
+    if(!raw) return json(res, 200, { ok:false, error:"Missing json" });
+    let incoming = null;
+    try{
+      incoming = (typeof raw === "string") ? JSON.parse(raw) : raw;
+    }catch(e){
+      return json(res, 200, { ok:false, error:"Invalid JSON" });
+    }
+
+    // Preserve/lock DM key rules
+    const existingKey = state?.settings?.dmKey || DM_KEY;
+    incoming.settings ||= {};
+    if(process.env.VEILWATCH_DM_KEY){
+      incoming.settings.dmKey = DM_KEY;
+    }else{
+      incoming.settings.dmKey ||= existingKey;
+    }
+
+    // Ensure required shapes
+    incoming.settings.features ||= DEFAULT_STATE.settings.features;
+    incoming.shops ||= DEFAULT_STATE.shops;
+    incoming.notifications ||= DEFAULT_STATE.notifications;
+    incoming.clues ||= DEFAULT_STATE.clues;
+    normalizeCluesShape(incoming);
+    normalizeFeatures(incoming);
+    normalizeCharacters(incoming);
+
+    state = incoming;
+    saveState(state);
+    sseBroadcast({ ts: Date.now(), type:"state.import", scope:"dm" });
+    return json(res, 200, { ok:true });
+  }
+
+  if(p === "/api/state/reset" && req.method==="POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    const existingKey = state?.settings?.dmKey || DM_KEY;
+    state = structuredClone(DEFAULT_STATE);
+    if(process.env.VEILWATCH_DM_KEY){
+      state.settings.dmKey = DM_KEY;
+    }else{
+      state.settings.dmKey = existingKey;
+    }
+    saveState(state);
+    sseBroadcast({ ts: Date.now(), type:"state.reset", scope:"dm" });
+    return json(res, 200, { ok:true });
+  }
+
   // -------------------------
   // DM: user list for assignment dropdown
   // -------------------------
@@ -605,6 +667,7 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/character/new" && req.method==="POST"){
     if(!requireLogin()) return;
     const body = JSON.parse(await readBody(req) || "{}");
+
     const name = String(body.name||"").trim().slice(0,40) || "Unnamed";
     const id = "c_" + Math.random().toString(36).slice(2,10);
 
@@ -613,34 +676,66 @@ const server = http.createServer(async (req,res)=>{
       ownerUserId = body.ownerUserId || null;
     }
 
+    // Light sanitizers (everything is ultimately user editable via /character/save anyway)
+    const clampArr = (v, max=200)=> Array.isArray(v) ? v.slice(0, max) : [];
+    const str = (v, max=400)=> String(v??"").slice(0, max);
+
+    const incomingSheet = (body.sheet && typeof body.sheet==="object") ? body.sheet : {};
+    const vit = (incomingSheet.vitals && typeof incomingSheet.vitals==="object") ? incomingSheet.vitals : {};
+    const mon = (incomingSheet.money  && typeof incomingSheet.money==="object") ? incomingSheet.money  : {};
+    const sts = (incomingSheet.stats  && typeof incomingSheet.stats==="object") ? incomingSheet.stats  : {};
+
+    const sheet = {
+      vitals: {
+        hpCur: str(vit.hpCur ?? vit.hpMax ?? ""),
+        hpMax: str(vit.hpMax ?? ""),
+        hpTemp: str(vit.hpTemp ?? ""),
+        ac: str(vit.ac ?? ""),
+        init: str(vit.init ?? ""),
+        speed: str(vit.speed ?? "")
+      },
+      money: {
+        cash: str(mon.cash ?? "", 40),
+        bank: str(mon.bank ?? "", 40)
+      },
+      stats: {
+        STR: str(sts.STR ?? "", 10),
+        DEX: str(sts.DEX ?? "", 10),
+        CON: str(sts.CON ?? "", 10),
+        INT: str(sts.INT ?? "", 10),
+        WIS: str(sts.WIS ?? "", 10),
+        CHA: str(sts.CHA ?? "", 10)
+      },
+      conditions: clampArr(incomingSheet.conditions, 40).map(x=>str(x, 50)),
+      background: str(incomingSheet.background ?? "", 200),
+      traits: str(incomingSheet.traits ?? "", 2000),
+      notes: str(incomingSheet.notes ?? "", 4000)
+    };
+
     const c = {
       id,
       name,
       ownerUserId,
-      setupComplete: true,
+      setupComplete: (body.setupComplete === undefined) ? true : !!body.setupComplete,
       classId: body.classId || null,
       subclassId: body.subclassId || null,
-      kits: [],
-      weapons: [],
-      inventory: [],
-      abilities: [],
-      spells: [],
-      sheet: {
-        vitals: { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" },
-        money:  { cash:"", bank:"" },
-        stats:  { STR:"",DEX:"",CON:"",INT:"",WIS:"",CHA:"" },
-        conditions: [],
-        notes: ""
-      },
+      level: body.level ?? null,
+      kits: clampArr(body.kits, 50).map(x=>str(x, 80)),
+      weapons: clampArr(body.weapons, 50),
+      inventory: clampArr(body.inventory, 400),
+      abilities: clampArr(body.abilities, 200),
+      spells: clampArr(body.spells, 300),
+      sheet,
       updatedAt: Date.now(),
       version: 1
     };
+
     state.characters.push(c);
     saveState(state);
     return json(res, 200, { ok:true, id, character: c });
   }
 
-  if(p === "/api/character/save" && req.method==="POST"){
+if(p === "/api/character/save" && req.method==="POST"){
     if(!requireLogin()) return;
     const body = JSON.parse(await readBody(req) || "{}");
     const charId = String(body.charId||"");
