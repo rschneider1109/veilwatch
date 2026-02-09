@@ -137,10 +137,8 @@
           <button class="btn smallbtn" id="addInvBtn">Add Inventory Item</button>
           <button class="btn smallbtn" id="addInvFromCatalogBtn">Add From Catalog</button>
         </div>
-      </div>
-
       
-      
+        </div> <!-- /ctab-inventory -->
 <div id="ctab-abilities" class="hidden" style="margin-top:12px;">
   <table>
     <thead><tr><th>ABILITY</th><th>TYPE</th><th>HIT/DC</th><th>EFFECT</th><th>COOLDOWN</th><th></th></tr></thead>
@@ -183,7 +181,25 @@
 </div>
 
 <div id="ctab-sheet" class="hidden" style="margin-top:12px;">
-        <div id="creationControls" style="margin-bottom:12px;"></div>
+        <div id="creationBlock" class="panelish" style="margin: 10px 0 14px 0;">
+          <div class="mini" style="margin-bottom:6px;">Character Creation</div>
+          <div class="row" style="gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="min-width:220px;">
+              <div class="mini">Class</div>
+              <select id="classSelCreate" class="input" style="width:220px;"></select>
+            </div>
+            <div style="min-width:220px;">
+              <div class="mini">Subclass</div>
+              <select id="subclassSelCreate" class="input" style="width:220px;"></select>
+            </div>
+            <div style="min-width:220px;">
+              <div class="mini">Kit</div>
+              <select id="kitSelCreate" class="input" style="width:220px;"></select>
+            </div>
+            <button class="btn smallbtn" id="addKitBtn" style="margin-top:18px;">Add Kit</button>
+          </div>
+          <div class="mini" id="kitsChosenHint" style="margin-top:8px; opacity:.85;"></div>
+        </div>
         <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
           <div style="min-width:160px;">
             <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
