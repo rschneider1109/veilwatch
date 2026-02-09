@@ -229,6 +229,7 @@ function setRoleUI(){
   const settingsTabBtn = document.getElementById("settingsTabBtn");
   const tabSettings = document.getElementById("tab-settings");
   const imp = document.getElementById("importPlayerBtn");
+  const delCharBtn = document.getElementById("deleteCharBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
   if(dmPanels) dmPanels.classList.toggle("hidden", SESSION.role !== "dm");
@@ -238,6 +239,7 @@ function setRoleUI(){
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
   if(imp) imp.classList.toggle("hidden", SESSION.role !== "dm");
+  if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
   // Who pill

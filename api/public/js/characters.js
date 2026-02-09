@@ -837,6 +837,42 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
   }
 });
 
+
+document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
+  try{
+    if(!(window.SESSION && SESSION.role === "dm")){ toast("DM only"); return; }
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Select a character first"); return; }
+
+    if(typeof vwModalConfirm === "function"){
+      const ok = await vwModalConfirm({
+        title: "Delete Character",
+        message: "This permanently deletes " + (c.name||"this character") + ".\n\nContinue?",
+        okText: "Delete",
+        cancelText: "Cancel"
+      });
+      if(!ok) return;
+    }else{
+      if(!confirm("Delete "+(c.name||"this character")+"?")) return;
+    }
+
+    const res = await api("/api/character/delete", { method:"POST", body: JSON.stringify({ charId: c.id }) });
+    if(res && res.ok){
+      toast("Character deleted");
+      // pick next available character
+      const st = await api("/api/state");
+      const list = st.characters || [];
+      SESSION.activeCharId = list.length ? list[0].id : null;
+      await refreshAll();
+    }else{
+      toast(res?.error || "Delete failed");
+    }
+  }catch(e){
+    console.error(e);
+    toast("Delete failed");
+  }
+});
+
 document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
   const c = getChar();
   if(!c){ toast("Create character first"); return; }
@@ -966,114 +1002,45 @@ document.getElementById("addWeaponBtn")?.addEventListener("click", async ()=>{
     if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
 
     const pick = await vwModalForm({
-      title: "Add Weapon",
-      okText: "Add",
-      fields: [{ key:"wid", label:"Weapon", type:"select", options: all.map(x=>({value:x.id,label:x.name})) }]
+      title: "Add Spell",
+      okText: "Next",
+      fields: [{
+        key:"sid",
+        label:"Spell",
+        type:"select",
+        options: [{ value:"__custom__", label:"(Custom Spell…)" }].concat(list.map(s=>({value:s.id,label:(s.modernName||s.name)})))
+      }]
     });
     if(!pick) return;
 
-    const weapon = all.find(x=>String(x.id)===String(pick.wid));
-    if(!weapon){ toast("Weapon not found"); return; }
-
-    c.weapons ||= [];
-    c.weapons.push({ ...weapon });
-    await vwSaveChar(c);
-    toast("Weapon added");
-    await refreshAll();
-  }catch(e){
-    console.error(e);
-    toast("Failed to add weapon");
-  }
-});
-
-document.getElementById("addAbilityBtn")?.addEventListener("click", async ()=>{
-  try{
-    const c = (typeof getChar==="function") ? getChar() : null;
-    if(!c){ toast("Create character first"); return; }
-
-    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const list = Array.isArray(cat?.abilities) ? cat.abilities : [];
-    if(!list.length){
-      // fallback: manual
-      if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
-      const out = await vwModalForm({
-        title:"Add Ability",
-        okText:"Add",
-        fields:[
-          {key:"name",label:"Ability Name",placeholder:"e.g. Adrenal Spike"},
-          {key:"type",label:"Type",placeholder:"passive / active / reaction"},
-          {key:"hit",label:"Hit/DC",placeholder:"—"},
-          {key:"effect",label:"Effect",placeholder:"Describe the effect"},
-          {key:"cooldown",label:"Cooldown",placeholder:"—"}
-        ]
-      });
-      if(!out) return;
-      c.abilities ||= [];
-      c.abilities.push({ id: crypto.randomUUID?.() || ("a_"+Math.random().toString(16).slice(2)), ...out });
-      await vwSaveChar(c);
-      toast("Ability added");
-      await refreshAll();
-      return;
-    }
-
-    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
-    const pick = await vwModalForm({
-      title: "Add Ability",
-      okText: "Add",
-      fields: [{ key:"aid", label:"Ability", type:"select", options: list.map(a=>({value:a.id,label:a.name})) }]
-    });
-    if(!pick) return;
-    const a = list.find(x=>String(x.id)===String(pick.aid));
-    if(!a){ toast("Ability not found"); return; }
-
-    c.abilities ||= [];
-    c.abilities.push({ ...a });
-    await vwSaveChar(c);
-    toast("Ability added");
-    await refreshAll();
-  }catch(e){
-    console.error(e);
-    toast("Failed to add ability");
-  }
-});
-
-document.getElementById("addSpellBtn")?.addEventListener("click", async ()=>{
-  try{
-    const c = (typeof getChar==="function") ? getChar() : null;
-    if(!c){ toast("Create character first"); return; }
-
-    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const list = Array.isArray(cat?.spells) ? cat.spells : [];
-    if(!list.length){
-      // fallback: manual
-      if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+    if(String(pick.sid) === "__custom__"){
       const out = await vwModalForm({
         title:"Add Spell",
         okText:"Add",
         fields:[
           {key:"name",label:"Spell Name",placeholder:"e.g. Ghost Signal"},
-          {key:"tier",label:"Tier",placeholder:"0-8"},
+          {key:"tier",label:"Tier/Level",placeholder:"0-8"},
           {key:"castTime",label:"Cast Time",placeholder:"action / bonus / reaction"},
-          {key:"concentration",label:"Concentration",placeholder:"yes/no"},
-          {key:"summary",label:"Summary",placeholder:"Describe the effect"}
+          {key:"concentration",label:"Concentration",type:"select",options:[{value:"",label:"No"},{value:"Yes",label:"Yes"}]},
+          {key:"summary",label:"Summary",type:"textarea",placeholder:"Describe the spell effect"}
         ]
       });
       if(!out) return;
       c.spells ||= [];
-      c.spells.push({ id: crypto.randomUUID?.() || ("s_"+Math.random().toString(16).slice(2)), ...out });
+      c.spells.push({
+        id: crypto.randomUUID?.() || ("s_"+Math.random().toString(16).slice(2)),
+        name: out.name || "",
+        tier: out.tier || "",
+        castTime: out.castTime || "",
+        concentration: String(out.concentration||"").toLowerCase()==="yes",
+        summary: out.summary || ""
+      });
       await vwSaveChar(c);
       toast("Spell added");
       await refreshAll();
       return;
     }
 
-    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
-    const pick = await vwModalForm({
-      title: "Add Spell",
-      okText: "Add",
-      fields: [{ key:"sid", label:"Spell", type:"select", options: list.map(s=>({value:s.id,label:(s.modernName||s.name)})) }]
-    });
-    if(!pick) return;
     const s = list.find(x=>String(x.id)===String(pick.sid));
     if(!s){ toast("Spell not found"); return; }
 
