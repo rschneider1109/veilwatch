@@ -1875,6 +1875,7 @@ const result = await new Promise((resolve)=>{
     ui.btnOk.onclick = null;
     ui.btnCan.onclick = null;
     btnBack.onclick = null;
+    try{ btnBack.remove(); }catch(e){}
     ui.modal.onclick = null;
     vwSetModalOpen(false);
     resolve(val);
@@ -2052,10 +2053,10 @@ const result = await new Promise((resolve)=>{
 
 document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
   try{
-    if(!(window.SESSION && (SESSION.role==="dm" || (SESSION.userId && c && c.ownerUserId===SESSION.userId)))){ toast("Only the owner (or DM) can delete"); return; }
     const c = (typeof getChar==="function") ? getChar() : null;
     if(!c){ toast("Select a character first"); return; }
-    if(!(window.SESSION && (SESSION.role==="dm" || (SESSION.userId && c.ownerUserId===SESSION.userId)))){ toast("Only the owner (or DM) can delete"); return; }
+    const canDelete = (SESSION.role==="dm") || (SESSION.userId && c.ownerUserId===SESSION.userId);
+    if(!canDelete){ toast("Only the owner (or DM) can delete"); return; }
     if(typeof vwModalConfirm === "function"){
       const ok = await vwModalConfirm({
         title: "Delete Character",
@@ -2222,6 +2223,78 @@ function vwUpdateCharacterModeUI(){
   const cb = document.getElementById("creationBlock");
   if(cb) cb.classList.add("hidden");
 }
+
+function vwUpdateCharSummaryRow(){
+  const row = document.getElementById("charSummaryRow");
+  if(!row) return;
+
+  const c = (typeof getChar==="function") ? getChar() : null;
+  const st = window.__STATE || {};
+  const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+
+  const set = (id, val)=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  };
+
+  if(!c){
+    set("charSummaryPlayer", "Player: —");
+    set("charSummaryClass", "Class: —");
+    set("charSummarySubclass", "Subclass: —");
+    set("charSummaryHP", "HP: —");
+    set("charSummaryAC", "AC: —");
+    set("charSummaryInit", "Init: —");
+    set("charSummarySpeed", "Speed: —");
+    set("charSummaryMoney", "Money: —");
+    return;
+  }
+
+  // Player / owner
+  let ownerName = "—";
+  try{
+    const u = (st.users||[]).find(x=>x.id===c.ownerUserId);
+    ownerName = u?.name || u?.username || u?.email || ownerName;
+  }catch(e){}
+  if(!ownerName || ownerName==="—"){
+    try{ ownerName = SESSION?.username || SESSION?.userId || "—"; }catch(e){}
+  }
+
+  // Class + Subclass names from catalog when possible
+  const classes = Array.isArray(cat?.classes) ? cat.classes : [];
+  const className = classes.find(x=>x.id===c.classId)?.name || c.className || c.classId || "—";
+
+  let subclassName = c.subclassId || c.subclassName || "—";
+  try{
+    const subsBy = cat?.subclassesByClass || {};
+    const list = Array.isArray(subsBy?.[c.classId]) ? subsBy[c.classId] : (Array.isArray(cat?.subclasses) ? cat.subclasses : []);
+    const sub = (list||[]).find(s=>s.id===c.subclassId);
+    if(sub) subclassName = sub.name || sub.id || subclassName;
+  }catch(e){}
+
+  // Vitals + money (read-only display)
+  const v = (c.sheet && c.sheet.vitals) ? c.sheet.vitals : {};
+  const hpCur = (v.hpCur ?? "");
+  const hpMax = (v.hpMax ?? "");
+  const hpTxt = (hpCur!=="" || hpMax!=="") ? `HP: ${hpCur || "—"} / ${hpMax || "—"}` : "HP: —";
+  const acTxt = (v.ac ?? "")!=="" ? `AC: ${v.ac}` : "AC: —";
+  const initTxt = (v.init ?? "")!=="" ? `Init: ${v.init}` : "Init: —";
+  const speedTxt = (v.speed ?? "")!=="" ? `Speed: ${v.speed}` : "Speed: —";
+
+  const m = (c.sheet && c.sheet.money) ? c.sheet.money : {};
+  const cash = (m.cash ?? "");
+  const bank = (m.bank ?? "");
+  const moneyTxt = (cash!=="" || bank!=="") ? `Money: $${cash || "0"} / $${bank || "0"}` : "Money: —";
+
+  set("charSummaryPlayer", `Player: ${ownerName}`);
+  set("charSummaryClass", `Class: ${className}`);
+  set("charSummarySubclass", `Subclass: ${subclassName || "—"}`);
+  set("charSummaryHP", hpTxt);
+  set("charSummaryAC", acTxt);
+  set("charSummaryInit", initTxt);
+  set("charSummarySpeed", speedTxt);
+  set("charSummaryMoney", moneyTxt);
+}
+
 
 // Helper: replace node to clear old/bad listeners
 function vwRebindButton(id, handler){
@@ -2453,12 +2526,12 @@ vwRebindButton("finishCharBtn", async ()=>{
 const __vw_old_renderCharacter = (typeof renderCharacter === "function") ? renderCharacter : null;
 renderCharacter = window.renderCharacter = function(){
   if(__vw_old_renderCharacter) __vw_old_renderCharacter();
-  try{ vwUpdateCharacterModeUI(); }catch(e){}
+  try{ vwUpdateCharacterModeUI(); vwUpdateCharSummaryRow(); }catch(e){}
 };
 const __vw_old_renderSheet = (typeof renderSheet === "function") ? renderSheet : null;
 renderSheet = window.renderSheet = function(){
   if(__vw_old_renderSheet) __vw_old_renderSheet();
-  try{ vwUpdateCharacterModeUI(); }catch(e){}
+  try{ vwUpdateCharacterModeUI(); vwUpdateCharSummaryRow(); }catch(e){}
 };
 
 function vwGetCatalog(){

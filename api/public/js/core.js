@@ -22,6 +22,9 @@ function vwModalBaseSetup(title, okText, cancelText){
   const btnOk  = document.getElementById("vwModalOk");
   const btnCan = document.getElementById("vwModalCancel");
 
+  // Clear any leftover wizard Back button from previous modal usage
+  try{ document.getElementById("vwModalBack")?.remove(); }catch(e){}
+
   mTitle.textContent = title || "Modal";
   btnOk.textContent = okText || "OK";
   btnCan.textContent = cancelText || "Cancel";
@@ -351,6 +354,8 @@ document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
   if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
   if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
+  const sf = document.getElementById("sheetOnlyFooter");
+  if(sf) sf.classList.toggle("hidden", b.dataset.ctab !== "sheet");
   try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = b.dataset.ctab; }catch(e){}
 });
 // intel sub-tabs (DM)
