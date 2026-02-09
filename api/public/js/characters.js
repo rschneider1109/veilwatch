@@ -75,6 +75,7 @@ function vwGetCatalog(){
   return window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG || null;
 }
 function renderCharacter(){
+  vwApplyCharacterMode();
   const c=getChar();
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
@@ -283,6 +284,7 @@ function vwWireSheetAutosave(){
 }
 
 function renderSheet(){
+  try{ vwRenderCreationControls(); }catch(e){}
   const sheetHost = document.getElementById("sheetHost") || document.getElementById("sheet") || document.getElementById("sheetPanel");
   if(!sheetHost) return;
   const c=getChar();
@@ -815,14 +817,6 @@ function vwHasModal(){
   return (typeof vwModalForm === "function") && (typeof vwModalInput === "function" || true);
 }
 
-document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
-  try{
-    if(typeof vwModalInput !== "function"){ toast("Modal input not available"); return; }
-    const name = await vwModalInput({
-      title: "New Character",
-      label: "Character name",
-      placeholder: "e.g. Mara Kincaid"
-    });
     if(!name) return;
 
     const res = await api("/api/character/new", { method:"POST", body: JSON.stringify({ name }) });
@@ -1268,3 +1262,169 @@ renderSheet = window.renderSheet = function(){
   try{ vwUpdateCharacterModeUI(); }catch(e){}
 };
 
+
+
+function vwApplyCharacterMode(){
+  const c = getChar();
+  const createBar = document.getElementById("createCtabBar");
+  const sheetBar  = document.getElementById("sheetCtabBar");
+  const isCreate = c ? !c.setupComplete : true;
+
+  if(createBar) createBar.classList.toggle("hidden", !isCreate);
+  if(sheetBar)  sheetBar.classList.toggle("hidden", isCreate);
+
+  // default tab per mode if not set
+  if(!SESSION.activeCtab){
+    SESSION.activeCtab = isCreate ? "sheet" : "sheet";
+  }
+  // If in sheet mode and user is on create-only tabs, keep it sane
+  if(!isCreate && ["actions","inventory","abilities","spells","sheet","background","traits","notes"].indexOf(SESSION.activeCtab)===-1){
+    SESSION.activeCtab = "sheet";
+  }
+  try{ if(typeof vwApplyCtab==="function") vwApplyCtab(SESSION.activeCtab); }catch(e){}
+}
+
+async function vwFinishCreation(){
+  const c = getChar();
+  if(!c) return;
+  c.setupComplete = true;
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){
+    toast("Character created");
+    SESSION.activeCtab = "sheet";
+    await refreshAll();
+    vwApplyCharacterMode();
+  }else toast(res?.error || "Failed");
+}
+
+
+function vwRenderCreationControls(){
+  const c = getChar();
+  const host = document.getElementById("creationControls");
+  if(!host) return;
+  if(!c){ host.innerHTML=""; return; }
+  if(c.setupComplete){ host.innerHTML=""; return; }
+
+  const cat = vwGetCatalog();
+  const classes = cat?.classes || [];
+  const subsBy = cat?.subclassesByClass || {};
+  const kitRecs = cat?.kitRecommendations || {};
+  const kitsById = cat?.kits?.byId || {};
+
+  // Build selects
+  const classOpts = classes.map(cl=>({value:cl.id,label:cl.name}));
+  const currentClass = c.classId || classOpts[0]?.value || "";
+  const subList = (subsBy[currentClass] || []).map(s=>({value:s.id,label:s.name}));
+
+  const recKitIds = (kitRecs[currentClass] || []);
+  const recKits = recKitIds.map(id=>kitsById[id]).filter(Boolean);
+
+  host.innerHTML = `
+    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="min-width:220px;flex:1;">
+        <div class="mini" style="margin-bottom:6px;">Class</div>
+        <select class="input" id="vwClassSel"></select>
+      </div>
+      <div style="min-width:240px;flex:1;">
+        <div class="mini" style="margin-bottom:6px;">Subclass</div>
+        <select class="input" id="vwSubSel"></select>
+      </div>
+      <div style="min-width:220px;flex:1;">
+        <div class="mini" style="margin-bottom:6px;">Kits</div>
+        <button class="btn smallbtn" id="vwAddKitBtn" type="button">Add Kit</button>
+      </div>
+      <div style="min-width:200px;">
+        <button class="btn smallbtn" id="vwFinishBtn" type="button">Finish Creation</button>
+      </div>
+    </div>
+    <div class="mini" style="margin-top:10px;">
+      ${recKits.length ? ("Recommended kits: " + recKits.map(k=>esc(k.name)).join(", ")) : "Recommended kits: (none listed)"} 
+    </div>
+  `;
+
+  const classSel = document.getElementById("vwClassSel");
+  classOpts.forEach(o=>{
+    const opt=document.createElement("option"); opt.value=o.value; opt.textContent=o.label; classSel.appendChild(opt);
+  });
+  classSel.value = currentClass;
+
+  const subSel = document.getElementById("vwSubSel");
+  function fillSubs(){
+    subSel.innerHTML="";
+    const cl = classSel.value;
+    (subsBy[cl] || []).forEach(s=>{
+      const opt=document.createElement("option"); opt.value=s.id; opt.textContent=s.name; subSel.appendChild(opt);
+    });
+    subSel.value = c.subclassId || subSel.options[0]?.value || "";
+  }
+  fillSubs();
+
+  classSel.onchange = async ()=>{
+    c.classId = classSel.value;
+    c.subclassId = "";
+    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    fillSubs();
+    toast("Class updated");
+  };
+
+  subSel.onchange = async ()=>{
+    c.subclassId = subSel.value;
+    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    toast("Subclass updated");
+  };
+
+  document.getElementById("vwAddKitBtn").onclick = async ()=>{
+    const cat = vwGetCatalog();
+    const kitsById = cat?.kits?.byId || {};
+    const kitCats = cat?.kits?.categories || [];
+    const kitList = Object.values(kitsById);
+    if(!kitList.length) return toast("No kits in catalog");
+
+    const step1 = await vwModalForm({
+      title:"Add Kit",
+      okText:"Next",
+      fields:[{key:"category",label:"Category",type:"select",options: kitCats.map(x=>({value:x,label:x}))}]
+    });
+    if(!step1) return;
+
+    const choices = kitList.filter(k=>k.category===step1.category);
+    const step2 = await vwModalForm({
+      title:"Add Kit",
+      okText:"Add",
+      fields:[{key:"kitId",label:"Kit",type:"select",options: choices.map(k=>({value:k.id,label:k.name}))}]
+    });
+    if(!step2) return;
+
+    const kit = kitsById[step2.kitId];
+    if(!kit) return;
+
+    c.kits ||= [];
+    if(!c.kits.includes(kit.id)) c.kits.push(kit.id);
+
+    // push items into inventory (avoid dup exact name)
+    c.inventory ||= [];
+    (kit.items||[]).forEach(name=>{
+      c.inventory.push({category:kit.category||"", name, weight:"", qty:"1", cost:"", notes:"(from kit) "+kit.name});
+    });
+
+    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    toast("Kit added");
+    await refreshAll();
+  };
+
+  document.getElementById("vwFinishBtn").onclick = ()=>vwFinishCreation();
+}
+
+
+document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
+  const res = await api("/api/character/new",{method:"POST"});
+  if(res && res.ok){
+    SESSION.activeCharId = res.id;
+    SESSION.activeCtab = "sheet";
+    toast("New character created");
+    await refreshAll();
+    vwApplyCharacterMode();
+    // jump user to Character tab
+    try{ renderTabs("character"); }catch(e){}
+  }else toast(res?.error || "Failed");
+});
