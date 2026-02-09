@@ -617,6 +617,7 @@ const server = http.createServer(async (req,res)=>{
       id,
       name,
       ownerUserId,
+      setupComplete: false,
       weapons: [],
       inventory: [],
       abilities: [],
@@ -703,19 +704,32 @@ const server = http.createServer(async (req,res)=>{
   }
 
   if(p === "/api/character/delete" && req.method==="POST"){
-    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
-    const body = JSON.parse(await readBody(req) || "{}");
-    const charId = String(body.charId||"");
-    const i = getCharIndex(charId);
-    if(i<0) return json(res, 404, { ok:false, error:"Not found" });
-    state.characters.splice(i,1);
-    // remove from active party if present
-    state.activeParty = (state.activeParty||[]).filter(e => e.charId !== charId);
-    saveState(state);
-    return json(res, 200, { ok:true });
+  if(!requireLogin()) return;
+  const body = JSON.parse(await readBody(req) || "{}");
+  const charId = String(body.charId||"");
+  const i = getCharIndex(charId);
+  if(i<0) return json(res, 404, { ok:false, error:"Not found" });
+
+  const c = state.characters[i];
+
+  // DM can delete anything. Players can delete only their own character.
+  const canDelete = dm || (user && user.role === "player" && c.ownerUserId === user.id);
+  if(!canDelete) return json(res, 403, { ok:false, error:"Not allowed" });
+
+  state.characters.splice(i,1);
+  // remove from active party if present
+  state.activeParty = (state.activeParty||[]).filter(e => e.charId !== charId);
+
+  // If the deleting player had this as active, clear it
+  if(user && user.activeCharId === charId){
+    user.activeCharId = null;
+    saveUsers(users);
   }
 
-  // DM assign owner (import workflow)
+  saveState(state);
+  return json(res, 200, { ok:true });
+}
+// DM assign owner (import workflow)
   if(p === "/api/dm/character/assign" && req.method === "POST"){
     if(!dm) return json(res, 403, { ok:false, error:"DM only" });
     const body = JSON.parse(await readBody(req) || "{}");
