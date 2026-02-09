@@ -619,6 +619,8 @@ const server = http.createServer(async (req,res)=>{
       ownerUserId,
       weapons: [],
       inventory: [],
+      abilities: [],
+      spells: [],
       sheet: {
         vitals: { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" },
         money:  { cash:"", bank:"" },
