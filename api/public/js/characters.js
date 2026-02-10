@@ -111,22 +111,132 @@ function renderCharacter(){
     return;
   }
   // weapons rows
-  (c.weapons||[]).forEach(w=>{
+  (c.weapons||[]).forEach((w,wi)=>{
+    // normalize weapon schema (older saves may use dmg / ammo.starting etc)
+    if(!w.id) w.id = "w_"+Math.random().toString(36).slice(2,9);
+    if(w.dmg && !w.damage) w.damage = w.dmg;
+    if(w.ammo){
+      // normalize ammo fields
+      if(w.ammo.magSize==null && w.ammo.starting!=null) w.ammo.magSize = Number(w.ammo.starting) || w.ammo.starting;
+      if(w.ammo.starting==null && w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
+      if(w.ammo.current==null && w.ammo.starting!=null) w.ammo.current = w.ammo.starting;
+      if(w.ammo.magsMax==null && w.ammo.mags!=null) w.ammo.magsMax = w.ammo.mags;
+    }
+
     const tr=document.createElement("tr");
-    tr.innerHTML = '<td>'+esc(w.name)+'</td><td>'+esc(w.range||"")+'</td><td>'+esc(w.hit||"")+'</td><td>'+esc(w.damage||"")+'</td><td><button class="btn smallbtn">Remove</button></td>';
+    tr.innerHTML =
+      '<td>'+esc(w.name||"")+'</td>'+
+      '<td>'+esc(w.range||"")+'</td>'+
+      '<td>'+esc(w.hit||"")+'</td>'+
+      '<td>'+esc(w.damage||"")+'</td>'+
+      '<td><button class="btn smallbtn">Remove</button></td>';
+
     tr.querySelector("button").onclick=async ()=>{
-      c.weapons = c.weapons.filter(x=>x.id!==w.id);
+      c.weapons = (c.weapons||[]).filter(x=>x.id!==w.id);
       await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      toast("Removed weapon"); await refreshAll();
+      toast("Removed weapon");
+      await refreshAll();
     };
+
     weapBody.appendChild(tr);
+
+    // Ammo tracking row (interactive)
     if(w.ammo){
       const tr2=document.createElement("tr");
-      tr2.innerHTML = '<td colspan="5" class="mini">Ammo: '+esc(w.ammo.type)+' | Starting '+esc(w.ammo.starting)+' | Current '+esc(w.ammo.current)+' | Mags '+esc(w.ammo.mags||"—")+'</td>';
+      tr2.innerHTML = `
+        <td colspan="5" class="mini">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="opacity:.9"><b>Ammo</b></span>
+            <span style="opacity:.7">Type</span>
+            <input class="input" style="width:120px" data-ammo="type" data-wi="${wi}" value="${esc(w.ammo.type||"")}" />
+            <span style="opacity:.7">Mag</span>
+            <input class="input" style="width:70px" data-ammo="magSize" data-wi="${wi}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" />
+            <span style="opacity:.7">Cur</span>
+            <input class="input" style="width:70px" data-ammo="current" data-wi="${wi}" value="${esc(w.ammo.current ?? "")}" />
+            <button class="btn smallbtn" data-ammo-act="shot" data-wi="${wi}">-1</button>
+            <button class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
+            <span style="opacity:.7">Mags</span>
+            <input class="input" style="width:70px" data-ammo="mags" data-wi="${wi}" value="${esc(w.ammo.mags ?? "")}" />
+            <button class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
+            <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
+          </div>
+          <div style="opacity:.65;margin-top:6px;">
+            Tip: <b>-1</b> decrements current. <b>Reload</b> swaps in a fresh mag (consumes 1 from Mags if available). <b>Reload Mags</b> restores Mags to the weapon’s starting mags.
+          </div>
+        </td>
+      `;
       weapBody.appendChild(tr2);
     }
   });
-  // inventory rows
+
+  // wire ammo controls (after rows exist)
+  weapBody.querySelectorAll("input[data-ammo]").forEach(inp=>{
+    inp.onchange = async ()=>{
+      const wi = Number(inp.getAttribute("data-wi"));
+      const key = inp.getAttribute("data-ammo");
+      const w = c.weapons?.[wi];
+      if(!w) return;
+      w.ammo = w.ammo || {};
+      let v = inp.value;
+
+      // numeric fields
+      if(key==="magSize" || key==="current" || key==="mags"){
+        const n = parseInt(v,10);
+        if(Number.isFinite(n)) v = n;
+      }
+
+      w.ammo[key] = v;
+      // keep legacy fields in sync
+      if(key==="magSize"){
+        w.ammo.starting = v;
+        if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
+      }
+      if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
+
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      renderCharacter(); // repaint to ensure all displays stay consistent
+    };
+  });
+
+  weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
+    btn.onclick = async ()=>{
+      const wi = Number(btn.getAttribute("data-wi"));
+      const act = btn.getAttribute("data-ammo-act");
+      const w = c.weapons?.[wi];
+      if(!w) return;
+      w.ammo = w.ammo || {};
+      const magSize = parseInt(w.ammo.magSize ?? w.ammo.starting ?? 0,10) || 0;
+      const cur = parseInt(w.ammo.current ?? 0,10) || 0;
+      const mags = parseInt(w.ammo.mags ?? 0,10) || 0;
+      const magsMax = parseInt(w.ammo.magsMax ?? mags,10) || 0;
+
+      if(act==="shot"){
+        w.ammo.current = Math.max(0, cur - 1);
+      }else if(act==="reload"){
+        // swap mag: consume one spare mag if you have it, then refill current
+        if(mags > 0){
+          w.ammo.mags = mags - 1;
+        }else{
+          // allow reload even if mags are 0 (loose ammo), but don't change mags
+          toast("Reloaded (no spare mags tracked)");
+        }
+        w.ammo.current = magSize || cur;
+      }else if(act==="addmag"){
+        w.ammo.mags = mags + 1;
+        if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
+      }else if(act==="reloadmags"){
+        w.ammo.mags = magsMax;
+        w.ammo.current = magSize || cur;
+      }
+
+      // legacy sync
+      if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
+
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      renderCharacter();
+    };
+  });
+// inventory rows
   (c.inventory||[]).forEach((it,idx)=>{
     const tr=document.createElement("tr");
     tr.innerHTML =
@@ -320,25 +430,34 @@ function vwWireSheetAutosave(){
     c.sheet[root][key] = value;
   }
 
+  // NOTE: Some legacy layouts include duplicate IDs for the same sheet fields (Home quick-sheet + Character Sheet).
+  // document.getElementById() only returns the first match, which can leave the visible sheet inputs unwired.
+  // So we wire *all* elements that share the same id.
   map.forEach(([id, pathArr])=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener("input", ()=>{
-      const c = getChar(); if(!c) return;
-      ensureSheet(c);
-      setPath(c, pathArr, el.value);
+    const els = Array.from(document.querySelectorAll('[id="'+id.replace(/"/g,'\\"')+'"]'));
+    if(!els.length) return;
+    els.forEach((el)=>{
+      el.addEventListener("input", ()=>{
+        const c = getChar(); if(!c) return;
+        ensureSheet(c);
+        setPath(c, pathArr, el.value);
 
-      // If the DM is editing the sheet initiative, update the DM Active Character card immediately
-      // (without waiting for autosave to complete). This keeps all three initiative locations in sync.
+      // Live-sync for the DM "Active Character" cards while editing the sheet.
+      // This avoids requiring a manual "Save Sheet" click for immediate UI consistency.
       try{
-        if(pathArr[0]==="vitals" && pathArr[1]==="init"){
+        if(pathArr[0]==="vitals" && (pathArr[1]==="init" || pathArr[1]==="hpCur" || pathArr[1]==="hpMax")){
           const st = window.__STATE;
           if(st && Array.isArray(st.activeParty)){
             const apx = st.activeParty.findIndex(x=>x.charId===c.id);
             if(apx>=0){
-              const raw = String(el.value ?? "").trim();
-              const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
-              st.activeParty[apx].initiative = newInit;
+              // Initiative: mirror into activeParty entry (cards prefer activeParty override).
+              if(pathArr[1]==="init"){
+                const raw = String(el.value ?? "").trim();
+                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
+                st.activeParty[apx].initiative = newInit;
+              }
+              // HP: cards compute from character sheet vitals, but they only re-render when prompted.
+              // Trigger a re-render on every keystroke so HP feels as immediate as Initiative.
               if(typeof renderDMActiveParty === "function") renderDMActiveParty();
             }
           }
@@ -346,8 +465,9 @@ function vwWireSheetAutosave(){
       }catch(e){}
 
       // Keep the always-visible summary pills in sync while the user types.
-      try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-      vwScheduleCharAutosave();
+        try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+        vwScheduleCharAutosave();
+      });
     });
   });
 }
@@ -368,13 +488,18 @@ function renderSheet(){
   c.sheet.traits ||= "";
   c.sheet.notes ||= "";
 
+  function setValueAll(id, value){
+    document.querySelectorAll('[id="'+String(id).replace(/"/g,'\\"')+'"]')
+      .forEach(el=>{ try{ el.value = (value ?? ""); }catch(e){} });
+  }
+
   const v=c.sheet.vitals;
-  document.getElementById("hpCur").value = v.hpCur ?? "";
-  document.getElementById("hpMax").value = v.hpMax ?? "";
-  document.getElementById("hpTemp").value = v.hpTemp ?? "";
-  document.getElementById("acVal").value = v.ac ?? "";
-  document.getElementById("initVal").value = v.init ?? "";
-  document.getElementById("spdVal").value = v.speed ?? "";
+  setValueAll("hpCur",  v.hpCur ?? "");
+  setValueAll("hpMax",  v.hpMax ?? "");
+  setValueAll("hpTemp", v.hpTemp ?? "");
+  setValueAll("acVal",  v.ac ?? "");
+  setValueAll("initVal",v.init ?? "");
+  setValueAll("spdVal", v.speed ?? "");
 
 // Extended text fields
 const bgEl = document.getElementById("bgText");
@@ -384,17 +509,17 @@ if(trEl) trEl.value = c.sheet.traits ?? "";
 const ntEl = document.getElementById("notesText");
 if(ntEl) ntEl.value = c.sheet.notes ?? "";
 
-  document.getElementById("cashVal").value = (c.sheet.money.cash ?? "");
-  document.getElementById("bankVal").value = (c.sheet.money.bank ?? "");
+  setValueAll("cashVal", (c.sheet.money.cash ?? ""));
+  setValueAll("bankVal", (c.sheet.money.bank ?? ""));
 
-  document.getElementById("statSTR").value = (c.sheet.stats.STR ?? "");
-  document.getElementById("statDEX").value = (c.sheet.stats.DEX ?? "");
-  document.getElementById("statCON").value = (c.sheet.stats.CON ?? "");
-  document.getElementById("statINT").value = (c.sheet.stats.INT ?? "");
-  document.getElementById("statWIS").value = (c.sheet.stats.WIS ?? "");
-  document.getElementById("statCHA").value = (c.sheet.stats.CHA ?? "");
+  setValueAll("statSTR", (c.sheet.stats.STR ?? ""));
+  setValueAll("statDEX", (c.sheet.stats.DEX ?? ""));
+  setValueAll("statCON", (c.sheet.stats.CON ?? ""));
+  setValueAll("statINT", (c.sheet.stats.INT ?? ""));
+  setValueAll("statWIS", (c.sheet.stats.WIS ?? ""));
+  setValueAll("statCHA", (c.sheet.stats.CHA ?? ""));
 
-  document.getElementById("notesText") && (document.getElementById("notesText").value = (c.sheet.notes ?? ""));
+  setValueAll("notesText", (c.sheet.notes ?? ""));
 
   // conditions
   const row=document.getElementById("condRow");
@@ -2372,14 +2497,14 @@ vwRebindButton("addWeaponBtn", async ()=>{
   try{
     const c = getChar();
     if(!c){ toast("Create character first"); return; }
-    const cat = vwGetCatalog ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const w = cat?.weapons || {};
+    const cat = (typeof vwGetCatalog==="function" ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
+    const wcat = cat?.weapons || {};
     const buckets = [
-      ["Sidearms", w.sidearms || []],
-      ["Primaries", w.primaries || []],
-      ["Nonlethal", w.nonlethal || []],
-      ["Melee", w.melee || []],
-      ["Heavy (restricted)", w.heavy_restricted || []],
+      ["Sidearms", wcat.sidearms || []],
+      ["Primaries", wcat.primaries || []],
+      ["Nonlethal", wcat.nonlethal || []],
+      ["Melee", wcat.melee || []],
+      ["Heavy (restricted)", wcat.heavy_restricted || []],
     ];
     const opts = [{ value:"__custom__", label:"(Custom Weapon…)" }];
     buckets.forEach(([label, list])=>{
@@ -2399,22 +2524,58 @@ vwRebindButton("addWeaponBtn", async ()=>{
     });
     if(!pick) return;
 
-    let weapon = { name:"", range:"", hit:"", dmg:"" };
+    const mkId = ()=>("w_"+Math.random().toString(36).slice(2,9));
+
+    let weapon = { id: mkId(), name:"", range:"", hit:"", damage:"", notes:"" };
+    let needsAmmo = false;
+    let ammoDefaults = { type:"", magSize:30, current:30, mags:2, magsMax:2 };
 
     if(pick.pick === "__custom__"){
       const det = await vwModalForm({
         title:"Custom Weapon",
-        okText:"Add",
+        okText:"Next",
         fields:[
           { key:"name", label:"Weapon Name" },
           { key:"range", label:"Range", placeholder:"e.g., 30/120" },
           { key:"hit", label:"Hit/DC", placeholder:"e.g., +5 / DC 14" },
-          { key:"dmg", label:"Damage", placeholder:"e.g., 1d8+3" },
+          { key:"damage", label:"Damage", placeholder:"e.g., 1d8+3" },
           { key:"notes", label:"Notes", placeholder:"Optional" },
+          { key:"hasAmmo", label:"Ammo Tracking", type:"select", options:[
+            { value:"no", label:"No" },
+            { value:"yes", label:"Yes" }
+          ], value:"no" },
         ]
       });
       if(!det) return;
-      weapon = { name:det.name||"", range:det.range||"", hit:det.hit||"", dmg:det.dmg||"", notes:det.notes||"" };
+
+      weapon.name   = det.name||"";
+      weapon.range  = det.range||"";
+      weapon.hit    = det.hit||"";
+      weapon.damage = det.damage||"";
+      weapon.notes  = det.notes||"";
+      needsAmmo = (det.hasAmmo==="yes");
+      if(needsAmmo){
+        // Ask ammo details for custom weapon
+        const a = await vwModalForm({
+          title:"Ammo Setup",
+          okText:"Add",
+          fields:[
+            { key:"type", label:"Ammo Type", placeholder:"e.g., 9mm, .45, 5.56" },
+            { key:"magSize", label:"Mag Size", placeholder:"30", value:"30" },
+            { key:"mags", label:"Spare Mags", placeholder:"2", value:"2" },
+            { key:"current", label:"Current Rounds", placeholder:"30", value:"30" },
+          ]
+        });
+        if(!a) return;
+        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const cur = parseInt(a.current,10);
+        ammoDefaults = {
+          type: (a.type||""),
+          magSize: Number.isFinite(magSize)?magSize:30,
+          mags: Number.isFinite(mags)?mags:0,
+          magsMax: Number.isFinite(mags)?mags:0,
+          current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:30),
+        };
+      }
     }else{
       const val = pick.pick;
       let chosen = null;
@@ -2425,9 +2586,58 @@ vwRebindButton("addWeaponBtn", async ()=>{
           if(id === val) chosen = it;
         });
       });
+
       weapon.name = chosen?.name || (typeof chosen==="string" ? chosen : "");
-      weapon.ammoModel = chosen?.ammoModel || "";
-      weapon.ammoType  = chosen?.ammoTypeDefault || "";
+      // Catalog weapons may carry ammoModel + ammoTypeDefault
+      const ammoModel = chosen?.ammoModel || "";
+      const ammoTypeDefault = chosen?.ammoTypeDefault || "";
+      if(ammoModel){
+        needsAmmo = true;
+        // Basic default capacities by model (user can edit later per weapon)
+        const defaultCap = (ammoModel==="shells") ? 8 : (ammoModel==="revolver") ? 6 : (ammoModel==="cell") ? 10 : (ammoModel==="belt") ? 100 : 30;
+        ammoDefaults = { type: ammoTypeDefault||"", magSize: defaultCap, current: defaultCap, mags: 2, magsMax: 2 };
+      }
+      // If chosen also includes range/hit/damage fields in the future, we accept them.
+      if(chosen && typeof chosen==="object"){
+        if(chosen.range) weapon.range = String(chosen.range);
+        if(chosen.hit) weapon.hit = String(chosen.hit);
+        if(chosen.damage) weapon.damage = String(chosen.damage);
+        if(chosen.notes) weapon.notes = String(chosen.notes);
+      }
+    }
+
+    if(needsAmmo){
+      // If we haven't shown ammo setup for catalog weapons, offer a quick confirm/edit
+      if(pick.pick !== "__custom__"){
+        const a = await vwModalForm({
+          title:"Ammo Setup",
+          okText:"Add",
+          fields:[
+            { key:"type", label:"Ammo Type", value: String(ammoDefaults.type||""), placeholder:"e.g., 9mm" },
+            { key:"magSize", label:"Mag Size", value: String(ammoDefaults.magSize||30), placeholder:"30" },
+            { key:"mags", label:"Spare Mags", value: String(ammoDefaults.mags||2), placeholder:"2" },
+            { key:"current", label:"Current Rounds", value: String(ammoDefaults.current||ammoDefaults.magSize||30), placeholder:"30" },
+          ]
+        });
+        if(!a) return;
+        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const cur = parseInt(a.current,10);
+        ammoDefaults = {
+          type: (a.type||""),
+          magSize: Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30),
+          mags: Number.isFinite(mags)?mags:(ammoDefaults.mags||0),
+          magsMax: Number.isFinite(mags)?mags:(ammoDefaults.magsMax||ammoDefaults.mags||0),
+          current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30)),
+        };
+      }
+
+      weapon.ammo = {
+        type: ammoDefaults.type || "",
+        magSize: ammoDefaults.magSize,
+        starting: ammoDefaults.magSize,  // backward-compat
+        current: ammoDefaults.current,
+        mags: ammoDefaults.mags,
+        magsMax: ammoDefaults.magsMax
+      };
     }
 
     c.weapons ||= [];
@@ -2438,6 +2648,7 @@ vwRebindButton("addWeaponBtn", async ()=>{
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
+
 
 vwRebindButton("addAbilityBtn", async ()=>{
   try{
