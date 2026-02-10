@@ -233,6 +233,30 @@ async function vwFlushCharAutosave(){
     if(res && res.ok){
       __vwCharLastSaveAt = Date.now();
       vwSetSaveMini("Saved " + new Date(__vwCharLastSaveAt).toLocaleTimeString());
+
+      // Keep in-memory state + DM Active Party cards in sync without requiring a manual "Save Sheet" click.
+      // This ensures Initiative (and other sheet vitals) immediately reflect in the DM Active Character card.
+      try{
+        const st = window.__STATE;
+        if(st && res.character){
+          // update character in local state
+          const ix = Array.isArray(st.characters) ? st.characters.findIndex(x=>x.id===res.character.id) : -1;
+          if(ix>=0) st.characters[ix] = res.character;
+
+          // sync activeParty.initiative to sheet.vitals.init for this character (mirrors server behavior)
+          const apx = Array.isArray(st.activeParty) ? st.activeParty.findIndex(x=>x.charId===res.character.id) : -1;
+          if(apx>=0){
+            const raw = res.character?.sheet?.vitals?.init;
+            const newInit = (raw===0 || raw) ? (Number.isFinite(Number(raw)) ? Number(raw) : String(raw)) : "";
+            st.activeParty[apx].initiative = newInit;
+          }
+
+          // re-render DM cards + summary pills if those components exist
+          if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+          if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
+        }
+      }catch(e){}
+
     }else{
       vwSetSaveMini("Save error");
     }
@@ -303,6 +327,24 @@ function vwWireSheetAutosave(){
       const c = getChar(); if(!c) return;
       ensureSheet(c);
       setPath(c, pathArr, el.value);
+
+      // If the DM is editing the sheet initiative, update the DM Active Character card immediately
+      // (without waiting for autosave to complete). This keeps all three initiative locations in sync.
+      try{
+        if(pathArr[0]==="vitals" && pathArr[1]==="init"){
+          const st = window.__STATE;
+          if(st && Array.isArray(st.activeParty)){
+            const apx = st.activeParty.findIndex(x=>x.charId===c.id);
+            if(apx>=0){
+              const raw = String(el.value ?? "").trim();
+              const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
+              st.activeParty[apx].initiative = newInit;
+              if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+            }
+          }
+        }
+      }catch(e){}
+
       // Keep the always-visible summary pills in sync while the user types.
       try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
       vwScheduleCharAutosave();
