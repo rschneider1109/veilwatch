@@ -448,7 +448,9 @@ function renderDMActiveParty(){
     const s = (c.sheet && c.sheet.stats) ? c.sheet.stats : {};
     const hp = (v.hpCur||"") + "/" + (v.hpMax||"");
     const ac = (v.ac||"");
-    const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : "";
+    // Prefer the Active Party's initiative if explicitly set; otherwise fall back to the character sheet's Init.
+    const sheetInit = (v.init===0 || v.init) ? v.init : "";
+    const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : sheetInit;
 
         const card = document.createElement("div");
     card.className = "card";
@@ -633,7 +635,7 @@ function renderDMActiveParty(){
       <div class="row" style="gap:10px;flex-wrap:wrap;">
         <div class="pill vwTapEdit" data-k="hp">HP: ${esc(hp)}</div>
         <div class="pill vwTapEdit" data-k="ac">AC: ${esc(ac||"--")}</div>
-        <div class="pill vwTapEdit" data-k="init">Init: ${esc(String(init||"--"))}</div>
+        <div class="pill vwTapEdit" data-k="init">Init: ${esc(String((init===0 || init) ? init : "--"))}</div>
       </div>
       <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px;">
         <div class="pill vwTapEdit" data-k="STR">STR ${esc(s.STR||"--")}</div>
@@ -700,18 +702,33 @@ function renderDMActiveParty(){
         if(k === "init"){
           pillEditNumber(pill, {
             label: "Init",
-            value: (entry.initiative===0 || entry.initiative) ? entry.initiative : "",
+            // Use the same resolved init used by the card display (activeParty override, else sheet).
+            value: (init===0 || init) ? init : "",
             minWidth: 72,
             onSave: async (initiative)=>{
               const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative })});
               if(res && res.ok){
-                // update local state
+                const raw = String(initiative ?? "").trim();
+                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
+
+                // update local state (activeParty + character sheet) so all UI locations update immediately
                 const st = window.__STATE || {};
                 st.activeParty ||= [];
                 const ix = st.activeParty.findIndex(x=>x.charId===c.id);
-                if(ix>=0) st.activeParty[ix].initiative = initiative;
+                if(ix>=0) st.activeParty[ix].initiative = newInit;
+
+                st.characters ||= [];
+                const cx = st.characters.findIndex(x=>x.id===c.id);
+                if(cx>=0){
+                  st.characters[cx].sheet ||= {};
+                  st.characters[cx].sheet.vitals ||= {};
+                  st.characters[cx].sheet.vitals.init = newInit;
+                }
+
                 window.__STATE = st;
-                try{ renderDMActiveParty(); }catch(_){}
+
+                try{ if(SESSION.activeCharId === c.id){ renderSheet(); vwUpdateCharSummaryRow(); } }catch(_){ }
+                try{ renderDMActiveParty(); }catch(_){ }
                 return true;
               }
               toast((res && res.error) ? res.error : "Failed");
