@@ -7,10 +7,11 @@ CREATE TABLE IF NOT EXISTS vw_state (
 CREATE TABLE IF NOT EXISTS vw_users (
   id VARCHAR(64) NOT NULL PRIMARY KEY,
   username VARCHAR(32) NOT NULL UNIQUE,
-  role VARCHAR(16) NOT NULL,
-  pass_algo VARCHAR(32) NOT NULL,
-  pass_salt CHAR(32) NOT NULL,
-  pass_hash CHAR(128) NOT NULL,
-  active_char_id VARCHAR(64) NULL,
-  created_at BIGINT NOT NULL
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(16) NOT NULL DEFAULT 'player',
+  temp_password VARCHAR(255) DEFAULT NULL,
+  must_change_password TINYINT(1) NOT NULL DEFAULT 0,
+  active_char_id VARCHAR(64) DEFAULT NULL,
+  created_at BIGINT NOT NULL,
+  INDEX idx_vw_users_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
