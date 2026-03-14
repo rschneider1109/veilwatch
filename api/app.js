@@ -9,32 +9,58 @@ if(typeof globalThis.structuredClone !== "function"){
   globalThis.structuredClone = (obj)=>JSON.parse(JSON.stringify(obj));
 }
 
-const { Pool } = require("pg");
+const mysql = require("mysql2/promise");
 
 const DM_KEY = process.env.VEILWATCH_DM_KEY || "VEILWATCHDM";
-const DATABASE_URL = process.env.DATABASE_URL || "";
+const DB_HOST = process.env.MYSQL_HOST || "";
+const DB_PORT = parseInt(process.env.MYSQL_PORT || "3306", 10);
+const DB_NAME = process.env.MYSQL_DATABASE || "veilwatch";
+const DB_USER = process.env.MYSQL_USER || "veilwatch";
+const DB_PASSWORD = process.env.MYSQL_PASSWORD || "veilwatch_pw";
 
 let pool = null;
 
 // -----------------------------
-// Postgres: optional state store
+// MariaDB / MySQL state + users store
 // -----------------------------
 async function initDb(){
-  if(!DATABASE_URL) return;
+  if(!DB_HOST) return;
   const maxTries = 30;
   const delayMs = 2000;
   for(let attempt=1; attempt<=maxTries; attempt++){
     try{
-      pool = new Pool({ connectionString: DATABASE_URL });
+      pool = mysql.createPool({
+        host: DB_HOST,
+        port: DB_PORT,
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PASSWORD,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+      });
       await pool.query(`
         CREATE TABLE IF NOT EXISTS vw_state (
-          id TEXT PRIMARY KEY,
-          state JSONB NOT NULL,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
+          id VARCHAR(64) NOT NULL PRIMARY KEY,
+          state_json LONGTEXT NOT NULL,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS vw_users (
+          id VARCHAR(64) NOT NULL PRIMARY KEY,
+          username VARCHAR(32) NOT NULL UNIQUE,
+          role VARCHAR(16) NOT NULL,
+          pass_algo VARCHAR(32) NOT NULL,
+          pass_salt CHAR(32) NOT NULL,
+          pass_hash CHAR(128) NOT NULL,
+          active_char_id VARCHAR(64) NULL,
+          created_at BIGINT NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
       return;
     } catch(e){
+      try{ if(pool) await pool.end(); } catch(_){}
       pool = null;
       await new Promise(r => setTimeout(r, delayMs));
     }
@@ -43,16 +69,56 @@ async function initDb(){
 
 async function dbGetState(){
   if(!pool) return null;
-  const r = await pool.query("SELECT state FROM vw_state WHERE id=$1", ["main"]);
-  return r.rows?.[0]?.state || null;
+  const [rows] = await pool.query("SELECT state_json FROM vw_state WHERE id = ? LIMIT 1", ["main"]);
+  if(!rows?.[0]?.state_json) return null;
+  return JSON.parse(rows[0].state_json);
 }
 
 async function dbSaveState(st){
   if(!pool) return;
   await pool.query(
-    "INSERT INTO vw_state (id, state) VALUES ($1,$2) ON CONFLICT (id) DO UPDATE SET state=EXCLUDED.state, updated_at=NOW()",
-    ["main", st]
+    "INSERT INTO vw_state (id, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = CURRENT_TIMESTAMP",
+    ["main", JSON.stringify(st)]
   );
+}
+
+async function dbLoadUsers(){
+  if(!pool) return null;
+  const [rows] = await pool.query(`
+    SELECT id, username, role, pass_algo, pass_salt, pass_hash, active_char_id, created_at
+    FROM vw_users
+    ORDER BY created_at ASC, username ASC
+  `);
+  return rows.map(r => ({
+    id: r.id,
+    username: r.username,
+    role: r.role,
+    pass: { algo: r.pass_algo, salt: r.pass_salt, hash: r.pass_hash },
+    activeCharId: r.active_char_id || null,
+    createdAt: Number(r.created_at || 0)
+  }));
+}
+
+async function dbSaveUsers(list){
+  if(!pool) return;
+  const conn = await pool.getConnection();
+  try{
+    await conn.beginTransaction();
+    await conn.query("DELETE FROM vw_users");
+    for(const u of list){
+      await conn.query(
+        `INSERT INTO vw_users (id, username, role, pass_algo, pass_salt, pass_hash, active_char_id, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [u.id, u.username, u.role, u.pass?.algo || "scrypt", u.pass?.salt || "", u.pass?.hash || "", u.activeCharId || null, Number(u.createdAt || Date.now())]
+      );
+    }
+    await conn.commit();
+  } catch(e){
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
 }
 
 // -----------------------------
@@ -201,7 +267,7 @@ function saveState(st){
 }
 
 // -----------------------------
-// Users + Sessions (file-backed)
+// Users + Sessions (MariaDB/MySQL primary, file backup)
 // -----------------------------
 let users = [];
 function fileLoadUsers(){
@@ -220,9 +286,26 @@ function fileLoadUsers(){
     return [];
   }
 }
-function fileSaveUsers(){
+function fileSaveUsers(list = users){
   ensureDir(DATA_DIR);
-  fs.writeFileSync(USERS_PATH, JSON.stringify({ users }, null, 2), "utf8");
+  fs.writeFileSync(USERS_PATH, JSON.stringify({ users: list }, null, 2), "utf8");
+}
+async function loadUsers(){
+  try{
+    const fromDb = await dbLoadUsers();
+    if(Array.isArray(fromDb) && fromDb.length){
+      fileSaveUsers(fromDb);
+      return fromDb;
+    }
+  } catch(_){}
+  const fromFile = fileLoadUsers();
+  try{ await dbSaveUsers(fromFile); } catch(_){}
+  return fromFile;
+}
+function saveUsers(list = users){
+  users = list;
+  fileSaveUsers(list);
+  dbSaveUsers(list).catch(()=>{});
 }
 
 function normUsername(u){
@@ -431,7 +514,7 @@ function servePublic(req, res, pathname){
 // Server
 // -----------------------------
 let state = normalizeCharacters(normalizeFeatures(structuredClone(DEFAULT_STATE)));
-users = fileLoadUsers();
+users = [];
 
 const server = http.createServer(async (req,res)=>{
   const parsed = url.parse(req.url, true);
@@ -474,7 +557,7 @@ const server = http.createServer(async (req,res)=>{
       activeCharId: null
     };
     users.push(u);
-    fileSaveUsers();
+    saveUsers(users);
 
     // auto-login
     const token = crypto.randomBytes(24).toString("hex");
@@ -1109,6 +1192,6 @@ if(p === "/api/character/save" && req.method==="POST"){
 (async ()=>{
   try{ await initDb(); } catch(_){}
   state = await loadState();
-  users = fileLoadUsers();
+  users = [];
   server.listen(PORT, ()=>console.log("Veilwatch OS listening on", PORT));
 })();
