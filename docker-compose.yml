@@ -53,7 +53,7 @@ services:
     depends_on:
       - veilwatch_db
     ports:
-      - "8282:80"
+      - "8283:80"
 
 volumes:
   veilwatch_db_data: {}
