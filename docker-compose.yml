@@ -2,23 +2,27 @@ version: "3.8"
 
 services:
   veilwatch_db:
-    image: postgres:16-alpine
+    image: mariadb:11.4
     restart: unless-stopped
     environment:
-      POSTGRES_DB: veilwatch
-      POSTGRES_USER: veilwatch
-      POSTGRES_PASSWORD: veilwatch_pw
+      MARIADB_DATABASE: veilwatch
+      MARIADB_USER: veilwatch
+      MARIADB_PASSWORD: veilwatch_pw
+      MARIADB_ROOT_PASSWORD: root_change_me
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     volumes:
-      - veilwatch_db_data:/var/lib/postgresql/data
+      - veilwatch_db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U veilwatch -d veilwatch"]
-      interval: 5s
-      timeout: 3s
-      retries: 60
-      start_period: 45s
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
     ports:
-      - "5432:5432"
+      - "3406:3306"
 
   veilwatch_app:
     build:
@@ -26,7 +30,11 @@ services:
     restart: unless-stopped
     environment:
       PORT: "8080"
-      DATABASE_URL: "postgres://veilwatch:veilwatch_pw@veilwatch_db:5432/veilwatch"
+      MYSQL_HOST: "veilwatch_db"
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: "veilwatch"
+      MYSQL_USER: "veilwatch"
+      MYSQL_PASSWORD: "veilwatch_pw"
       VEILWATCH_DM_KEY: "VEILWATCHDM"
     depends_on:
       - veilwatch_db
@@ -35,15 +43,17 @@ services:
     volumes:
       - veilwatch_app_data:/app/data
 
-  veilwatch_adminer:
-    image: adminer:4
+  veilwatch_phpmyadmin:
+    image: phpmyadmin:5-apache
     restart: unless-stopped
     environment:
-      ADMINER_DEFAULT_SERVER: veilwatch_db
+      PMA_HOST: veilwatch_db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
     depends_on:
       - veilwatch_db
     ports:
-      - "8282:8080"
+      - "8282:80"
 
 volumes:
   veilwatch_db_data: {}
