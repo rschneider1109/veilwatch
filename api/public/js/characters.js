@@ -55,7 +55,7 @@ async function vwAddInventoryItemDropdown() {
     category: step1.category || "",
     name: step2.name || "",
     weight: selectedItem?.default_weight ?? "",
-    qty: step2.qty || String(selectedItem?.default_qty ?? 1),
+    qty: step2.qty || "1",
     cost: selectedItem?.default_cost ?? "",
     notes: step2.notes || selectedItem?.default_notes || ""
   });
@@ -85,6 +85,92 @@ async function vwLoadInventoryCatalog(){
   }catch(e){}
   const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
   return cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory || null;
+}
+
+
+async function vwPromptInventoryCatalogItem(category, items){
+  items = Array.isArray(items) ? items : [];
+  if(!items.length) return null;
+
+  return new Promise((resolve)=>{
+    const modal = document.getElementById("vwModal");
+    const mTitle = document.getElementById("vwModalTitle");
+    const mBody  = document.getElementById("vwModalBody");
+    const btnOk  = document.getElementById("vwModalOk");
+    const btnCan = document.getElementById("vwModalCancel");
+
+    if(!modal || !mTitle || !mBody || !btnOk || !btnCan){
+      resolve(null);
+      return;
+    }
+
+    mTitle.textContent = "Add From Catalog";
+    btnOk.textContent = "Add";
+    btnCan.textContent = "Cancel";
+
+    const optionsHtml = items.map((it, idx)=>{
+      const name = String(it?.name ?? it ?? "");
+      const safeVal = name.replace(/"/g, "&quot;");
+      const selected = idx===0 ? " selected" : "";
+      return `<option value="${safeVal}"${selected}>${name}</option>`;
+    }).join("");
+
+    mBody.innerHTML =
+      `<div style="display:grid;gap:12px">`+
+        `<div><div class="mini" style="margin-bottom:6px;opacity:.9">Item</div><select id="vwInvCatalogName" class="input" style="width:100%">${optionsHtml}</select></div>`+
+        `<div><div class="mini" style="margin-bottom:6px;opacity:.9">Qty</div><input id="vwInvCatalogQty" class="input" placeholder="1" /></div>`+
+        `<div><div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div><input id="vwInvCatalogWeight" class="input" placeholder="" /></div>`+
+        `<div><div class="mini" style="margin-bottom:6px;opacity:.9">Cost ($)</div><input id="vwInvCatalogCost" class="input" placeholder="" /></div>`+
+        `<div><div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div><input id="vwInvCatalogNotes" class="input" placeholder="Optional" /></div>`+
+      `</div>`;
+
+    const nameEl = document.getElementById("vwInvCatalogName");
+    const qtyEl = document.getElementById("vwInvCatalogQty");
+    const weightEl = document.getElementById("vwInvCatalogWeight");
+    const costEl = document.getElementById("vwInvCatalogCost");
+    const notesEl = document.getElementById("vwInvCatalogNotes");
+
+    function close(val){
+      modal.style.display = "none";
+      btnOk.onclick = null;
+      btnCan.onclick = null;
+      modal.onclick = null;
+      try{ if(typeof vwSetModalOpen === "function") vwSetModalOpen(false); }catch(e){}
+      resolve(val);
+    }
+
+    function fillFromSelection(){
+      const selectedName = String(nameEl?.value || "");
+      const selectedItem = items.find(it => String(it?.name ?? it ?? "") === selectedName) || null;
+      const defaultQty = selectedItem?.default_qty;
+      if(qtyEl) qtyEl.value = (defaultQty === undefined || defaultQty === null || defaultQty === "") ? "1" : String(defaultQty);
+      if(weightEl) weightEl.value = (selectedItem?.default_weight ?? "") === null ? "" : String(selectedItem?.default_weight ?? "");
+      if(costEl) costEl.value = (selectedItem?.default_cost ?? "") === null ? "" : String(selectedItem?.default_cost ?? "");
+      if(notesEl) notesEl.value = String(selectedItem?.default_notes ?? "");
+    }
+
+    nameEl?.addEventListener("change", fillFromSelection);
+    fillFromSelection();
+
+    btnOk.onclick = ()=>{
+      const selectedName = String(nameEl?.value || "");
+      const selectedItem = items.find(it => String(it?.name ?? it ?? "") === selectedName) || null;
+      close({
+        name: selectedName,
+        selectedItem,
+        qty: String(qtyEl?.value || "").trim(),
+        weight: String(weightEl?.value || "").trim(),
+        cost: String(costEl?.value || "").trim(),
+        notes: String(notesEl?.value || "").trim()
+      });
+    };
+    btnCan.onclick = ()=>close(null);
+    modal.onclick = (e)=>{ if(e.target === modal) close(null); };
+
+    try{ if(typeof vwSetModalOpen === "function") vwSetModalOpen(true); }catch(e){}
+    modal.style.display = "flex";
+    setTimeout(()=>nameEl?.focus(), 30);
+  });
 }
 
 function vwNormalizeInitValue(raw){
@@ -2360,7 +2446,7 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     category: step1.category || "",
     name: step2.name || "",
     weight: step2.weight || "",
-    qty: step2.qty || String(selectedItem?.default_qty ?? 1),
+    qty: step2.qty || "1",
     cost: step2.cost || "",
     notes: step2.notes || ""
   });
@@ -2392,26 +2478,19 @@ document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async
     const items = (groups[step1.category] || []);
     if(!items.length){ toast("No items in that category"); return; }
 
-    const step2 = await vwModalForm({
-      title: "Add From Catalog",
-      okText: "Add",
-      fields: [
-        { key:"name", label:"Item", type:"select", options: items.map(it=>({value:(it?.name ?? it),label:(it?.name ?? it)})) },
-        { key:"qty", label:"Qty", placeholder:"1" }
-      ]
-    });
+    const step2 = await vwPromptInventoryCatalogItem(step1.category, items);
     if(!step2) return;
 
-    const selectedItem = items.find(it => String((it?.name ?? it)) === String(step2.name || "")) || null;
+    const selectedItem = step2.selectedItem || items.find(it => String((it?.name ?? it)) === String(step2.name || "")) || null;
 
     c.inventory ||= [];
-    c.inventory.push({ 
-      category: step1.category, 
-      name: step2.name, 
-      weight: selectedItem?.default_weight ?? "", 
-      qty: step2.qty || String(selectedItem?.default_qty ?? 1), 
-      cost: selectedItem?.default_cost ?? "", 
-      notes: selectedItem?.default_notes || "" 
+    c.inventory.push({
+      category: step1.category,
+      name: step2.name || "",
+      weight: step2.weight || (selectedItem?.default_weight ?? ""),
+      qty: step2.qty || String(selectedItem?.default_qty ?? "1"),
+      cost: step2.cost || (selectedItem?.default_cost ?? ""),
+      notes: step2.notes || (selectedItem?.default_notes || "")
     });
     await vwSaveChar(c);
     toast("Item added");
