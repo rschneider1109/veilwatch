@@ -309,13 +309,31 @@ function setRoleUI(){
 window.setRoleUI = setRoleUI;
 
 // ---- Tabs ----
-function renderTabs(tab){
+async function renderTabs(tab){
+  const currentTab = document.querySelector(".nav .btn.active")?.dataset?.tab || "home";
+
+  // Flush pending character-sheet autosaves before leaving the Character tab.
+  // Without this, a quick tab switch can let Home/DM views re-render from older server state,
+  // which makes Init/HP pills appear to vanish even though the input box still shows the typed value.
+  if(currentTab === "character" && tab !== "character"){
+    try{
+      if(typeof vwFlushCharAutosave === "function") await vwFlushCharAutosave();
+    }catch(e){}
+  }
+
   const tabs = ["home","character","intel","shop","settings"];
   tabs.forEach(t=>{
     const el = document.getElementById("tab-"+t);
     if(el) el.classList.toggle("hidden", t !== tab);
   });
   document.querySelectorAll(".nav .btn").forEach(b=>b.classList.toggle("active", b.dataset.tab === tab));
+
+  // Refresh character-linked views after a tab switch so the persistent pills/cards
+  // redraw from the most recent local/server state.
+  try{
+    if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+    if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
+  }catch(e){}
 
   // When switching to Intel, render immediately + acknowledge
   if(tab === "intel"){
@@ -329,8 +347,8 @@ function renderTabs(tab){
 window.renderTabs = renderTabs;
 
 // nav + goto
-document.querySelectorAll(".nav .btn").forEach(b=>b.onclick=()=>renderTabs(b.dataset.tab));
-document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>renderTabs(b.dataset.go));
+document.querySelectorAll(".nav .btn").forEach(b=>b.onclick=()=>{ void renderTabs(b.dataset.tab); });
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ void renderTabs(b.dataset.go); });
 
 // character sub-tabs (supports create-mode bar + sheet-mode bar)
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
