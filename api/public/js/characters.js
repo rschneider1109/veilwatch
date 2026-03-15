@@ -7,12 +7,7 @@ async function vwAddInventoryItemDropdown() {
   const c = getChar();
   if (!c) return toast("Create/select a character first");
 
-  const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
-  const groups =
-    cat?.inventoryItemsByCategory ||
-    cat?.inventory_items_by_category ||
-    cat?.inventoryByCategory ||
-    null;
+  const groups = await vwLoadInventoryCatalog();
 
   const categories = groups ? Object.keys(groups) : ["General"];
   const safeCats = categories.length ? categories : ["General"];
@@ -37,7 +32,7 @@ async function vwAddInventoryItemDropdown() {
   if (!step1) return;
 
   const items = groups ? (groups[step1.category] || []) : [];
-  const itemOptions = items.length ? items.map(n=>({ value:n, label:n })) : [{ value:"", label:"(type item name)" }];
+  const itemOptions = items.length ? items.map(it=>({ value:(it?.name ?? it), label:(it?.name ?? it) })) : [{ value:"", label:"(type item name)" }];
 
   // Step 2: choose item + qty
   const step2 = await vwModalForm({
@@ -53,12 +48,16 @@ async function vwAddInventoryItemDropdown() {
   });
   if (!step2) return;
 
+  const selectedItem = Array.isArray(items) ? items.find(it => String((it?.name ?? it)) === String(step2.name || "")) : null;
+
   c.inventory = c.inventory || [];
   c.inventory.push({
     category: step1.category || "",
     name: step2.name || "",
+    weight: selectedItem?.default_weight ?? "",
     qty: step2.qty || "1",
-    notes: step2.notes || ""
+    cost: selectedItem?.default_cost ?? "",
+    notes: step2.notes || selectedItem?.default_notes || ""
   });
 
   await saveChar(c);
@@ -77,6 +76,15 @@ async function saveChar(character){
     method:"POST",
     body: JSON.stringify({ charId: character.id, character })
   });
+}
+
+async function vwLoadInventoryCatalog(){
+  try{
+    const res = await api("/api/catalog/inventory");
+    if(res?.ok && res?.byCategory) return res.byCategory;
+  }catch(e){}
+  const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
+  return cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory || null;
 }
 
 function vwNormalizeInitValue(raw){
@@ -2367,8 +2375,7 @@ document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async
     const c = (typeof getChar==="function") ? getChar() : null;
     if(!c){ toast("Create character first"); return; }
 
-    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
-    const groups = cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory;
+    const groups = await vwLoadInventoryCatalog();
     if(!groups){ toast("Catalog not loaded"); return; }
 
     const categories = Object.keys(groups||{});
@@ -2389,14 +2396,23 @@ document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async
       title: "Add From Catalog",
       okText: "Add",
       fields: [
-        { key:"name", label:"Item", type:"select", options: items.map(n=>({value:n,label:n})) },
+        { key:"name", label:"Item", type:"select", options: items.map(it=>({value:(it?.name ?? it),label:(it?.name ?? it)})) },
         { key:"qty", label:"Qty", placeholder:"1" }
       ]
     });
     if(!step2) return;
 
+    const selectedItem = items.find(it => String((it?.name ?? it)) === String(step2.name || "")) || null;
+
     c.inventory ||= [];
-    c.inventory.push({ category: step1.category, name: step2.name, weight:"", qty: step2.qty || "1", cost:"", notes:"" });
+    c.inventory.push({ 
+      category: step1.category, 
+      name: step2.name, 
+      weight: selectedItem?.default_weight ?? "", 
+      qty: step2.qty || "1", 
+      cost: selectedItem?.default_cost ?? "", 
+      notes: selectedItem?.default_notes || "" 
+    });
     await vwSaveChar(c);
     toast("Item added");
     await refreshAll();
