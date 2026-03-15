@@ -68,6 +68,7 @@ async function initDb(){
           default_cost DECIMAL(10,2) DEFAULT NULL,
           default_notes TEXT DEFAULT NULL,
           ammo_type VARCHAR(64) DEFAULT NULL,
+          default_qty INT NOT NULL DEFAULT 1,
           is_active TINYINT(1) NOT NULL DEFAULT 1,
           sort_order INT NOT NULL DEFAULT 0,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,6 +77,7 @@ async function initDb(){
           INDEX idx_vw_inventory_items_active (is_active)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+      await ensureInventoryCatalogSchema();
       await dbSeedInventoryCatalog();
       return;
     } catch(e){
@@ -83,6 +85,15 @@ async function initDb(){
       pool = null;
       await new Promise(r => setTimeout(r, delayMs));
     }
+  }
+}
+
+
+async function ensureInventoryCatalogSchema(){
+  if(!pool) return;
+  const [rows] = await pool.query("SHOW COLUMNS FROM vw_inventory_items LIKE 'default_qty'");
+  if(!Array.isArray(rows) || !rows.length){
+    await pool.query("ALTER TABLE vw_inventory_items ADD COLUMN default_qty INT NOT NULL DEFAULT 1 AFTER ammo_type");
   }
 }
 
@@ -163,7 +174,8 @@ function buildInventoryCatalogSeed(){
       defaultsByName.set(String(it.name||"").trim().toLowerCase(), {
         default_cost: (it.cost ?? null),
         default_weight: (it.weight ?? ""),
-        default_notes: (it.notes ?? "")
+        default_notes: (it.notes ?? ""),
+        default_qty: 1
       });
     }
   }
@@ -184,6 +196,7 @@ function buildInventoryCatalogSeed(){
         default_cost: (defaults.default_cost === undefined ? null : defaults.default_cost),
         default_notes: defaults.default_notes ?? "",
         ammo_type: ammoType || null,
+        default_qty: 1,
         is_active: 1,
         sort_order: sortOrder++
       });
@@ -201,8 +214,8 @@ async function dbSeedInventoryCatalog(){
   for(const item of seed){
     await pool.query(
       `INSERT INTO vw_inventory_items
-       (id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         item.id,
         item.name,
@@ -211,6 +224,7 @@ async function dbSeedInventoryCatalog(){
         item.default_cost,
         item.default_notes || null,
         item.ammo_type || null,
+        Number(item.default_qty || 1),
         item.is_active ? 1 : 0,
         Number(item.sort_order || 0)
       ]
@@ -221,7 +235,7 @@ async function dbSeedInventoryCatalog(){
 async function dbListInventoryCatalog(){
   if(!pool) return buildInventoryCatalogSeed();
   const [rows] = await pool.query(`
-    SELECT id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order
+    SELECT id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order
     FROM vw_inventory_items
     WHERE is_active = 1
     ORDER BY category ASC, sort_order ASC, name ASC
@@ -234,6 +248,7 @@ async function dbListInventoryCatalog(){
     default_cost: (r.default_cost == null ? "" : Number(r.default_cost)),
     default_notes: r.default_notes ?? "",
     ammo_type: r.ammo_type ?? "",
+    default_qty: Number(r.default_qty || 1),
     is_active: !!r.is_active,
     sort_order: Number(r.sort_order || 0)
   }));
@@ -246,10 +261,12 @@ async function dbUpsertInventoryCatalogItem(item){
   const category = String(item?.category || "Misc").trim() || "Misc";
   const costRaw = item?.default_cost;
   const cost = (costRaw === "" || costRaw === null || costRaw === undefined) ? null : Number(costRaw);
+  const qtyRaw = item?.default_qty;
+  const defaultQty = Math.max(1, parseInt(qtyRaw, 10) || 1);
   await pool.query(
     `INSERT INTO vw_inventory_items
-     (id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     (id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
        name = VALUES(name),
        category = VALUES(category),
@@ -257,6 +274,7 @@ async function dbUpsertInventoryCatalogItem(item){
        default_cost = VALUES(default_cost),
        default_notes = VALUES(default_notes),
        ammo_type = VALUES(ammo_type),
+       default_qty = VALUES(default_qty),
        is_active = VALUES(is_active),
        sort_order = VALUES(sort_order),
        updated_at = CURRENT_TIMESTAMP`,
@@ -268,6 +286,7 @@ async function dbUpsertInventoryCatalogItem(item){
       (Number.isFinite(cost) ? cost : null),
       (item?.default_notes ?? "") || null,
       (item?.ammo_type ?? "") || null,
+      defaultQty,
       item?.is_active === false ? 0 : 1,
       Number(item?.sort_order || 0)
     ]
