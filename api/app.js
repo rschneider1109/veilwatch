@@ -77,7 +77,26 @@ async function initDb(){
           INDEX idx_vw_inventory_items_active (is_active)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
-      await ensureInventoryCatalogSchema();
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS vw_inventory_items_custom (
+          id VARCHAR(64) NOT NULL PRIMARY KEY,
+          name VARCHAR(128) NOT NULL UNIQUE,
+          category VARCHAR(64) NOT NULL DEFAULT 'Misc',
+          default_weight VARCHAR(32) DEFAULT NULL,
+          default_cost DECIMAL(10,2) DEFAULT NULL,
+          default_notes TEXT DEFAULT NULL,
+          ammo_type VARCHAR(64) DEFAULT NULL,
+          default_qty INT NOT NULL DEFAULT 1,
+          is_active TINYINT(1) NOT NULL DEFAULT 1,
+          sort_order INT NOT NULL DEFAULT 0,
+          created_by VARCHAR(64) DEFAULT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_vw_inventory_items_custom_category (category),
+          INDEX idx_vw_inventory_items_custom_active (is_active)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+      await dbEnsureInventoryCatalogSchema();
       await dbSeedInventoryCatalog();
       return;
     } catch(e){
@@ -85,15 +104,6 @@ async function initDb(){
       pool = null;
       await new Promise(r => setTimeout(r, delayMs));
     }
-  }
-}
-
-
-async function ensureInventoryCatalogSchema(){
-  if(!pool) return;
-  const [rows] = await pool.query("SHOW COLUMNS FROM vw_inventory_items LIKE 'default_qty'");
-  if(!Array.isArray(rows) || !rows.length){
-    await pool.query("ALTER TABLE vw_inventory_items ADD COLUMN default_qty INT NOT NULL DEFAULT 1 AFTER ammo_type");
   }
 }
 
@@ -162,6 +172,25 @@ async function dbSaveUsers(list){
   }
 }
 
+async function dbColumnExists(tableName, columnName){
+  if(!pool) return false;
+  const [rows] = await pool.query(`SHOW COLUMNS FROM ${tableName} LIKE ?`, [columnName]);
+  return Array.isArray(rows) && rows.length > 0;
+}
+
+async function dbEnsureColumn(tableName, columnName, ddl){
+  if(!pool) return;
+  if(await dbColumnExists(tableName, columnName)) return;
+  await pool.query(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${ddl}`);
+}
+
+async function dbEnsureInventoryCatalogSchema(){
+  if(!pool) return;
+  await dbEnsureColumn("vw_inventory_items", "default_qty", "INT NOT NULL DEFAULT 1 AFTER ammo_type");
+  await dbEnsureColumn("vw_inventory_items_custom", "default_qty", "INT NOT NULL DEFAULT 1 AFTER ammo_type");
+  await dbEnsureColumn("vw_inventory_items_custom", "created_by", "VARCHAR(64) DEFAULT NULL AFTER sort_order");
+}
+
 function slugifyInventoryId(name){
   return "inv_" + String(name||"").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0,48);
 }
@@ -175,7 +204,7 @@ function buildInventoryCatalogSeed(){
         default_cost: (it.cost ?? null),
         default_weight: (it.weight ?? ""),
         default_notes: (it.notes ?? ""),
-        default_qty: 1
+        default_qty: (it.qty ?? it.default_qty ?? 1)
       });
     }
   }
@@ -196,7 +225,7 @@ function buildInventoryCatalogSeed(){
         default_cost: (defaults.default_cost === undefined ? null : defaults.default_cost),
         default_notes: defaults.default_notes ?? "",
         ammo_type: ammoType || null,
-        default_qty: 1,
+        default_qty: Math.max(1, parseInt(defaults.default_qty ?? 1, 10) || 1),
         is_active: 1,
         sort_order: sortOrder++
       });
@@ -224,7 +253,7 @@ async function dbSeedInventoryCatalog(){
         item.default_cost,
         item.default_notes || null,
         item.ammo_type || null,
-        Number(item.default_qty || 1),
+        Math.max(1, parseInt(item.default_qty ?? 1, 10) || 1),
         item.is_active ? 1 : 0,
         Number(item.sort_order || 0)
       ]
@@ -234,13 +263,18 @@ async function dbSeedInventoryCatalog(){
 
 async function dbListInventoryCatalog(){
   if(!pool) return buildInventoryCatalogSeed();
-  const [rows] = await pool.query(`
+  const [officialRows] = await pool.query(`
     SELECT id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order
     FROM vw_inventory_items
     WHERE is_active = 1
-    ORDER BY category ASC, sort_order ASC, name ASC
   `);
-  return rows.map(r => ({
+  const [customRows] = await pool.query(`
+    SELECT id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order, created_by
+    FROM vw_inventory_items_custom
+    WHERE is_active = 1
+  `);
+
+  const mapRow = (r, source) => ({
     id: r.id,
     name: r.name,
     category: r.category,
@@ -248,21 +282,64 @@ async function dbListInventoryCatalog(){
     default_cost: (r.default_cost == null ? "" : Number(r.default_cost)),
     default_notes: r.default_notes ?? "",
     ammo_type: r.ammo_type ?? "",
-    default_qty: Number(r.default_qty || 1),
+    default_qty: Math.max(1, parseInt(r.default_qty ?? 1, 10) || 1),
     is_active: !!r.is_active,
-    sort_order: Number(r.sort_order || 0)
-  }));
+    sort_order: Number(r.sort_order || 0),
+    source,
+    is_custom: source === "custom",
+    created_by: ("created_by" in r) ? (r.created_by ?? "") : ""
+  });
+
+  return []
+    .concat((officialRows || []).map(r => mapRow(r, "official")))
+    .concat((customRows || []).map(r => mapRow(r, "custom")))
+    .sort((a,b)=> String(a.category||"").localeCompare(String(b.category||"")) || Number(a.sort_order||0)-Number(b.sort_order||0) || String(a.name||"").localeCompare(String(b.name||"")));
 }
 
-async function dbUpsertInventoryCatalogItem(item){
+async function dbUpsertInventoryCatalogItem(item, opts = {}){
   if(!pool) return { ok:false, error:"Database not configured" };
+  const table = opts.table === "custom" ? "vw_inventory_items_custom" : "vw_inventory_items";
   const name = String(item?.name || "").trim();
   if(!name) return { ok:false, error:"Item name required" };
   const category = String(item?.category || "Misc").trim() || "Misc";
   const costRaw = item?.default_cost;
   const cost = (costRaw === "" || costRaw === null || costRaw === undefined) ? null : Number(costRaw);
-  const qtyRaw = item?.default_qty;
-  const defaultQty = Math.max(1, parseInt(qtyRaw, 10) || 1);
+  const defaultQty = Math.max(1, parseInt(item?.default_qty ?? 1, 10) || 1);
+
+  if(table === "vw_inventory_items_custom"){
+    await pool.query(
+      `INSERT INTO vw_inventory_items_custom
+       (id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         name = VALUES(name),
+         category = VALUES(category),
+         default_weight = VALUES(default_weight),
+         default_cost = VALUES(default_cost),
+         default_notes = VALUES(default_notes),
+         ammo_type = VALUES(ammo_type),
+         default_qty = VALUES(default_qty),
+         is_active = VALUES(is_active),
+         sort_order = VALUES(sort_order),
+         created_by = COALESCE(vw_inventory_items_custom.created_by, VALUES(created_by)),
+         updated_at = CURRENT_TIMESTAMP`,
+      [
+        item.id || slugifyInventoryId(`custom_${name}`),
+        name,
+        category,
+        (item?.default_weight ?? "") || null,
+        (Number.isFinite(cost) ? cost : null),
+        (item?.default_notes ?? "") || null,
+        (item?.ammo_type ?? "") || null,
+        defaultQty,
+        item?.is_active === false ? 0 : 1,
+        Number(item?.sort_order || 0),
+        opts.createdBy || null
+      ]
+    );
+    return { ok:true };
+  }
+
   await pool.query(
     `INSERT INTO vw_inventory_items
      (id, name, category, default_weight, default_cost, default_notes, ammo_type, default_qty, is_active, sort_order)
@@ -975,6 +1052,21 @@ const server = http.createServer(async (req,res)=>{
     }catch(e){
       console.error("inventory catalog save failed", e);
       return json(res, 500, { ok:false, error:"Failed to save inventory catalog" });
+    }
+  }
+
+  if(p === "/api/catalog/inventory/custom/save" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    try{
+      const body = JSON.parse(await readBody(req) || "{}");
+      const item = body?.item || null;
+      const result = await dbUpsertInventoryCatalogItem(item, { table:"custom", createdBy: user?.id || null });
+      if(!result.ok) return json(res, 200, result);
+      sseBroadcast({ ts: Date.now(), type:"catalog.inventory.tick", scope:"dm" });
+      return json(res, 200, { ok:true });
+    }catch(e){
+      console.error("custom inventory catalog save failed", e);
+      return json(res, 500, { ok:false, error:"Failed to save custom inventory item" });
     }
   }
 
