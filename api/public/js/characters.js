@@ -464,34 +464,44 @@ function vwWireSheetAutosave(){
     const els = Array.from(document.querySelectorAll('[id="'+id.replace(/"/g,'\\"')+'"]'));
     if(!els.length) return;
     els.forEach((el)=>{
-      el.addEventListener("input", ()=>{
+      const commitCurrentValue = async ()=>{
         const c = getChar(); if(!c) return;
         ensureSheet(c);
         setPath(c, pathArr, el.value);
 
-      // Live-sync for the DM "Active Character" cards while editing the sheet.
-      // This avoids requiring a manual "Save Sheet" click for immediate UI consistency.
-      try{
-        if(pathArr[0]==="vitals" && (pathArr[1]==="init" || pathArr[1]==="hpCur" || pathArr[1]==="hpMax")){
-          const st = window.__STATE;
-          if(st && Array.isArray(st.activeParty)){
-            const apx = st.activeParty.findIndex(x=>x.charId===c.id);
-            if(apx>=0){
-              // Initiative: mirror into activeParty entry (cards prefer activeParty override).
-              if(pathArr[1]==="init"){
-                vwSyncInitiativeEverywhere(c.id, el.value);
+        try{
+          if(pathArr[0]==="vitals" && (pathArr[1]==="init" || pathArr[1]==="hpCur" || pathArr[1]==="hpMax")){
+            const st = window.__STATE;
+            if(st && Array.isArray(st.activeParty)){
+              const apx = st.activeParty.findIndex(x=>x.charId===c.id);
+              if(apx>=0){
+                if(pathArr[1]==="init") vwSyncInitiativeEverywhere(c.id, el.value);
+                if(typeof renderDMActiveParty === "function") renderDMActiveParty();
               }
-              // HP: cards compute from character sheet vitals, but they only re-render when prompted.
-              // Trigger a re-render on every keystroke so HP feels as immediate as Initiative.
-              if(typeof renderDMActiveParty === "function") renderDMActiveParty();
             }
           }
-        }
-      }catch(e){}
+        }catch(e){}
 
-      // Keep the always-visible summary pills in sync while the user types.
         try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+      };
+
+      el.addEventListener("input", ()=>{
+        commitCurrentValue();
         vwScheduleCharAutosave();
+      });
+
+      el.addEventListener("keydown", async (e)=>{
+        if(e.key!=="Enter") return;
+        e.preventDefault();
+        e.stopPropagation();
+        await commitCurrentValue();
+        await vwFlushCharAutosave();
+        try{ el.blur(); }catch(_e){}
+      });
+
+      el.addEventListener("blur", async ()=>{
+        await commitCurrentValue();
+        await vwFlushCharAutosave();
       });
     });
   });
