@@ -19,6 +19,11 @@ function vwStartStream(){
       if(typeof vwComputeUnseen==="function") vwComputeUnseen();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
       if(typeof renderIntelDM==="function") renderIntelDM();
+      if(typeof renderDMActiveParty==="function") renderDMActiveParty();
+      if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
+      if(typeof renderDMActiveParty==="function") renderDMActiveParty();
+      if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
+      if(typeof renderSheet==="function" && document.getElementById("tab-character") && !document.getElementById("tab-character").classList.contains("hidden")) renderSheet();
     }catch(e){}
   });
 
@@ -53,6 +58,8 @@ function vwStartFallbackPoller(){
       if(typeof vwComputeUnseen==="function") vwComputeUnseen();
       if(typeof renderIntelPlayer==="function") renderIntelPlayer();
       if(typeof renderIntelDM==="function") renderIntelDM();
+      if(typeof renderDMActiveParty==="function") renderDMActiveParty();
+      if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
     }catch(e){}
   }, 5000);
 }
