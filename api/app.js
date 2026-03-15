@@ -10,6 +10,7 @@ if(typeof globalThis.structuredClone !== "function"){
 }
 
 const mysql = require("mysql2/promise");
+const CATALOG_V2 = require(path.join(__dirname, "public", "js", "veilwatch_catalog_v2.js"));
 
 const DM_KEY = process.env.VEILWATCH_DM_KEY || "VEILWATCHDM";
 const DB_HOST = process.env.MYSQL_HOST || "";
@@ -58,6 +59,24 @@ async function initDb(){
           created_at BIGINT NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS vw_inventory_items (
+          id VARCHAR(64) NOT NULL PRIMARY KEY,
+          name VARCHAR(128) NOT NULL UNIQUE,
+          category VARCHAR(64) NOT NULL DEFAULT 'Misc',
+          default_weight VARCHAR(32) DEFAULT NULL,
+          default_cost DECIMAL(10,2) DEFAULT NULL,
+          default_notes TEXT DEFAULT NULL,
+          ammo_type VARCHAR(64) DEFAULT NULL,
+          is_active TINYINT(1) NOT NULL DEFAULT 1,
+          sort_order INT NOT NULL DEFAULT 0,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_vw_inventory_items_category (category),
+          INDEX idx_vw_inventory_items_active (is_active)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+      await dbSeedInventoryCatalog();
       return;
     } catch(e){
       try{ if(pool) await pool.end(); } catch(_){}
@@ -130,6 +149,130 @@ async function dbSaveUsers(list){
   } finally {
     conn.release();
   }
+}
+
+function slugifyInventoryId(name){
+  return "inv_" + String(name||"").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0,48);
+}
+
+function buildInventoryCatalogSeed(){
+  const groups = CATALOG_V2?.inventoryItemsByCategory || {};
+  const defaultsByName = new Map();
+  for(const shop of (DEFAULT_STATE?.shops?.list || [])){
+    for(const it of (shop.items || [])){
+      defaultsByName.set(String(it.name||"").trim().toLowerCase(), {
+        default_cost: (it.cost ?? null),
+        default_weight: (it.weight ?? ""),
+        default_notes: (it.notes ?? "")
+      });
+    }
+  }
+  const rows = [];
+  let sortOrder = 0;
+  for(const [category, items] of Object.entries(groups)){
+    for(const rawName of (items || [])){
+      const name = String(rawName || "").trim();
+      if(!name) continue;
+      const key = name.toLowerCase();
+      const defaults = defaultsByName.get(key) || {};
+      const ammoType = category === "Ammo" ? name.replace(/\s*ammo\s*\(box\)/i, "").trim() : null;
+      rows.push({
+        id: slugifyInventoryId(name),
+        name,
+        category: String(category || "Misc"),
+        default_weight: defaults.default_weight ?? "",
+        default_cost: (defaults.default_cost === undefined ? null : defaults.default_cost),
+        default_notes: defaults.default_notes ?? "",
+        ammo_type: ammoType || null,
+        is_active: 1,
+        sort_order: sortOrder++
+      });
+    }
+  }
+  return rows;
+}
+
+async function dbSeedInventoryCatalog(){
+  if(!pool) return;
+  const [rows] = await pool.query("SELECT COUNT(*) AS cnt FROM vw_inventory_items");
+  const count = Number(rows?.[0]?.cnt || 0);
+  if(count > 0) return;
+  const seed = buildInventoryCatalogSeed();
+  for(const item of seed){
+    await pool.query(
+      `INSERT INTO vw_inventory_items
+       (id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        item.id,
+        item.name,
+        item.category,
+        item.default_weight || null,
+        item.default_cost,
+        item.default_notes || null,
+        item.ammo_type || null,
+        item.is_active ? 1 : 0,
+        Number(item.sort_order || 0)
+      ]
+    );
+  }
+}
+
+async function dbListInventoryCatalog(){
+  if(!pool) return buildInventoryCatalogSeed();
+  const [rows] = await pool.query(`
+    SELECT id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order
+    FROM vw_inventory_items
+    WHERE is_active = 1
+    ORDER BY category ASC, sort_order ASC, name ASC
+  `);
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    category: r.category,
+    default_weight: r.default_weight ?? "",
+    default_cost: (r.default_cost == null ? "" : Number(r.default_cost)),
+    default_notes: r.default_notes ?? "",
+    ammo_type: r.ammo_type ?? "",
+    is_active: !!r.is_active,
+    sort_order: Number(r.sort_order || 0)
+  }));
+}
+
+async function dbUpsertInventoryCatalogItem(item){
+  if(!pool) return { ok:false, error:"Database not configured" };
+  const name = String(item?.name || "").trim();
+  if(!name) return { ok:false, error:"Item name required" };
+  const category = String(item?.category || "Misc").trim() || "Misc";
+  const costRaw = item?.default_cost;
+  const cost = (costRaw === "" || costRaw === null || costRaw === undefined) ? null : Number(costRaw);
+  await pool.query(
+    `INSERT INTO vw_inventory_items
+     (id, name, category, default_weight, default_cost, default_notes, ammo_type, is_active, sort_order)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       name = VALUES(name),
+       category = VALUES(category),
+       default_weight = VALUES(default_weight),
+       default_cost = VALUES(default_cost),
+       default_notes = VALUES(default_notes),
+       ammo_type = VALUES(ammo_type),
+       is_active = VALUES(is_active),
+       sort_order = VALUES(sort_order),
+       updated_at = CURRENT_TIMESTAMP`,
+    [
+      item.id || slugifyInventoryId(name),
+      name,
+      category,
+      (item?.default_weight ?? "") || null,
+      (Number.isFinite(cost) ? cost : null),
+      (item?.default_notes ?? "") || null,
+      (item?.ammo_type ?? "") || null,
+      item?.is_active === false ? 0 : 1,
+      Number(item?.sort_order || 0)
+    ]
+  );
+  return { ok:true };
 }
 
 // -----------------------------
@@ -780,6 +923,40 @@ const server = http.createServer(async (req,res)=>{
   if(p === "/api/dm/users" && req.method === "GET"){
     if(!dm) return json(res, 403, { ok:false, error:"DM only" });
     return json(res, 200, { ok:true, users: users.map(publicUser) });
+  }
+
+  // -------------------------
+  // Inventory Catalog
+  // -------------------------
+  if(p === "/api/catalog/inventory" && req.method === "GET"){
+    try{
+      const items = await dbListInventoryCatalog();
+      const byCategory = {};
+      for(const item of items){
+        (byCategory[item.category] ||= []).push(item);
+      }
+      return json(res, 200, { ok:true, items, byCategory });
+    }catch(e){
+      console.error("inventory catalog list failed", e);
+      return json(res, 500, { ok:false, error:"Failed to load inventory catalog" });
+    }
+  }
+
+  if(p === "/api/catalog/inventory/save" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    try{
+      const body = JSON.parse(await readBody(req) || "{}");
+      const items = Array.isArray(body.items) ? body.items : [];
+      for(const item of items){
+        const result = await dbUpsertInventoryCatalogItem(item);
+        if(!result.ok) return json(res, 200, result);
+      }
+      sseBroadcast({ ts: Date.now(), type:"catalog.inventory.tick", scope:"dm" });
+      return json(res, 200, { ok:true });
+    }catch(e){
+      console.error("inventory catalog save failed", e);
+      return json(res, 500, { ok:false, error:"Failed to save inventory catalog" });
+    }
   }
 
   // -------------------------
