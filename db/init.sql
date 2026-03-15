@@ -33,3 +33,21 @@ CREATE TABLE IF NOT EXISTS vw_inventory_items (
   INDEX idx_vw_inventory_items_category (category),
   INDEX idx_vw_inventory_items_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS vw_inventory_items_custom (
+  id VARCHAR(64) NOT NULL PRIMARY KEY,
+  name VARCHAR(128) NOT NULL UNIQUE,
+  category VARCHAR(64) NOT NULL DEFAULT 'Misc',
+  default_weight VARCHAR(32) DEFAULT NULL,
+  default_cost DECIMAL(10,2) DEFAULT NULL,
+  default_notes TEXT DEFAULT NULL,
+  ammo_type VARCHAR(64) DEFAULT NULL,
+  default_qty INT NOT NULL DEFAULT 1,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_by VARCHAR(64) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_vw_inventory_items_custom_category (category),
+  INDEX idx_vw_inventory_items_custom_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
