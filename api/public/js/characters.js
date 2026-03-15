@@ -265,7 +265,8 @@ async function vwOpenAddItemModal(){
           weight: document.getElementById("vwInvWeight")?.value || item.default_weight || "",
           qty: document.getElementById("vwInvQty")?.value || String(item.default_qty || 1),
           cost: document.getElementById("vwInvCost")?.value || item.default_cost || "",
-          notes: document.getElementById("vwInvNotes")?.value || item.default_notes || ""
+          notes: document.getElementById("vwInvNotes")?.value || item.default_notes || "",
+          ammoType: item.ammo_type || ""
         });
         const res = await saveChar(c);
         if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
@@ -304,7 +305,7 @@ async function vwOpenAddItemModal(){
       }
 
       c.inventory ||= [];
-      c.inventory.push({ category, name, weight, qty, cost, notes });
+      c.inventory.push({ category, name, weight, qty, cost, notes, ammoType });
       const res = await saveChar(c);
       if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
       shutdown(true);
@@ -319,6 +320,60 @@ async function vwOpenAddItemModal(){
   if(typeof vwSetModalOpen === "function") vwSetModalOpen(true);
   ui.modal.style.display = "flex";
   renderCatalog();
+}
+
+
+function vwCanonicalAmmoKey(v){
+  return String(v ?? "")
+    .toLowerCase()
+    .replace(/\(.*?\)/g, " ")
+    .replace(/\bammo\b/g, " ")
+    .replace(/\brounds?\b/g, " ")
+    .replace(/\bshells?\b/g, " ")
+    .replace(/\bbox(es)?\b/g, " ")
+    .replace(/\bcase(s)?\b/g, " ")
+    .replace(/[^a-z0-9.+-]+/g, "")
+    .trim();
+}
+
+function vwFindMatchingAmmoInventoryItems(character, ammoType){
+  const key = vwCanonicalAmmoKey(ammoType);
+  if(!key) return [];
+  const inv = Array.isArray(character?.inventory) ? character.inventory : [];
+  const out = [];
+  inv.forEach((it, idx)=>{
+    const itemKey = vwCanonicalAmmoKey(it?.ammoType || it?.ammo_type || "");
+    const hay = [
+      itemKey,
+      vwCanonicalAmmoKey(it?.name || ""),
+      vwCanonicalAmmoKey(it?.category || ""),
+      vwCanonicalAmmoKey(it?.notes || "")
+    ].filter(Boolean).join(" ");
+    const qty = Math.max(0, parseInt(it?.qty ?? 0, 10) || 0);
+    if(qty > 0 && (itemKey === key || hay.includes(key))){
+      out.push({ idx, item: it, qty });
+    }
+  });
+  return out;
+}
+
+function vwDeductAmmoFromInventory(character, ammoType, needed){
+  const req = Math.max(0, parseInt(needed ?? 0, 10) || 0);
+  if(req <= 0) return { ok:true, used:0 };
+  const matches = vwFindMatchingAmmoInventoryItems(character, ammoType);
+  let left = req;
+  const total = matches.reduce((sum, row)=> sum + (parseInt(row.qty, 10) || 0), 0);
+  if(total < req){
+    return { ok:false, used:0, available: total };
+  }
+  matches.forEach(row=>{
+    if(left <= 0) return;
+    const take = Math.min(left, parseInt(row.qty, 10) || 0);
+    const curQty = Math.max(0, parseInt(character.inventory[row.idx]?.qty ?? 0, 10) || 0);
+    character.inventory[row.idx].qty = String(Math.max(0, curQty - take));
+    left -= take;
+  });
+  return { ok:true, used:req, available: total };
 }
 
 function vwNormalizeInitValue(raw){
@@ -435,7 +490,7 @@ function renderCharacter(){
             <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>-1</b> decrements current. <b>Reload</b> swaps in a fresh mag (consumes 1 from Mags if available). <b>Reload Mags</b> restores Mags to the weapon’s starting mags.
+            Tip: <b>-1</b> decrements current. <b>Reload</b> refills the current mag using matching ammo from Inventory and consumes 1 from <b>Mags</b> if tracked. <b>Reload Mags</b> restores all tracked mags and the current mag using matching ammo from Inventory.
           </div>
         </td>
       `;
@@ -487,20 +542,55 @@ function renderCharacter(){
       if(act==="shot"){
         w.ammo.current = Math.max(0, cur - 1);
       }else if(act==="reload"){
-        // swap mag: consume one spare mag if you have it, then refill current
+        const ammoType = String(w.ammo.type || "").trim();
+        const needed = Math.max(0, magSize - cur);
+        if(magSize <= 0){
+          toast("Set Mag size first");
+          return;
+        }
+        if(!ammoType){
+          toast("Set Ammo Type first");
+          return;
+        }
+        if(needed <= 0){
+          toast("Mag already full");
+          return;
+        }
+        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
+        if(!used.ok){
+          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
+          return;
+        }
         if(mags > 0){
           w.ammo.mags = mags - 1;
-        }else{
-          // allow reload even if mags are 0 (loose ammo), but don't change mags
-          toast("Reloaded (no spare mags tracked)");
         }
-        w.ammo.current = magSize || cur;
+        w.ammo.current = magSize;
       }else if(act==="addmag"){
         w.ammo.mags = mags + 1;
         if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
       }else if(act==="reloadmags"){
+        const ammoType = String(w.ammo.type || "").trim();
+        if(magSize <= 0){
+          toast("Set Mag size first");
+          return;
+        }
+        if(!ammoType){
+          toast("Set Ammo Type first");
+          return;
+        }
+        const magsToFill = Math.max(0, magsMax - mags);
+        const needed = Math.max(0, (magSize - cur) + (magsToFill * magSize));
+        if(needed <= 0){
+          toast("Ammo already topped off");
+          return;
+        }
+        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
+        if(!used.ok){
+          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
+          return;
+        }
         w.ammo.mags = magsMax;
-        w.ammo.current = magSize || cur;
+        w.ammo.current = magSize;
       }
 
       // legacy sync
