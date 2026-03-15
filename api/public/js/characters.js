@@ -55,7 +55,7 @@ async function vwAddInventoryItemDropdown() {
     category: step1.category || "",
     name: step2.name || "",
     weight: selectedItem?.default_weight ?? "",
-    qty: step2.qty || "1",
+    qty: step2.qty || String(selectedItem?.default_qty ?? 1),
     cost: selectedItem?.default_cost ?? "",
     notes: step2.notes || selectedItem?.default_notes || ""
   });
@@ -2360,7 +2360,7 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     category: step1.category || "",
     name: step2.name || "",
     weight: step2.weight || "",
-    qty: step2.qty || "1",
+    qty: step2.qty || String(selectedItem?.default_qty ?? 1),
     cost: step2.cost || "",
     notes: step2.notes || ""
   });
@@ -2409,7 +2409,7 @@ document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async
       category: step1.category, 
       name: step2.name, 
       weight: selectedItem?.default_weight ?? "", 
-      qty: step2.qty || "1", 
+      qty: step2.qty || String(selectedItem?.default_qty ?? 1), 
       cost: selectedItem?.default_cost ?? "", 
       notes: selectedItem?.default_notes || "" 
     });
