@@ -867,20 +867,8 @@ if(p === "/api/character/save" && req.method==="POST"){
     incoming.version = Number(existing.version||1) + 1;
     incoming.updatedAt = Date.now();
     state.characters[i] = incoming;
-
-    // Keep DM Active Party initiative in sync with the character sheet Init, if present.
-    try{
-      const ap = (state.activeParty||[]).find(x=>x.charId===charId);
-      if(ap){
-        const raw = incoming?.sheet?.vitals?.init;
-        if(raw===0 || raw){
-          const n = Number(raw);
-          ap.initiative = Number.isFinite(n) ? n : String(raw);
-        }else{
-          ap.initiative = "";
-        }
-      }
-    }catch(e){}
+    // Keep all initiative surfaces joined.
+    try{ syncCharacterInitiativeAndActiveParty(incoming, state.activeParty); }catch(e){}
 
     saveState(state);
     return json(res, 200, { ok:true, version: incoming.version, updatedAt: incoming.updatedAt });
@@ -907,20 +895,8 @@ if(p === "/api/character/save" && req.method==="POST"){
     merged.updatedAt = Date.now();
 
     state.characters[i] = merged;
-
-    // Keep DM Active Party initiative in sync with the character sheet Init, if present.
-    try{
-      const ap = (state.activeParty||[]).find(x=>x.charId===charId);
-      if(ap){
-        const raw = merged?.sheet?.vitals?.init;
-        if(raw===0 || raw){
-          const n = Number(raw);
-          ap.initiative = Number.isFinite(n) ? n : String(raw);
-        }else{
-          ap.initiative = "";
-        }
-      }
-    }catch(e){}
+    // Keep all initiative surfaces joined.
+    try{ syncCharacterInitiativeAndActiveParty(merged, state.activeParty); }catch(e){}
 
     saveState(state);
     return json(res, 200, { ok:true, version: merged.version, updatedAt: merged.updatedAt, character: merged });
@@ -1007,14 +983,10 @@ if(p === "/api/character/save" && req.method==="POST"){
       return json(res, 200, { ok:true }); // idempotent
     }
     // If initiative isn't supplied, default to the character sheet's Init (modifier).
-    let initVal = (body.initiative===0 || body.initiative) ? Number(body.initiative) : "";
+    let initVal = normalizeInitiativeValue(body.initiative);
     try{
       if(initVal===""){
-        const sheetInit = c?.sheet?.vitals?.init;
-        if(sheetInit===0 || sheetInit){
-          const n = Number(sheetInit);
-          initVal = Number.isFinite(n) ? n : "";
-        }
+        initVal = normalizeInitiativeValue(c?.sheet?.vitals?.init);
       }
     }catch(e){}
 
@@ -1040,10 +1012,10 @@ if(p === "/api/character/save" && req.method==="POST"){
     if(!dm) return json(res, 403, { ok:false, error:"DM only" });
     const body = JSON.parse(await readBody(req) || "{}");
     const charId = String(body.charId||"");
-    const init = String(body.initiative ?? "");
+    const nextInit = normalizeInitiativeValue(body.initiative);
     const entry = (state.activeParty||[]).find(x=>x.charId===charId);
     if(!entry) return json(res, 404, { ok:false, error:"Not found" });
-    entry.initiative = (init.trim()==="") ? "" : Number(init);
+    entry.initiative = nextInit;
 
     // Keep the character sheet's Init in sync so all UI locations show the same value.
     try{
@@ -1051,7 +1023,7 @@ if(p === "/api/character/save" && req.method==="POST"){
       if(c){
         c.sheet ||= {};
         c.sheet.vitals ||= { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" };
-        c.sheet.vitals.init = entry.initiative;
+        c.sheet.vitals.init = nextInit;
         c.version = Number(c.version||1) + 1;
         c.updatedAt = Date.now();
       }
