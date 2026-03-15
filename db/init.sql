@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS vw_inventory_items (
   default_cost DECIMAL(10,2) DEFAULT NULL,
   default_notes TEXT DEFAULT NULL,
   ammo_type VARCHAR(64) DEFAULT NULL,
+  default_qty INT NOT NULL DEFAULT 1,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   sort_order INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
