@@ -464,19 +464,22 @@ function vwWireSheetAutosave(){
     const els = Array.from(document.querySelectorAll('[id="'+id.replace(/"/g,'\\"')+'"]'));
     if(!els.length) return;
     els.forEach((el)=>{
-      const commitCurrentValue = async ()=>{
+      const commitCurrentValue = ()=>{
         const c = getChar(); if(!c) return;
         ensureSheet(c);
         setPath(c, pathArr, el.value);
 
         try{
-          if(pathArr[0]==="vitals" && (pathArr[1]==="init" || pathArr[1]==="hpCur" || pathArr[1]==="hpMax")){
+          if(pathArr[0]==="vitals" && pathArr[1]==="init"){
+            // Keep the local header/summary in step while typing, but do not force a full DM-card re-render here.
+            // The blur/autosave path will update shared state cleanly after the value is committed.
             const st = window.__STATE;
-            if(st && Array.isArray(st.activeParty)){
-              const apx = st.activeParty.findIndex(x=>x.charId===c.id);
-              if(apx>=0){
-                if(pathArr[1]==="init") vwSyncInitiativeEverywhere(c.id, el.value);
-                if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+            if(st && Array.isArray(st.characters)){
+              const cx = st.characters.findIndex(x=>x.id===c.id);
+              if(cx>=0){
+                st.characters[cx].sheet ||= {};
+                st.characters[cx].sheet.vitals ||= {};
+                st.characters[cx].sheet.vitals.init = vwNormalizeInitValue(el.value);
               }
             }
           }
@@ -490,17 +493,15 @@ function vwWireSheetAutosave(){
         vwScheduleCharAutosave();
       });
 
-      el.addEventListener("keydown", async (e)=>{
+      el.addEventListener("keydown", (e)=>{
         if(e.key!=="Enter") return;
         e.preventDefault();
         e.stopPropagation();
-        await commitCurrentValue();
-        await vwFlushCharAutosave();
         try{ el.blur(); }catch(_e){}
       });
 
       el.addEventListener("blur", async ()=>{
-        await commitCurrentValue();
+        commitCurrentValue();
         await vwFlushCharAutosave();
       });
     });
