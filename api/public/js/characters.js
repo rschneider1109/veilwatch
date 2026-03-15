@@ -92,6 +92,57 @@ function vwSyncActivePartyFromCharacter(updatedChar){
   window.__STATE = st;
 }
 
+function vwNormalizeInitiativeValue(raw){
+  if(raw===0 || raw==="0") return 0;
+  const txt = String(raw ?? "").trim();
+  if(txt==="") return "";
+  const n = Number(txt);
+  return Number.isFinite(n) ? n : txt;
+}
+
+function vwGetJoinedInitiative(charOrId){
+  const st = window.__STATE || {};
+  const charId = typeof charOrId === "string" ? charOrId : charOrId?.id;
+  if(!charId) return "";
+
+  const apEntry = Array.isArray(st.activeParty) ? st.activeParty.find(x=>x.charId===charId) : null;
+  if(apEntry && (apEntry.initiative===0 || apEntry.initiative)) return vwNormalizeInitiativeValue(apEntry.initiative);
+
+  const character = typeof charOrId === "object" && charOrId ? charOrId : (Array.isArray(st.characters) ? st.characters.find(x=>x.id===charId) : null);
+  const raw = character?.sheet?.vitals?.init;
+  return vwNormalizeInitiativeValue(raw);
+}
+
+function vwSyncInitiativeEverywhere(charId, initiative, opts){
+  const st = window.__STATE || {};
+  const options = opts || {};
+  const nextInit = vwNormalizeInitiativeValue(initiative);
+
+  if(Array.isArray(st.activeParty)) {
+    const apx = st.activeParty.findIndex(x=>x.charId===charId);
+    if(apx>=0) st.activeParty[apx].initiative = nextInit;
+  }
+
+  if(Array.isArray(st.characters)) {
+    const cx = st.characters.findIndex(x=>x.id===charId);
+    if(cx>=0){
+      st.characters[cx].sheet ||= {};
+      st.characters[cx].sheet.vitals ||= {};
+      st.characters[cx].sheet.vitals.init = nextInit;
+    }
+  }
+
+  window.__STATE = st;
+
+  if(options.refresh !== false){
+    try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
+    try{ if(typeof renderSheet === "function" && SESSION.activeCharId === charId) renderSheet(); }catch(e){}
+    try{ if(typeof vwUpdateCharSummaryRow === "function" && SESSION.activeCharId === charId) vwUpdateCharSummaryRow(); }catch(e){}
+  }
+
+  return nextInit;
+}
+
 function vwRefreshCharacterViews(){
   try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
   try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
@@ -417,13 +468,7 @@ async function vwFlushCharAutosave(){
           const ix = Array.isArray(st.characters) ? st.characters.findIndex(x=>x.id===res.character.id) : -1;
           if(ix>=0) st.characters[ix] = res.character;
 
-          // sync activeParty.initiative to sheet.vitals.init for this character (mirrors server behavior)
-          const apx = Array.isArray(st.activeParty) ? st.activeParty.findIndex(x=>x.charId===res.character.id) : -1;
-          if(apx>=0){
-            const raw = res.character?.sheet?.vitals?.init;
-            const newInit = (raw===0 || raw) ? (Number.isFinite(Number(raw)) ? Number(raw) : String(raw)) : "";
-            st.activeParty[apx].initiative = newInit;
-          }
+          vwSyncInitiativeEverywhere(res.character.id, res.character?.sheet?.vitals?.init, { refresh:false });
 
           // re-render DM cards + summary pills if those components exist
           if(typeof renderDMActiveParty === "function") renderDMActiveParty();
@@ -516,9 +561,7 @@ function vwWireSheetAutosave(){
             if(apx>=0){
               // Initiative: mirror into activeParty entry (cards prefer activeParty override).
               if(pathArr[1]==="init"){
-                const raw = String(el.value ?? "").trim();
-                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
-                st.activeParty[apx].initiative = newInit;
+                vwSyncInitiativeEverywhere(c.id, el.value, { refresh:false });
               }
               // HP: cards compute from character sheet vitals, but they only re-render when prompted.
               // Trigger a re-render on every keystroke so HP feels as immediate as Initiative.
@@ -679,9 +722,7 @@ function renderDMActiveParty(){
     const s = (c.sheet && c.sheet.stats) ? c.sheet.stats : {};
     const hp = (v.hpCur||"") + "/" + (v.hpMax||"");
     const ac = (v.ac||"");
-    // Prefer the Active Party's initiative if explicitly set; otherwise fall back to the character sheet's Init.
-    const sheetInit = (v.init===0 || v.init) ? v.init : "";
-    const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : sheetInit;
+    const init = vwGetJoinedInitiative(c);
 
         const card = document.createElement("div");
     card.className = "card";
@@ -939,27 +980,7 @@ function renderDMActiveParty(){
             onSave: async (initiative)=>{
               const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative })});
               if(res && res.ok){
-                const raw = String(initiative ?? "").trim();
-                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
-
-                // update local state (activeParty + character sheet) so all UI locations update immediately
-                const st = window.__STATE || {};
-                st.activeParty ||= [];
-                const ix = st.activeParty.findIndex(x=>x.charId===c.id);
-                if(ix>=0) st.activeParty[ix].initiative = newInit;
-
-                st.characters ||= [];
-                const cx = st.characters.findIndex(x=>x.id===c.id);
-                if(cx>=0){
-                  st.characters[cx].sheet ||= {};
-                  st.characters[cx].sheet.vitals ||= {};
-                  st.characters[cx].sheet.vitals.init = newInit;
-                }
-
-                window.__STATE = st;
-
-                try{ if(SESSION.activeCharId === c.id){ renderSheet(); vwUpdateCharSummaryRow(); } }catch(_){ }
-                try{ renderDMActiveParty(); }catch(_){ }
+                vwSyncInitiativeEverywhere(c.id, initiative);
                 return true;
               }
               toast((res && res.error) ? res.error : "Failed");
@@ -2527,7 +2548,8 @@ function vwUpdateCharSummaryRow(){
   const hpMax = (v.hpMax ?? "");
   const hpTxt = (hpCur!=="" || hpMax!=="") ? `HP: ${hpCur || "—"} / ${hpMax || "—"}` : "HP: —";
   const acTxt = (v.ac ?? "")!=="" ? `AC: ${v.ac}` : "AC: —";
-  const initTxt = (v.init ?? "")!=="" ? `Init: ${v.init}` : "Init: —";
+  const joinedInit = vwGetJoinedInitiative(c);
+  const initTxt = (joinedInit ?? "")!=="" ? `Init: ${joinedInit}` : "Init: —";
   const speedTxt = (v.speed ?? "")!=="" ? `Speed: ${v.speed}` : "Speed: —";
 
   const m = (c.sheet && c.sheet.money) ? c.sheet.money : {};
