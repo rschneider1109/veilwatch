@@ -51,3 +51,50 @@ th{color:var(--muted);font-weight:600;}
 @keyframes intelPulse{0%{box-shadow:0 0 0 rgba(255,60,60,.0);}50%{box-shadow:0 0 18px rgba(255,60,60,.55);}100%{box-shadow:0 0 0 rgba(255,60,60,.0);}}
 
 .toast.show{display:block;}
+
+
+/* Compact inventory tab layout */
+#ctab-inventory{
+  max-width: 980px;
+}
+#ctab-inventory table{
+  table-layout: fixed;
+}
+#ctab-inventory th,
+#ctab-inventory td{
+  padding: 7px 5px;
+  vertical-align: middle;
+}
+#ctab-inventory th:nth-child(1),
+#ctab-inventory td:nth-child(1){ width: 16%; }
+#ctab-inventory th:nth-child(2),
+#ctab-inventory td:nth-child(2){ width: 24%; }
+#ctab-inventory th:nth-child(3),
+#ctab-inventory td:nth-child(3){ width: 12%; }
+#ctab-inventory th:nth-child(4),
+#ctab-inventory td:nth-child(4){ width: 10%; }
+#ctab-inventory th:nth-child(5),
+#ctab-inventory td:nth-child(5){ width: 12%; }
+#ctab-inventory th:nth-child(6),
+#ctab-inventory td:nth-child(6){ width: 20%; }
+#ctab-inventory th:nth-child(7),
+#ctab-inventory td:nth-child(7){ width: 6%; }
+#ctab-inventory .input{
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+#ctab-inventory .smallbtn{
+  padding: 8px 8px;
+  min-width: 50px;
+}
+@media (max-width: 1100px){
+  #ctab-inventory{
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  #ctab-inventory table{
+    min-width: 860px;
+  }
+}
