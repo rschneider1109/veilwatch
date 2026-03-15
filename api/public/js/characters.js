@@ -70,121 +70,44 @@ function getChar(){
   return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
 }
 
-function vwUpsertCharInState(updatedChar){
-  if(!updatedChar || !updatedChar.id) return updatedChar;
-  const st = window.__STATE || {};
-  st.characters ||= [];
-  const idx = st.characters.findIndex(x=>x.id===updatedChar.id);
-  if(idx>=0) st.characters[idx] = updatedChar;
-  else st.characters.push(updatedChar);
-  window.__STATE = st;
-  return updatedChar;
+async function saveChar(character){
+  // Wrapper used in multiple flows
+  if(!character || !character.id) return { ok:false, error:"Missing character id" };
+  return api("/api/character/save",{
+    method:"POST",
+    body: JSON.stringify({ charId: character.id, character })
+  });
 }
 
-function vwSyncActivePartyFromCharacter(updatedChar){
-  if(!updatedChar || !updatedChar.id) return;
-  const st = window.__STATE || {};
-  if(!Array.isArray(st.activeParty)) return;
-  const apx = st.activeParty.findIndex(x=>x.charId===updatedChar.id);
-  if(apx<0) return;
-  const raw = updatedChar?.sheet?.vitals?.init;
-  st.activeParty[apx].initiative = (raw===0 || raw) ? (Number.isFinite(Number(raw)) ? Number(raw) : String(raw)) : "";
-  window.__STATE = st;
+function vwNormalizeInitValue(raw){
+  const s = String(raw ?? "").trim();
+  if(s==="") return "";
+  const n = Number(s);
+  return Number.isFinite(n) ? n : s;
 }
 
-function vwNormalizeInitiativeValue(raw){
-  if(raw===0 || raw==="0") return 0;
-  const txt = String(raw ?? "").trim();
-  if(txt==="") return "";
-  const n = Number(txt);
-  return Number.isFinite(n) ? n : txt;
-}
+function vwSyncInitiativeEverywhere(charId, rawValue){
+  try{
+    const st = window.__STATE || {};
+    st.characters ||= [];
+    st.activeParty ||= [];
 
-function vwGetJoinedInitiative(charOrId){
-  const st = window.__STATE || {};
-  const charId = typeof charOrId === "string" ? charOrId : charOrId?.id;
-  if(!charId) return "";
-
-  const apEntry = Array.isArray(st.activeParty) ? st.activeParty.find(x=>x.charId===charId) : null;
-  if(apEntry && (apEntry.initiative===0 || apEntry.initiative)) return vwNormalizeInitiativeValue(apEntry.initiative);
-
-  const character = typeof charOrId === "object" && charOrId ? charOrId : (Array.isArray(st.characters) ? st.characters.find(x=>x.id===charId) : null);
-  const raw = character?.sheet?.vitals?.init;
-  return vwNormalizeInitiativeValue(raw);
-}
-
-function vwSyncInitiativeEverywhere(charId, initiative, opts){
-  const st = window.__STATE || {};
-  const options = opts || {};
-  const nextInit = vwNormalizeInitiativeValue(initiative);
-
-  if(Array.isArray(st.activeParty)) {
-    const apx = st.activeParty.findIndex(x=>x.charId===charId);
-    if(apx>=0) st.activeParty[apx].initiative = nextInit;
-  }
-
-  if(Array.isArray(st.characters)) {
+    const normalized = vwNormalizeInitValue(rawValue);
     const cx = st.characters.findIndex(x=>x.id===charId);
     if(cx>=0){
       st.characters[cx].sheet ||= {};
       st.characters[cx].sheet.vitals ||= {};
-      st.characters[cx].sheet.vitals.init = nextInit;
+      st.characters[cx].sheet.vitals.init = normalized;
     }
-  }
 
-  window.__STATE = st;
+    const ax = st.activeParty.findIndex(x=>x.charId===charId);
+    if(ax>=0) st.activeParty[ax].initiative = normalized;
 
-  if(options.refresh !== false){
-    try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
-    try{ if(typeof renderSheet === "function" && SESSION.activeCharId === charId) renderSheet(); }catch(e){}
-    try{ if(typeof vwUpdateCharSummaryRow === "function" && SESSION.activeCharId === charId) vwUpdateCharSummaryRow(); }catch(e){}
-  }
+    window.__STATE = st;
+  }catch(e){}
 
-  return nextInit;
-}
-
-function vwRefreshCharacterViews(){
-  try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
-  try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
-  try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
   try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-}
-
-async function saveChar(character){
-  const payload = (character && character.charId && character.character)
-    ? character
-    : { charId: character?.id, character };
-  if(!payload?.charId || !payload?.character){
-    return { ok:false, error:"Missing character payload" };
-  }
-  if(typeof vwFlushCharAutosave === "function"){
-    try{ await vwFlushCharAutosave(); }catch(e){}
-  }
-  const res = await api("/api/character/save",{
-    method:"POST",
-    body: JSON.stringify(payload)
-  });
-  if(res && res.ok){
-    vwUpsertCharInState(payload.character);
-    vwSyncActivePartyFromCharacter(payload.character);
-  }
-  return res;
-}
-
-async function vwPatchCurrentChar(patch, opts){
-  const c = getChar();
-  if(!c || !c.id) return { ok:false, error:"No active character" };
-  const options = opts || {};
-  const res = await api("/api/character/patch",{
-    method:"POST",
-    body: JSON.stringify({ charId:c.id, patch })
-  });
-  if(res && res.ok && res.character){
-    vwUpsertCharInState(res.character);
-    vwSyncActivePartyFromCharacter(res.character);
-    if(options.refresh !== false) vwRefreshCharacterViews();
-  }
-  return res;
+  try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
 }
 
 // Starter-kit recommendations by class (UI ordering only)
@@ -242,9 +165,9 @@ function renderCharacter(){
 
     tr.querySelector("button").onclick=async ()=>{
       c.weapons = (c.weapons||[]).filter(x=>x.id!==w.id);
-      const res = await vwPatchCurrentChar({ weapons: c.weapons });
-      if(res && res.ok) toast("Removed weapon");
-      else toast(res?.error || "Failed");
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      toast("Removed weapon");
+      await refreshAll();
     };
 
     weapBody.appendChild(tr);
@@ -302,9 +225,8 @@ function renderCharacter(){
       }
       if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
 
-      const res = await vwPatchCurrentChar({ weapons: c.weapons }, { refresh:false });
-      if(res && res.ok) renderCharacter(); // repaint to ensure all displays stay consistent
-      else toast(res?.error || "Failed")
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      renderCharacter(); // repaint to ensure all displays stay consistent
     };
   });
 
@@ -342,9 +264,8 @@ function renderCharacter(){
       // legacy sync
       if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
 
-      const res = await vwPatchCurrentChar({ weapons: c.weapons }, { refresh:false });
-      if(res && res.ok) renderCharacter();
-      else toast(res?.error || "Failed");
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      renderCharacter();
     };
   });
 // inventory rows
@@ -362,16 +283,14 @@ function renderCharacter(){
       inp.onchange=async ()=>{
         const k=inp.dataset.k;
         c.inventory[idx][k]=inp.value;
-        const res = await vwPatchCurrentChar({ inventory: c.inventory }, { refresh:false });
-        if(res && res.ok) document.getElementById("saveMini").textContent="Saved";
-        else toast(res?.error || "Failed");
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        document.getElementById("saveMini").textContent="Saved";
       };
     });
     tr.querySelector('button').onclick = async ()=>{
       c.inventory.splice(idx,1);
-      const res = await vwPatchCurrentChar({ inventory: c.inventory });
-      if(res && res.ok) toast("Removed item");
-      else toast(res?.error || "Failed");
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      toast("Removed item"); await refreshAll();
     };
     invBody.appendChild(tr);
   });
@@ -391,9 +310,8 @@ function renderCharacter(){
         '<td><button class="btn smallbtn">Remove</button></td>';
       tr.querySelector('button').onclick=async ()=>{
         c.abilities.splice(idx,1);
-        const res = await vwPatchCurrentChar({ abilities: c.abilities });
-        if(res && res.ok) toast("Removed ability");
-        else toast(res?.error || "Failed");
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Removed ability"); await refreshAll();
       };
       abBody.appendChild(tr);
     });
@@ -417,9 +335,8 @@ function renderCharacter(){
         '<td><button class="btn smallbtn">Remove</button></td>';
       tr.querySelector('button').onclick=async ()=>{
         c.spells.splice(idx,1);
-        const res = await vwPatchCurrentChar({ spells: c.spells });
-        if(res && res.ok) toast("Removed spell");
-        else toast(res?.error || "Failed");
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        toast("Removed spell"); await refreshAll();
       };
       spBody.appendChild(tr);
     });
@@ -468,7 +385,8 @@ async function vwFlushCharAutosave(){
           const ix = Array.isArray(st.characters) ? st.characters.findIndex(x=>x.id===res.character.id) : -1;
           if(ix>=0) st.characters[ix] = res.character;
 
-          vwSyncInitiativeEverywhere(res.character.id, res.character?.sheet?.vitals?.init, { refresh:false });
+          // Keep sheet + active-party initiative unified after autosave.
+          vwSyncInitiativeEverywhere(res.character.id, res.character?.sheet?.vitals?.init);
 
           // re-render DM cards + summary pills if those components exist
           if(typeof renderDMActiveParty === "function") renderDMActiveParty();
@@ -561,7 +479,7 @@ function vwWireSheetAutosave(){
             if(apx>=0){
               // Initiative: mirror into activeParty entry (cards prefer activeParty override).
               if(pathArr[1]==="init"){
-                vwSyncInitiativeEverywhere(c.id, el.value, { refresh:false });
+                vwSyncInitiativeEverywhere(c.id, el.value);
               }
               // HP: cards compute from character sheet vitals, but they only re-render when prompted.
               // Trigger a re-render on every keystroke so HP feels as immediate as Initiative.
@@ -627,6 +545,7 @@ if(ntEl) ntEl.value = c.sheet.notes ?? "";
   setValueAll("statCHA", (c.sheet.stats.CHA ?? ""));
 
   setValueAll("notesText", (c.sheet.notes ?? ""));
+  try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
 
   // conditions
   const row=document.getElementById("condRow");
@@ -722,7 +641,9 @@ function renderDMActiveParty(){
     const s = (c.sheet && c.sheet.stats) ? c.sheet.stats : {};
     const hp = (v.hpCur||"") + "/" + (v.hpMax||"");
     const ac = (v.ac||"");
-    const init = vwGetJoinedInitiative(c);
+    // Prefer the Active Party's initiative if explicitly set; otherwise fall back to the character sheet's Init.
+    const sheetInit = (v.init===0 || v.init) ? v.init : "";
+    const init = (entry.initiative===0 || entry.initiative) ? entry.initiative : sheetInit;
 
         const card = document.createElement("div");
     card.className = "card";
@@ -980,7 +901,12 @@ function renderDMActiveParty(){
             onSave: async (initiative)=>{
               const res = await api("/api/dm/activeParty/initiative", { method:"POST", body: JSON.stringify({ charId: c.id, initiative })});
               if(res && res.ok){
-                vwSyncInitiativeEverywhere(c.id, initiative);
+                const raw = String(initiative ?? "").trim();
+                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
+
+                vwSyncInitiativeEverywhere(c.id, newInit);
+                try{ if(SESSION.activeCharId === c.id){ renderSheet(); vwUpdateCharSummaryRow(); } }catch(_){ }
+                try{ renderDMActiveParty(); }catch(_){ }
                 return true;
               }
               toast((res && res.error) ? res.error : "Failed");
@@ -2375,9 +2301,9 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     // fallback: old behavior
     c.inventory ||= [];
     c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-    const res = await vwPatchCurrentChar({ inventory: c.inventory });
-    if(res && res.ok){ toast("Added inventory row"); }
-    else toast(res?.error||"Failed");
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
+    else toast(res.error||"Failed");
     return;
   }
 
@@ -2420,8 +2346,8 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     notes: step2.notes || ""
   });
 
-  const res = await vwPatchCurrentChar({ inventory: c.inventory });
-  if(res && res.ok){ toast("Inventory item added"); }
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
   else toast(res?.error || "Failed");
 });
 
@@ -2548,8 +2474,7 @@ function vwUpdateCharSummaryRow(){
   const hpMax = (v.hpMax ?? "");
   const hpTxt = (hpCur!=="" || hpMax!=="") ? `HP: ${hpCur || "—"} / ${hpMax || "—"}` : "HP: —";
   const acTxt = (v.ac ?? "")!=="" ? `AC: ${v.ac}` : "AC: —";
-  const joinedInit = vwGetJoinedInitiative(c);
-  const initTxt = (joinedInit ?? "")!=="" ? `Init: ${joinedInit}` : "Init: —";
+  const initTxt = (v.init ?? "")!=="" ? `Init: ${v.init}` : "Init: —";
   const speedTxt = (v.speed ?? "")!=="" ? `Speed: ${v.speed}` : "Speed: —";
 
   const m = (c.sheet && c.sheet.money) ? c.sheet.money : {};
@@ -2729,8 +2654,8 @@ vwRebindButton("addWeaponBtn", async ()=>{
     c.weapons ||= [];
     c.weapons.push(weapon);
 
-    const res = await vwPatchCurrentChar({ weapons: c.weapons });
-    if(res && res.ok){ toast("Weapon added"); }
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Weapon added"); await refreshAll(); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
@@ -2781,8 +2706,8 @@ vwRebindButton("addAbilityBtn", async ()=>{
     c.abilities ||= [];
     c.abilities.push(ab);
 
-    const res = await vwPatchCurrentChar({ abilities: c.abilities });
-    if(res && res.ok){ toast("Ability added"); }
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Ability added"); await refreshAll(); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
@@ -2839,8 +2764,8 @@ vwRebindButton("addSpellBtn", async ()=>{
     c.spells ||= [];
     c.spells.push(sp);
 
-    const res = await vwPatchCurrentChar({ spells: c.spells });
-    if(res && res.ok){ toast("Spell added"); }
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Spell added"); await refreshAll(); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
