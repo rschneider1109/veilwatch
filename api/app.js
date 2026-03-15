@@ -440,6 +440,27 @@ function readBody(req){
   });
 }
 
+
+function normalizeInitiativeValue(raw){
+  const s = String(raw ?? "").trim();
+  if(s === "") return "";
+  const n = Number(s);
+  return Number.isFinite(n) ? n : s;
+}
+
+function syncCharacterInitiativeAndActiveParty(character, activeParty){
+  if(!character || typeof character !== "object") return;
+  character.sheet ||= {};
+  character.sheet.vitals ||= { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" };
+
+  const nextInit = normalizeInitiativeValue(character.sheet?.vitals?.init);
+  character.sheet.vitals.init = nextInit;
+
+  if(!Array.isArray(activeParty)) return;
+  const entry = activeParty.find(x => x && x.charId === character.id);
+  if(entry) entry.initiative = nextInit;
+}
+
 function deepMerge(target, patch){
   if(patch === null || patch === undefined) return target;
   if(typeof patch !== "object" || Array.isArray(patch)) return patch;
