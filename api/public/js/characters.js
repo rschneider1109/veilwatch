@@ -70,12 +70,70 @@ function getChar(){
   return (st.characters||[]).find(c=>c.id===SESSION.activeCharId);
 }
 
+function vwUpsertCharInState(updatedChar){
+  if(!updatedChar || !updatedChar.id) return updatedChar;
+  const st = window.__STATE || {};
+  st.characters ||= [];
+  const idx = st.characters.findIndex(x=>x.id===updatedChar.id);
+  if(idx>=0) st.characters[idx] = updatedChar;
+  else st.characters.push(updatedChar);
+  window.__STATE = st;
+  return updatedChar;
+}
+
+function vwSyncActivePartyFromCharacter(updatedChar){
+  if(!updatedChar || !updatedChar.id) return;
+  const st = window.__STATE || {};
+  if(!Array.isArray(st.activeParty)) return;
+  const apx = st.activeParty.findIndex(x=>x.charId===updatedChar.id);
+  if(apx<0) return;
+  const raw = updatedChar?.sheet?.vitals?.init;
+  st.activeParty[apx].initiative = (raw===0 || raw) ? (Number.isFinite(Number(raw)) ? Number(raw) : String(raw)) : "";
+  window.__STATE = st;
+}
+
+function vwRefreshCharacterViews(){
+  try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
+  try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
+  try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
+  try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+}
+
 async function saveChar(character){
-  // Wrapper used in multiple flows
-  return api("/api/character/save",{
+  const payload = (character && character.charId && character.character)
+    ? character
+    : { charId: character?.id, character };
+  if(!payload?.charId || !payload?.character){
+    return { ok:false, error:"Missing character payload" };
+  }
+  if(typeof vwFlushCharAutosave === "function"){
+    try{ await vwFlushCharAutosave(); }catch(e){}
+  }
+  const res = await api("/api/character/save",{
     method:"POST",
-    body: JSON.stringify(character)
+    body: JSON.stringify(payload)
   });
+  if(res && res.ok){
+    vwUpsertCharInState(payload.character);
+    vwSyncActivePartyFromCharacter(payload.character);
+  }
+  return res;
+}
+
+async function vwPatchCurrentChar(patch, opts){
+  const c = getChar();
+  if(!c || !c.id) return { ok:false, error:"No active character" };
+  const options = opts || {};
+  const res = await api("/api/character/patch",{
+    method:"POST",
+    body: JSON.stringify({ charId:c.id, patch })
+  });
+  if(res && res.ok && res.character){
+    vwUpsertCharInState(res.character);
+    vwSyncActivePartyFromCharacter(res.character);
+    if(options.refresh !== false) vwRefreshCharacterViews();
+  }
+  return res;
 }
 
 // Starter-kit recommendations by class (UI ordering only)
@@ -133,9 +191,9 @@ function renderCharacter(){
 
     tr.querySelector("button").onclick=async ()=>{
       c.weapons = (c.weapons||[]).filter(x=>x.id!==w.id);
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      toast("Removed weapon");
-      await refreshAll();
+      const res = await vwPatchCurrentChar({ weapons: c.weapons });
+      if(res && res.ok) toast("Removed weapon");
+      else toast(res?.error || "Failed");
     };
 
     weapBody.appendChild(tr);
@@ -193,8 +251,9 @@ function renderCharacter(){
       }
       if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
 
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      renderCharacter(); // repaint to ensure all displays stay consistent
+      const res = await vwPatchCurrentChar({ weapons: c.weapons }, { refresh:false });
+      if(res && res.ok) renderCharacter(); // repaint to ensure all displays stay consistent
+      else toast(res?.error || "Failed")
     };
   });
 
@@ -232,8 +291,9 @@ function renderCharacter(){
       // legacy sync
       if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
 
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      renderCharacter();
+      const res = await vwPatchCurrentChar({ weapons: c.weapons }, { refresh:false });
+      if(res && res.ok) renderCharacter();
+      else toast(res?.error || "Failed");
     };
   });
 // inventory rows
@@ -251,14 +311,16 @@ function renderCharacter(){
       inp.onchange=async ()=>{
         const k=inp.dataset.k;
         c.inventory[idx][k]=inp.value;
-        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        document.getElementById("saveMini").textContent="Saved";
+        const res = await vwPatchCurrentChar({ inventory: c.inventory }, { refresh:false });
+        if(res && res.ok) document.getElementById("saveMini").textContent="Saved";
+        else toast(res?.error || "Failed");
       };
     });
     tr.querySelector('button').onclick = async ()=>{
       c.inventory.splice(idx,1);
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      toast("Removed item"); await refreshAll();
+      const res = await vwPatchCurrentChar({ inventory: c.inventory });
+      if(res && res.ok) toast("Removed item");
+      else toast(res?.error || "Failed");
     };
     invBody.appendChild(tr);
   });
@@ -278,8 +340,9 @@ function renderCharacter(){
         '<td><button class="btn smallbtn">Remove</button></td>';
       tr.querySelector('button').onclick=async ()=>{
         c.abilities.splice(idx,1);
-        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        toast("Removed ability"); await refreshAll();
+        const res = await vwPatchCurrentChar({ abilities: c.abilities });
+        if(res && res.ok) toast("Removed ability");
+        else toast(res?.error || "Failed");
       };
       abBody.appendChild(tr);
     });
@@ -303,8 +366,9 @@ function renderCharacter(){
         '<td><button class="btn smallbtn">Remove</button></td>';
       tr.querySelector('button').onclick=async ()=>{
         c.spells.splice(idx,1);
-        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        toast("Removed spell"); await refreshAll();
+        const res = await vwPatchCurrentChar({ spells: c.spells });
+        if(res && res.ok) toast("Removed spell");
+        else toast(res?.error || "Failed");
       };
       spBody.appendChild(tr);
     });
@@ -2290,9 +2354,9 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     // fallback: old behavior
     c.inventory ||= [];
     c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
-    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
-    else toast(res.error||"Failed");
+    const res = await vwPatchCurrentChar({ inventory: c.inventory });
+    if(res && res.ok){ toast("Added inventory row"); }
+    else toast(res?.error||"Failed");
     return;
   }
 
@@ -2335,8 +2399,8 @@ document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
     notes: step2.notes || ""
   });
 
-  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
+  const res = await vwPatchCurrentChar({ inventory: c.inventory });
+  if(res && res.ok){ toast("Inventory item added"); }
   else toast(res?.error || "Failed");
 });
 
@@ -2643,8 +2707,8 @@ vwRebindButton("addWeaponBtn", async ()=>{
     c.weapons ||= [];
     c.weapons.push(weapon);
 
-    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    if(res && res.ok){ toast("Weapon added"); await refreshAll(); }
+    const res = await vwPatchCurrentChar({ weapons: c.weapons });
+    if(res && res.ok){ toast("Weapon added"); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
@@ -2695,8 +2759,8 @@ vwRebindButton("addAbilityBtn", async ()=>{
     c.abilities ||= [];
     c.abilities.push(ab);
 
-    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    if(res && res.ok){ toast("Ability added"); await refreshAll(); }
+    const res = await vwPatchCurrentChar({ abilities: c.abilities });
+    if(res && res.ok){ toast("Ability added"); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
@@ -2753,8 +2817,8 @@ vwRebindButton("addSpellBtn", async ()=>{
     c.spells ||= [];
     c.spells.push(sp);
 
-    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-    if(res && res.ok){ toast("Spell added"); await refreshAll(); }
+    const res = await vwPatchCurrentChar({ spells: c.spells });
+    if(res && res.ok){ toast("Spell added"); }
     else toast(res?.error || "Failed");
   }catch(e){ console.error(e); toast("Failed"); }
 });
