@@ -535,11 +535,6 @@ function renderCharacter(){
       if(btn.dataset.busy === "1") return;
       btn.dataset.busy = "1";
       try{
-        const active = document.activeElement;
-        if(active && active !== btn && typeof active.blur === "function"){
-          try{ active.blur(); }catch(e){}
-        }
-
         const wi = Number(btn.getAttribute("data-wi"));
         const act = btn.getAttribute("data-ammo-act");
         const w = c.weapons?.[wi];
