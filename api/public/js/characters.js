@@ -526,6 +526,16 @@ function renderCharacter(){
     };
   });
 
+  const vwSyncWeaponAmmoRow = (wi, w)=>{
+    weapBody.querySelectorAll(`input[data-wi="${wi}"][data-ammo]`).forEach(el=>{
+      const key = el.getAttribute("data-ammo");
+      if(key==="magSize") el.value = (w.ammo?.magSize ?? w.ammo?.starting ?? "");
+      else if(key==="current") el.value = (w.ammo?.current ?? "");
+      else if(key==="mags") el.value = (w.ammo?.mags ?? "");
+      else if(key==="type") el.value = (w.ammo?.type ?? "");
+    });
+  };
+
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
     const runAmmoAction = async (ev)=>{
       if(ev){
@@ -580,8 +590,9 @@ function renderCharacter(){
 
         if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
 
+        vwSyncWeaponAmmoRow(wi, w);
+        try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
         await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        renderCharacter();
       }finally{
         setTimeout(()=>{ delete btn.dataset.busy; }, 0);
       }
