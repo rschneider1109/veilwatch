@@ -490,7 +490,7 @@ function renderCharacter(){
             <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>-1</b> decrements current. <b>Reload</b> refills the current mag using matching ammo from Inventory and consumes 1 from <b>Mags</b> if tracked. <b>Reload Mags</b> restores all tracked mags and the current mag using matching ammo from Inventory.
+            Tip: <b>-1</b> decrements current. <b>Reload</b> refills only the current mag using matching ammo from Inventory. <b>Reload Mags</b> restores tracked spare mags to max using matching ammo from Inventory.
           </div>
         </td>
       `;
@@ -528,7 +528,10 @@ function renderCharacter(){
   });
 
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
-    btn.onclick = async ()=>{
+    btn.onclick = async (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+
       const wi = Number(btn.getAttribute("data-wi"));
       const act = btn.getAttribute("data-ammo-act");
       const w = c.weapons?.[wi];
@@ -561,9 +564,7 @@ function renderCharacter(){
           toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
           return;
         }
-        if(mags > 0){
-          w.ammo.mags = mags - 1;
-        }
+        // Reload only tops off the current mag. It should not also reduce spare mags.
         w.ammo.current = magSize;
       }else if(act==="addmag"){
         w.ammo.mags = mags + 1;
@@ -578,10 +579,12 @@ function renderCharacter(){
           toast("Set Ammo Type first");
           return;
         }
+        // Reload Mags fills only the tracked spare mags back to max.
+        // The current mag is handled by Reload, so do not count it again here.
         const magsToFill = Math.max(0, magsMax - mags);
-        const needed = Math.max(0, (magSize - cur) + (magsToFill * magSize));
+        const needed = Math.max(0, magsToFill * magSize);
         if(needed <= 0){
-          toast("Ammo already topped off");
+          toast("Spare mags already topped off");
           return;
         }
         const used = vwDeductAmmoFromInventory(c, ammoType, needed);
@@ -590,7 +593,6 @@ function renderCharacter(){
           return;
         }
         w.ammo.mags = magsMax;
-        w.ammo.current = magSize;
       }
 
       // legacy sync
