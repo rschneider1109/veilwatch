@@ -7,7 +7,12 @@ async function vwAddInventoryItemDropdown() {
   const c = getChar();
   if (!c) return toast("Create/select a character first");
 
-  const groups = await vwLoadInventoryCatalog();
+  const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
+  const groups =
+    cat?.inventoryItemsByCategory ||
+    cat?.inventory_items_by_category ||
+    cat?.inventoryByCategory ||
+    null;
 
   const categories = groups ? Object.keys(groups) : ["General"];
   const safeCats = categories.length ? categories : ["General"];
@@ -32,7 +37,7 @@ async function vwAddInventoryItemDropdown() {
   if (!step1) return;
 
   const items = groups ? (groups[step1.category] || []) : [];
-  const itemOptions = items.length ? items.map(it=>({ value:(it?.name ?? it), label:(it?.name ?? it) })) : [{ value:"", label:"(type item name)" }];
+  const itemOptions = items.length ? items.map(n=>({ value:n, label:n })) : [{ value:"", label:"(type item name)" }];
 
   // Step 2: choose item + qty
   const step2 = await vwModalForm({
@@ -48,16 +53,12 @@ async function vwAddInventoryItemDropdown() {
   });
   if (!step2) return;
 
-  const selectedItem = Array.isArray(items) ? items.find(it => String((it?.name ?? it)) === String(step2.name || "")) : null;
-
   c.inventory = c.inventory || [];
   c.inventory.push({
     category: step1.category || "",
     name: step2.name || "",
-    weight: selectedItem?.default_weight ?? "",
     qty: step2.qty || "1",
-    cost: selectedItem?.default_cost ?? "",
-    notes: step2.notes || selectedItem?.default_notes || ""
+    notes: step2.notes || ""
   });
 
   await saveChar(c);
@@ -71,340 +72,10 @@ function getChar(){
 
 async function saveChar(character){
   // Wrapper used in multiple flows
-  if(!character || !character.id) return { ok:false, error:"Missing character id" };
   return api("/api/character/save",{
     method:"POST",
-    body: JSON.stringify({ charId: character.id, character })
+    body: JSON.stringify(character)
   });
-}
-
-async function vwLoadInventoryCatalogBundle(){
-  try{
-    const res = await api("/api/catalog/inventory");
-    if(res?.ok){
-      const items = Array.isArray(res.items) ? res.items : [];
-      const byCategory = res.byCategory || {};
-      return { items, byCategory };
-    }
-  }catch(e){}
-  const cat = (window.vwGetCatalog ? window.vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG));
-  const raw = cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory || null;
-  const byCategory = {};
-  if(raw && typeof raw === "object"){
-    Object.entries(raw).forEach(([category, items])=>{
-      byCategory[category] = (items || []).map(it => (typeof it === "string"
-        ? { name: it, category, default_qty: 1, default_weight: "", default_cost: "", default_notes: "", source: "official", is_custom: false }
-        : Object.assign({ category, default_qty:1, source:"official", is_custom:false }, it)
-      ));
-    });
-  }
-  const items = Object.values(byCategory).flat();
-  return { items, byCategory };
-}
-
-async function vwLoadInventoryCatalog(){
-  const bundle = await vwLoadInventoryCatalogBundle();
-  return bundle?.byCategory || null;
-}
-
-function vwEscapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch] || ch));
-}
-
-function vwNormalizeInventoryCatalogItem(item, categoryHint){
-  return {
-    id: item?.id || "",
-    name: String(item?.name ?? item ?? "").trim(),
-    category: String(item?.category || categoryHint || "Misc"),
-    default_qty: Math.max(1, parseInt(item?.default_qty ?? 1, 10) || 1),
-    default_weight: item?.default_weight ?? "",
-    default_cost: item?.default_cost ?? "",
-    default_notes: item?.default_notes ?? "",
-    ammo_type: item?.ammo_type ?? "",
-    source: item?.source || (item?.is_custom ? "custom" : "official"),
-    is_custom: !!item?.is_custom
-  };
-}
-
-async function vwOpenAddItemModal(){
-  const c = getChar();
-  if(!c){ toast("Create character first"); return; }
-  if(typeof vwModalBaseSetup !== "function"){
-    c.inventory ||= [];
-    c.inventory.push({ category:"", name:"", weight:"", qty:"1", cost:"", notes:"" });
-    const res = await saveChar(c);
-    if(res?.ok){ toast("Added inventory row"); await refreshAll?.(); }
-    else toast(res?.error || "Failed");
-    return;
-  }
-
-  const bundle = await vwLoadInventoryCatalogBundle();
-  const byCategory = bundle?.byCategory || {};
-  const categories = Object.keys(byCategory);
-  const safeCats = categories.length ? categories : ["Misc"];
-  let mode = "catalog";
-  let selectedCategory = safeCats[0];
-  let selectedName = "";
-
-  const ui = vwModalBaseSetup("Add Item", "Add", "Cancel");
-
-  function itemsForCategory(cat){
-    return (byCategory[cat] || []).map(it => vwNormalizeInventoryCatalogItem(it, cat));
-  }
-
-  function findSelectedItem(){
-    return itemsForCategory(selectedCategory).find(it => String(it.name) === String(selectedName)) || null;
-  }
-
-  function setCatalogFieldValues(item){
-    const qtyEl = document.getElementById("vwInvQty");
-    const weightEl = document.getElementById("vwInvWeight");
-    const costEl = document.getElementById("vwInvCost");
-    const notesEl = document.getElementById("vwInvNotes");
-    if(qtyEl && (!qtyEl.value || qtyEl.dataset.autofill === "1")){ qtyEl.value = String(item?.default_qty ?? 1); qtyEl.dataset.autofill = "1"; }
-    if(weightEl && (!weightEl.value || weightEl.dataset.autofill === "1")){ weightEl.value = String(item?.default_weight ?? ""); weightEl.dataset.autofill = "1"; }
-    if(costEl && (!costEl.value || costEl.dataset.autofill === "1")){ costEl.value = String(item?.default_cost ?? ""); costEl.dataset.autofill = "1"; }
-    if(notesEl && (!notesEl.value || notesEl.dataset.autofill === "1")){ notesEl.value = String(item?.default_notes ?? ""); notesEl.dataset.autofill = "1"; }
-    const badgeEl = document.getElementById("vwInvCatalogSource");
-    if(badgeEl) badgeEl.textContent = item ? (item.is_custom ? "Source: Custom Catalog" : "Source: Main Catalog") : "";
-  }
-
-  function markFieldManual(ev){
-    if(ev?.target) ev.target.dataset.autofill = "0";
-  }
-
-  function renderCatalog(){
-    mode = "catalog";
-    const items = itemsForCategory(selectedCategory);
-    if(!selectedName || !items.some(it => String(it.name) === String(selectedName))){
-      selectedName = items[0]?.name || "";
-    }
-    const current = findSelectedItem();
-    ui.mBody.innerHTML = `
-      <div style="margin-bottom:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Category</div>
-        <select id="vwInvCategory" class="input" style="width:100%">${safeCats.map(cat => `<option value="${vwEscapeHtml(cat)}"${cat===selectedCategory?" selected":""}>${vwEscapeHtml(cat)}</option>`).join("")}</select>
-      </div>
-      <div style="margin-bottom:8px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Item</div>
-        <select id="vwInvItemSelect" class="input" style="width:100%">${items.map(it => `<option value="${vwEscapeHtml(it.name)}"${String(it.name)===String(selectedName)?" selected":""}>${vwEscapeHtml(it.name)}${it.is_custom ? " • custom" : ""}</option>`).join("")}</select>
-        <div id="vwInvCatalogSource" class="mini" style="margin-top:6px;opacity:.8"></div>
-      </div>
-      <button id="vwInvManualModeBtn" type="button" class="btn smallbtn" style="margin-bottom:12px;">Add Item Manually</button>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Qty</div><input id="vwInvQty" class="input" value="${vwEscapeHtml(String(current?.default_qty ?? 1))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div><input id="vwInvWeight" class="input" value="${vwEscapeHtml(String(current?.default_weight ?? ""))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Cost ($)</div><input id="vwInvCost" class="input" value="${vwEscapeHtml(String(current?.default_cost ?? ""))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div><input id="vwInvNotes" class="input" value="${vwEscapeHtml(String(current?.default_notes ?? ""))}" placeholder="Optional" /></div>
-      </div>
-    `;
-
-    document.getElementById("vwInvCategory")?.addEventListener("change", (e)=>{ selectedCategory = e.target.value; selectedName = ""; renderCatalog(); });
-    document.getElementById("vwInvItemSelect")?.addEventListener("change", (e)=>{
-      selectedName = e.target.value;
-      ["vwInvQty","vwInvWeight","vwInvCost","vwInvNotes"].forEach(id=>{ const el=document.getElementById(id); if(el) el.dataset.autofill = "1"; });
-      setCatalogFieldValues(findSelectedItem());
-    });
-    ["vwInvQty","vwInvWeight","vwInvCost","vwInvNotes"].forEach(id=> document.getElementById(id)?.addEventListener("input", markFieldManual));
-    document.getElementById("vwInvManualModeBtn")?.addEventListener("click", ()=> renderManual());
-    setCatalogFieldValues(current);
-  }
-
-  function renderManual(){
-    mode = "manual";
-    ui.mBody.innerHTML = `
-      <div class="mini" style="margin-bottom:8px;opacity:.85">Create a one-off item, or save it to the custom item database for reuse later.</div>
-      <div style="margin-bottom:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Item Name</div>
-        <input id="vwManualInvName" class="input" placeholder="Item name" />
-      </div>
-      <div style="margin-bottom:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Category</div>
-        <select id="vwManualInvCategory" class="input" style="width:100%">${safeCats.map(cat => `<option value="${vwEscapeHtml(cat)}">${vwEscapeHtml(cat)}</option>`).join("")}<option value="Misc">Misc</option></select>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Qty</div><input id="vwManualInvQty" class="input" value="1" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div><input id="vwManualInvWeight" class="input" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Cost ($)</div><input id="vwManualInvCost" class="input" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Ammo Type</div><input id="vwManualInvAmmoType" class="input" placeholder="Optional" /></div>
-      </div>
-      <div style="margin-top:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
-        <input id="vwManualInvNotes" class="input" placeholder="Optional" />
-      </div>
-      <label class="mini" style="display:flex;align-items:center;gap:8px;margin-top:12px;opacity:${SESSION.role === "dm" ? "1" : ".65"};">
-        <input id="vwManualInvSaveCustom" type="checkbox" ${SESSION.role === "dm" ? "" : "disabled"} />
-        Save to Custom Item Database
-      </label>
-      ${SESSION.role === "dm" ? "" : '<div class="mini" style="margin-top:6px;opacity:.7">DM only for database saves. You can still add one-time items.</div>'}
-      <button id="vwInvBackToCatalogBtn" type="button" class="btn smallbtn" style="margin-top:12px;">Back to Catalog</button>
-    `;
-    document.getElementById("vwInvBackToCatalogBtn")?.addEventListener("click", ()=> renderCatalog());
-  }
-
-  function shutdown(val){
-    ui.modal.style.display = "none";
-    ui.btnOk.onclick = null;
-    ui.btnCan.onclick = null;
-    ui.modal.onclick = null;
-    if(typeof vwSetModalOpen === "function") vwSetModalOpen(false);
-    return val;
-  }
-
-  ui.btnCan.onclick = ()=> shutdown(null);
-  ui.modal.onclick = (e)=>{ if(e.target === ui.modal) shutdown(null); };
-  ui.btnOk.onclick = async ()=>{
-    try{
-      if(mode === "catalog"){
-        const item = findSelectedItem();
-        if(!item){ toast("Choose an item first"); return; }
-        c.inventory ||= [];
-        c.inventory.push({
-          category: selectedCategory || item.category || "",
-          name: item.name || "",
-          weight: document.getElementById("vwInvWeight")?.value || item.default_weight || "",
-          qty: document.getElementById("vwInvQty")?.value || String(item.default_qty || 1),
-          cost: document.getElementById("vwInvCost")?.value || item.default_cost || "",
-          notes: document.getElementById("vwInvNotes")?.value || item.default_notes || "",
-          ammoType: item.ammo_type || ""
-        });
-        const res = await saveChar(c);
-        if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
-        shutdown(true);
-        toast("Item added");
-        await refreshAll?.();
-        return;
-      }
-
-      const name = String(document.getElementById("vwManualInvName")?.value || "").trim();
-      if(!name){ toast("Item name is required"); return; }
-      const category = String(document.getElementById("vwManualInvCategory")?.value || "Misc").trim() || "Misc";
-      const qty = String(document.getElementById("vwManualInvQty")?.value || "1").trim() || "1";
-      const weight = String(document.getElementById("vwManualInvWeight")?.value || "").trim();
-      const cost = String(document.getElementById("vwManualInvCost")?.value || "").trim();
-      const notes = String(document.getElementById("vwManualInvNotes")?.value || "").trim();
-      const ammoType = String(document.getElementById("vwManualInvAmmoType")?.value || "").trim();
-      const saveCustom = !!document.getElementById("vwManualInvSaveCustom")?.checked;
-
-      if(saveCustom){
-        const saveRes = await api("/api/catalog/inventory/custom/save", {
-          method:"POST",
-          body: JSON.stringify({
-            item: {
-              name,
-              category,
-              default_qty: Math.max(1, parseInt(qty, 10) || 1),
-              default_weight: weight,
-              default_cost: cost,
-              default_notes: notes,
-              ammo_type: ammoType
-            }
-          })
-        });
-        if(!saveRes?.ok){ toast(saveRes?.error || "Failed to save custom item"); return; }
-      }
-
-      c.inventory ||= [];
-      c.inventory.push({ category, name, weight, qty, cost, notes, ammoType });
-      const res = await saveChar(c);
-      if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
-      shutdown(true);
-      toast(saveCustom ? "Item added and saved to custom catalog" : "Item added");
-      await refreshAll?.();
-    }catch(err){
-      console.error(err);
-      toast("Failed to add item");
-    }
-  };
-
-  if(typeof vwSetModalOpen === "function") vwSetModalOpen(true);
-  ui.modal.style.display = "flex";
-  renderCatalog();
-}
-
-
-function vwCanonicalAmmoKey(v){
-  return String(v ?? "")
-    .toLowerCase()
-    .replace(/\(.*?\)/g, " ")
-    .replace(/\bammo\b/g, " ")
-    .replace(/\brounds?\b/g, " ")
-    .replace(/\bshells?\b/g, " ")
-    .replace(/\bbox(es)?\b/g, " ")
-    .replace(/\bcase(s)?\b/g, " ")
-    .replace(/[^a-z0-9.+-]+/g, "")
-    .trim();
-}
-
-function vwFindMatchingAmmoInventoryItems(character, ammoType){
-  const key = vwCanonicalAmmoKey(ammoType);
-  if(!key) return [];
-  const inv = Array.isArray(character?.inventory) ? character.inventory : [];
-  const out = [];
-  inv.forEach((it, idx)=>{
-    const itemKey = vwCanonicalAmmoKey(it?.ammoType || it?.ammo_type || "");
-    const hay = [
-      itemKey,
-      vwCanonicalAmmoKey(it?.name || ""),
-      vwCanonicalAmmoKey(it?.category || ""),
-      vwCanonicalAmmoKey(it?.notes || "")
-    ].filter(Boolean).join(" ");
-    const qty = Math.max(0, parseInt(it?.qty ?? 0, 10) || 0);
-    if(qty > 0 && (itemKey === key || hay.includes(key))){
-      out.push({ idx, item: it, qty });
-    }
-  });
-  return out;
-}
-
-function vwDeductAmmoFromInventory(character, ammoType, needed){
-  const req = Math.max(0, parseInt(needed ?? 0, 10) || 0);
-  if(req <= 0) return { ok:true, used:0 };
-  const matches = vwFindMatchingAmmoInventoryItems(character, ammoType);
-  let left = req;
-  const total = matches.reduce((sum, row)=> sum + (parseInt(row.qty, 10) || 0), 0);
-  if(total < req){
-    return { ok:false, used:0, available: total };
-  }
-  matches.forEach(row=>{
-    if(left <= 0) return;
-    const take = Math.min(left, parseInt(row.qty, 10) || 0);
-    const curQty = Math.max(0, parseInt(character.inventory[row.idx]?.qty ?? 0, 10) || 0);
-    character.inventory[row.idx].qty = String(Math.max(0, curQty - take));
-    left -= take;
-  });
-  return { ok:true, used:req, available: total };
-}
-
-function vwNormalizeInitValue(raw){
-  const s = String(raw ?? "").trim();
-  if(s==="") return "";
-  const n = Number(s);
-  return Number.isFinite(n) ? n : s;
-}
-
-function vwSyncInitiativeEverywhere(charId, rawValue){
-  try{
-    const st = window.__STATE || {};
-    st.characters ||= [];
-    st.activeParty ||= [];
-
-    const normalized = vwNormalizeInitValue(rawValue);
-    const cx = st.characters.findIndex(x=>x.id===charId);
-    if(cx>=0){
-      st.characters[cx].sheet ||= {};
-      st.characters[cx].sheet.vitals ||= {};
-      st.characters[cx].sheet.vitals.init = normalized;
-    }
-
-    const ax = st.activeParty.findIndex(x=>x.charId===charId);
-    if(ax>=0) st.activeParty[ax].initiative = normalized;
-
-    window.__STATE = st;
-  }catch(e){}
-
-  try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-  try{ if(typeof renderDMActiveParty === "function") renderDMActiveParty(); }catch(e){}
 }
 
 // Starter-kit recommendations by class (UI ordering only)
@@ -490,7 +161,7 @@ function renderCharacter(){
             <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>-1</b> decrements current. <b>Reload</b> refills only the current mag using matching ammo from Inventory. <b>Reload Mags</b> restores tracked spare mags to max using matching ammo from Inventory.
+            Tip: <b>-1</b> decrements current. <b>Reload</b> swaps in a fresh mag (consumes 1 from Mags if available). <b>Reload Mags</b> restores Mags to the weapon’s starting mags.
           </div>
         </td>
       `;
@@ -499,39 +170,42 @@ function renderCharacter(){
   });
 
   // wire ammo controls (after rows exist)
+  const persistAmmoChange = async ()=>{
+    await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    const saveMiniEl = document.getElementById("saveMini");
+    if(saveMiniEl) saveMiniEl.textContent = "Saved";
+  };
+  const applyAmmoInputValue = (inp)=>{
+    const wi = Number(inp.getAttribute("data-wi"));
+    const key = inp.getAttribute("data-ammo");
+    const w = c.weapons?.[wi];
+    if(!w) return null;
+    w.ammo = w.ammo || {};
+    let v = inp.value;
+
+    if(key==="magSize" || key==="current" || key==="mags"){
+      const n = parseInt(v,10);
+      if(Number.isFinite(n)) v = n;
+    }
+
+    w.ammo[key] = v;
+    if(key==="magSize"){
+      w.ammo.starting = v;
+      if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
+    }
+    if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
+    return w;
+  };
+
   weapBody.querySelectorAll("input[data-ammo]").forEach(inp=>{
-    inp.onchange = async ()=>{
-      const wi = Number(inp.getAttribute("data-wi"));
-      const key = inp.getAttribute("data-ammo");
-      const w = c.weapons?.[wi];
-      if(!w) return;
-      w.ammo = w.ammo || {};
-      let v = inp.value;
-
-      // numeric fields
-      if(key==="magSize" || key==="current" || key==="mags"){
-        const n = parseInt(v,10);
-        if(Number.isFinite(n)) v = n;
-      }
-
-      w.ammo[key] = v;
-      // keep legacy fields in sync
-      if(key==="magSize"){
-        w.ammo.starting = v;
-        if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
-      }
-      if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
-
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      renderCharacter(); // repaint to ensure all displays stay consistent
-    };
+    inp.oninput = ()=>{ applyAmmoInputValue(inp); };
+    inp.onchange = async ()=>{ applyAmmoInputValue(inp); await persistAmmoChange(); };
+    inp.onblur = async ()=>{ applyAmmoInputValue(inp); await persistAmmoChange(); };
   });
 
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
-    btn.onclick = async (ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-
+    btn.onmousedown = (e)=>{ e.preventDefault(); };
+    btn.onclick = async ()=>{
       const wi = Number(btn.getAttribute("data-wi"));
       const act = btn.getAttribute("data-ammo-act");
       const w = c.weapons?.[wi];
@@ -545,60 +219,22 @@ function renderCharacter(){
       if(act==="shot"){
         w.ammo.current = Math.max(0, cur - 1);
       }else if(act==="reload"){
-        const ammoType = String(w.ammo.type || "").trim();
-        const needed = Math.max(0, magSize - cur);
-        if(magSize <= 0){
-          toast("Set Mag size first");
-          return;
+        if(mags > 0){
+          w.ammo.mags = mags - 1;
+        }else{
+          toast("Reloaded (no spare mags tracked)");
         }
-        if(!ammoType){
-          toast("Set Ammo Type first");
-          return;
-        }
-        if(needed <= 0){
-          toast("Mag already full");
-          return;
-        }
-        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
-        if(!used.ok){
-          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
-          return;
-        }
-        // Reload only tops off the current mag. It should not also reduce spare mags.
-        w.ammo.current = magSize;
+        w.ammo.current = magSize || cur;
       }else if(act==="addmag"){
         w.ammo.mags = mags + 1;
         if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
       }else if(act==="reloadmags"){
-        const ammoType = String(w.ammo.type || "").trim();
-        if(magSize <= 0){
-          toast("Set Mag size first");
-          return;
-        }
-        if(!ammoType){
-          toast("Set Ammo Type first");
-          return;
-        }
-        // Reload Mags fills only the tracked spare mags back to max.
-        // The current mag is handled by Reload, so do not count it again here.
-        const magsToFill = Math.max(0, magsMax - mags);
-        const needed = Math.max(0, magsToFill * magSize);
-        if(needed <= 0){
-          toast("Spare mags already topped off");
-          return;
-        }
-        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
-        if(!used.ok){
-          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
-          return;
-        }
         w.ammo.mags = magsMax;
       }
 
-      // legacy sync
       if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
 
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      await persistAmmoChange();
       renderCharacter();
     };
   });
@@ -719,8 +355,13 @@ async function vwFlushCharAutosave(){
           const ix = Array.isArray(st.characters) ? st.characters.findIndex(x=>x.id===res.character.id) : -1;
           if(ix>=0) st.characters[ix] = res.character;
 
-          // Keep sheet + active-party initiative unified after autosave.
-          vwSyncInitiativeEverywhere(res.character.id, res.character?.sheet?.vitals?.init);
+          // sync activeParty.initiative to sheet.vitals.init for this character (mirrors server behavior)
+          const apx = Array.isArray(st.activeParty) ? st.activeParty.findIndex(x=>x.charId===res.character.id) : -1;
+          if(apx>=0){
+            const raw = res.character?.sheet?.vitals?.init;
+            const newInit = (raw===0 || raw) ? (Number.isFinite(Number(raw)) ? Number(raw) : String(raw)) : "";
+            st.activeParty[apx].initiative = newInit;
+          }
 
           // re-render DM cards + summary pills if those components exist
           if(typeof renderDMActiveParty === "function") renderDMActiveParty();
@@ -798,45 +439,36 @@ function vwWireSheetAutosave(){
     const els = Array.from(document.querySelectorAll('[id="'+id.replace(/"/g,'\\"')+'"]'));
     if(!els.length) return;
     els.forEach((el)=>{
-      const commitCurrentValue = ()=>{
+      el.addEventListener("input", ()=>{
         const c = getChar(); if(!c) return;
         ensureSheet(c);
         setPath(c, pathArr, el.value);
 
-        try{
-          if(pathArr[0]==="vitals" && pathArr[1]==="init"){
-            // Keep the local header/summary in step while typing, but do not force a full DM-card re-render here.
-            // The blur/autosave path will update shared state cleanly after the value is committed.
-            const st = window.__STATE;
-            if(st && Array.isArray(st.characters)){
-              const cx = st.characters.findIndex(x=>x.id===c.id);
-              if(cx>=0){
-                st.characters[cx].sheet ||= {};
-                st.characters[cx].sheet.vitals ||= {};
-                st.characters[cx].sheet.vitals.init = vwNormalizeInitValue(el.value);
+      // Live-sync for the DM "Active Character" cards while editing the sheet.
+      // This avoids requiring a manual "Save Sheet" click for immediate UI consistency.
+      try{
+        if(pathArr[0]==="vitals" && (pathArr[1]==="init" || pathArr[1]==="hpCur" || pathArr[1]==="hpMax")){
+          const st = window.__STATE;
+          if(st && Array.isArray(st.activeParty)){
+            const apx = st.activeParty.findIndex(x=>x.charId===c.id);
+            if(apx>=0){
+              // Initiative: mirror into activeParty entry (cards prefer activeParty override).
+              if(pathArr[1]==="init"){
+                const raw = String(el.value ?? "").trim();
+                const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
+                st.activeParty[apx].initiative = newInit;
               }
+              // HP: cards compute from character sheet vitals, but they only re-render when prompted.
+              // Trigger a re-render on every keystroke so HP feels as immediate as Initiative.
+              if(typeof renderDMActiveParty === "function") renderDMActiveParty();
             }
           }
-        }catch(e){}
+        }
+      }catch(e){}
 
+      // Keep the always-visible summary pills in sync while the user types.
         try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-      };
-
-      el.addEventListener("input", ()=>{
-        commitCurrentValue();
         vwScheduleCharAutosave();
-      });
-
-      el.addEventListener("keydown", (e)=>{
-        if(e.key!=="Enter") return;
-        e.preventDefault();
-        e.stopPropagation();
-        try{ el.blur(); }catch(_e){}
-      });
-
-      el.addEventListener("blur", async ()=>{
-        commitCurrentValue();
-        await vwFlushCharAutosave();
       });
     });
   });
@@ -890,7 +522,6 @@ if(ntEl) ntEl.value = c.sheet.notes ?? "";
   setValueAll("statCHA", (c.sheet.stats.CHA ?? ""));
 
   setValueAll("notesText", (c.sheet.notes ?? ""));
-  try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
 
   // conditions
   const row=document.getElementById("condRow");
@@ -1249,7 +880,22 @@ function renderDMActiveParty(){
                 const raw = String(initiative ?? "").trim();
                 const newInit = (raw==="") ? "" : (Number.isFinite(Number(raw)) ? Number(raw) : raw);
 
-                vwSyncInitiativeEverywhere(c.id, newInit);
+                // update local state (activeParty + character sheet) so all UI locations update immediately
+                const st = window.__STATE || {};
+                st.activeParty ||= [];
+                const ix = st.activeParty.findIndex(x=>x.charId===c.id);
+                if(ix>=0) st.activeParty[ix].initiative = newInit;
+
+                st.characters ||= [];
+                const cx = st.characters.findIndex(x=>x.id===c.id);
+                if(cx>=0){
+                  st.characters[cx].sheet ||= {};
+                  st.characters[cx].sheet.vitals ||= {};
+                  st.characters[cx].sheet.vitals.init = newInit;
+                }
+
+                window.__STATE = st;
+
                 try{ if(SESSION.activeCharId === c.id){ renderSheet(); vwUpdateCharSummaryRow(); } }catch(_){ }
                 try{ renderDMActiveParty(); }catch(_){ }
                 return true;
@@ -2629,9 +2275,116 @@ document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
 });
 
 document.getElementById("addInvBtn")?.addEventListener("click", async ()=>{
-  await vwOpenAddItemModal();
+  const c = getChar();
+  if(!c){ toast("Create character first"); return; }
+
+  const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+  const groups =
+    cat?.inventoryItemsByCategory ||
+    cat?.inventory_items_by_category ||
+    cat?.inventoryByCategory ||
+    null;
+
+  const categories = groups ? Object.keys(groups) : [];
+  const safeCats = categories.length ? categories : ["General"];
+
+  if(typeof vwModalForm !== "function"){
+    // fallback: old behavior
+    c.inventory ||= [];
+    c.inventory.push({category:"",name:"",weight:"",qty:"1",cost:"",notes:""});
+    const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+    if(res && res.ok){ toast("Added inventory row"); await refreshAll(); }
+    else toast(res.error||"Failed");
+    return;
+  }
+
+  // Step 1: choose category
+  const step1 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Next",
+    fields: [
+      { key:"category", label:"Category", type:"select", options: safeCats.map(x=>({ value:x, label:x })) }
+    ]
+  });
+  if(!step1) return;
+
+  const items = groups ? (groups[step1.category] || []) : [];
+  const hasItems = Array.isArray(items) && items.length;
+
+  // Step 2: choose item + details
+  const step2 = await vwModalForm({
+    title: "Add Inventory Item",
+    okText: "Add",
+    fields: [
+      ...(hasItems
+        ? [{ key:"name", label:"Item", type:"select", options: items.map(n=>({ value:n, label:n })) }]
+        : [{ key:"name", label:"Item", placeholder:"Item name" }]),
+      { key:"qty", label:"Qty", placeholder:"1" },
+      { key:"weight", label:"Weight", placeholder:"" },
+      { key:"cost", label:"Cost ($)", placeholder:"" },
+      { key:"notes", label:"Notes", placeholder:"Optional" }
+    ]
+  });
+  if(!step2) return;
+
+  c.inventory ||= [];
+  c.inventory.push({
+    category: step1.category || "",
+    name: step2.name || "",
+    weight: step2.weight || "",
+    qty: step2.qty || "1",
+    cost: step2.cost || "",
+    notes: step2.notes || ""
+  });
+
+  const res = await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+  if(res && res.ok){ toast("Inventory item added"); await refreshAll(); }
+  else toast(res?.error || "Failed");
 });
 
+document.getElementById("addInvFromCatalogBtn")?.addEventListener("click", async ()=>{
+  try{
+    const c = (typeof getChar==="function") ? getChar() : null;
+    if(!c){ toast("Create character first"); return; }
+
+    const cat = (typeof vwGetCatalog==="function") ? vwGetCatalog() : (window.VW_CHAR_CATALOG || window.VEILWATCH_CATALOG);
+    const groups = cat?.inventoryItemsByCategory || cat?.inventory_items_by_category || cat?.inventoryByCategory;
+    if(!groups){ toast("Catalog not loaded"); return; }
+
+    const categories = Object.keys(groups||{});
+    if(!categories.length){ toast("Catalog has no inventory"); return; }
+    if(typeof vwModalForm !== "function"){ toast("Modal not available"); return; }
+
+    const step1 = await vwModalForm({
+      title: "Add From Catalog",
+      okText: "Next",
+      fields: [{ key:"category", label:"Category", type:"select", options: categories.map(x=>({value:x,label:x})) }]
+    });
+    if(!step1) return;
+
+    const items = (groups[step1.category] || []);
+    if(!items.length){ toast("No items in that category"); return; }
+
+    const step2 = await vwModalForm({
+      title: "Add From Catalog",
+      okText: "Add",
+      fields: [
+        { key:"name", label:"Item", type:"select", options: items.map(n=>({value:n,label:n})) },
+        { key:"qty", label:"Qty", placeholder:"1" }
+      ]
+    });
+    if(!step2) return;
+
+    c.inventory ||= [];
+    c.inventory.push({ category: step1.category, name: step2.name, weight:"", qty: step2.qty || "1", cost:"", notes:"" });
+    await vwSaveChar(c);
+    toast("Item added");
+    await refreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Failed to add from catalog");
+  }
+});
 
 
 // ---- Character mode (Creation vs Sheet-only) ----
