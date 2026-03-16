@@ -476,7 +476,7 @@ function renderCharacter(){
             <button type="button" class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>-1</b> decrements current. <b>Reload</b> tops off the current mag from matching inventory ammo. <b>Reload Mags</b> restores spare mags to max using matching inventory ammo.
+            Tip: <b>-1</b> decrements current. <b>Reload</b> swaps in one spare mag and reduces <b>Mags</b> by 1. <b>Reload Mags</b> refills missing spare mags from matching inventory ammo.
           </div>
         </td>
       `;
@@ -526,16 +526,6 @@ function renderCharacter(){
     };
   });
 
-  const vwSyncWeaponAmmoRow = (wi, w)=>{
-    weapBody.querySelectorAll(`input[data-wi="${wi}"][data-ammo]`).forEach(el=>{
-      const key = el.getAttribute("data-ammo");
-      if(key==="magSize") el.value = (w.ammo?.magSize ?? w.ammo?.starting ?? "");
-      else if(key==="current") el.value = (w.ammo?.current ?? "");
-      else if(key==="mags") el.value = (w.ammo?.mags ?? "");
-      else if(key==="type") el.value = (w.ammo?.type ?? "");
-    });
-  };
-
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
     const runAmmoAction = async (ev)=>{
       if(ev){
@@ -564,12 +554,17 @@ function renderCharacter(){
             toast("Mag is already full");
             return;
           }
-          const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
-          if(!consumed.ok){
-            toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
-            return;
+          if(mags > 0){
+            w.ammo.current = magSize || cur;
+            w.ammo.mags = Math.max(0, mags - 1);
+          }else{
+            const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
+            if(!consumed.ok){
+              toast(`Need 1 spare mag or ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
+              return;
+            }
+            w.ammo.current = magSize || cur;
           }
-          w.ammo.current = magSize || cur;
         }else if(act==="addmag"){
           w.ammo.mags = mags + 1;
           if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
@@ -590,9 +585,17 @@ function renderCharacter(){
 
         if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
 
-        vwSyncWeaponAmmoRow(wi, w);
-        try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
         await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        try{
+          const scope = weapBody;
+          const curEl = scope.querySelector(`input[data-ammo="current"][data-wi="${wi}"]`);
+          if(curEl) curEl.value = String(w.ammo.current ?? "");
+          const magsEl = scope.querySelector(`input[data-ammo="mags"][data-wi="${wi}"]`);
+          if(magsEl) magsEl.value = String(w.ammo.mags ?? "");
+          const magSizeEl = scope.querySelector(`input[data-ammo="magSize"][data-wi="${wi}"]`);
+          if(magSizeEl) magSizeEl.value = String(w.ammo.magSize ?? w.ammo.starting ?? "");
+          if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
+        }catch(_){ }
       }finally{
         setTimeout(()=>{ delete btn.dataset.busy; }, 0);
       }
