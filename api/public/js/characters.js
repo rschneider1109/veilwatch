@@ -468,12 +468,12 @@ function renderCharacter(){
             <input class="input" style="width:70px" data-ammo="magSize" data-wi="${wi}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" />
             <span style="opacity:.7">Cur</span>
             <input class="input" style="width:70px" data-ammo="current" data-wi="${wi}" value="${esc(w.ammo.current ?? "")}" />
-            <button class="btn smallbtn" data-ammo-act="shot" data-wi="${wi}">-1</button>
-            <button class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
+            <button type="button" class="btn smallbtn" data-ammo-act="shot" data-wi="${wi}">-1</button>
+            <button type="button" class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
             <span style="opacity:.7">Mags</span>
             <input class="input" style="width:70px" data-ammo="mags" data-wi="${wi}" value="${esc(w.ammo.mags ?? "")}" />
-            <button class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
-            <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
+            <button type="button" class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
+            <button type="button" class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
             Tip: <b>-1</b> decrements current. <b>Reload</b> tops off the current mag from matching inventory ammo. <b>Reload Mags</b> restores spare mags to max using matching inventory ammo.
@@ -527,56 +527,81 @@ function renderCharacter(){
   });
 
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
-    btn.onmousedown = (ev)=>{ ev.preventDefault(); };
-    btn.onclick = async ()=>{
-      const wi = Number(btn.getAttribute("data-wi"));
-      const act = btn.getAttribute("data-ammo-act");
-      const w = c.weapons?.[wi];
-      if(!w) return;
-      w.ammo = w.ammo || {};
-      const magSize = parseInt(w.ammo.magSize ?? w.ammo.starting ?? 0,10) || 0;
-      const cur = parseInt(w.ammo.current ?? 0,10) || 0;
-      const mags = parseInt(w.ammo.mags ?? 0,10) || 0;
-      const magsMax = parseInt(w.ammo.magsMax ?? mags,10) || 0;
-      const ammoType = String(w.ammo.type || "").trim();
-
-      if(act==="shot"){
-        w.ammo.current = Math.max(0, cur - 1);
-      }else if(act==="reload"){
-        const needed = Math.max(0, magSize - cur);
-        if(!needed){
-          toast("Mag is already full");
-          return;
-        }
-        const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
-        if(!consumed.ok){
-          toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
-          return;
-        }
-        w.ammo.current = magSize || cur;
-      }else if(act==="addmag"){
-        w.ammo.mags = mags + 1;
-        if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
-      }else if(act==="reloadmags"){
-        const missingMags = Math.max(0, magsMax - mags);
-        if(!missingMags){
-          toast("Spare mags are already full");
-          return;
-        }
-        const needed = missingMags * (magSize || 0);
-        const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
-        if(!consumed.ok){
-          toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
-          return;
-        }
-        w.ammo.mags = magsMax;
+    const runAmmoAction = async (ev)=>{
+      if(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
       }
+      if(btn.dataset.busy === "1") return;
+      btn.dataset.busy = "1";
+      try{
+        const active = document.activeElement;
+        if(active && active !== btn && typeof active.blur === "function"){
+          try{ active.blur(); }catch(e){}
+        }
 
-      if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
+        const wi = Number(btn.getAttribute("data-wi"));
+        const act = btn.getAttribute("data-ammo-act");
+        const w = c.weapons?.[wi];
+        if(!w) return;
+        w.ammo = w.ammo || {};
+        const magSize = parseInt(w.ammo.magSize ?? w.ammo.starting ?? 0,10) || 0;
+        const cur = parseInt(w.ammo.current ?? 0,10) || 0;
+        const mags = parseInt(w.ammo.mags ?? 0,10) || 0;
+        const magsMax = parseInt(w.ammo.magsMax ?? mags,10) || 0;
+        const ammoType = String(w.ammo.type || "").trim();
 
-      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      renderCharacter();
+        if(act==="shot"){
+          w.ammo.current = Math.max(0, cur - 1);
+        }else if(act==="reload"){
+          const needed = Math.max(0, magSize - cur);
+          if(!needed){
+            toast("Mag is already full");
+            return;
+          }
+          const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
+          if(!consumed.ok){
+            toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
+            return;
+          }
+          w.ammo.current = magSize || cur;
+        }else if(act==="addmag"){
+          w.ammo.mags = mags + 1;
+          if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
+        }else if(act==="reloadmags"){
+          const missingMags = Math.max(0, magsMax - mags);
+          if(!missingMags){
+            toast("Spare mags are already full");
+            return;
+          }
+          const needed = missingMags * (magSize || 0);
+          const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
+          if(!consumed.ok){
+            toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
+            return;
+          }
+          w.ammo.mags = magsMax;
+        }
+
+        if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
+
+        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+        renderCharacter();
+      }finally{
+        setTimeout(()=>{ delete btn.dataset.busy; }, 0);
+      }
     };
+
+    btn.addEventListener("pointerdown", runAmmoAction);
+    btn.addEventListener("click", (ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+    btn.addEventListener("keydown", (ev)=>{
+      if(ev.key === "Enter" || ev.key === " "){
+        runAmmoAction(ev);
+      }
+    });
   });
 // inventory rows
   (c.inventory||[]).forEach((it,idx)=>{
