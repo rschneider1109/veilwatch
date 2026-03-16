@@ -431,7 +431,11 @@ function renderCharacter(){
     if(!w.id) w.id = "w_"+Math.random().toString(36).slice(2,9);
     if(w.dmg && !w.damage) w.damage = w.dmg;
     if(w.ammo){
-      // normalize ammo fields
+      // AMMO NORMALIZATION:
+      // - magSize = rounds in one full magazine
+      // - current = rounds currently in the weapon
+      // - mags = currently loaded spare mags available
+      // - magsMax = max spare mags this weapon can carry at full loadout
       if(w.ammo.magSize==null && w.ammo.starting!=null) w.ammo.magSize = Number(w.ammo.starting) || w.ammo.starting;
       if(w.ammo.starting==null && w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
       if(w.ammo.current==null && w.ammo.starting!=null) w.ammo.current = w.ammo.starting;
@@ -472,11 +476,13 @@ function renderCharacter(){
             <button type="button" class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
             <span style="opacity:.7">Mags</span>
             <input class="input" style="width:70px" data-ammo="mags" data-wi="${wi}" value="${esc(w.ammo.mags ?? "")}" />
+            <span style="opacity:.7">Max Mags</span>
+            <input class="input" style="width:80px" data-ammo="magsMax" data-wi="${wi}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" />
             <button type="button" class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
             <button type="button" class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>-1</b> decrements current. <b>Reload</b> swaps in one spare mag and reduces <b>Mags</b> by 1. <b>Reload Mags</b> refills missing spare mags from matching inventory ammo.
+            Tip: <b>Mag</b> is rounds per magazine. <b>Mags</b> is your current spare loaded mags. <b>Max Mags</b> is the cap you can carry after looting or shopping. <b>-1</b> decrements current. <b>Reload</b> swaps in one spare mag and reduces <b>Mags</b> by 1. <b>Reload Mags</b> refills missing spare mags up to <b>Max Mags</b> from matching inventory ammo.
           </div>
         </td>
       `;
@@ -493,7 +499,7 @@ function renderCharacter(){
       if(!w) return;
       w.ammo = w.ammo || {};
       let v = inp.value;
-      if(key==="magSize" || key==="current" || key==="mags"){
+      if(key==="magSize" || key==="current" || key==="mags" || key==="magsMax"){
         const n = parseInt(v,10);
         if(Number.isFinite(n)) v = n;
       }
@@ -503,6 +509,10 @@ function renderCharacter(){
         if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
       }
       if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
+      if(key==="magsMax"){
+        if(w.ammo.mags==null || w.ammo.mags==="") w.ammo.mags = v;
+        if(Number(w.ammo.mags) > Number(v)) w.ammo.mags = v;
+      }
     };
     inp.onchange = async ()=>{
       const wi = Number(inp.getAttribute("data-wi"));
@@ -511,7 +521,7 @@ function renderCharacter(){
       if(!w) return;
       w.ammo = w.ammo || {};
       let v = inp.value;
-      if(key==="magSize" || key==="current" || key==="mags"){
+      if(key==="magSize" || key==="current" || key==="mags" || key==="magsMax"){
         const n = parseInt(v,10);
         if(Number.isFinite(n)) v = n;
       }
@@ -521,6 +531,10 @@ function renderCharacter(){
         if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
       }
       if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
+      if(key==="magsMax"){
+        if(w.ammo.mags==null || w.ammo.mags==="") w.ammo.mags = v;
+        if(Number(w.ammo.mags) > Number(v)) w.ammo.mags = v;
+      }
       await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
       try{ vwUpdateCharSummaryRow(); }catch(e){}
     };
@@ -566,8 +580,8 @@ function renderCharacter(){
             w.ammo.current = magSize || cur;
           }
         }else if(act==="addmag"){
+          w.ammo.magsMax = Math.max(magsMax, mags + 1);
           w.ammo.mags = mags + 1;
-          if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
         }else if(act==="reloadmags"){
           const missingMags = Math.max(0, magsMax - mags);
           if(!missingMags){
@@ -592,6 +606,8 @@ function renderCharacter(){
           if(curEl) curEl.value = String(w.ammo.current ?? "");
           const magsEl = scope.querySelector(`input[data-ammo="mags"][data-wi="${wi}"]`);
           if(magsEl) magsEl.value = String(w.ammo.mags ?? "");
+          const magsMaxEl = scope.querySelector(`input[data-ammo="magsMax"][data-wi="${wi}"]`);
+          if(magsMaxEl) magsMaxEl.value = String(w.ammo.magsMax ?? w.ammo.mags ?? "");
           const magSizeEl = scope.querySelector(`input[data-ammo="magSize"][data-wi="${wi}"]`);
           if(magSizeEl) magSizeEl.value = String(w.ammo.magSize ?? w.ammo.starting ?? "");
           if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
@@ -1989,14 +2005,14 @@ const result = await new Promise((resolve)=>{
           </div>
 
           ${hasAmmo ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
             <div>
               <div class="mini" style="opacity:.8;margin-bottom:4px;">Ammo Type</div>
               <input class="input" data-wammo="type" data-idx="${idx}" value="${esc(w.ammo.type||"")}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Starting</div>
-              <input class="input" data-wammo="starting" data-idx="${idx}" value="${esc(w.ammo.starting||"")}" placeholder="full / 30 / etc" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Mag Size</div>
+              <input class="input" data-wammo="magSize" data-idx="${idx}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" placeholder="30" />
             </div>
             <div>
               <div class="mini" style="opacity:.8;margin-bottom:4px;">Current</div>
@@ -2006,7 +2022,12 @@ const result = await new Promise((resolve)=>{
               <div class="mini" style="opacity:.8;margin-bottom:4px;">Mags</div>
               <input class="input" data-wammo="mags" data-idx="${idx}" value="${esc(w.ammo.mags||"")}" placeholder="2" />
             </div>
+            <div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">Max Mags</div>
+              <input class="input" data-wammo="magsMax" data-idx="${idx}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" placeholder="2" />
+            </div>
           </div>
+          <div class="mini" style="opacity:.72;margin-top:6px;">Edit <b>Mag Size</b>, <b>Mags</b>, and <b>Max Mags</b> here anytime. Reload Mags fills back up to Max Mags.</div>
           ` : `
           <div class="mini" style="opacity:.7;margin-top:10px;">(No ammo tracking on this weapon)</div>
           `}
@@ -2028,7 +2049,21 @@ const result = await new Promise((resolve)=>{
         const idx = Number(inp.getAttribute("data-idx"));
         const k = inp.getAttribute("data-wammo");
         state.weapons[idx].ammo = state.weapons[idx].ammo || {};
-        state.weapons[idx].ammo[k] = inp.value;
+        let v = inp.value;
+        if(k==="magSize" || k==="current" || k==="mags" || k==="magsMax"){
+          const n = parseInt(v,10);
+          if(Number.isFinite(n)) v = n;
+        }
+        state.weapons[idx].ammo[k] = v;
+        if(k==="magSize"){
+          state.weapons[idx].ammo.starting = v;
+          if(state.weapons[idx].ammo.current==null || state.weapons[idx].ammo.current==="") state.weapons[idx].ammo.current = v;
+        }
+        if(k==="mags" && (state.weapons[idx].ammo.magsMax==null || state.weapons[idx].ammo.magsMax==="")) state.weapons[idx].ammo.magsMax = v;
+        if(k==="magsMax"){
+          if(state.weapons[idx].ammo.mags==null || state.weapons[idx].ammo.mags==="") state.weapons[idx].ammo.mags = v;
+          if(Number(state.weapons[idx].ammo.mags) > Number(v)) state.weapons[idx].ammo.mags = v;
+        }
       };
     });
 
@@ -2821,17 +2856,18 @@ vwRebindButton("addWeaponBtn", async ()=>{
           fields:[
             { key:"type", label:"Ammo Type", placeholder:"e.g., 9mm, .45, 5.56" },
             { key:"magSize", label:"Mag Size", placeholder:"30", value:"30" },
-            { key:"mags", label:"Spare Mags", placeholder:"2", value:"2" },
+            { key:"mags", label:"Current Spare Mags", placeholder:"2", value:"2" },
+            { key:"magsMax", label:"Max Mags", placeholder:"2", value:"2" },
             { key:"current", label:"Current Rounds", placeholder:"30", value:"30" },
           ]
         });
         if(!a) return;
-        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const cur = parseInt(a.current,10);
+        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const magsMax = parseInt(a.magsMax,10); const cur = parseInt(a.current,10);
         ammoDefaults = {
           type: (a.type||""),
           magSize: Number.isFinite(magSize)?magSize:30,
           mags: Number.isFinite(mags)?mags:0,
-          magsMax: Number.isFinite(mags)?mags:0,
+          magsMax: Number.isFinite(magsMax)?magsMax:(Number.isFinite(mags)?mags:0),
           current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:30),
         };
       }
@@ -2874,17 +2910,18 @@ vwRebindButton("addWeaponBtn", async ()=>{
           fields:[
             { key:"type", label:"Ammo Type", value: String(ammoDefaults.type||""), placeholder:"e.g., 9mm" },
             { key:"magSize", label:"Mag Size", value: String(ammoDefaults.magSize||30), placeholder:"30" },
-            { key:"mags", label:"Spare Mags", value: String(ammoDefaults.mags||2), placeholder:"2" },
+            { key:"mags", label:"Current Spare Mags", value: String(ammoDefaults.mags||2), placeholder:"2" },
+            { key:"magsMax", label:"Max Mags", value: String(ammoDefaults.magsMax||ammoDefaults.mags||2), placeholder:"2" },
             { key:"current", label:"Current Rounds", value: String(ammoDefaults.current||ammoDefaults.magSize||30), placeholder:"30" },
           ]
         });
         if(!a) return;
-        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const cur = parseInt(a.current,10);
+        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const magsMax = parseInt(a.magsMax,10); const cur = parseInt(a.current,10);
         ammoDefaults = {
           type: (a.type||""),
           magSize: Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30),
           mags: Number.isFinite(mags)?mags:(ammoDefaults.mags||0),
-          magsMax: Number.isFinite(mags)?mags:(ammoDefaults.magsMax||ammoDefaults.mags||0),
+          magsMax: Number.isFinite(magsMax)?magsMax:(Number.isFinite(mags)?mags:(ammoDefaults.magsMax||ammoDefaults.mags||0)),
           current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30)),
         };
       }
