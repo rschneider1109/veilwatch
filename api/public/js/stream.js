@@ -23,6 +23,7 @@ function vwStartStream(){
       if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
       if(typeof renderDMActiveParty==="function") renderDMActiveParty();
       if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
+      if(typeof renderShop==="function" && document.getElementById("tab-shop") && !document.getElementById("tab-shop").classList.contains("hidden")) renderShop();
       if(typeof renderSheet==="function" && document.getElementById("tab-character") && !document.getElementById("tab-character").classList.contains("hidden")) renderSheet();
     }catch(e){}
   });
@@ -60,6 +61,7 @@ function vwStartFallbackPoller(){
       if(typeof renderIntelDM==="function") renderIntelDM();
       if(typeof renderDMActiveParty==="function") renderDMActiveParty();
       if(typeof vwUpdateCharSummaryRow==="function") vwUpdateCharSummaryRow();
+      if(typeof renderShop==="function" && document.getElementById("tab-shop") && !document.getElementById("tab-shop").classList.contains("hidden")) renderShop();
     }catch(e){}
   }, 5000);
 }
@@ -99,7 +101,21 @@ async function pollState(){
       c:(st.clues?.items||[]).length,
       a:(st.clues?.archived||[]).length,
       ch:(st.characters||[]).length,
-      cv:(st.clues?.items||[]).map(x=>String(x.id)+":"+String(x.visibility)).join("|")
+      cv:(st.clues?.items||[]).map(x=>String(x.id)+":"+String(x.visibility)).join("|"),
+      se:!!(st.shops?.enabled),
+      sa:String(st.shops?.activeShopId||""),
+      sl:(st.shops?.list||[]).map(s=>[
+        String(s?.id||""),
+        String(s?.name||""),
+        (s?.items||[]).length,
+        (s?.items||[]).map(it=>[
+          String(it?.id||""),
+          String(it?.name||""),
+          String(it?.category||""),
+          String(it?.cost||""),
+          String(it?.stock||"")
+        ].join("~")).join("^")
+      ].join("#")).join("||")
     });
     if(sig !== __lastSig){
       __lastSig = sig;
