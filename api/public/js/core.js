@@ -258,6 +258,9 @@ async function api(pathname, opts){
   opts.method ||= "GET";
   opts.headers ||= {};
   opts.headers["Content-Type"] ||= "application/json";
+  if((opts.method || "GET").toUpperCase() === "GET"){
+    opts.cache = "no-store";
+  }
   // DM header (server also supports cookie sessions; header is optional)
   if(SESSION.role === "dm" && SESSION.dmKey) opts.headers["X-DM-Key"] = SESSION.dmKey;
 
@@ -313,8 +316,6 @@ async function renderTabs(tab){
   const currentTab = document.querySelector(".nav .btn.active")?.dataset?.tab || "home";
 
   // Flush pending character-sheet autosaves before leaving the Character tab.
-  // Without this, a quick tab switch can let Home/DM views re-render from older server state,
-  // which makes Init/HP pills appear to vanish even though the input box still shows the typed value.
   if(currentTab === "character" && tab !== "character"){
     try{
       if(typeof vwFlushCharAutosave === "function") await vwFlushCharAutosave();
@@ -335,14 +336,25 @@ async function renderTabs(tab){
     if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
   }catch(e){}
 
-  // When switching to Intel, render immediately + acknowledge
-  if(tab === "intel"){
-    if(typeof vwAcknowledgeIntel === "function") vwAcknowledgeIntel();
-    setTimeout(()=>{
+  // Render the newly active tab immediately from the latest in-memory state.
+  try{
+    if(tab === "home"){
+      if(typeof renderDM === "function") renderDM();
+      if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+    } else if(tab === "character"){
+      if(typeof renderCharacter === "function") renderCharacter();
+      if(typeof renderSheet === "function") renderSheet();
+    } else if(tab === "intel"){
+      if(typeof vwAcknowledgeIntel === "function") vwAcknowledgeIntel();
       if(typeof renderIntelDM === "function") renderIntelDM();
       if(typeof renderIntelPlayer === "function") renderIntelPlayer();
-    }, 0);
-  }
+      if(typeof renderDM === "function") renderDM();
+    } else if(tab === "shop"){
+      if(typeof renderShop === "function") renderShop();
+    } else if(tab === "settings"){
+      if(typeof renderSettings === "function") renderSettings();
+    }
+  }catch(e){}
 }
 window.renderTabs = renderTabs;
 
