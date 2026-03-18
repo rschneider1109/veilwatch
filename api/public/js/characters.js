@@ -1,4 +1,97 @@
 
+
+/* ============================================================================
+   VEILWATCH EASY EDIT SECTION
+   Edit the values in this block first. This section is meant for day-to-day
+   tuning without digging through the rest of the file.
+   ========================================================================== */
+const VW_EDIT = {
+  inventory: {
+    defaultQty: 1,
+    addItemTitle: "Add Item",
+    addItemManualButton: "Add Item Manually",
+    sourceMainText: "Source: Main Catalog",
+    sourceCustomText: "Source: Custom Catalog",
+    labels: {
+      category: "Category",
+      item: "Item",
+      qty: "Qty",
+      weight: "Weight",
+      cost: "Cost ($)",
+      notes: "Notes",
+      itemName: "Item Name",
+      saveCustom: "Save to Custom Item Database"
+    }
+  },
+  weapons: {
+    labels: {
+      ammoType: "Ammo Type",
+      magSize: "Mag Size",
+      currentRounds: "Current Rounds",
+      currentShort: "Cur",
+      spareMags: "Mags",
+      maxMags: "Max Mags",
+      starting: "Starting",
+      name: "Name",
+      range: "Range",
+      hit: "Hit / DC",
+      damage: "Damage"
+    },
+    placeholders: {
+      ammoType: "e.g., 9mm",
+      magSize: "30",
+      currentRounds: "30",
+      spareMags: "2",
+      maxMags: "2",
+      range: "e.g., 30 ft",
+      hit: "+5",
+      damage: "2d6"
+    },
+    defaults: {
+      magazineFed: { magSize: 30, current: 30, mags: 2, magsMax: 2 },
+      shells:      { magSize: 8,  current: 8,  mags: 2, magsMax: 2 },
+      revolver:    { magSize: 6,  current: 6,  mags: 2, magsMax: 2 },
+      cell:        { magSize: 10, current: 10, mags: 2, magsMax: 2 },
+      belt:        { magSize: 100,current: 100,mags: 2, magsMax: 2 }
+    }
+  }
+};
+
+function vwWeaponDefaultsForAmmoModel(ammoModel="", ammoType=""){
+  const map = VW_EDIT.weapons.defaults;
+  const base =
+    ammoModel === "shells"  ? map.shells :
+    ammoModel === "revolver"? map.revolver :
+    ammoModel === "cell"    ? map.cell :
+    ammoModel === "belt"    ? map.belt :
+                              map.magazineFed;
+  return {
+    type: ammoType || "",
+    magSize: Number(base.magSize || 0),
+    current: Number(base.current || base.magSize || 0),
+    mags: Number(base.mags || 0),
+    magsMax: Number(base.magsMax ?? base.mags ?? 0)
+  };
+}
+
+function vwNormalizeAmmoSetup(raw={}, fallback={}){
+  const fb = Object.assign({ type:"", magSize:0, current:0, mags:0, magsMax:0 }, fallback || {});
+  const magSize = parseInt(raw.magSize ?? fb.magSize, 10);
+  const mags = parseInt(raw.mags ?? fb.mags, 10);
+  const magsMax = parseInt(raw.magsMax ?? raw.maxMags ?? fb.magsMax ?? fb.mags ?? mags, 10);
+  const current = parseInt(raw.current ?? fb.current ?? magSize, 10);
+  return {
+    type: String(raw.type ?? fb.type ?? ""),
+    magSize: Number.isFinite(magSize) ? magSize : Number(fb.magSize || 0),
+    current: Number.isFinite(current) ? current : Number(fb.current || fb.magSize || 0),
+    mags: Number.isFinite(mags) ? mags : Number(fb.mags || 0),
+    magsMax: Number.isFinite(magsMax) ? magsMax : Number(fb.magsMax || fb.mags || 0)
+  };
+}
+/* ============================================================================
+   END EASY EDIT SECTION
+   ========================================================================== */
+
 /** 
  * Add Inventory Item (dropdown)
  * Uses catalog inventoryItemsByCategory if available; otherwise falls back to manual entry.
@@ -93,8 +186,8 @@ async function vwLoadInventoryCatalogBundle(){
   if(raw && typeof raw === "object"){
     Object.entries(raw).forEach(([category, items])=>{
       byCategory[category] = (items || []).map(it => (typeof it === "string"
-        ? { name: it, category, default_qty: 1, default_weight: "", default_cost: "", default_notes: "", source: "official", is_custom: false }
-        : Object.assign({ category, default_qty:1, source:"official", is_custom:false }, it)
+        ? { name: it, category, default_qty: VW_EDIT.inventory.defaultQty, default_weight: "", default_cost: "", default_notes: "", source: "official", is_custom: false }
+        : Object.assign({ category, default_qty:VW_EDIT.inventory.defaultQty, source:"official", is_custom:false }, it)
       ));
     });
   }
@@ -116,7 +209,7 @@ function vwNormalizeInventoryCatalogItem(item, categoryHint){
     id: item?.id || "",
     name: String(item?.name ?? item ?? "").trim(),
     category: String(item?.category || categoryHint || "Misc"),
-    default_qty: Math.max(1, parseInt(item?.default_qty ?? 1, 10) || 1),
+    default_qty: Math.max(1, parseInt(item?.default_qty ?? VW_EDIT.inventory.defaultQty, 10) || VW_EDIT.inventory.defaultQty),
     default_weight: item?.default_weight ?? "",
     default_cost: item?.default_cost ?? "",
     default_notes: item?.default_notes ?? "",
@@ -124,46 +217,6 @@ function vwNormalizeInventoryCatalogItem(item, categoryHint){
     source: item?.source || (item?.is_custom ? "custom" : "official"),
     is_custom: !!item?.is_custom
   };
-}
-
-function vwToAmmoRoundsQty(raw){
-  const n = parseInt(String(raw ?? "").trim(), 10);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function vwFindAmmoInventoryMatches(character, ammoType){
-  const target = String(ammoType || "").trim().toLowerCase();
-  if(!target) return [];
-  const inv = Array.isArray(character?.inventory) ? character.inventory : [];
-  const normalizedTarget = target.replace(/\s+/g, "");
-  return inv
-    .map((item, idx) => ({ item, idx }))
-    .filter(({ item }) => {
-      const explicitType = String(item?.ammo_type || "").trim().toLowerCase();
-      if(explicitType && explicitType === target) return true;
-      const name = String(item?.name || "").trim().toLowerCase();
-      const compactName = name.replace(/\s+/g, "");
-      return compactName.includes(normalizedTarget) && /ammo|round|rounds|shell|shells|box|case|mag|magazine|cell|cells/.test(name);
-    });
-}
-
-function vwConsumeInventoryAmmo(character, ammoType, roundsNeeded){
-  const need = Math.max(0, parseInt(roundsNeeded, 10) || 0);
-  if(!need) return { ok:true, consumed:0 };
-  const matches = vwFindAmmoInventoryMatches(character, ammoType);
-  const available = matches.reduce((sum, entry) => sum + vwToAmmoRoundsQty(entry.item?.qty), 0);
-  if(available < need){
-    return { ok:false, available, needed:need };
-  }
-  let remaining = need;
-  matches.forEach(({ item }) => {
-    if(remaining <= 0) return;
-    const qty = vwToAmmoRoundsQty(item?.qty);
-    const take = Math.min(qty, remaining);
-    item.qty = String(qty - take);
-    remaining -= take;
-  });
-  return { ok:true, consumed:need, remaining:available - need };
 }
 
 async function vwOpenAddItemModal(){
@@ -186,7 +239,7 @@ async function vwOpenAddItemModal(){
   let selectedCategory = safeCats[0];
   let selectedName = "";
 
-  const ui = vwModalBaseSetup("Add Item", "Add", "Cancel");
+  const ui = vwModalBaseSetup(VW_EDIT.inventory.addItemTitle, "Add", "Cancel");
 
   function itemsForCategory(cat){
     return (byCategory[cat] || []).map(it => vwNormalizeInventoryCatalogItem(it, cat));
@@ -201,12 +254,12 @@ async function vwOpenAddItemModal(){
     const weightEl = document.getElementById("vwInvWeight");
     const costEl = document.getElementById("vwInvCost");
     const notesEl = document.getElementById("vwInvNotes");
-    if(qtyEl && (!qtyEl.value || qtyEl.dataset.autofill === "1")){ qtyEl.value = String(item?.default_qty ?? 1); qtyEl.dataset.autofill = "1"; }
+    if(qtyEl && (!qtyEl.value || qtyEl.dataset.autofill === "1")){ qtyEl.value = String(item?.default_qty ?? VW_EDIT.inventory.defaultQty); qtyEl.dataset.autofill = "1"; }
     if(weightEl && (!weightEl.value || weightEl.dataset.autofill === "1")){ weightEl.value = String(item?.default_weight ?? ""); weightEl.dataset.autofill = "1"; }
     if(costEl && (!costEl.value || costEl.dataset.autofill === "1")){ costEl.value = String(item?.default_cost ?? ""); costEl.dataset.autofill = "1"; }
     if(notesEl && (!notesEl.value || notesEl.dataset.autofill === "1")){ notesEl.value = String(item?.default_notes ?? ""); notesEl.dataset.autofill = "1"; }
     const badgeEl = document.getElementById("vwInvCatalogSource");
-    if(badgeEl) badgeEl.textContent = item ? (item.is_custom ? "Source: Custom Catalog" : "Source: Main Catalog") : "";
+    if(badgeEl) badgeEl.textContent = item ? (item.is_custom ? VW_EDIT.inventory.sourceCustomText : VW_EDIT.inventory.sourceMainText) : "";
   }
 
   function markFieldManual(ev){
@@ -222,20 +275,20 @@ async function vwOpenAddItemModal(){
     const current = findSelectedItem();
     ui.mBody.innerHTML = `
       <div style="margin-bottom:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Category</div>
+        <div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.category)}</div>
         <select id="vwInvCategory" class="input" style="width:100%">${safeCats.map(cat => `<option value="${vwEscapeHtml(cat)}"${cat===selectedCategory?" selected":""}>${vwEscapeHtml(cat)}</option>`).join("")}</select>
       </div>
       <div style="margin-bottom:8px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Item</div>
+        <div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.item)}</div>
         <select id="vwInvItemSelect" class="input" style="width:100%">${items.map(it => `<option value="${vwEscapeHtml(it.name)}"${String(it.name)===String(selectedName)?" selected":""}>${vwEscapeHtml(it.name)}${it.is_custom ? " • custom" : ""}</option>`).join("")}</select>
         <div id="vwInvCatalogSource" class="mini" style="margin-top:6px;opacity:.8"></div>
       </div>
-      <button id="vwInvManualModeBtn" type="button" class="btn smallbtn" style="margin-bottom:12px;">Add Item Manually</button>
+      <button id="vwInvManualModeBtn" type="button" class="btn smallbtn" style="margin-bottom:12px;">${vwEscapeHtml(VW_EDIT.inventory.addItemManualButton)}</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div><div class="mini" style="margin-bottom:6px;opacity:.9">Qty</div><input id="vwInvQty" class="input" value="${vwEscapeHtml(String(current?.default_qty ?? 1))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div><input id="vwInvWeight" class="input" value="${vwEscapeHtml(String(current?.default_weight ?? ""))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Cost ($)</div><input id="vwInvCost" class="input" value="${vwEscapeHtml(String(current?.default_cost ?? ""))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div><input id="vwInvNotes" class="input" value="${vwEscapeHtml(String(current?.default_notes ?? ""))}" placeholder="Optional" /></div>
+        <div><div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.weight)}</div><input id="vwInvWeight" class="input" value="${vwEscapeHtml(String(current?.default_weight ?? ""))}" /></div>
+        <div><div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.cost)}</div><input id="vwInvCost" class="input" value="${vwEscapeHtml(String(current?.default_cost ?? ""))}" /></div>
+        <div><div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.notes)}</div><input id="vwInvNotes" class="input" value="${vwEscapeHtml(String(current?.default_notes ?? ""))}" placeholder="Optional" /></div>
       </div>
     `;
 
@@ -259,7 +312,7 @@ async function vwOpenAddItemModal(){
         <input id="vwManualInvName" class="input" placeholder="Item name" />
       </div>
       <div style="margin-bottom:10px">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Category</div>
+        <div class="mini" style="margin-bottom:6px;opacity:.9">${vwEscapeHtml(VW_EDIT.inventory.labels.category)}</div>
         <select id="vwManualInvCategory" class="input" style="width:100%">${safeCats.map(cat => `<option value="${vwEscapeHtml(cat)}">${vwEscapeHtml(cat)}</option>`).join("")}<option value="Misc">Misc</option></select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -306,7 +359,7 @@ async function vwOpenAddItemModal(){
           qty: document.getElementById("vwInvQty")?.value || String(item.default_qty || 1),
           cost: document.getElementById("vwInvCost")?.value || item.default_cost || "",
           notes: document.getElementById("vwInvNotes")?.value || item.default_notes || "",
-          ammo_type: item.ammo_type || ""
+          ammoType: item.ammo_type || ""
         });
         const res = await saveChar(c);
         if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
@@ -345,7 +398,7 @@ async function vwOpenAddItemModal(){
       }
 
       c.inventory ||= [];
-      c.inventory.push({ category, name, weight, qty, cost, notes, ammo_type: ammoType });
+      c.inventory.push({ category, name, weight, qty, cost, notes, ammoType });
       const res = await saveChar(c);
       if(!res?.ok){ toast(res?.error || "Failed to save"); return; }
       shutdown(true);
@@ -360,6 +413,60 @@ async function vwOpenAddItemModal(){
   if(typeof vwSetModalOpen === "function") vwSetModalOpen(true);
   ui.modal.style.display = "flex";
   renderCatalog();
+}
+
+
+function vwCanonicalAmmoKey(v){
+  return String(v ?? "")
+    .toLowerCase()
+    .replace(/\(.*?\)/g, " ")
+    .replace(/\bammo\b/g, " ")
+    .replace(/\brounds?\b/g, " ")
+    .replace(/\bshells?\b/g, " ")
+    .replace(/\bbox(es)?\b/g, " ")
+    .replace(/\bcase(s)?\b/g, " ")
+    .replace(/[^a-z0-9.+-]+/g, "")
+    .trim();
+}
+
+function vwFindMatchingAmmoInventoryItems(character, ammoType){
+  const key = vwCanonicalAmmoKey(ammoType);
+  if(!key) return [];
+  const inv = Array.isArray(character?.inventory) ? character.inventory : [];
+  const out = [];
+  inv.forEach((it, idx)=>{
+    const itemKey = vwCanonicalAmmoKey(it?.ammoType || it?.ammo_type || "");
+    const hay = [
+      itemKey,
+      vwCanonicalAmmoKey(it?.name || ""),
+      vwCanonicalAmmoKey(it?.category || ""),
+      vwCanonicalAmmoKey(it?.notes || "")
+    ].filter(Boolean).join(" ");
+    const qty = Math.max(0, parseInt(it?.qty ?? 0, 10) || 0);
+    if(qty > 0 && (itemKey === key || hay.includes(key))){
+      out.push({ idx, item: it, qty });
+    }
+  });
+  return out;
+}
+
+function vwDeductAmmoFromInventory(character, ammoType, needed){
+  const req = Math.max(0, parseInt(needed ?? 0, 10) || 0);
+  if(req <= 0) return { ok:true, used:0 };
+  const matches = vwFindMatchingAmmoInventoryItems(character, ammoType);
+  let left = req;
+  const total = matches.reduce((sum, row)=> sum + (parseInt(row.qty, 10) || 0), 0);
+  if(total < req){
+    return { ok:false, used:0, available: total };
+  }
+  matches.forEach(row=>{
+    if(left <= 0) return;
+    const take = Math.min(left, parseInt(row.qty, 10) || 0);
+    const curQty = Math.max(0, parseInt(character.inventory[row.idx]?.qty ?? 0, 10) || 0);
+    character.inventory[row.idx].qty = String(Math.max(0, curQty - take));
+    left -= take;
+  });
+  return { ok:true, used:req, available: total };
 }
 
 function vwNormalizeInitValue(raw){
@@ -431,11 +538,7 @@ function renderCharacter(){
     if(!w.id) w.id = "w_"+Math.random().toString(36).slice(2,9);
     if(w.dmg && !w.damage) w.damage = w.dmg;
     if(w.ammo){
-      // AMMO NORMALIZATION:
-      // - magSize = rounds in one full magazine
-      // - current = rounds currently in the weapon
-      // - mags = currently loaded spare mags available
-      // - magsMax = max spare mags this weapon can carry at full loadout
+      // normalize ammo fields
       if(w.ammo.magSize==null && w.ammo.starting!=null) w.ammo.magSize = Number(w.ammo.starting) || w.ammo.starting;
       if(w.ammo.starting==null && w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
       if(w.ammo.current==null && w.ammo.starting!=null) w.ammo.current = w.ammo.starting;
@@ -472,17 +575,15 @@ function renderCharacter(){
             <input class="input" style="width:70px" data-ammo="magSize" data-wi="${wi}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" />
             <span style="opacity:.7">Cur</span>
             <input class="input" style="width:70px" data-ammo="current" data-wi="${wi}" value="${esc(w.ammo.current ?? "")}" />
-            <button type="button" class="btn smallbtn" data-ammo-act="shot" data-wi="${wi}">-1</button>
-            <button type="button" class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
+            <button class="btn smallbtn" data-ammo-act="shot" data-wi="${wi}">-1</button>
+            <button class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
             <span style="opacity:.7">Mags</span>
             <input class="input" style="width:70px" data-ammo="mags" data-wi="${wi}" value="${esc(w.ammo.mags ?? "")}" />
-            <span style="opacity:.7">Max Mags</span>
-            <input class="input" style="width:80px" data-ammo="magsMax" data-wi="${wi}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" />
-            <button type="button" class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
-            <button type="button" class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
+            <button class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
+            <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
           <div style="opacity:.65;margin-top:6px;">
-            Tip: <b>Mag</b> is rounds per magazine. <b>Mags</b> is your current spare loaded mags. <b>Max Mags</b> is the cap you can carry after looting or shopping. <b>-1</b> decrements current. <b>Reload</b> swaps in one spare mag and reduces <b>Mags</b> by 1. <b>Reload Mags</b> refills missing spare mags up to <b>Max Mags</b> from matching inventory ammo.
+            Tip: <b>-1</b> decrements current. <b>Reload</b> refills the current mag using matching ammo from Inventory and consumes 1 from <b>Mags</b> if tracked. <b>Reload Mags</b> restores all tracked mags and the current mag using matching ammo from Inventory.
           </div>
         </td>
       `;
@@ -492,28 +593,6 @@ function renderCharacter(){
 
   // wire ammo controls (after rows exist)
   weapBody.querySelectorAll("input[data-ammo]").forEach(inp=>{
-    inp.oninput = ()=>{
-      const wi = Number(inp.getAttribute("data-wi"));
-      const key = inp.getAttribute("data-ammo");
-      const w = c.weapons?.[wi];
-      if(!w) return;
-      w.ammo = w.ammo || {};
-      let v = inp.value;
-      if(key==="magSize" || key==="current" || key==="mags" || key==="magsMax"){
-        const n = parseInt(v,10);
-        if(Number.isFinite(n)) v = n;
-      }
-      w.ammo[key] = v;
-      if(key==="magSize"){
-        w.ammo.starting = v;
-        if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
-      }
-      if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
-      if(key==="magsMax"){
-        if(w.ammo.mags==null || w.ammo.mags==="") w.ammo.mags = v;
-        if(Number(w.ammo.mags) > Number(v)) w.ammo.mags = v;
-      }
-    };
     inp.onchange = async ()=>{
       const wi = Number(inp.getAttribute("data-wi"));
       const key = inp.getAttribute("data-ammo");
@@ -521,112 +600,98 @@ function renderCharacter(){
       if(!w) return;
       w.ammo = w.ammo || {};
       let v = inp.value;
-      if(key==="magSize" || key==="current" || key==="mags" || key==="magsMax"){
+
+      // numeric fields
+      if(key==="magSize" || key==="current" || key==="mags"){
         const n = parseInt(v,10);
         if(Number.isFinite(n)) v = n;
       }
+
       w.ammo[key] = v;
+      // keep legacy fields in sync
       if(key==="magSize"){
         w.ammo.starting = v;
         if(w.ammo.current==null || w.ammo.current==="") w.ammo.current = v;
       }
       if(key==="mags" && (w.ammo.magsMax==null || w.ammo.magsMax==="")) w.ammo.magsMax = v;
-      if(key==="magsMax"){
-        if(w.ammo.mags==null || w.ammo.mags==="") w.ammo.mags = v;
-        if(Number(w.ammo.mags) > Number(v)) w.ammo.mags = v;
-      }
+
       await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-      try{ vwUpdateCharSummaryRow(); }catch(e){}
+      renderCharacter(); // repaint to ensure all displays stay consistent
     };
   });
 
   weapBody.querySelectorAll("button[data-ammo-act]").forEach(btn=>{
-    const runAmmoAction = async (ev)=>{
-      if(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-      }
-      if(btn.dataset.busy === "1") return;
-      btn.dataset.busy = "1";
-      try{
-        const wi = Number(btn.getAttribute("data-wi"));
-        const act = btn.getAttribute("data-ammo-act");
-        const w = c.weapons?.[wi];
-        if(!w) return;
-        w.ammo = w.ammo || {};
-        const magSize = parseInt(w.ammo.magSize ?? w.ammo.starting ?? 0,10) || 0;
-        const cur = parseInt(w.ammo.current ?? 0,10) || 0;
-        const mags = parseInt(w.ammo.mags ?? 0,10) || 0;
-        const magsMax = parseInt(w.ammo.magsMax ?? mags,10) || 0;
+    btn.onclick = async ()=>{
+      const wi = Number(btn.getAttribute("data-wi"));
+      const act = btn.getAttribute("data-ammo-act");
+      const w = c.weapons?.[wi];
+      if(!w) return;
+      w.ammo = w.ammo || {};
+      const magSize = parseInt(w.ammo.magSize ?? w.ammo.starting ?? 0,10) || 0;
+      const cur = parseInt(w.ammo.current ?? 0,10) || 0;
+      const mags = parseInt(w.ammo.mags ?? 0,10) || 0;
+      const magsMax = parseInt(w.ammo.magsMax ?? mags,10) || 0;
+
+      if(act==="shot"){
+        w.ammo.current = Math.max(0, cur - 1);
+      }else if(act==="reload"){
         const ammoType = String(w.ammo.type || "").trim();
-
-        if(act==="shot"){
-          w.ammo.current = Math.max(0, cur - 1);
-        }else if(act==="reload"){
-          const needed = Math.max(0, magSize - cur);
-          if(!needed){
-            toast("Mag is already full");
-            return;
-          }
-          if(mags > 0){
-            w.ammo.current = magSize || cur;
-            w.ammo.mags = Math.max(0, mags - 1);
-          }else{
-            const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
-            if(!consumed.ok){
-              toast(`Need 1 spare mag or ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
-              return;
-            }
-            w.ammo.current = magSize || cur;
-          }
-        }else if(act==="addmag"){
-          w.ammo.magsMax = Math.max(magsMax, mags + 1);
-          w.ammo.mags = mags + 1;
-        }else if(act==="reloadmags"){
-          const missingMags = Math.max(0, magsMax - mags);
-          if(!missingMags){
-            toast("Spare mags are already full");
-            return;
-          }
-          const needed = missingMags * (magSize || 0);
-          const consumed = vwConsumeInventoryAmmo(c, ammoType, needed);
-          if(!consumed.ok){
-            toast(`Need ${consumed.needed} ${ammoType || "ammo"} but only have ${consumed.available}`);
-            return;
-          }
-          w.ammo.mags = magsMax;
+        const needed = Math.max(0, magSize - cur);
+        if(magSize <= 0){
+          toast("Set Mag size first");
+          return;
         }
-
-        if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
-
-        await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
-        try{
-          const scope = weapBody;
-          const curEl = scope.querySelector(`input[data-ammo="current"][data-wi="${wi}"]`);
-          if(curEl) curEl.value = String(w.ammo.current ?? "");
-          const magsEl = scope.querySelector(`input[data-ammo="mags"][data-wi="${wi}"]`);
-          if(magsEl) magsEl.value = String(w.ammo.mags ?? "");
-          const magsMaxEl = scope.querySelector(`input[data-ammo="magsMax"][data-wi="${wi}"]`);
-          if(magsMaxEl) magsMaxEl.value = String(w.ammo.magsMax ?? w.ammo.mags ?? "");
-          const magSizeEl = scope.querySelector(`input[data-ammo="magSize"][data-wi="${wi}"]`);
-          if(magSizeEl) magSizeEl.value = String(w.ammo.magSize ?? w.ammo.starting ?? "");
-          if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
-        }catch(_){ }
-      }finally{
-        setTimeout(()=>{ delete btn.dataset.busy; }, 0);
+        if(!ammoType){
+          toast("Set Ammo Type first");
+          return;
+        }
+        if(needed <= 0){
+          toast("Mag already full");
+          return;
+        }
+        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
+        if(!used.ok){
+          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
+          return;
+        }
+        if(mags > 0){
+          w.ammo.mags = mags - 1;
+        }
+        w.ammo.current = magSize;
+      }else if(act==="addmag"){
+        w.ammo.mags = mags + 1;
+        if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
+      }else if(act==="reloadmags"){
+        const ammoType = String(w.ammo.type || "").trim();
+        if(magSize <= 0){
+          toast("Set Mag size first");
+          return;
+        }
+        if(!ammoType){
+          toast("Set Ammo Type first");
+          return;
+        }
+        const magsToFill = Math.max(0, magsMax - mags);
+        const needed = Math.max(0, (magSize - cur) + (magsToFill * magSize));
+        if(needed <= 0){
+          toast("Ammo already topped off");
+          return;
+        }
+        const used = vwDeductAmmoFromInventory(c, ammoType, needed);
+        if(!used.ok){
+          toast(`Not enough ${ammoType} in inventory (${used.available || 0}/${needed})`);
+          return;
+        }
+        w.ammo.mags = magsMax;
+        w.ammo.current = magSize;
       }
+
+      // legacy sync
+      if(w.ammo.magSize!=null) w.ammo.starting = w.ammo.magSize;
+
+      await api("/api/character/save",{method:"POST",body:JSON.stringify({charId:c.id, character:c})});
+      renderCharacter();
     };
-
-    btn.addEventListener("pointerdown", runAmmoAction);
-    btn.addEventListener("click", (ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-    });
-    btn.addEventListener("keydown", (ev)=>{
-      if(ev.key === "Enter" || ev.key === " "){
-        runAmmoAction(ev);
-      }
-    });
   });
 // inventory rows
   (c.inventory||[]).forEach((it,idx)=>{
@@ -1967,6 +2032,10 @@ const result = await new Promise((resolve)=>{
     return { packSel, kitId, invAuto };
   }
 
+  // ============================================================
+  // WEAPON SHEET RENDER
+  // This controls what players edit directly on the Character Sheet.
+  // ============================================================
   function renderWeapons(){
     const host = qs("vwCreateWeapons");
     if(!host) return;
@@ -1987,47 +2056,46 @@ const result = await new Promise((resolve)=>{
 
           <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Name</div>
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.name)}</div>
               <input class="input" data-wk="name" data-idx="${idx}" value="${esc(w.name||"")}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Range</div>
-              <input class="input" data-wk="range" data-idx="${idx}" value="${esc(w.range||"")}" placeholder="e.g., 30 ft" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.range)}</div>
+              <input class="input" data-wk="range" data-idx="${idx}" value="${esc(w.range||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.range)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Hit / DC</div>
-              <input class="input" data-wk="hit" data-idx="${idx}" value="${esc(w.hit||"")}" placeholder="+5" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.hit)}</div>
+              <input class="input" data-wk="hit" data-idx="${idx}" value="${esc(w.hit||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.hit)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Damage</div>
-              <input class="input" data-wk="damage" data-idx="${idx}" value="${esc(w.damage||"")}" placeholder="2d6" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.damage)}</div>
+              <input class="input" data-wk="damage" data-idx="${idx}" value="${esc(w.damage||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.damage)}" />
             </div>
           </div>
 
           ${hasAmmo ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-top:10px;">
+          <div style="display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr .8fr;gap:8px;margin-top:10px;">
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Ammo Type</div>
-              <input class="input" data-wammo="type" data-idx="${idx}" value="${esc(w.ammo.type||"")}" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.ammoType)}</div>
+              <input class="input" data-wammo="type" data-idx="${idx}" value="${esc(w.ammo.type||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.ammoType)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Mag Size</div>
-              <input class="input" data-wammo="magSize" data-idx="${idx}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" placeholder="30" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.magSize)}</div>
+              <input class="input" data-wammo="magSize" data-idx="${idx}" value="${esc(w.ammo.magSize ?? w.ammo.starting ?? "")}" placeholder="${esc(VW_EDIT.weapons.placeholders.magSize)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Current</div>
-              <input class="input" data-wammo="current" data-idx="${idx}" value="${esc(w.ammo.current||"")}" placeholder="30" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.currentShort)}</div>
+              <input class="input" data-wammo="current" data-idx="${idx}" value="${esc(w.ammo.current||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.currentRounds)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Mags</div>
-              <input class="input" data-wammo="mags" data-idx="${idx}" value="${esc(w.ammo.mags||"")}" placeholder="2" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.spareMags)}</div>
+              <input class="input" data-wammo="mags" data-idx="${idx}" value="${esc(w.ammo.mags||"")}" placeholder="${esc(VW_EDIT.weapons.placeholders.spareMags)}" />
             </div>
             <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">Max Mags</div>
-              <input class="input" data-wammo="magsMax" data-idx="${idx}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" placeholder="2" />
+              <div class="mini" style="opacity:.8;margin-bottom:4px;">${esc(VW_EDIT.weapons.labels.maxMags)}</div>
+              <input class="input" data-wammo="magsMax" data-idx="${idx}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" placeholder="${esc(VW_EDIT.weapons.placeholders.maxMags)}" />
             </div>
           </div>
-          <div class="mini" style="opacity:.72;margin-top:6px;">Edit <b>Mag Size</b>, <b>Mags</b>, and <b>Max Mags</b> here anytime. Reload Mags fills back up to Max Mags.</div>
           ` : `
           <div class="mini" style="opacity:.7;margin-top:10px;">(No ammo tracking on this weapon)</div>
           `}
@@ -2049,21 +2117,7 @@ const result = await new Promise((resolve)=>{
         const idx = Number(inp.getAttribute("data-idx"));
         const k = inp.getAttribute("data-wammo");
         state.weapons[idx].ammo = state.weapons[idx].ammo || {};
-        let v = inp.value;
-        if(k==="magSize" || k==="current" || k==="mags" || k==="magsMax"){
-          const n = parseInt(v,10);
-          if(Number.isFinite(n)) v = n;
-        }
-        state.weapons[idx].ammo[k] = v;
-        if(k==="magSize"){
-          state.weapons[idx].ammo.starting = v;
-          if(state.weapons[idx].ammo.current==null || state.weapons[idx].ammo.current==="") state.weapons[idx].ammo.current = v;
-        }
-        if(k==="mags" && (state.weapons[idx].ammo.magsMax==null || state.weapons[idx].ammo.magsMax==="")) state.weapons[idx].ammo.magsMax = v;
-        if(k==="magsMax"){
-          if(state.weapons[idx].ammo.mags==null || state.weapons[idx].ammo.mags==="") state.weapons[idx].ammo.mags = v;
-          if(Number(state.weapons[idx].ammo.mags) > Number(v)) state.weapons[idx].ammo.mags = v;
-        }
+        state.weapons[idx].ammo[k] = inp.value;
       };
     });
 
@@ -2786,6 +2840,10 @@ function vwRebindButton(id, handler){
   return fresh;
 }
 
+// ============================================================
+// ADD / CREATE WEAPON FLOW
+// This is the easiest place to change default weapon ammo setup.
+// ============================================================
 // ---- Fix/Bind Abilities + Spells + Weapons + Save text tabs ----
 vwRebindButton("addWeaponBtn", async ()=>{
   try{
@@ -2822,7 +2880,7 @@ vwRebindButton("addWeaponBtn", async ()=>{
 
     let weapon = { id: mkId(), name:"", range:"", hit:"", damage:"", notes:"" };
     let needsAmmo = false;
-    let ammoDefaults = { type:"", magSize:30, current:30, mags:2, magsMax:2 };
+    let ammoDefaults = vwWeaponDefaultsForAmmoModel("", "");
 
     if(pick.pick === "__custom__"){
       const det = await vwModalForm({
@@ -2854,22 +2912,15 @@ vwRebindButton("addWeaponBtn", async ()=>{
           title:"Ammo Setup",
           okText:"Add",
           fields:[
-            { key:"type", label:"Ammo Type", placeholder:"e.g., 9mm, .45, 5.56" },
-            { key:"magSize", label:"Mag Size", placeholder:"30", value:"30" },
-            { key:"mags", label:"Current Spare Mags", placeholder:"2", value:"2" },
-            { key:"magsMax", label:"Max Mags", placeholder:"2", value:"2" },
-            { key:"current", label:"Current Rounds", placeholder:"30", value:"30" },
+            { key:"type", label:VW_EDIT.weapons.labels.ammoType, placeholder:VW_EDIT.weapons.placeholders.ammoType },
+            { key:"magSize", label:VW_EDIT.weapons.labels.magSize, placeholder:VW_EDIT.weapons.placeholders.magSize, value:String(ammoDefaults.magSize||VW_EDIT.weapons.defaults.magazineFed.magSize) },
+            { key:"mags", label:VW_EDIT.weapons.labels.spareMags, placeholder:VW_EDIT.weapons.placeholders.spareMags, value:String(ammoDefaults.mags||VW_EDIT.weapons.defaults.magazineFed.mags) },
+            { key:"magsMax", label:VW_EDIT.weapons.labels.maxMags, placeholder:VW_EDIT.weapons.placeholders.maxMags, value:String(ammoDefaults.magsMax||ammoDefaults.mags||VW_EDIT.weapons.defaults.magazineFed.magsMax) },
+            { key:"current", label:VW_EDIT.weapons.labels.currentRounds, placeholder:VW_EDIT.weapons.placeholders.currentRounds, value:String(ammoDefaults.current||ammoDefaults.magSize||VW_EDIT.weapons.defaults.magazineFed.current) },
           ]
         });
         if(!a) return;
-        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const magsMax = parseInt(a.magsMax,10); const cur = parseInt(a.current,10);
-        ammoDefaults = {
-          type: (a.type||""),
-          magSize: Number.isFinite(magSize)?magSize:30,
-          mags: Number.isFinite(mags)?mags:0,
-          magsMax: Number.isFinite(magsMax)?magsMax:(Number.isFinite(mags)?mags:0),
-          current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:30),
-        };
+        ammoDefaults = vwNormalizeAmmoSetup(a, ammoDefaults);
       }
     }else{
       const val = pick.pick;
@@ -2888,9 +2939,8 @@ vwRebindButton("addWeaponBtn", async ()=>{
       const ammoTypeDefault = chosen?.ammoTypeDefault || "";
       if(ammoModel){
         needsAmmo = true;
-        // Basic default capacities by model (user can edit later per weapon)
-        const defaultCap = (ammoModel==="shells") ? 8 : (ammoModel==="revolver") ? 6 : (ammoModel==="cell") ? 10 : (ammoModel==="belt") ? 100 : 30;
-        ammoDefaults = { type: ammoTypeDefault||"", magSize: defaultCap, current: defaultCap, mags: 2, magsMax: 2 };
+        // Catalog defaults now come from the EASY EDIT section near the top of this file.
+        ammoDefaults = vwWeaponDefaultsForAmmoModel(ammoModel, ammoTypeDefault);
       }
       // If chosen also includes range/hit/damage fields in the future, we accept them.
       if(chosen && typeof chosen==="object"){
@@ -2908,22 +2958,15 @@ vwRebindButton("addWeaponBtn", async ()=>{
           title:"Ammo Setup",
           okText:"Add",
           fields:[
-            { key:"type", label:"Ammo Type", value: String(ammoDefaults.type||""), placeholder:"e.g., 9mm" },
-            { key:"magSize", label:"Mag Size", value: String(ammoDefaults.magSize||30), placeholder:"30" },
-            { key:"mags", label:"Current Spare Mags", value: String(ammoDefaults.mags||2), placeholder:"2" },
-            { key:"magsMax", label:"Max Mags", value: String(ammoDefaults.magsMax||ammoDefaults.mags||2), placeholder:"2" },
-            { key:"current", label:"Current Rounds", value: String(ammoDefaults.current||ammoDefaults.magSize||30), placeholder:"30" },
+            { key:"type", label:VW_EDIT.weapons.labels.ammoType, value: String(ammoDefaults.type||""), placeholder:VW_EDIT.weapons.placeholders.ammoType },
+            { key:"magSize", label:VW_EDIT.weapons.labels.magSize, value: String(ammoDefaults.magSize||VW_EDIT.weapons.defaults.magazineFed.magSize), placeholder:VW_EDIT.weapons.placeholders.magSize },
+            { key:"mags", label:VW_EDIT.weapons.labels.spareMags, value: String(ammoDefaults.mags||VW_EDIT.weapons.defaults.magazineFed.mags), placeholder:VW_EDIT.weapons.placeholders.spareMags },
+            { key:"magsMax", label:VW_EDIT.weapons.labels.maxMags, value: String(ammoDefaults.magsMax||ammoDefaults.mags||VW_EDIT.weapons.defaults.magazineFed.magsMax), placeholder:VW_EDIT.weapons.placeholders.maxMags },
+            { key:"current", label:VW_EDIT.weapons.labels.currentRounds, value: String(ammoDefaults.current||ammoDefaults.magSize||VW_EDIT.weapons.defaults.magazineFed.current), placeholder:VW_EDIT.weapons.placeholders.currentRounds },
           ]
         });
         if(!a) return;
-        const magSize = parseInt(a.magSize,10); const mags = parseInt(a.mags,10); const magsMax = parseInt(a.magsMax,10); const cur = parseInt(a.current,10);
-        ammoDefaults = {
-          type: (a.type||""),
-          magSize: Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30),
-          mags: Number.isFinite(mags)?mags:(ammoDefaults.mags||0),
-          magsMax: Number.isFinite(magsMax)?magsMax:(Number.isFinite(mags)?mags:(ammoDefaults.magsMax||ammoDefaults.mags||0)),
-          current: Number.isFinite(cur)?cur:(Number.isFinite(magSize)?magSize:(ammoDefaults.magSize||30)),
-        };
+        ammoDefaults = vwNormalizeAmmoSetup(a, ammoDefaults);
       }
 
       weapon.ammo = {
