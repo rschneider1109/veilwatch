@@ -448,7 +448,7 @@
     if(!feat.shop){
       enabledPill.textContent = 'Shop: Disabled';
       shopPill.textContent = 'Shop: --';
-      body.innerHTML = '<tr><td colspan="8" class="mini">Shop feature is disabled.</td></tr>';
+      body.innerHTML = '<div class="shop-storefront-empty mini">Shop feature is disabled.</div>';
       renderShopCart();
       return;
     }
@@ -552,12 +552,12 @@
 
     body.innerHTML = '';
     if(!enabled && SESSION.role !== 'dm'){
-      body.innerHTML = '<tr><td colspan="8" class="mini">Shop is currently disabled.</td></tr>';
+      body.innerHTML = '<div class="shop-storefront-empty mini">Shop is currently disabled.</div>';
       renderShopCart();
       return;
     }
     if(!currentShop){
-      body.innerHTML = '<tr><td colspan="8" class="mini">No shop selected.</td></tr>';
+      body.innerHTML = '<div class="shop-storefront-empty mini">No shop selected.</div>';
       renderShopCart();
       return;
     }
@@ -568,47 +568,74 @@
         : 'Browse the shelves, add items to your cart, then check out when you are ready.';
     }
 
-    (currentShop.items || []).forEach((it, idx) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + esc(it.name) + '</td>' +
-        '<td>' + esc(it.category || '') + '</td>' +
-        '<td>$' + esc(parseMoney(it.cost).toFixed(2).replace(/\.00$/,'')) + '</td>' +
-        '<td>' + esc(it.weight || '') + '</td>' +
-        '<td>' + esc(decorateItemMeta(it) || '—') + '</td>' +
-        '<td>' + esc(it.notes || '') + '</td>' +
-        '<td>' + esc(isInfiniteStock(it.stock) ? '∞' : itemStockLeft(it)) + '</td>' +
-        '<td></td>';
-      const td = tr.lastChild;
+    const items = Array.isArray(currentShop.items) ? currentShop.items.slice() : [];
+    if(!items.length){
+      body.innerHTML = '<div class="shop-storefront-empty mini">This shop has no items yet.' + (SESSION.role === 'dm' ? ' Use Add New Shop Item to stock the shelves.' : '') + '</div>';
       if(SESSION.role === 'dm'){
-        const hasTarget = !!getShopTargetCharacter();
-        const soldOut = itemStockLeft(it) <= 0;
-        td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Del</button> <button class="btn smallbtn"' + ((!hasTarget || soldOut) ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
-        const [editItemBtn, delBtn, cartBtn] = td.querySelectorAll('button');
-        editItemBtn.onclick = ()=>openEditItemModal(currentShop, it);
-        delBtn.onclick = async ()=>{
-          const ok = await vwModalConfirm({ title:'Delete Item', message:'Delete "' + (it.name || 'this item') + '"?' });
-          if(!ok) return;
-          currentShop.items.splice(idx, 1);
-          await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
-          toast('Item deleted');
-          await refreshAll();
-        };
-        cartBtn.onclick = ()=>{ if(hasTarget && !soldOut) addItemToCart(it); };
-      }else{
-        const soldOut = itemStockLeft(it) <= 0;
-        td.innerHTML = '<button class="btn smallbtn"' + (soldOut ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
-        td.querySelector('button').onclick = ()=>{ if(!soldOut) addItemToCart(it); };
+        const addWrap = document.createElement('div');
+        addWrap.className = 'shop-card shop-card-add';
+        addWrap.innerHTML = '<div class="shop-card-title">Add New Shop Item</div><div class="shop-card-desc">Create the first shelf item for this shop.</div><div class="shop-card-footer"><button class="btn smallbtn" id="addShopItemBtn">Add Item</button></div>';
+        body.appendChild(addWrap);
+        addWrap.querySelector('#addShopItemBtn').onclick = ()=>openAddItemModal(currentShop);
       }
-      body.appendChild(tr);
+      renderShopCart();
+      return;
+    }
+
+    const groups = {};
+    items.forEach((it, idx) => {
+      const key = String(it.category || 'General').trim() || 'General';
+      (groups[key] ||= []).push({ it, idx });
     });
 
-    if(SESSION.role === 'dm'){
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="8"><button class="btn smallbtn" id="addShopItemBtn">Add Item</button></td>';
-      body.appendChild(tr);
-      tr.querySelector('#addShopItemBtn').onclick = ()=>openAddItemModal(currentShop);
-    }
+    Object.keys(groups).sort((a,b)=>a.localeCompare(b)).forEach(cat => {
+      const aisle = document.createElement('section');
+      aisle.className = 'shop-aisle';
+      const entries = groups[cat];
+      aisle.innerHTML = '<div class="shop-aisle-head"><div><div class="shop-aisle-title">' + esc(cat) + '</div><div class="shop-aisle-meta">' + esc(entries.length) + ' item' + (entries.length === 1 ? '' : 's') + '</div></div></div><div class="shop-aisle-grid"></div>';
+      const grid = aisle.querySelector('.shop-aisle-grid');
+
+      entries.forEach(({it, idx}) => {
+        const soldOut = itemStockLeft(it) <= 0;
+        const hasTarget = !!getShopTargetCharacter();
+        const card = document.createElement('article');
+        card.className = 'shop-card';
+        card.innerHTML =
+          '<div class="shop-card-title">' + esc(it.name || 'Item') + '</div>' +
+          '<div class="shop-card-price-row"><div class="shop-card-price">$' + esc(parseMoney(it.cost).toFixed(2).replace(/\.00$/,'')) + '</div><div class="shop-card-stock">Stock: ' + esc(isInfiniteStock(it.stock) ? '∞' : itemStockLeft(it)) + '</div></div>' +
+          '<div class="shop-card-meta">' + esc(decorateItemMeta(it) || 'Standard shelf item') + (it.weight ? ' • ' + esc(String(it.weight)) + ' wt' : '') + '</div>' +
+          '<div class="shop-card-desc">' + esc(it.notes || 'No extra notes.') + '</div>' +
+          '<div class="shop-card-footer"></div>';
+        const footer = card.querySelector('.shop-card-footer');
+        if(SESSION.role === 'dm'){
+          footer.innerHTML = '<button class="btn smallbtn">Edit</button><button class="btn smallbtn">Del</button><button class="btn smallbtn"' + ((!hasTarget || soldOut) ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
+          const [editItemBtn, delBtn, cartBtn] = footer.querySelectorAll('button');
+          editItemBtn.onclick = ()=>openEditItemModal(currentShop, it);
+          delBtn.onclick = async ()=>{
+            const ok = await vwModalConfirm({ title:'Delete Item', message:'Delete "' + (it.name || 'this item') + '"?' });
+            if(!ok) return;
+            currentShop.items.splice(idx, 1);
+            await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+            toast('Item deleted');
+            await refreshAll();
+          };
+          cartBtn.onclick = ()=>{ if(hasTarget && !soldOut) addItemToCart(it); };
+        }else{
+          footer.innerHTML = '<button class="btn smallbtn"' + (soldOut ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
+          footer.querySelector('button').onclick = ()=>{ if(!soldOut) addItemToCart(it); };
+        }
+        grid.appendChild(card);
+      });
+
+      if(SESSION.role === 'dm'){
+        const addCard = document.createElement('article');
+        addCard.className = 'shop-card shop-card-add';
+        addCard.innerHTML = '<div class="shop-card-title">Add Item</div><div class="shop-card-desc">Drop a new shelf item into the ' + esc(cat) + ' aisle.</div><div class="shop-card-footer"><button class="btn smallbtn">Add Item</button></div>';
+        addCard.querySelector('button').onclick = ()=>openAddItemModal(currentShop);
+        grid.appendChild(addCard);
+      }
+      body.appendChild(aisle);
+    });
 
     renderShopCart();
   };
