@@ -345,14 +345,15 @@
   }
 
   function normalizeCatalogItem(item, categoryHint){
+    const category = String(item?.category || item?.item_category || item?.group || categoryHint || 'Misc').trim() || 'Misc';
     return {
       id: item?.id || '',
       name: String(item?.name ?? item ?? '').trim(),
-      category: String(item?.category || categoryHint || 'Misc').trim() || 'Misc',
-      default_qty: Math.max(1, parseInt(item?.default_qty ?? 1, 10) || 1),
-      default_weight: item?.default_weight ?? '',
-      default_cost: item?.default_cost ?? '',
-      default_notes: item?.default_notes ?? '',
+      category,
+      default_qty: Math.max(1, parseInt(item?.default_qty ?? item?.qty ?? 1, 10) || 1),
+      default_weight: item?.default_weight ?? item?.weight ?? '',
+      default_cost: item?.default_cost ?? item?.cost ?? '',
+      default_notes: item?.default_notes ?? item?.notes ?? '',
       ammo_type: item?.ammo_type ?? '',
       source: item?.source || (item?.is_custom ? 'custom' : 'official'),
       is_custom: !!item?.is_custom
@@ -447,13 +448,13 @@
     if(!result) return;
     const current = selectedItem();
     if(!current?.name) return;
-    shop.items ||= [];
-    shop.items.push({
+    const nextCategory = String(current.category || selectedCategory || 'Misc').trim() || 'Misc';
+    const nextItem = {
       id: 'i_' + Math.random().toString(36).slice(2,8),
       sourceId: current.id || '',
       sourceType: current.is_custom ? 'custom' : 'official',
       name: current.name,
-      category: current.category,
+      category: nextCategory,
       cost: parseMoney(document.getElementById('vwShopCost')?.value || current.default_cost || 0),
       weight: String(document.getElementById('vwShopWeight')?.value ?? current.default_weight ?? ''),
       inventoryQty: Math.max(1, parseIntSafe(document.getElementById('vwShopQty')?.value || current.default_qty || 1, 1)),
@@ -461,9 +462,16 @@
       ammo_type: String(document.getElementById('vwShopAmmoType')?.value || current.ammo_type || '').trim(),
       notes: String(document.getElementById('vwShopNotes')?.value || current.default_notes || '').trim(),
       stock: String(document.getElementById('vwShopStock')?.value || '∞').trim() || '∞'
-    });
-    await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
-    toast('Item added');
+    };
+    shop.items = Array.isArray(shop.items) ? shop.items : [];
+    shop.items.push(nextItem);
+    const saveRes = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
+    if(!saveRes?.ok){
+      toast(saveRes?.error || 'Failed to save item');
+      return;
+    }
+    toast('Item added to ' + nextCategory);
+    try{ if(typeof renderShop === 'function') await renderShop(); }catch(e){}
     await refreshAll();
   }
 
@@ -503,7 +511,8 @@
   function getAisles(items){
     const map = new Map();
     (items || []).forEach(it => {
-      const cat = String(it.category || 'Misc').trim() || 'Misc';
+      const cat = String(it?.category || it?.item_category || it?.group || 'Misc').trim() || 'Misc';
+      it.category = cat;
       if(!map.has(cat)) map.set(cat, []);
       map.get(cat).push(it);
     });
