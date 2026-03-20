@@ -325,44 +325,44 @@
   </section>
 
   <section id="tab-shop" class="hidden">
-    <div class="panel shop-panel">
-      <div class="shop-topbar">
-        <div>
-          <div class="pill" id="shopEnabledPill">Shop: --</div>
-          <div class="shop-title">Quartermaster / Storefront</div>
-          <div class="mini">Built like a real store: each category gets its own aisle, with DM management on top and player browsing underneath.</div>
-        </div>
-        <div class="right row shop-admin-actions" id="dmShopRow" style="gap:8px;">
+    <div class="panel">
+      <div class="row">
+        <div class="pill" id="shopEnabledPill">Shop: --</div>
+        <div class="right row" id="dmShopRow" style="gap:8px;">
           <button class="btn smallbtn" id="toggleShopBtn">Toggle Shop</button>
-          <button class="btn smallbtn" id="addShopBtn">ADD NEW SHOP</button>
+          <button class="btn smallbtn" id="addShopBtn">New Shop</button>
         </div>
       </div>
-
       <hr/>
-
-      <div class="shop-toolbar">
-        <div class="shop-toolbar-main">
-          <label class="shop-field">
-            <span class="mini">Storefront</span>
-            <select id="shopSel"></select>
-          </label>
-          <button class="btn smallbtn hidden" id="editShopBtn">Rename Shop</button>
-        </div>
-        <div class="shop-toolbar-side">
-          <label class="shop-field shop-search-field">
-            <span class="mini">Search inventory</span>
-            <input class="input" id="shopSearch" placeholder="Search items, notes, ammo type, category..."/>
-          </label>
-        </div>
+      <div class="row">
+        <select id="shopSel"></select>
+        <button class="btn smallbtn hidden" id="editShopBtn">Edit Shop</button>
       </div>
-
-      <div id="shopStats" class="shop-stats"></div>
-      <div id="shopCategoryFilters" class="shop-category-filters"></div>
-
-      <div id="shopAisles" class="shop-aisles"></div>
-      <div id="shopBody" class="hidden"></div>
-
-      <div class="mini shop-footer-note">Players browse by aisle and add items to Inventory. DM can create shops, rename them, and manage aisle stock.</div>
+      <hr/>
+      <div class="shop-layout">
+        <div class="shop-table-panel" id="shopTableWrap">
+          <table>
+            <thead><tr><th>ITEM</th><th>CATEGORY</th><th>COST</th><th>WEIGHT</th><th>BUNDLE</th><th>NOTES</th><th>STOCK</th><th></th></tr></thead>
+            <tbody id="shopBody"></tbody>
+          </table>
+        </div>
+        <aside class="shop-cart-panel hidden" id="shopCartPanel">
+          <div class="shop-cart-head">
+            <div>
+              <div class="shop-cart-title">Cart</div>
+              <div class="mini" id="shopCartStatus">Cart unavailable</div>
+            </div>
+            <div class="pill" id="shopCartTotal">$0</div>
+          </div>
+          <div class="shop-cart-body" id="shopCartBody"></div>
+          <div class="shop-cart-actions">
+            <button class="btn smallbtn" id="shopClearCartBtn">Clear Cart</button>
+            <button class="btn smallbtn" id="shopCheckoutBtn">Checkout</button>
+          </div>
+          <div class="mini">This pass builds the cart and inventory checkout flow. Cash/bank validation plugs in later.</div>
+        </aside>
+      </div>
+      <div class="mini" style="margin-top:10px;" id="shopHelpText">Players can add shop items to Inventory. DM can customize each shop.</div>
     </div>
   </section>
 
