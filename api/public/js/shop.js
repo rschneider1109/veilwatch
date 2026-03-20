@@ -1,625 +1,537 @@
-function vwShopEsc(v){
-  return esc(v == null ? "" : String(v));
-}
+(function(){
+  const CART_STORAGE_KEY = "vwShopCartsV1";
 
-function vwShopNormalizeStock(raw){
-  const s = String(raw ?? "∞").trim();
-  if(!s || s === "∞") return "∞";
-  const n = parseInt(s, 10);
-  return Number.isFinite(n) && n >= 0 ? String(n) : "∞";
-}
+  function getShopState(){
+    const st = window.__STATE || {};
+    st.shops ||= { enabled:true, activeShopId:"", list:[] };
+    st.shops.list ||= [];
+    return st.shops;
+  }
 
-function vwShopStockLabel(raw){
-  const s = vwShopNormalizeStock(raw);
-  return s === "∞" ? "Stock: ∞" : "Stock: " + s;
-}
+  function getActiveShop(){
+    const shops = getShopState();
+    return (shops.list || []).find(s => s.id === shops.activeShopId) || (shops.list || [])[0] || null;
+  }
 
-function vwShopGroupItems(items){
-  const map = new Map();
-  (items || []).forEach(it => {
-    const cat = String(it?.category || "General").trim() || "General";
-    if(!map.has(cat)) map.set(cat, []);
-    map.get(cat).push(it);
-  });
-  return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-}
+  function parseMoney(raw){
+    const n = Number(String(raw ?? "").replace(/[^0-9.\-]/g, ""));
+    return Number.isFinite(n) ? n : 0;
+  }
 
-function vwShopGetActiveCharacter(){
-  return (typeof getChar === "function") ? getChar() : null;
-}
+  function parseIntSafe(raw, fallback=0){
+    const n = parseInt(String(raw ?? "").trim(), 10);
+    return Number.isFinite(n) ? n : fallback;
+  }
 
-function vwShopBuildStats(shop, grouped){
-  const items = Array.isArray(shop?.items) ? shop.items : [];
-  const char = vwShopGetActiveCharacter();
-  return [
-    { label:"Selected Shop", value: shop?.name || "--" },
-    { label:"Aisles", value: String(grouped.length) },
-    { label:"Items", value: String(items.length) },
-    { label:"Shopping For", value: char?.name || (SESSION.role === "dm" ? "DM View" : "No Character") }
-  ];
-}
+  function isInfiniteStock(stock){
+    const s = String(stock ?? "").trim().toLowerCase();
+    return s === "" || s === "∞" || s === "inf" || s === "infinite";
+  }
 
-function vwShopRenderStats(el, shop, grouped){
-  if(!el) return;
-  const stats = vwShopBuildStats(shop, grouped);
-  el.innerHTML = stats.map(s => (
-    '<div class="shop-stat">' +
-      '<div class="shop-stat-label">' + vwShopEsc(s.label) + '</div>' +
-      '<div class="shop-stat-value">' + vwShopEsc(s.value) + '</div>' +
-    '</div>'
-  )).join('');
-}
-
-function vwShopRenderFilters(el, grouped, selectedCategory, onPick){
-  if(!el) return;
-  const categories = grouped.map(([cat]) => cat);
-  const all = [{ id:"__all__", label:"All Aisles" }].concat(categories.map(cat => ({ id:cat, label:cat })));
-  el.innerHTML = all.map(entry => (
-    '<button class="shop-chip ' + (selectedCategory === entry.id ? 'active' : '') + '" data-shop-cat="' + vwShopEsc(entry.id) + '">' + vwShopEsc(entry.label) + '</button>'
-  )).join('');
-  el.querySelectorAll('[data-shop-cat]').forEach(btn => {
-    btn.onclick = () => onPick(btn.getAttribute('data-shop-cat') || '__all__');
-  });
-}
-
-function vwShopNormalizeCatalogItem(item){
-  return {
-    id: String(item?.id || ""),
-    name: String(item?.name || "").trim(),
-    category: String(item?.category || "General").trim() || "General",
-    default_qty: Math.max(1, parseInt(item?.default_qty ?? 1, 10) || 1),
-    default_weight: String(item?.default_weight ?? "").trim(),
-    default_cost: String(item?.default_cost ?? "").trim(),
-    default_notes: String(item?.default_notes ?? "").trim(),
-    ammo_type: String(item?.ammo_type ?? "").trim(),
-    source: String(item?.source || (item?.is_custom ? "custom" : "official")),
-    is_custom: !!item?.is_custom
-  };
-}
-
-async function vwShopLoadCatalogBundle(){
-  if(typeof vwLoadInventoryCatalogBundle === "function"){
+  function readCarts(){
     try{
-      const bundle = await vwLoadInventoryCatalogBundle();
-      if(bundle?.items) return bundle;
-    }catch(e){}
-  }
-  try{
-    const res = await api('/api/catalog/inventory');
-    if(res?.ok) return { items: res.items || [], byCategory: res.byCategory || {} };
-  }catch(e){}
-  return { items: [], byCategory: {} };
-}
-
-function vwShopSourceLabel(sourceType){
-  return sourceType === 'custom' ? 'Custom Catalog' : 'Main Catalog';
-}
-
-function vwShopItemSourceBadge(it){
-  if(it?.sourceType === 'custom') return 'Custom Catalog';
-  if(it?.sourceType === 'standard' || it?.sourceType === 'official') return 'Main Catalog';
-  return 'Manual Item';
-}
-
-function vwShopDecorateItemFromCatalog(shopItem, catalogItem){
-  const cat = catalogItem ? vwShopNormalizeCatalogItem(catalogItem) : null;
-  const sourceType = String(shopItem?.sourceType || (cat?.is_custom ? 'custom' : (cat ? 'standard' : 'manual')));
-  const category = String(shopItem?.categoryOverride || shopItem?.category || cat?.category || 'General').trim() || 'General';
-  const price = String(shopItem?.priceOverride ?? shopItem?.cost ?? cat?.default_cost ?? '0').trim() || '0';
-  const weight = String(shopItem?.weightOverride ?? shopItem?.weight ?? cat?.default_weight ?? '').trim();
-  const notes = String(shopItem?.notesOverride ?? shopItem?.notes ?? cat?.default_notes ?? '').trim();
-  return Object.assign({}, shopItem, {
-    id: shopItem?.id || ('i_' + Math.random().toString(36).slice(2,8)),
-    sourceType,
-    sourceId: String(shopItem?.sourceId || cat?.id || ''),
-    category,
-    name: String(shopItem?.nameOverride || shopItem?.name || cat?.name || 'Untitled Item').trim() || 'Untitled Item',
-    cost: price,
-    weight,
-    notes,
-    stock: vwShopNormalizeStock(shopItem?.stock),
-    ammoType: String(shopItem?.ammoType || cat?.ammo_type || '').trim()
-  });
-}
-
-function vwShopFindCatalogMatch(bundle, shopItem){
-  const items = Array.isArray(bundle?.items) ? bundle.items.map(vwShopNormalizeCatalogItem) : [];
-  const sourceType = String(shopItem?.sourceType || '').trim();
-  const sourceId = String(shopItem?.sourceId || '').trim();
-  if(sourceId){
-    const exact = items.find(it => String(it.id) === sourceId);
-    if(exact) return exact;
-  }
-  const name = String(shopItem?.name || '').trim().toLowerCase();
-  const category = String(shopItem?.category || '').trim().toLowerCase();
-  return items.find(it => {
-    const sourceOkay = !sourceType || (sourceType === 'custom' ? it.is_custom : !it.is_custom);
-    return sourceOkay && String(it.name).trim().toLowerCase() === name && (!category || String(it.category).trim().toLowerCase() === category);
-  }) || null;
-}
-
-async function vwShopPromptForItem(existing){
-  const ex = existing || {};
-  const result = await vwModalForm({
-    title: existing ? 'Edit Item' : 'Add Item',
-    fields: [
-      { key:'name', label:'Item name', value: ex.name || '', placeholder:'Flashlight' },
-      { key:'category', label:'Category / Aisle', value: ex.category || 'Gear', placeholder:'Gear' },
-      { key:'cost', label:'Cost ($)', value: String(ex.cost ?? '0'), placeholder:'35' },
-      { key:'weight', label:'Weight', value: String(ex.weight ?? ''), placeholder:'1' },
-      { key:'notes', label:'Description / Notes', value: ex.notes || '', placeholder:'Short item notes' },
-      { key:'stock', label:'Stock (∞ or number)', value: String(ex.stock ?? '∞'), placeholder:'∞' }
-    ],
-    okText: existing ? 'Save' : 'Add'
-  });
-  if(!result || !String(result.name || '').trim()) return null;
-  return {
-    id: ex.id || ('i_' + Math.random().toString(36).slice(2,8)),
-    sourceType: ex.sourceType || 'manual',
-    sourceId: ex.sourceId || '',
-    name: String(result.name || '').trim(),
-    category: String(result.category || 'General').trim() || 'General',
-    cost: String(result.cost ?? '0').trim(),
-    weight: String(result.weight ?? '').trim(),
-    notes: String(result.notes ?? '').trim(),
-    stock: vwShopNormalizeStock(result.stock)
-  };
-}
-
-async function vwShopOpenCatalogAddModal(defaultCategory){
-  if(typeof vwModalBaseSetup !== 'function') return null;
-  const bundle = await vwShopLoadCatalogBundle();
-  const items = (bundle?.items || []).map(vwShopNormalizeCatalogItem);
-  if(!items.length){
-    toast('No inventory items found in the database');
-    return null;
-  }
-
-  const allCategories = Array.from(new Set(items.map(it => it.category).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
-  let sourceMode = 'all';
-  let selectedCategory = defaultCategory && allCategories.includes(defaultCategory) ? defaultCategory : (allCategories[0] || 'General');
-  let selectedId = '';
-
-  const ui = vwModalBaseSetup('Add Item to Shop', 'Add Item', 'Cancel');
-
-  function itemsForView(){
-    return items.filter(it => {
-      const sourceOkay = sourceMode === 'all' || (sourceMode === 'standard' ? !it.is_custom : it.is_custom);
-      const catOkay = !selectedCategory || it.category === selectedCategory;
-      return sourceOkay && catOkay;
-    });
-  }
-
-  function currentItem(){
-    const list = itemsForView();
-    if(!list.some(it => String(it.id) === String(selectedId))){
-      selectedId = list[0]?.id || '';
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return (parsed && typeof parsed === "object") ? parsed : {};
+    }catch(e){
+      return {};
     }
-    return list.find(it => String(it.id) === String(selectedId)) || null;
   }
 
-  function fieldValue(id){
-    return String(document.getElementById(id)?.value || '').trim();
+  function writeCarts(carts){
+    try{ localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(carts || {})); }catch(e){}
   }
 
-  function render(){
-    const visible = itemsForView();
-    const current = currentItem();
-    ui.mBody.innerHTML = `
-      <div class="mini" style="margin-bottom:10px;opacity:.85">Pick an existing inventory item from the database, then set the shelf details for this shop.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <div class="mini" style="margin-bottom:6px;opacity:.9">Source</div>
-          <select id="vwShopSourceMode" class="input" style="width:100%">
-            <option value="all" ${sourceMode==='all'?'selected':''}>All Sources</option>
-            <option value="standard" ${sourceMode==='standard'?'selected':''}>Main Catalog</option>
-            <option value="custom" ${sourceMode==='custom'?'selected':''}>Custom Catalog</option>
-          </select>
-        </div>
-        <div>
-          <div class="mini" style="margin-bottom:6px;opacity:.9">Aisle</div>
-          <select id="vwShopCategoryPick" class="input" style="width:100%">${allCategories.map(cat => `<option value="${vwShopEsc(cat)}" ${cat===selectedCategory?'selected':''}>${vwShopEsc(cat)}</option>`).join('')}</select>
-        </div>
-      </div>
-      <div style="margin-bottom:12px;">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Database Item</div>
-        <select id="vwShopItemPick" class="input" style="width:100%">${visible.map(it => `<option value="${vwShopEsc(it.id)}" ${String(it.id)===String(selectedId)?'selected':''}>${vwShopEsc(it.name)}${it.is_custom ? ' • custom' : ''}</option>`).join('')}</select>
-      </div>
-      <div class="mini" style="margin-bottom:10px;opacity:.85;border:1px solid #2b3a4d;border-radius:12px;padding:10px;">
-        <div><strong>${vwShopEsc(current?.name || 'No item selected')}</strong></div>
-        <div style="margin-top:4px;">Source: ${vwShopEsc(current ? vwShopSourceLabel(current.is_custom ? 'custom' : 'standard') : '--')}</div>
-        <div>Default Cost: $${vwShopEsc(current?.default_cost || '0')} • Default Weight: ${vwShopEsc(current?.default_weight || '--')}</div>
-        <div>Notes: ${vwShopEsc(current?.default_notes || 'No default notes')}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Shelf Price ($)</div><input id="vwShopPrice" class="input" value="${vwShopEsc(String(current?.default_cost || '0'))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Stock</div><input id="vwShopStock" class="input" value="∞" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Aisle Label</div><input id="vwShopAisle" class="input" value="${vwShopEsc(String(defaultCategory || current?.category || selectedCategory || 'General'))}" /></div>
-        <div><div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div><input id="vwShopWeight" class="input" value="${vwShopEsc(String(current?.default_weight || ''))}" /></div>
-      </div>
-      <div style="margin-top:10px;">
-        <div class="mini" style="margin-bottom:6px;opacity:.9">Shelf Notes</div>
-        <input id="vwShopNotes" class="input" value="${vwShopEsc(String(current?.default_notes || ''))}" placeholder="Optional override" />
-      </div>
-    `;
-
-    document.getElementById('vwShopSourceMode')?.addEventListener('change', (e)=>{ sourceMode = e.target.value; render(); });
-    document.getElementById('vwShopCategoryPick')?.addEventListener('change', (e)=>{ selectedCategory = e.target.value; render(); });
-    document.getElementById('vwShopItemPick')?.addEventListener('change', (e)=>{ selectedId = e.target.value; render(); });
+  function getCartBucket(charId, shopId){
+    const carts = readCarts();
+    carts[charId] ||= {};
+    carts[charId][shopId] ||= { items: [] };
+    return { carts, bucket: carts[charId][shopId] };
   }
 
-  function close(val){
-    ui.modal.style.display = 'none';
-    ui.btnOk.onclick = null;
-    ui.btnCan.onclick = null;
-    ui.modal.onclick = null;
-    if(typeof vwSetModalOpen === 'function') vwSetModalOpen(false);
-    return val;
+  function getCurrentCart(){
+    const c = getChar?.();
+    const shop = getActiveShop();
+    if(!c || !shop) return { carts: readCarts(), bucket: { items: [] }, char: c, shop };
+    const out = getCartBucket(c.id, shop.id);
+    out.char = c;
+    out.shop = shop;
+    return out;
   }
 
-  return new Promise((resolve)=>{
-    ui.btnCan.onclick = ()=> resolve(close(null));
-    ui.modal.onclick = (e)=>{ if(e.target === ui.modal) resolve(close(null)); };
-    ui.btnOk.onclick = ()=>{
-      const selected = items.find(it => String(it.id) === String(selectedId));
-      if(!selected){ toast('Choose an item first'); return; }
-      resolve(close({
-        id: 'i_' + Math.random().toString(36).slice(2,8),
-        sourceType: selected.is_custom ? 'custom' : 'standard',
-        sourceId: selected.id,
-        category: fieldValue('vwShopAisle') || selected.category || 'General',
-        cost: fieldValue('vwShopPrice') || String(selected.default_cost || '0'),
-        weight: fieldValue('vwShopWeight') || String(selected.default_weight || ''),
-        notes: fieldValue('vwShopNotes') || String(selected.default_notes || ''),
-        stock: vwShopNormalizeStock(fieldValue('vwShopStock')),
-        ammoType: String(selected.ammo_type || '').trim()
-      }));
-    };
-    if(typeof vwSetModalOpen === 'function') vwSetModalOpen(true);
-    ui.modal.style.display = 'flex';
-    render();
-  });
-}
-
-async function vwShopPromptForEdit(item){
-  const ex = item || {};
-  const catalog = await vwShopLoadCatalogBundle();
-  const linked = vwShopFindCatalogMatch(catalog, ex);
-  const title = ex?.sourceId ? 'Edit Shop Shelf Item' : 'Edit Item';
-  const result = await vwModalForm({
-    title,
-    fields: [
-      { key:'name', label:'Item name', value: ex.name || linked?.name || '', placeholder:'Flashlight' },
-      { key:'category', label:'Category / Aisle', value: ex.category || linked?.category || 'Gear', placeholder:'Gear' },
-      { key:'cost', label:'Cost ($)', value: String(ex.cost ?? linked?.default_cost ?? '0'), placeholder:'35' },
-      { key:'weight', label:'Weight', value: String(ex.weight ?? linked?.default_weight ?? ''), placeholder:'1' },
-      { key:'notes', label:'Description / Notes', value: ex.notes || linked?.default_notes || '', placeholder:'Short item notes' },
-      { key:'stock', label:'Stock (∞ or number)', value: String(ex.stock ?? '∞'), placeholder:'∞' }
-    ],
-    okText: 'Save'
-  });
-  if(!result || !String(result.name || '').trim()) return null;
-  return Object.assign({}, ex, {
-    name: String(result.name || '').trim(),
-    category: String(result.category || 'General').trim() || 'General',
-    cost: String(result.cost ?? '0').trim(),
-    weight: String(result.weight ?? '').trim(),
-    notes: String(result.notes ?? '').trim(),
-    stock: vwShopNormalizeStock(result.stock)
-  });
-}
-
-async function vwShopAddToInventory(item){
-  const c = vwShopGetActiveCharacter();
-  if(!c){ toast('Create/select character first'); return; }
-  c.inventory ||= [];
-  const isUnique = String(item?.notes || '').toLowerCase().includes('unique');
-  const existing = c.inventory.find(x =>
-    String(x?.name || '').toLowerCase() === String(item?.name || '').toLowerCase() &&
-    String(x?.category || '').toLowerCase() === String(item?.category || '').toLowerCase()
-  );
-  if(isUnique && existing){
-    toast('Already owned');
-    return;
-  }
-  if(existing && !isUnique){
-    const prev = parseInt(String(existing.qty || '1'), 10);
-    existing.qty = String((Number.isFinite(prev) ? prev : 1) + 1);
-    if(!String(existing.cost || '').trim()) existing.cost = String(item?.cost || '');
-    if(!String(existing.weight || '').trim()) existing.weight = String(item?.weight || '');
-    if(!String(existing.notes || '').trim()) existing.notes = String(item?.notes || '');
-  } else {
-    c.inventory.push({
-      category: item?.category || '',
-      name: item?.name || '',
-      weight: String(item?.weight || ''),
-      qty: '1',
-      cost: String(item?.cost || ''),
-      notes: item?.notes || '',
-      ammoType: item?.ammoType || ''
-    });
-  }
-  const res = await api('/api/character/save',{method:'POST',body:JSON.stringify({charId:c.id, character:c})});
-  if(!res?.ok){ toast(res?.error || 'Failed to save character'); return; }
-  await api('/api/notify',{method:'POST',body:JSON.stringify({type:'Shop Request', detail:(item?.name || 'Item') + ' added from shop', from: SESSION.name || 'Player'})});
-  toast('Added to inventory');
-  await refreshAll();
-}
-
-async function vwShopSave(shops){
-  const res = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
-  if(!res?.ok && res?.error) toast(res.error);
-  return res;
-}
-
-async function vwShopRunAdminAction(btn, fn){
-  if(!btn || btn.dataset.busy === '1') return;
-  btn.dataset.busy = '1';
-  btn.disabled = true;
-  try{
-    await fn();
-  }finally{
-    btn.dataset.busy = '0';
-    btn.disabled = false;
-  }
-}
-
-async function renderShop(){
-  const st = window.__STATE || {};
-  const shops = st.shops || {};
-  shops.list ||= [];
-  const feat = (st.settings?.features) || { shop:true, intel:true };
-  const enabled = !!shops.enabled;
-  const enabledPill = document.getElementById('shopEnabledPill');
-  const shopPill = document.getElementById('shopPill');
-  const shopSel = document.getElementById('shopSel');
-  const searchEl = document.getElementById('shopSearch');
-  const aislesEl = document.getElementById('shopAisles');
-  const statsEl = document.getElementById('shopStats');
-  const filtersEl = document.getElementById('shopCategoryFilters');
-  const legacyBody = document.getElementById('shopBody');
-  const toggleBtn = document.getElementById('toggleShopBtn');
-  const addShopBtn = document.getElementById('addShopBtn');
-  const editShopBtn = document.getElementById('editShopBtn');
-  if(legacyBody) legacyBody.innerHTML = '';
-
-  if(!enabledPill || !shopSel || !aislesEl) return;
-
-  const ensureActiveShopId = () => {
-    if(!shops.activeShopId && shops.list.length) shops.activeShopId = shops.list[0].id;
-    if(shops.activeShopId && !shops.list.some(s => s.id === shops.activeShopId)){
-      shops.activeShopId = shops.list[0]?.id || null;
-    }
-  };
-  ensureActiveShopId();
-
-  if(toggleBtn){
-    toggleBtn.textContent = enabled ? 'Disable Shop' : 'Enable Shop';
-    toggleBtn.title = enabled ? 'Turn the entire shop system off for players' : 'Turn the shop system back on';
+  function itemCartKey(it){ return String(it.id || it.sourceId || it.name || Math.random()); }
+  function itemBundleQty(it){ return Math.max(1, parseIntSafe(it.inventoryQty ?? it.qty ?? 1, 1)); }
+  function itemBundleUnit(it){ return String(it.inventoryUnit || "").trim(); }
+  function itemStockLeft(it){ return isInfiniteStock(it.stock) ? Infinity : Math.max(0, parseIntSafe(it.stock, 0)); }
+  function lineStockLeft(line){
+    const shop = getActiveShop();
+    if(!shop) return Infinity;
+    const item = (shop.items || []).find(x => String(x.id) === String(line.itemId || line.id));
+    return item ? itemStockLeft(item) : 0;
   }
 
-  if(!feat.shop){
-    enabledPill.textContent = 'Shop: Disabled';
-    if(shopPill) shopPill.textContent = 'Shop: --';
-    statsEl.innerHTML = '';
-    filtersEl.innerHTML = '';
-    aislesEl.innerHTML = '<div class="shop-empty">Shop feature is currently disabled in Settings.</div>';
-    return;
+  function cartLineDisplayQty(line){
+    const totalUnits = Math.max(1, parseIntSafe(line.qty, 1)) * itemBundleQty(line);
+    const unit = itemBundleUnit(line);
+    return unit ? (totalUnits + " " + unit) : String(totalUnits);
   }
 
-  enabledPill.textContent = enabled ? 'Shop: Enabled' : 'Shop: Disabled';
-  const activeShop = shops.list.find(s => s.id === shops.activeShopId) || null;
-  if(shopPill) shopPill.textContent = 'Shop: ' + (activeShop?.name || '--');
+  function addItemToCart(it){
+    const c = getChar?.();
+    if(!c){ toast("Create/select character first"); return; }
+    const shop = getActiveShop();
+    if(!shop){ toast("No shop selected"); return; }
+    if(itemStockLeft(it) <= 0){ toast("Out of stock"); return; }
 
-  shopSel.innerHTML = shops.list.map(s => '<option value="' + vwShopEsc(s.id) + '">' + vwShopEsc(s.name) + '</option>').join('');
-  if(activeShop) shopSel.value = activeShop.id;
-  shopSel.onchange = async () => {
-    if(SESSION.role !== 'dm'){
-      toast('DM only');
-      if(activeShop) shopSel.value = activeShop.id;
+    const { carts, bucket } = getCartBucket(c.id, shop.id);
+    bucket.items ||= [];
+    const key = itemCartKey(it);
+    let line = bucket.items.find(x => String(x.id) === String(key));
+    const currentQty = line ? Math.max(1, parseIntSafe(line.qty, 1)) : 0;
+    const proposedQty = currentQty + 1;
+    if(itemStockLeft(it) !== Infinity && proposedQty > itemStockLeft(it)){
+      toast("Not enough stock");
       return;
     }
-    shops.activeShopId = shopSel.value;
-    await vwShopSave(shops);
-    toast('Active shop set');
+
+    if(line){
+      line.qty = proposedQty;
+    }else{
+      bucket.items.push({
+        id: key,
+        itemId: it.id || key,
+        name: it.name || "Item",
+        category: it.category || "",
+        cost: parseMoney(it.cost),
+        weight: it.weight ?? "",
+        notes: it.notes || "",
+        stock: it.stock ?? "∞",
+        qty: 1,
+        inventoryQty: itemBundleQty(it),
+        inventoryUnit: itemBundleUnit(it),
+        ammo_type: it.ammo_type || "",
+      });
+    }
+
+    writeCarts(carts);
+    renderShopCart();
+    toast("Added to cart");
+  }
+
+  function updateCartLineQty(lineId, nextQty){
+    const c = getChar?.();
+    const shop = getActiveShop();
+    if(!c || !shop) return;
+    const { carts, bucket } = getCartBucket(c.id, shop.id);
+    bucket.items ||= [];
+    const idx = bucket.items.findIndex(x => String(x.id) === String(lineId));
+    if(idx < 0) return;
+    if(nextQty <= 0){
+      bucket.items.splice(idx, 1);
+      writeCarts(carts);
+      renderShopCart();
+      return;
+    }
+    const line = bucket.items[idx];
+    const maxStock = lineStockLeft(line);
+    if(maxStock !== Infinity && nextQty > maxStock){
+      toast("Not enough stock");
+      return;
+    }
+    line.qty = nextQty;
+    writeCarts(carts);
+    renderShopCart();
+  }
+
+  function clearCurrentCart(showToast){
+    const c = getChar?.();
+    const shop = getActiveShop();
+    if(!c || !shop) return;
+    const carts = readCarts();
+    if(carts[c.id] && carts[c.id][shop.id]){
+      carts[c.id][shop.id] = { items: [] };
+      writeCarts(carts);
+      renderShopCart();
+      if(showToast) toast("Cart cleared");
+    }
+  }
+
+  function renderShopCart(){
+    const wrap = document.getElementById("shopCartPanel");
+    const body = document.getElementById("shopCartBody");
+    const totalEl = document.getElementById("shopCartTotal");
+    const statusEl = document.getElementById("shopCartStatus");
+    const checkoutBtn = document.getElementById("shopCheckoutBtn");
+    const clearBtn = document.getElementById("shopClearCartBtn");
+    if(!wrap || !body || !totalEl || !statusEl || !checkoutBtn || !clearBtn) return;
+
+    if(SESSION.role === "dm"){
+      wrap.classList.add("hidden");
+      return;
+    }
+    wrap.classList.remove("hidden");
+
+    const c = getChar?.();
+    const shop = getActiveShop();
+    if(!c){
+      body.innerHTML = '<div class="mini">Select a character to start shopping.</div>';
+      totalEl.textContent = "$0";
+      statusEl.textContent = "Cart unavailable";
+      checkoutBtn.disabled = true;
+      clearBtn.disabled = true;
+      return;
+    }
+    if(!shop){
+      body.innerHTML = '<div class="mini">No active shop.</div>';
+      totalEl.textContent = "$0";
+      statusEl.textContent = "Cart unavailable";
+      checkoutBtn.disabled = true;
+      clearBtn.disabled = true;
+      return;
+    }
+
+    const { bucket } = getCartBucket(c.id, shop.id);
+    const items = Array.isArray(bucket.items) ? bucket.items : [];
+    const total = items.reduce((sum, line) => sum + (parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty, 1))), 0);
+
+    statusEl.textContent = 'Shopping as ' + (c.name || 'Character') + ' • ' + (shop.name || 'Shop');
+
+    if(!items.length){
+      body.innerHTML = '<div class="mini">Cart is empty. Add a few shelf items and they will stack here.</div>';
+      totalEl.textContent = "$0";
+      checkoutBtn.disabled = true;
+      clearBtn.disabled = true;
+    }else{
+      body.innerHTML = '';
+      items.forEach(line => {
+        const row = document.createElement("div");
+        row.className = "shop-cart-row";
+        row.innerHTML =
+          '<div class="shop-cart-main">' +
+            '<div class="shop-cart-name">' + esc(line.name) + '</div>' +
+            '<div class="mini">' + esc(line.category || "General") + ' • ' + esc(cartLineDisplayQty(line)) + '</div>' +
+          '</div>' +
+          '<div class="shop-cart-linecost">$' + esc((parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty,1))).toFixed(2).replace(/\.00$/,"")) + '</div>' +
+          '<div class="shop-cart-controls">' +
+            '<button class="btn smallbtn shop-qty-btn" data-act="dec">-</button>' +
+            '<span class="shop-cart-qty">' + esc(line.qty) + '</span>' +
+            '<button class="btn smallbtn shop-qty-btn" data-act="inc">+</button>' +
+            '<button class="btn smallbtn shop-remove-btn" data-act="del">Remove</button>' +
+          '</div>';
+
+        row.querySelector('[data-act="dec"]').onclick = ()=>updateCartLineQty(line.id, Math.max(0, parseIntSafe(line.qty,1)-1));
+        row.querySelector('[data-act="inc"]').onclick = ()=>updateCartLineQty(line.id, parseIntSafe(line.qty,1)+1);
+        row.querySelector('[data-act="del"]').onclick = ()=>updateCartLineQty(line.id, 0);
+        body.appendChild(row);
+      });
+
+      totalEl.textContent = "$" + total.toFixed(2).replace(/\.00$/,"");
+      checkoutBtn.disabled = false;
+      clearBtn.disabled = false;
+    }
+
+    clearBtn.onclick = async ()=>{
+      const ok = await vwModalConfirm({ title:"Clear Cart", message:"Remove all items from this cart?" });
+      if(!ok) return;
+      clearCurrentCart(true);
+    };
+    checkoutBtn.onclick = checkoutCurrentCart;
+  }
+
+  function buildInventoryQtyString(totalQty, unit){ return unit ? (String(totalQty) + ' ' + unit) : String(totalQty); }
+  function parseInventoryQtyString(raw){ const m = String(raw ?? '').trim().match(/^(\d+)/); return m ? parseInt(m[1], 10) : parseIntSafe(raw, 0); }
+  function isUniqueShopItem(line){ return String(line.notes || '').toLowerCase().includes('unique'); }
+
+  async function checkoutCurrentCart(){
+    const c = getChar?.();
+    const shop = getActiveShop();
+    if(!c){ toast("Create/select character first"); return; }
+    if(!shop){ toast("No shop selected"); return; }
+
+    const { carts, bucket } = getCartBucket(c.id, shop.id);
+    const lines = Array.isArray(bucket.items) ? bucket.items : [];
+    if(!lines.length){ toast("Cart is empty"); return; }
+
+    const shopItems = shop.items || [];
+    for(const line of lines){
+      const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
+      if(!current){ toast('One or more items are no longer sold here'); return; }
+      const stockLeft = itemStockLeft(current);
+      if(stockLeft !== Infinity && Math.max(1, parseIntSafe(line.qty,1)) > stockLeft){ toast('Not enough stock for ' + (current.name || 'item')); return; }
+      if(isUniqueShopItem(line) && (c.inventory || []).some(x=>String(x.name||'').toLowerCase()===String(line.name||'').toLowerCase())){ toast((line.name || 'Unique item') + ' is already owned'); return; }
+    }
+
+    const preview = lines.map(line => '• ' + (line.name || 'Item') + ' × ' + Math.max(1, parseIntSafe(line.qty, 1)) + ' → ' + cartLineDisplayQty(line)).join('<br/>');
+    const ok = await vwModalConfirm({
+      title: "Checkout Cart",
+      message: "Complete checkout and add these items to inventory?<br/><br/>" + preview + '<br/><br/><span class="mini">Money validation is not connected yet in this pass.</span>',
+      okText: "Checkout",
+      cancelText: "Back"
+    });
+    if(!ok) return;
+
+    c.inventory ||= [];
+    const grouped = new Map();
+    lines.forEach(line => {
+      const bundles = Math.max(1, parseIntSafe(line.qty, 1));
+      const totalQty = bundles * itemBundleQty(line);
+      const groupKey = [String(line.name || '').toLowerCase(), String(line.category || '').toLowerCase(), String(line.notes || '').toLowerCase(), String(line.weight || ''), String(line.cost || ''), String(line.inventoryUnit || '').toLowerCase(), String(line.ammo_type || '').toLowerCase()].join('|');
+      const existing = grouped.get(groupKey) || { category: line.category || '', name: line.name || 'Item', weight: String(line.weight ?? ''), qtyValue: 0, cost: String(line.cost ?? ''), notes: line.notes || '', inventoryUnit: itemBundleUnit(line), ammo_type: line.ammo_type || '' };
+      existing.qtyValue += totalQty;
+      grouped.set(groupKey, existing);
+    });
+
+    grouped.forEach(entry => {
+      const invMatch = (c.inventory || []).find(item =>
+        String(item.name || '').toLowerCase() === String(entry.name || '').toLowerCase() &&
+        String(item.category || '').toLowerCase() === String(entry.category || '').toLowerCase() &&
+        String(item.notes || '').toLowerCase() === String(entry.notes || '').toLowerCase() &&
+        String(item.weight || '') === String(entry.weight || '') &&
+        String(item.ammo_type || '').toLowerCase() === String(entry.ammo_type || '').toLowerCase()
+      );
+      if(invMatch){
+        const currentQty = parseInventoryQtyString(invMatch.qty);
+        invMatch.qty = buildInventoryQtyString(currentQty + entry.qtyValue, entry.inventoryUnit);
+        if(entry.ammo_type && !invMatch.ammo_type) invMatch.ammo_type = entry.ammo_type;
+      }else{
+        c.inventory.push({ category: entry.category, name: entry.name, weight: entry.weight, qty: buildInventoryQtyString(entry.qtyValue, entry.inventoryUnit), cost: entry.cost, notes: entry.notes, ammo_type: entry.ammo_type || '' });
+      }
+    });
+
+    lines.forEach(line => {
+      const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
+      if(current && !isInfiniteStock(current.stock)) current.stock = Math.max(0, itemStockLeft(current) - Math.max(1, parseIntSafe(line.qty, 1)));
+    });
+
+    const saveCharRes = await api('/api/character/save', { method:'POST', body: JSON.stringify({ charId:c.id, character:c }) });
+    if(!saveCharRes?.ok){ toast(saveCharRes?.error || 'Failed to save inventory'); return; }
+
+    await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
+    await api('/api/notify', { method:'POST', body: JSON.stringify({ type:'Shop Checkout', detail:(shop.name || 'Shop') + ' • ' + lines.length + ' cart item(s)', from: SESSION.name || SESSION.username || 'Player' }) });
+
+    bucket.items = [];
+    writeCarts(carts);
+    toast('Checkout complete');
     await refreshAll();
-  };
+  }
 
-  if(toggleBtn) toggleBtn.onclick = async () => {
-    if(SESSION.role !== 'dm') return;
-    await vwShopRunAdminAction(toggleBtn, async ()=>{
-      shops.enabled = !shops.enabled;
-      enabledPill.textContent = shops.enabled ? 'Shop: Enabled' : 'Shop: Disabled';
-      toggleBtn.textContent = shops.enabled ? 'Disable Shop' : 'Enable Shop';
-      const res = await vwShopSave(shops);
-      if(!res?.ok) return;
-      toast(shops.enabled ? 'Shop enabled' : 'Shop disabled');
-      await refreshAll();
+  async function openAddItemModal(shop){
+    const result = await vwModalForm({
+      title: 'Add Item',
+      fields: [
+        { key:'name', label:'Item name', value:'', placeholder:'9mm Ammo Box' },
+        { key:'category', label:'Category', value:'Ammo', placeholder:'Ammo / Gear / Medical' },
+        { key:'cost', label:'Cost ($)', value:'0', placeholder:'20' },
+        { key:'weight', label:'Weight', value:'1', placeholder:'1' },
+        { key:'inventoryQty', label:'Inventory quantity per purchase', value:'1', placeholder:'400' },
+        { key:'inventoryUnit', label:'Inventory unit label (optional)', value:'', placeholder:'rounds' },
+        { key:'ammo_type', label:'Ammo type (optional)', value:'', placeholder:'9mm' },
+        { key:'notes', label:'Notes', value:'', placeholder:'Unique / special' },
+        { key:'stock', label:'Stock (∞ or number)', value:'∞', placeholder:'∞' }
+      ],
+      okText: 'Add'
     });
-  };
-  if(addShopBtn) addShopBtn.onclick = async () => {
-    if(SESSION.role !== 'dm') return;
-    await vwShopRunAdminAction(addShopBtn, async ()=>{
-      const n = await vwModalInput({ title:'Add New Shop', label:'Shop name', placeholder:'e.g. Riverside Market' });
-      if(!n || !String(n).trim()) return;
-      const id = 's_' + Math.random().toString(36).slice(2,8);
-      shops.list.push({ id, name:String(n).trim(), items:[] });
-      shops.activeShopId = id;
-      await vwShopSave(shops);
-      toast('Shop created');
-      await refreshAll();
+    if(!result || !result.name) return;
+    shop.items ||= [];
+    shop.items.push({
+      id: 'i_' + Math.random().toString(36).slice(2,8),
+      name: result.name,
+      category: result.category,
+      cost: parseMoney(result.cost),
+      weight: result.weight,
+      inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
+      inventoryUnit: String(result.inventoryUnit || '').trim(),
+      ammo_type: String(result.ammo_type || '').trim(),
+      notes: result.notes || '',
+      stock: result.stock
     });
-  };
-  if(editShopBtn) editShopBtn.onclick = async () => {
-    if(SESSION.role !== 'dm') return;
-    await vwShopRunAdminAction(editShopBtn, async ()=>{
-      const curr = shops.list.find(s => s.id === shops.activeShopId);
-      if(!curr) return;
-      const n = await vwModalInput({ title:'Rename Shop', label:'Shop name', value:curr.name, placeholder:'Shop name' });
-      if(!n || !String(n).trim()) return;
-      curr.name = String(n).trim();
-      await vwShopSave(shops);
-      toast('Shop renamed');
-      await refreshAll();
+    await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
+    toast('Item added');
+    await refreshAll();
+  }
+
+  async function openEditItemModal(shop, it){
+    const result = await vwModalForm({
+      title: 'Edit Item',
+      fields: [
+        { key:'name', label:'Item name', value:it.name || '', placeholder:'9mm Ammo Box' },
+        { key:'category', label:'Category', value:it.category || '', placeholder:'Ammo / Gear / Medical' },
+        { key:'cost', label:'Cost ($)', value:String(it.cost ?? ''), placeholder:'20' },
+        { key:'weight', label:'Weight', value:String(it.weight ?? ''), placeholder:'1' },
+        { key:'inventoryQty', label:'Inventory quantity per purchase', value:String(it.inventoryQty ?? it.qty ?? 1), placeholder:'400' },
+        { key:'inventoryUnit', label:'Inventory unit label (optional)', value:String(it.inventoryUnit || ''), placeholder:'rounds' },
+        { key:'ammo_type', label:'Ammo type (optional)', value:String(it.ammo_type || ''), placeholder:'9mm' },
+        { key:'notes', label:'Notes', value:it.notes || '', placeholder:'Unique / special' },
+        { key:'stock', label:'Stock (∞ or number)', value:String(it.stock ?? '∞'), placeholder:'∞' }
+      ],
+      okText: 'Save'
     });
-  };
-
-  if(!activeShop){
-    statsEl.innerHTML = '';
-    filtersEl.innerHTML = '';
-    aislesEl.innerHTML = SESSION.role === 'dm'
-      ? '<div class="shop-empty">No shop exists yet. Use <strong>ADD NEW SHOP</strong> to create your first storefront.</div>'
-      : '<div class="shop-empty">No shop is available yet. Ask the DM to create one.</div>';
-    return;
+    if(!result) return;
+    Object.assign(it, {
+      name: result.name,
+      category: result.category,
+      cost: parseMoney(result.cost),
+      weight: result.weight,
+      inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
+      inventoryUnit: String(result.inventoryUnit || '').trim(),
+      ammo_type: String(result.ammo_type || '').trim(),
+      notes: result.notes || '',
+      stock: result.stock
+    });
+    await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
+    toast('Item saved');
+    await refreshAll();
   }
 
-  if(!enabled && SESSION.role !== 'dm'){
-    vwShopRenderStats(statsEl, activeShop, []);
-    filtersEl.innerHTML = '';
-    aislesEl.innerHTML = '<div class="shop-empty">The shop is currently offline. The lights are out and the checkout lanes are closed.</div>';
-    return;
+  function decorateItemMeta(it){
+    const bits = [];
+    const qty = itemBundleQty(it);
+    const unit = itemBundleUnit(it);
+    if(qty || unit) bits.push(qty + (unit ? ' ' + unit : ''));
+    if(it.ammo_type) bits.push(it.ammo_type);
+    return bits.join(' • ');
   }
 
-  const rawSearch = String(searchEl?.value || '').trim().toLowerCase();
-  const stateKey = '__VW_SHOP_UI';
-  window[stateKey] ||= { selectedCategory:'__all__' };
-  const uiState = window[stateKey];
+  window.renderShop = async function renderShop(){
+    const st = window.__STATE || {};
+    const shops = getShopState();
+    const feat = (st.settings?.features) || { shop:true, intel:true };
+    const enabledPill = document.getElementById('shopEnabledPill');
+    const shopPill = document.getElementById('shopPill');
+    const body = document.getElementById('shopBody');
+    const sel = document.getElementById('shopSel');
+    const editBtn = document.getElementById('editShopBtn');
+    const help = document.getElementById('shopHelpText');
+    if(!enabledPill || !shopPill || !body || !sel) return;
 
-  const bundle = await vwShopLoadCatalogBundle();
-  const items = Array.isArray(activeShop.items) ? activeShop.items.map(it => vwShopDecorateItemFromCatalog(it, vwShopFindCatalogMatch(bundle, it))) : [];
-  activeShop.items = items;
+    if(!feat.shop){
+      enabledPill.textContent = 'Shop: Disabled';
+      shopPill.textContent = 'Shop: --';
+      body.innerHTML = '<tr><td colspan="8" class="mini">Shop feature is disabled.</td></tr>';
+      renderShopCart();
+      return;
+    }
 
-  const matchesSearch = (it) => {
-    if(!rawSearch) return true;
-    const hay = [it?.name, it?.category, it?.notes, it?.cost, it?.weight, it?.ammoType, vwShopItemSourceBadge(it)].join(' ').toLowerCase();
-    return hay.includes(rawSearch);
-  };
+    const enabled = !!shops.enabled;
+    const currentShop = getActiveShop();
+    enabledPill.textContent = enabled ? 'Shop: Enabled' : 'Shop: Disabled';
+    shopPill.textContent = 'Shop: ' + (currentShop?.name || '--');
 
-  const groupedAll = vwShopGroupItems(items);
-  const filteredGroups = groupedAll
-    .map(([cat, list]) => [cat, list.filter(matchesSearch)])
-    .filter(([cat, list]) => list.length && (uiState.selectedCategory === '__all__' || uiState.selectedCategory === cat));
+    sel.innerHTML = '';
+    (shops.list || []).forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.textContent = s.name;
+      if(s.id === shops.activeShopId) o.selected = true;
+      sel.appendChild(o);
+    });
 
-  vwShopRenderStats(statsEl, activeShop, groupedAll);
-  vwShopRenderFilters(filtersEl, groupedAll, uiState.selectedCategory, async (cat) => {
-    uiState.selectedCategory = cat;
-    await renderShop();
-  });
+    sel.onchange = async ()=>{
+      if(SESSION.role !== 'dm') return renderShopCart();
+      shops.activeShopId = sel.value;
+      await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+      toast('Active shop set');
+      await refreshAll();
+    };
 
-  if(searchEl && !searchEl.dataset.boundShopSearch){
-    searchEl.dataset.boundShopSearch = '1';
-    searchEl.addEventListener('input', () => renderShop());
-  }
+    const toggleBtn = document.getElementById('toggleShopBtn');
+    const addShopBtn = document.getElementById('addShopBtn');
+    if(toggleBtn){
+      toggleBtn.textContent = enabled ? 'Disable Shop' : 'Enable Shop';
+      toggleBtn.onclick = async ()=>{
+        if(SESSION.role !== 'dm') return;
+        shops.enabled = !shops.enabled;
+        await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+        toast('Shop toggled');
+        await refreshAll();
+      };
+    }
+    if(addShopBtn){
+      addShopBtn.onclick = async ()=>{
+        if(SESSION.role !== 'dm') return;
+        const n = await vwModalInput({ title:'New Shop', label:'Shop name', placeholder:'e.g. Riverside Armory' });
+        if(!n) return;
+        const id = 's_' + Math.random().toString(36).slice(2,8);
+        shops.list ||= [];
+        shops.list.push({ id, name:n, items:[] });
+        shops.activeShopId = id;
+        await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+        toast('Shop created');
+        await refreshAll();
+      };
+    }
+    if(editBtn){
+      editBtn.classList.toggle('hidden', SESSION.role !== 'dm');
+      editBtn.onclick = async ()=>{
+        if(SESSION.role !== 'dm') return;
+        const curr = getActiveShop();
+        if(!curr) return;
+        const n = await vwModalInput({ title:'Rename Shop', label:'Shop name', value:curr.name, placeholder:'Shop name' });
+        if(!n) return;
+        curr.name = n;
+        await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+        toast('Shop renamed');
+        await refreshAll();
+      };
+    }
 
-  if(!filteredGroups.length){
-    aislesEl.innerHTML = '<div class="shop-empty">Nothing matches the current aisle filter or search. Try another shelf label.</div>';
-    return;
-  }
+    body.innerHTML = '';
+    if(!enabled && SESSION.role !== 'dm'){
+      body.innerHTML = '<tr><td colspan="8" class="mini">Shop is currently disabled.</td></tr>';
+      renderShopCart();
+      return;
+    }
+    if(!currentShop){
+      body.innerHTML = '<tr><td colspan="8" class="mini">No shop selected.</td></tr>';
+      renderShopCart();
+      return;
+    }
 
-  aislesEl.innerHTML = '';
-  filteredGroups.forEach(([category, list]) => {
-    const aisle = document.createElement('section');
-    aisle.className = 'shop-aisle';
-    aisle.innerHTML =
-      '<div class="shop-aisle-head">' +
-        '<div>' +
-          '<div class="shop-aisle-title">Aisle: ' + vwShopEsc(category) + '</div>' +
-          '<div class="shop-aisle-meta">' +
-            '<span class="badge">' + vwShopEsc(list.length) + ' item' + (list.length === 1 ? '' : 's') + '</span>' +
-            '<span class="badge">' + (SESSION.role === 'dm' ? 'DM Management View' : 'Player Browsing View') + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="shop-actions">' +
-          (SESSION.role === 'dm' ? '<button class="btn smallbtn" data-add-in-cat="' + vwShopEsc(category) + '">Add Item to Aisle</button>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="shop-aisle-grid"></div>';
+    if(help){
+      help.textContent = SESSION.role === 'dm'
+        ? 'DM can manage shelves here. Players now add items to a cart and check out later.'
+        : 'Browse the shelves, add items to your cart, then check out when you are ready.';
+    }
 
-    const grid = aisle.querySelector('.shop-aisle-grid');
-    list.forEach((it) => {
-      const card = document.createElement('article');
-      card.className = 'shop-card';
-      const notes = String(it?.notes || '').trim();
-      card.innerHTML =
-        '<div class="shop-card-top">' +
-          '<div>' +
-            '<div class="shop-card-title">' + vwShopEsc(it?.name || 'Untitled Item') + '</div>' +
-            '<div class="shop-card-meta">' +
-              '<span class="badge">' + vwShopEsc(it?.category || 'General') + '</span>' +
-              '<span class="badge">Wt ' + vwShopEsc(it?.weight || '--') + '</span>' +
-              '<span class="badge">' + vwShopEsc(vwShopItemSourceBadge(it)) + '</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="shop-card-price">$' + vwShopEsc(it?.cost || '0') + '</div>' +
-        '</div>' +
-        '<div class="shop-card-desc">' + vwShopEsc(notes || 'No item notes yet. This shelf is waiting for a label.') + '</div>' +
-        '<div class="shop-card-footer">' +
-          '<div class="shop-stock">' + vwShopEsc(vwShopStockLabel(it?.stock)) + '</div>' +
-          '<div class="shop-actions"></div>' +
-        '</div>';
-      const actions = card.querySelector('.shop-actions');
+    (currentShop.items || []).forEach((it, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + esc(it.name) + '</td>' +
+        '<td>' + esc(it.category || '') + '</td>' +
+        '<td>$' + esc(parseMoney(it.cost).toFixed(2).replace(/\.00$/,'')) + '</td>' +
+        '<td>' + esc(it.weight || '') + '</td>' +
+        '<td>' + esc(decorateItemMeta(it) || '—') + '</td>' +
+        '<td>' + esc(it.notes || '') + '</td>' +
+        '<td>' + esc(isInfiniteStock(it.stock) ? '∞' : itemStockLeft(it)) + '</td>' +
+        '<td></td>';
+      const td = tr.lastChild;
       if(SESSION.role === 'dm'){
-        actions.innerHTML = '<button class="btn smallbtn" data-edit-item="1">Edit</button><button class="btn smallbtn" data-del-item="1">Delete</button>';
-        const editBtn = actions.querySelector('[data-edit-item]');
-        const delBtn = actions.querySelector('[data-del-item]');
-        editBtn.onclick = async () => {
-          const updated = await vwShopPromptForEdit(it);
-          if(!updated) return;
-          Object.assign(it, updated);
-          await vwShopSave(shops);
-          toast('Item saved');
-          await refreshAll();
-        };
-        delBtn.onclick = async () => {
-          const ok = await vwModalConfirm({ title:'Delete Item', message:'Delete "' + (it?.name || 'this item') + '" from the shop shelf?' });
+        td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Del</button>';
+        const [editItemBtn, delBtn] = td.querySelectorAll('button');
+        editItemBtn.onclick = ()=>openEditItemModal(currentShop, it);
+        delBtn.onclick = async ()=>{
+          const ok = await vwModalConfirm({ title:'Delete Item', message:'Delete "' + (it.name || 'this item') + '"?' });
           if(!ok) return;
-          const src = activeShop.items || [];
-          const realIdx = src.indexOf(it);
-          if(realIdx >= 0) src.splice(realIdx, 1);
-          await vwShopSave(shops);
+          currentShop.items.splice(idx, 1);
+          await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
           toast('Item deleted');
           await refreshAll();
         };
-      } else {
-        actions.innerHTML = '<button class="btn smallbtn" data-buy-item="1">Add to Inventory</button>';
-        actions.querySelector('[data-buy-item]').onclick = async () => {
-          await vwShopAddToInventory(it);
-        };
+      }else{
+        const soldOut = itemStockLeft(it) <= 0;
+        td.innerHTML = '<button class="btn smallbtn"' + (soldOut ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
+        td.querySelector('button').onclick = ()=>{ if(!soldOut) addItemToCart(it); };
       }
-      grid.appendChild(card);
+      body.appendChild(tr);
     });
 
     if(SESSION.role === 'dm'){
-      const addInCat = aisle.querySelector('[data-add-in-cat]');
-      if(addInCat){
-        addInCat.onclick = async () => {
-          const created = await vwShopOpenCatalogAddModal(category);
-          if(!created) return;
-          activeShop.items ||= [];
-          activeShop.items.push(created);
-          await vwShopSave(shops);
-          toast('Item added from database');
-          await refreshAll();
-        };
-      }
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="8"><button class="btn smallbtn" id="addShopItemBtn">Add Item</button></td>';
+      body.appendChild(tr);
+      tr.querySelector('#addShopItemBtn').onclick = ()=>openAddItemModal(currentShop);
     }
 
-    aislesEl.appendChild(aisle);
-  });
-
-  if(SESSION.role === 'dm'){
-    const quickAdd = document.createElement('div');
-    quickAdd.className = 'shop-empty';
-    quickAdd.innerHTML = '<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;"><div><strong>Need a new shelf item?</strong><div class="mini">Use the database picker to add a main-catalog or custom item to any aisle in this shop.</div></div><button class="btn smallbtn" id="shopQuickAddAny">Add Item From Database</button></div>';
-    aislesEl.appendChild(quickAdd);
-    quickAdd.querySelector('#shopQuickAddAny').onclick = async () => {
-      const created = await vwShopOpenCatalogAddModal();
-      if(!created) return;
-      activeShop.items ||= [];
-      activeShop.items.push(created);
-      await vwShopSave(shops);
-      toast('Item added from database');
-      await refreshAll();
-    };
-  }
-}
+    renderShopCart();
+  };
+})();
