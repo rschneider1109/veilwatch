@@ -1,5 +1,6 @@
 (function(){
   const CART_STORAGE_KEY = "vwShopCartsV1";
+  const DM_TARGET_STORAGE_KEY = "vwShopDmTargetV1";
 
   function getShopState(){
     const st = window.__STATE || {};
@@ -42,6 +43,48 @@
     try{ localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(carts || {})); }catch(e){}
   }
 
+  function readDmTargetId(){
+    try{ return String(localStorage.getItem(DM_TARGET_STORAGE_KEY) || "").trim(); }catch(e){ return ""; }
+  }
+
+  function writeDmTargetId(charId){
+    try{
+      if(charId) localStorage.setItem(DM_TARGET_STORAGE_KEY, String(charId));
+      else localStorage.removeItem(DM_TARGET_STORAGE_KEY);
+    }catch(e){}
+  }
+
+  function getAllCharacters(){
+    const st = window.__STATE || {};
+    return Array.isArray(st.characters) ? st.characters : [];
+  }
+
+  function getShopTargetCharacter(){
+    if(SESSION.role === "dm"){
+      const wanted = readDmTargetId();
+      return getAllCharacters().find(c => String(c.id) === wanted) || null;
+    }
+    return (typeof getChar === "function") ? getChar() : null;
+  }
+
+  function getShopTargetGroups(){
+    const st = window.__STATE || {};
+    const users = Array.isArray(st.users) ? st.users : [];
+    const chars = getAllCharacters().slice();
+    const owned = [];
+    const unassigned = [];
+    chars.forEach(c => {
+      const owner = users.find(u => String(u.id) === String(c.ownerUserId || ""));
+      const meta = owner ? (owner.name || owner.username || owner.email || "Player") : "Unassigned";
+      const row = { value:String(c.id), label:(c.name || "Unnamed Character") + " • " + meta };
+      if(owner) owned.push(row);
+      else unassigned.push(row);
+    });
+    owned.sort((a,b)=>a.label.localeCompare(b.label));
+    unassigned.sort((a,b)=>a.label.localeCompare(b.label));
+    return { owned, unassigned };
+  }
+
   function getCartBucket(charId, shopId){
     const carts = readCarts();
     carts[charId] ||= {};
@@ -50,7 +93,7 @@
   }
 
   function getCurrentCart(){
-    const c = getChar?.();
+    const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c || !shop) return { carts: readCarts(), bucket: { items: [] }, char: c, shop };
     const out = getCartBucket(c.id, shop.id);
@@ -77,8 +120,8 @@
   }
 
   function addItemToCart(it){
-    const c = getChar?.();
-    if(!c){ toast("Create/select character first"); return; }
+    const c = getShopTargetCharacter();
+    if(!c){ toast(SESSION.role === "dm" ? "Select who you are shopping for first" : "Create/select character first"); return; }
     const shop = getActiveShop();
     if(!shop){ toast("No shop selected"); return; }
     if(itemStockLeft(it) <= 0){ toast("Out of stock"); return; }
@@ -119,7 +162,7 @@
   }
 
   function updateCartLineQty(lineId, nextQty){
-    const c = getChar?.();
+    const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c || !shop) return;
     const { carts, bucket } = getCartBucket(c.id, shop.id);
@@ -144,7 +187,7 @@
   }
 
   function clearCurrentCart(showToast){
-    const c = getChar?.();
+    const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c || !shop) return;
     const carts = readCarts();
@@ -165,16 +208,12 @@
     const clearBtn = document.getElementById("shopClearCartBtn");
     if(!wrap || !body || !totalEl || !statusEl || !checkoutBtn || !clearBtn) return;
 
-    if(SESSION.role === "dm"){
-      wrap.classList.add("hidden");
-      return;
-    }
     wrap.classList.remove("hidden");
 
-    const c = getChar?.();
+    const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c){
-      body.innerHTML = '<div class="mini">Select a character to start shopping.</div>';
+      body.innerHTML = '<div class="mini">' + (SESSION.role === "dm" ? "Select a character or NPC to shop for." : "Select a character to start shopping.") + '</div>';
       totalEl.textContent = "$0";
       statusEl.textContent = "Cart unavailable";
       checkoutBtn.disabled = true;
@@ -194,7 +233,7 @@
     const items = Array.isArray(bucket.items) ? bucket.items : [];
     const total = items.reduce((sum, line) => sum + (parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty, 1))), 0);
 
-    statusEl.textContent = 'Shopping as ' + (c.name || 'Character') + ' • ' + (shop.name || 'Shop');
+    statusEl.textContent = (SESSION.role === 'dm' ? 'DM shopping for ' : 'Shopping as ') + (c.name || 'Character') + ' • ' + (shop.name || 'Shop');
 
     if(!items.length){
       body.innerHTML = '<div class="mini">Cart is empty. Add a few shelf items and they will stack here.</div>';
@@ -243,9 +282,9 @@
   function isUniqueShopItem(line){ return String(line.notes || '').toLowerCase().includes('unique'); }
 
   async function checkoutCurrentCart(){
-    const c = getChar?.();
+    const c = getShopTargetCharacter();
     const shop = getActiveShop();
-    if(!c){ toast("Create/select character first"); return; }
+    if(!c){ toast(SESSION.role === "dm" ? "Select who you are shopping for first" : "Create/select character first"); return; }
     if(!shop){ toast("No shop selected"); return; }
 
     const { carts, bucket } = getCartBucket(c.id, shop.id);
@@ -400,6 +439,8 @@
     const shopPill = document.getElementById('shopPill');
     const body = document.getElementById('shopBody');
     const sel = document.getElementById('shopSel');
+    const targetSel = document.getElementById('shopTargetSel');
+    const targetWrap = document.getElementById('shopTargetWrap');
     const editBtn = document.getElementById('editShopBtn');
     const help = document.getElementById('shopHelpText');
     if(!enabledPill || !shopPill || !body || !sel) return;
@@ -433,6 +474,40 @@
       toast('Active shop set');
       await refreshAll();
     };
+
+    if(targetWrap && targetSel){
+      targetWrap.classList.toggle('hidden', SESSION.role !== 'dm');
+      if(SESSION.role === 'dm'){
+        const groups = getShopTargetGroups();
+        const currentTarget = getShopTargetCharacter();
+        const currentId = String(currentTarget?.id || readDmTargetId() || '');
+        targetSel.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Shopping For...';
+        targetSel.appendChild(placeholder);
+        const addGroup = (label, items)=>{
+          if(!items.length) return;
+          const og = document.createElement('optgroup');
+          og.label = label;
+          items.forEach(item=>{
+            const o = document.createElement('option');
+            o.value = item.value;
+            o.textContent = item.label;
+            if(item.value === currentId) o.selected = true;
+            og.appendChild(o);
+          });
+          targetSel.appendChild(og);
+        };
+        addGroup('Player Characters', groups.owned || []);
+        addGroup('Unassigned / NPCs', groups.unassigned || []);
+        targetSel.value = currentId;
+        targetSel.onchange = ()=>{
+          writeDmTargetId(targetSel.value || '');
+          renderShopCart();
+        };
+      }
+    }
 
     const toggleBtn = document.getElementById('toggleShopBtn');
     const addShopBtn = document.getElementById('addShopBtn');
@@ -489,7 +564,7 @@
 
     if(help){
       help.textContent = SESSION.role === 'dm'
-        ? 'DM can manage shelves here. Players now add items to a cart and check out later.'
+        ? 'DM can manage shelves here and shop for any character or NPC using the Shopping For selector.'
         : 'Browse the shelves, add items to your cart, then check out when you are ready.';
     }
 
@@ -506,8 +581,10 @@
         '<td></td>';
       const td = tr.lastChild;
       if(SESSION.role === 'dm'){
-        td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Del</button>';
-        const [editItemBtn, delBtn] = td.querySelectorAll('button');
+        const hasTarget = !!getShopTargetCharacter();
+        const soldOut = itemStockLeft(it) <= 0;
+        td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Del</button> <button class="btn smallbtn"' + ((!hasTarget || soldOut) ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
+        const [editItemBtn, delBtn, cartBtn] = td.querySelectorAll('button');
         editItemBtn.onclick = ()=>openEditItemModal(currentShop, it);
         delBtn.onclick = async ()=>{
           const ok = await vwModalConfirm({ title:'Delete Item', message:'Delete "' + (it.name || 'this item') + '"?' });
@@ -517,6 +594,7 @@
           toast('Item deleted');
           await refreshAll();
         };
+        cartBtn.onclick = ()=>{ if(hasTarget && !soldOut) addItemToCart(it); };
       }else{
         const soldOut = itemStockLeft(it) <= 0;
         td.innerHTML = '<button class="btn smallbtn"' + (soldOut ? ' disabled' : '') + '>' + (soldOut ? 'Out of Stock' : 'Add to Cart') + '</button>';
