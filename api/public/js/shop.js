@@ -21,6 +21,22 @@
     return Number.isFinite(n) ? n : 0;
   }
 
+  function formatMoneyValue(n){
+    const num = Number(n || 0);
+    const safe = Number.isFinite(num) ? Math.max(0, num) : 0;
+    return safe.toFixed(2).replace(/\.00$/, "");
+  }
+
+  function formatMoneyText(n){ return "$" + formatMoneyValue(n); }
+
+  function getTargetMoney(charObj){
+    const money = (charObj?.sheet?.money && typeof charObj.sheet.money === "object") ? charObj.sheet.money : {};
+    return {
+      cash: parseMoney(money.cash),
+      bank: parseMoney(money.bank)
+    };
+  }
+
   function parseIntSafe(raw, fallback=0){
     const n = parseInt(String(raw ?? "").trim(), 10);
     return Number.isFinite(n) ? n : fallback;
@@ -170,6 +186,8 @@
     }
   }
 
+  let __shopCheckoutBusy = false;
+
   function renderShopCart(){
     const wrap = document.getElementById("shopCartPanel");
     const body = document.getElementById("shopCartBody");
@@ -203,8 +221,9 @@
     const { bucket } = getCartBucket(c.id, shop.id);
     const items = Array.isArray(bucket.items) ? bucket.items : [];
     const total = items.reduce((sum, line) => sum + (parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty, 1))), 0);
+    const money = getTargetMoney(c);
 
-    statusEl.textContent = (SESSION.role === 'dm' ? 'DM shopping for ' : 'Shopping as ') + (c.name || 'Character') + ' • ' + (shop.name || 'Shop');
+    statusEl.textContent = 'Shopping for: ' + (c.name || 'Character') + ' • ' + (shop.name || 'Shop') + ' • Cash ' + formatMoneyText(money.cash) + ' / Bank ' + formatMoneyText(money.bank);
 
     if(!items.length){
       body.innerHTML = '<div class="mini">Cart is empty. Add a few shelf items and they will stack here.</div>';
@@ -247,42 +266,12 @@
     checkoutBtn.onclick = checkoutCurrentCart;
   }
 
-
-  function normalizeShopItemForSave(it){
-    return {
-      ...it,
-      name: String(it?.name || '').trim(),
-      category: String(it?.category || it?.item_category || it?.group || 'Misc').trim() || 'Misc',
-      cost: parseMoney(it?.cost || 0),
-      weight: String(it?.weight ?? ''),
-      inventoryQty: Math.max(1, parseIntSafe(it?.inventoryQty ?? it?.qty ?? 1, 1)),
-      inventoryUnit: String(it?.inventoryUnit || '').trim(),
-      ammo_type: String(it?.ammo_type || '').trim(),
-      notes: String(it?.notes || '').trim(),
-      stock: (()=>{
-        const raw = String(it?.stock ?? '∞').trim();
-        if(isInfiniteStock(raw)) return '∞';
-        return String(Math.max(0, parseIntSafe(raw, 0)));
-      })()
-    };
-  }
-
-  async function saveShopsState(){
-    const shops = getShopState();
-    shops.list = Array.isArray(shops.list) ? shops.list : [];
-    shops.list.forEach(shop => {
-      shop.items = Array.isArray(shop.items) ? shop.items : [];
-      shop.items = shop.items.map(normalizeShopItemForSave);
-    });
-    const res = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
-    return res;
-  }
-
   function buildInventoryQtyString(totalQty, unit){ return unit ? (String(totalQty) + ' ' + unit) : String(totalQty); }
   function parseInventoryQtyString(raw){ const m = String(raw ?? '').trim().match(/^(\d+)/); return m ? parseInt(m[1], 10) : parseIntSafe(raw, 0); }
   function isUniqueShopItem(line){ return String(line.notes || '').toLowerCase().includes('unique'); }
 
   async function checkoutCurrentCart(){
+    if(__shopCheckoutBusy) return;
     const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c){ toast(SESSION.role === "dm" ? "Select who you are shopping for first" : "Create/select character first"); return; }
@@ -301,58 +290,88 @@
       if(isUniqueShopItem(line) && (c.inventory || []).some(x=>String(x.name||'').toLowerCase()===String(line.name||'').toLowerCase())){ toast((line.name || 'Unique item') + ' is already owned'); return; }
     }
 
-    const preview = lines.map(line => '• ' + (line.name || 'Item') + ' × ' + Math.max(1, parseIntSafe(line.qty, 1)) + ' → ' + cartLineDisplayQty(line)).join('<br/>');
-    const ok = await vwModalConfirm({
-      title: "Checkout Cart",
-      message: "Complete checkout and add these items to inventory?<br/><br/>" + preview + '<br/><br/><span class="mini">Money validation is not connected yet in this pass.</span>',
-      okText: "Checkout",
-      cancelText: "Back"
+    const total = lines.reduce((sum, line) => sum + (parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty, 1))), 0);
+    const money = getTargetMoney(c);
+    const preview = lines.map(line => (line.name || 'Item') + ' × ' + Math.max(1, parseIntSafe(line.qty, 1)) + ' (' + cartLineDisplayQty(line) + ')').join(' | ');
+    const payment = await vwModalForm({
+      title: 'Checkout Cart',
+      okText: 'Complete Purchase',
+      fields: [
+        { key:'preview', label:'Cart summary', type:'static', value: preview },
+        { key:'total', label:'Order total', type:'static', value: formatMoneyText(total) },
+        { key:'paymentSource', label:'Pay with', type:'select', value: money.cash >= total ? 'cash' : 'bank', options:[
+          { value:'cash', label:'Cash • ' + formatMoneyText(money.cash) },
+          { value:'bank', label:'Bank • ' + formatMoneyText(money.bank) }
+        ] }
+      ]
     });
-    if(!ok) return;
+    if(!payment) return;
 
-    c.inventory ||= [];
-    const grouped = new Map();
-    lines.forEach(line => {
-      const bundles = Math.max(1, parseIntSafe(line.qty, 1));
-      const totalQty = bundles * itemBundleQty(line);
-      const groupKey = [String(line.name || '').toLowerCase(), String(line.category || '').toLowerCase(), String(line.notes || '').toLowerCase(), String(line.weight || ''), String(line.cost || ''), String(line.inventoryUnit || '').toLowerCase(), String(line.ammo_type || '').toLowerCase()].join('|');
-      const existing = grouped.get(groupKey) || { category: line.category || '', name: line.name || 'Item', weight: String(line.weight ?? ''), qtyValue: 0, cost: String(line.cost ?? ''), notes: line.notes || '', inventoryUnit: itemBundleUnit(line), ammo_type: line.ammo_type || '' };
-      existing.qtyValue += totalQty;
-      grouped.set(groupKey, existing);
-    });
+    const paySource = String(payment.paymentSource || 'cash');
+    const available = paySource === 'bank' ? money.bank : money.cash;
+    if(available < total){
+      toast('You do not have enough money');
+      return;
+    }
 
-    grouped.forEach(entry => {
-      const invMatch = (c.inventory || []).find(item =>
-        String(item.name || '').toLowerCase() === String(entry.name || '').toLowerCase() &&
-        String(item.category || '').toLowerCase() === String(entry.category || '').toLowerCase() &&
-        String(item.notes || '').toLowerCase() === String(entry.notes || '').toLowerCase() &&
-        String(item.weight || '') === String(entry.weight || '') &&
-        String(item.ammo_type || '').toLowerCase() === String(entry.ammo_type || '').toLowerCase()
-      );
-      if(invMatch){
-        const currentQty = parseInventoryQtyString(invMatch.qty);
-        invMatch.qty = buildInventoryQtyString(currentQty + entry.qtyValue, entry.inventoryUnit);
-        if(entry.ammo_type && !invMatch.ammo_type) invMatch.ammo_type = entry.ammo_type;
-      }else{
-        c.inventory.push({ category: entry.category, name: entry.name, weight: entry.weight, qty: buildInventoryQtyString(entry.qtyValue, entry.inventoryUnit), cost: entry.cost, notes: entry.notes, ammo_type: entry.ammo_type || '' });
-      }
-    });
+    __shopCheckoutBusy = true;
+    renderShopCart();
+    try{
+      c.inventory ||= [];
+      c.sheet ||= {};
+      c.sheet.money ||= { cash:'0', bank:'0' };
+      const grouped = new Map();
+      lines.forEach(line => {
+        const bundles = Math.max(1, parseIntSafe(line.qty, 1));
+        const totalQty = bundles * itemBundleQty(line);
+        const groupKey = [String(line.name || '').toLowerCase(), String(line.category || '').toLowerCase(), String(line.notes || '').toLowerCase(), String(line.weight || ''), String(line.cost || ''), String(line.inventoryUnit || '').toLowerCase(), String(line.ammo_type || '').toLowerCase()].join('|');
+        const existing = grouped.get(groupKey) || { category: line.category || '', name: line.name || 'Item', weight: String(line.weight ?? ''), qtyValue: 0, cost: String(line.cost ?? ''), notes: line.notes || '', inventoryUnit: itemBundleUnit(line), ammo_type: line.ammo_type || '' };
+        existing.qtyValue += totalQty;
+        grouped.set(groupKey, existing);
+      });
 
-    lines.forEach(line => {
-      const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
-      if(current && !isInfiniteStock(current.stock)) current.stock = Math.max(0, itemStockLeft(current) - Math.max(1, parseIntSafe(line.qty, 1)));
-    });
+      grouped.forEach(entry => {
+        const invMatch = (c.inventory || []).find(item =>
+          String(item.name || '').toLowerCase() === String(entry.name || '').toLowerCase() &&
+          String(item.category || '').toLowerCase() === String(entry.category || '').toLowerCase() &&
+          String(item.notes || '').toLowerCase() === String(entry.notes || '').toLowerCase() &&
+          String(item.weight || '') === String(entry.weight || '') &&
+          String(item.ammo_type || '').toLowerCase() === String(entry.ammo_type || '').toLowerCase()
+        );
+        if(invMatch){
+          const currentQty = parseInventoryQtyString(invMatch.qty);
+          invMatch.qty = buildInventoryQtyString(currentQty + entry.qtyValue, entry.inventoryUnit);
+          if(entry.ammo_type && !invMatch.ammo_type) invMatch.ammo_type = entry.ammo_type;
+        }else{
+          c.inventory.push({ category: entry.category, name: entry.name, weight: entry.weight, qty: buildInventoryQtyString(entry.qtyValue, entry.inventoryUnit), cost: entry.cost, notes: entry.notes, ammo_type: entry.ammo_type || '' });
+        }
+      });
 
-    const saveCharRes = await api('/api/character/save', { method:'POST', body: JSON.stringify({ charId:c.id, character:c }) });
-    if(!saveCharRes?.ok){ toast(saveCharRes?.error || 'Failed to save inventory'); return; }
+      lines.forEach(line => {
+        const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
+        if(current && !isInfiniteStock(current.stock)) current.stock = Math.max(0, itemStockLeft(current) - Math.max(1, parseIntSafe(line.qty, 1)));
+      });
 
-    await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
-    await api('/api/notify', { method:'POST', body: JSON.stringify({ type:'Shop Checkout', detail:(shop.name || 'Shop') + ' • ' + lines.length + ' cart item(s)', from: SESSION.name || SESSION.username || 'Player' }) });
+      const nextMoney = Math.max(0, available - total);
+      if(paySource === 'bank') c.sheet.money.bank = formatMoneyValue(nextMoney);
+      else c.sheet.money.cash = formatMoneyValue(nextMoney);
 
-    bucket.items = [];
-    writeCarts(carts);
-    toast('Checkout complete');
-    await refreshAll();
+      const saveCharRes = await api('/api/character/save', { method:'POST', body: JSON.stringify({ charId:c.id, character:c }) });
+      if(!saveCharRes?.ok){ toast(saveCharRes?.error || 'Failed to save inventory'); return; }
+
+      const saveShopRes = await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
+      if(!saveShopRes?.ok){ toast(saveShopRes?.error || 'Failed to save shop stock'); return; }
+
+      await api('/api/notify', { method:'POST', body: JSON.stringify({ type:'Shop Checkout', detail:(shop.name || 'Shop') + ' • ' + lines.length + ' cart item(s) • ' + formatMoneyText(total) + ' from ' + paySource, from: SESSION.name || SESSION.username || 'Player' }) });
+
+      bucket.items = [];
+      writeCarts(carts);
+      toast('Checkout complete');
+      await refreshAll();
+    } finally {
+      __shopCheckoutBusy = false;
+      renderShopCart();
+    }
   }
 
   async function loadInventoryCatalogBundle(){
@@ -495,7 +514,7 @@
     };
     shop.items = Array.isArray(shop.items) ? shop.items : [];
     shop.items.push(nextItem);
-    const saveRes = await saveShopsState();
+    const saveRes = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
     if(!saveRes?.ok){
       toast(saveRes?.error || 'Failed to save item');
       return;
@@ -522,20 +541,18 @@
       okText: 'Save'
     });
     if(!result) return;
-    Object.assign(it, normalizeShopItemForSave({
-      ...it,
+    Object.assign(it, {
       name: result.name,
       category: result.category,
-      cost: result.cost,
+      cost: parseMoney(result.cost),
       weight: result.weight,
-      inventoryQty: result.inventoryQty,
-      inventoryUnit: result.inventoryUnit,
-      ammo_type: result.ammo_type,
-      notes: result.notes,
+      inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
+      inventoryUnit: String(result.inventoryUnit || '').trim(),
+      ammo_type: String(result.ammo_type || '').trim(),
+      notes: result.notes || '',
       stock: result.stock
-    }));
-    const saveRes = await saveShopsState();
-    if(!saveRes?.ok){ toast(saveRes?.error || 'Failed to save item'); return; }
+    });
+    await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
     toast('Item saved');
     await refreshAll();
   }
@@ -572,7 +589,7 @@
           <div class="shop-card-price">$${esc(parseMoney(it.cost).toFixed(2).replace(/\.00$/,''))}</div>
         </div>
         <div class="shop-card-desc">${esc(it.notes || 'Shelf item')}</div>
-        <div class="shop-card-stock">Stock: ${esc(isInfiniteStock(it.stock) ? '∞' : itemStockLeft(it))}${(!isInfiniteStock(it.stock) && itemStockLeft(it) > 0 && itemStockLeft(it) <= 5) ? ' <span class="shop-low-stock">Low</span>' : ''}</div>
+        <div class="shop-card-stock">Stock: ${esc(stockLabel)}${stockNote ? `<span class="mini" style="color:#f6c56f">${esc(stockNote)}</span>` : ''}</div>
         <div class="shop-card-footer">
           ${SESSION.role === 'dm' ? `
             <button class="btn smallbtn" data-act="edit">Edit</button>

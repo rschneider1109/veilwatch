@@ -120,6 +120,14 @@ function vwModalForm(opts){
       const placeholder = String(f.placeholder || "").replace(/"/g, "&quot;");
       const value = String(f.value ?? "");
       const type = f.type || "text";
+      if(type === "static"){
+        return (
+          '<div style="margin-bottom:10px">' +
+            '<div class="mini" style="margin-bottom:6px;opacity:.9">'+label+'</div>' +
+            '<div class="input" data-key="'+key+'" style="width:100%;opacity:.95;pointer-events:none">'+value+'</div>' +
+          '</div>'
+        );
+      }
       if(type === "select"){
         const raw = Array.isArray(f.options) ? f.options : [];
         const selected = String(f.value ?? "");
