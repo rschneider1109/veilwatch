@@ -575,6 +575,9 @@
     if(it.inventoryQty) metaBits.push(String(itemBundleQty(it)) + (itemBundleUnit(it) ? ' ' + itemBundleUnit(it) : ''));
     if(it.weight) metaBits.push(String(it.weight) + ' wt');
     const sourceLabel = it.sourceType === 'custom' ? 'Custom Catalog' : (it.sourceId ? 'Main Catalog' : 'Shop Item');
+    const rawStock = isInfiniteStock(it.stock) ? null : itemStockLeft(it);
+    const stockLabel = rawStock == null ? '∞' : String(rawStock);
+    const stockNote = rawStock != null && rawStock > 0 && rawStock <= 3 ? ' • Low' : '';
     return `
       <article class="shop-card">
         <div class="shop-card-head">
