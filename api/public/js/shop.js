@@ -97,44 +97,8 @@
   }
 
   function itemCartKey(it){ return String(it.id || it.sourceId || it.name || Math.random()); }
-  function itemBundleQty(it){
-    const explicit = Math.max(1, parseIntSafe(it.inventoryQty ?? it.qty ?? 1, 1));
-    if(explicit > 1) return explicit;
-    const inferred = inferAmmoBundleMeta(it);
-    return inferred?.qty || explicit;
-  }
-  function itemBundleUnit(it){
-    const explicit = String(it.inventoryUnit || "").trim();
-    if(explicit) return explicit;
-    const inferred = inferAmmoBundleMeta(it);
-    return inferred?.unit || "";
-  }
-
-  function inferAmmoBundleMeta(it){
-    const ammoKey = String(it?.ammo_type || '').trim().toLowerCase() || String(it?.name || '').toLowerCase();
-    const table = {
-      '9mm': { qty:400, unit:'rounds', invName:'9mm Ammo' },
-      '.45': { qty:300, unit:'rounds', invName:'.45 Ammo' },
-      '45 acp': { qty:300, unit:'rounds', invName:'.45 Ammo' },
-      '.357': { qty:200, unit:'rounds', invName:'.357 Ammo' },
-      '5.56': { qty:300, unit:'rounds', invName:'5.56 Ammo' },
-      '556': { qty:300, unit:'rounds', invName:'5.56 Ammo' },
-      '7.62': { qty:240, unit:'rounds', invName:'7.62 Ammo' },
-      '762': { qty:240, unit:'rounds', invName:'7.62 Ammo' },
-      '12 gauge': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
-      '12ga': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
-      'shotgun': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
-    };
-    for(const [k,v] of Object.entries(table)){
-      if(ammoKey.includes(k)) return v;
-    }
-    return null;
-  }
-  function itemInventoryName(it){
-    const inferred = inferAmmoBundleMeta(it);
-    if(inferred?.invName) return inferred.invName;
-    return String(it?.name || 'Item');
-  }
+  function itemBundleQty(it){ return Math.max(1, parseIntSafe(it.inventoryQty ?? it.qty ?? 1, 1)); }
+  function itemBundleUnit(it){ return String(it.inventoryUnit || "").trim(); }
   function itemStockLeft(it){ return isInfiniteStock(it.stock) ? Infinity : Math.max(0, parseIntSafe(it.stock, 0)); }
   function lineStockLeft(line){
     const shop = getActiveShop();
@@ -169,7 +133,7 @@
       bucket.items.push({
         id: key,
         itemId: it.id || key,
-        name: itemInventoryName(it) || "Item",
+        name: it.name || "Item",
         category: it.category || "",
         cost: parseMoney(it.cost),
         weight: it.weight ?? "",
@@ -431,15 +395,31 @@
 
   function normalizeCatalogItem(item, categoryHint){
     const category = String(item?.category || item?.item_category || item?.group || categoryHint || 'Misc').trim() || 'Misc';
+    const name = String(item?.name ?? item ?? '').trim();
+    const ammoType = String(item?.ammo_type ?? item?.ammoType ?? '').trim();
+    const unit = String(item?.inventory_unit ?? item?.inventoryUnit ?? item?.unit_label ?? item?.unit ?? '').trim();
+    const lowerName = name.toLowerCase();
+    const lowerCategory = category.toLowerCase();
+    const lowerUnit = unit.toLowerCase();
+    const looksAmmo = lowerCategory.includes('ammo') || !!ammoType || lowerName.includes('ammo');
+    const defaultQtyRaw = item?.default_qty ?? item?.inventoryQty ?? item?.inventory_qty ?? item?.qty ?? 1;
+    let defaultQty = Math.max(1, parseInt(defaultQtyRaw, 10) || 1);
+    if(looksAmmo && defaultQty === 1){
+      if(lowerUnit.includes('round')) defaultQty = 400;
+      else if(ammoType || lowerName.includes('9mm') || lowerName.includes('5.56') || lowerName.includes('223') || lowerName.includes('7.62') || lowerName.includes('45 acp') || lowerName.includes('.45')) defaultQty = 400;
+    }
+    let inventoryUnit = unit;
+    if(looksAmmo && !inventoryUnit) inventoryUnit = 'rounds';
     return {
       id: item?.id || '',
-      name: String(item?.name ?? item ?? '').trim(),
+      name,
       category,
-      default_qty: Math.max(1, parseInt(item?.default_qty ?? item?.qty ?? 1, 10) || 1),
+      default_qty: defaultQty,
       default_weight: item?.default_weight ?? item?.weight ?? '',
       default_cost: item?.default_cost ?? item?.cost ?? '',
       default_notes: item?.default_notes ?? item?.notes ?? '',
-      ammo_type: item?.ammo_type ?? '',
+      ammo_type: ammoType,
+      inventory_unit: inventoryUnit,
       source: item?.source || (item?.is_custom ? 'custom' : 'official'),
       is_custom: !!item?.is_custom
     };
@@ -499,11 +479,11 @@
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Inventory unit label</div>
-            <input id="vwShopUnit" class="input" placeholder="rounds" />
+            <input id="vwShopUnit" class="input" value="${esc(String(current?.inventory_unit || ''))}" placeholder="rounds" disabled />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Ammo type</div>
-            <input id="vwShopAmmoType" class="input" value="${esc(String(current?.ammo_type || ''))}" placeholder="Optional" />
+            <input id="vwShopAmmoType" class="input" value="${esc(String(current?.ammo_type || ''))}" placeholder="Optional" disabled />
           </div>
         </div>
         <div style="margin-top:10px;">
@@ -564,29 +544,25 @@
     const result = await vwModalForm({
       title: 'Edit Item',
       fields: [
-        { key:'name', label:'Item name', value:it.name || '', placeholder:'9mm Ammo Box' },
-        { key:'category', label:'Category', value:it.category || '', placeholder:'Ammo / Gear / Medical' },
+        { key:'nameStatic', label:'Item name', type:'static', value:String(it.name || '') },
+        { key:'categoryStatic', label:'Category', type:'static', value:String(it.category || 'Misc') },
         { key:'cost', label:'Cost ($)', value:String(it.cost ?? ''), placeholder:'20' },
         { key:'weight', label:'Weight', value:String(it.weight ?? ''), placeholder:'1' },
         { key:'inventoryQty', label:'Inventory quantity per purchase', value:String(it.inventoryQty ?? it.qty ?? 1), placeholder:'400' },
-        { key:'inventoryUnit', label:'Inventory unit label (optional)', value:String(it.inventoryUnit || ''), placeholder:'rounds' },
-        { key:'ammo_type', label:'Ammo type (optional)', value:String(it.ammo_type || ''), placeholder:'9mm' },
-        { key:'notes', label:'Notes', value:it.notes || '', placeholder:'Unique / special' },
+        { key:'inventoryUnitStatic', label:'Inventory unit label', type:'static', value:String(it.inventoryUnit || '') },
+        { key:'ammoTypeStatic', label:'Ammo type', type:'static', value:String(it.ammo_type || '') },
+        { key:'notes', label:'Notes', type:'textarea', value:it.notes || '', placeholder:'Unique / special' },
         { key:'stock', label:'Stock (∞ or number)', value:String(it.stock ?? '∞'), placeholder:'∞' }
       ],
       okText: 'Save'
     });
     if(!result) return;
     Object.assign(it, {
-      name: result.name,
-      category: result.category,
       cost: parseMoney(result.cost),
-      weight: result.weight,
+      weight: String(result.weight ?? '').trim(),
       inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
-      inventoryUnit: String(result.inventoryUnit || '').trim(),
-      ammo_type: String(result.ammo_type || '').trim(),
-      notes: result.notes || '',
-      stock: result.stock
+      notes: String(result.notes || '').trim(),
+      stock: String(result.stock || '∞').trim() || '∞'
     });
     await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
     toast('Item saved');
