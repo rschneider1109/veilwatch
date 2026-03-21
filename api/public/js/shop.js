@@ -97,8 +97,44 @@
   }
 
   function itemCartKey(it){ return String(it.id || it.sourceId || it.name || Math.random()); }
-  function itemBundleQty(it){ return Math.max(1, parseIntSafe(it.inventoryQty ?? it.qty ?? 1, 1)); }
-  function itemBundleUnit(it){ return String(it.inventoryUnit || "").trim(); }
+  function itemBundleQty(it){
+    const explicit = Math.max(1, parseIntSafe(it.inventoryQty ?? it.qty ?? 1, 1));
+    if(explicit > 1) return explicit;
+    const inferred = inferAmmoBundleMeta(it);
+    return inferred?.qty || explicit;
+  }
+  function itemBundleUnit(it){
+    const explicit = String(it.inventoryUnit || "").trim();
+    if(explicit) return explicit;
+    const inferred = inferAmmoBundleMeta(it);
+    return inferred?.unit || "";
+  }
+
+  function inferAmmoBundleMeta(it){
+    const ammoKey = String(it?.ammo_type || '').trim().toLowerCase() || String(it?.name || '').toLowerCase();
+    const table = {
+      '9mm': { qty:400, unit:'rounds', invName:'9mm Ammo' },
+      '.45': { qty:300, unit:'rounds', invName:'.45 Ammo' },
+      '45 acp': { qty:300, unit:'rounds', invName:'.45 Ammo' },
+      '.357': { qty:200, unit:'rounds', invName:'.357 Ammo' },
+      '5.56': { qty:300, unit:'rounds', invName:'5.56 Ammo' },
+      '556': { qty:300, unit:'rounds', invName:'5.56 Ammo' },
+      '7.62': { qty:240, unit:'rounds', invName:'7.62 Ammo' },
+      '762': { qty:240, unit:'rounds', invName:'7.62 Ammo' },
+      '12 gauge': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
+      '12ga': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
+      'shotgun': { qty:25, unit:'shells', invName:'12 Gauge Shells' },
+    };
+    for(const [k,v] of Object.entries(table)){
+      if(ammoKey.includes(k)) return v;
+    }
+    return null;
+  }
+  function itemInventoryName(it){
+    const inferred = inferAmmoBundleMeta(it);
+    if(inferred?.invName) return inferred.invName;
+    return String(it?.name || 'Item');
+  }
   function itemStockLeft(it){ return isInfiniteStock(it.stock) ? Infinity : Math.max(0, parseIntSafe(it.stock, 0)); }
   function lineStockLeft(line){
     const shop = getActiveShop();
@@ -133,7 +169,7 @@
       bucket.items.push({
         id: key,
         itemId: it.id || key,
-        name: it.name || "Item",
+        name: itemInventoryName(it) || "Item",
         category: it.category || "",
         cost: parseMoney(it.cost),
         weight: it.weight ?? "",
