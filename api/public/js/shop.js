@@ -58,16 +58,19 @@
   }
 
   function getShopTargetGroups(){
+    const st = window.__STATE || {};
+    const users = Array.isArray(st.users) ? st.users : [];
     const chars = getAllCharacters().slice();
-    const playerChars = [];
-    const npcChars = [];
+    const owned = [];
+    const unassigned = [];
     chars.forEach(c => {
+      const owner = users.find(u => String(u.id) === String(c.ownerUserId || ""));
       const row = { value:String(c.id), label:(c.name || "Unnamed Character") };
-      if(c.ownerUserId) playerChars.push(row); else npcChars.push(row);
+      if(owner) owned.push(row); else unassigned.push(row);
     });
-    playerChars.sort((a,b)=>a.label.localeCompare(b.label));
-    npcChars.sort((a,b)=>a.label.localeCompare(b.label));
-    return { playerChars, npcChars };
+    owned.sort((a,b)=>a.label.localeCompare(b.label));
+    unassigned.sort((a,b)=>a.label.localeCompare(b.label));
+    return { owned, unassigned };
   }
 
   function getCartBucket(charId, shopId){
@@ -174,7 +177,6 @@
     const statusEl = document.getElementById("shopCartStatus");
     const checkoutBtn = document.getElementById("shopCheckoutBtn");
     const clearBtn = document.getElementById("shopClearCartBtn");
-    const targetDisplay = document.getElementById("shopTargetDisplay");
     if(!wrap || !body || !totalEl || !statusEl || !checkoutBtn || !clearBtn) return;
 
     wrap.classList.remove("hidden");
@@ -185,7 +187,6 @@
       body.innerHTML = '<div class="mini">' + (SESSION.role === "dm" ? "Select a character or NPC to shop for." : "Select a character to start shopping.") + '</div>';
       totalEl.textContent = "$0";
       statusEl.textContent = "Cart unavailable";
-      if(targetDisplay) targetDisplay.textContent = SESSION.role === 'dm' ? 'Shopping for: Select a name' : 'Shopping for: No active character';
       checkoutBtn.disabled = true;
       clearBtn.disabled = true;
       return;
@@ -194,7 +195,6 @@
       body.innerHTML = '<div class="mini">No active shop.</div>';
       totalEl.textContent = "$0";
       statusEl.textContent = "Cart unavailable";
-      if(targetDisplay) targetDisplay.textContent = 'Shopping for: ' + (c?.name || 'Unknown');
       checkoutBtn.disabled = true;
       clearBtn.disabled = true;
       return;
@@ -205,7 +205,6 @@
     const total = items.reduce((sum, line) => sum + (parseMoney(line.cost) * Math.max(1, parseIntSafe(line.qty, 1))), 0);
 
     statusEl.textContent = (SESSION.role === 'dm' ? 'DM shopping for ' : 'Shopping as ') + (c.name || 'Character') + ' • ' + (shop.name || 'Shop');
-    if(targetDisplay) targetDisplay.textContent = 'Shopping for: ' + (c.name || 'Character');
 
     if(!items.length){
       body.innerHTML = '<div class="mini">Cart is empty. Add a few shelf items and they will stack here.</div>';
@@ -236,28 +235,54 @@
       });
 
       totalEl.textContent = "$" + total.toFixed(2).replace(/\.00$/,"");
-      checkoutBtn.disabled = !!__shopCheckoutBusy;
-      clearBtn.disabled = !!__shopCheckoutBusy;
+      checkoutBtn.disabled = false;
+      clearBtn.disabled = false;
     }
 
     clearBtn.onclick = async ()=>{
-      if(__shopCheckoutBusy) return;
       const ok = await vwModalConfirm({ title:"Clear Cart", message:"Remove all items from this cart?" });
       if(!ok) return;
       clearCurrentCart(true);
     };
-    checkoutBtn.textContent = __shopCheckoutBusy ? 'Processing...' : 'Checkout';
     checkoutBtn.onclick = checkoutCurrentCart;
+  }
+
+
+  function normalizeShopItemForSave(it){
+    return {
+      ...it,
+      name: String(it?.name || '').trim(),
+      category: String(it?.category || it?.item_category || it?.group || 'Misc').trim() || 'Misc',
+      cost: parseMoney(it?.cost || 0),
+      weight: String(it?.weight ?? ''),
+      inventoryQty: Math.max(1, parseIntSafe(it?.inventoryQty ?? it?.qty ?? 1, 1)),
+      inventoryUnit: String(it?.inventoryUnit || '').trim(),
+      ammo_type: String(it?.ammo_type || '').trim(),
+      notes: String(it?.notes || '').trim(),
+      stock: (()=>{
+        const raw = String(it?.stock ?? '∞').trim();
+        if(isInfiniteStock(raw)) return '∞';
+        return String(Math.max(0, parseIntSafe(raw, 0)));
+      })()
+    };
+  }
+
+  async function saveShopsState(){
+    const shops = getShopState();
+    shops.list = Array.isArray(shops.list) ? shops.list : [];
+    shops.list.forEach(shop => {
+      shop.items = Array.isArray(shop.items) ? shop.items : [];
+      shop.items = shop.items.map(normalizeShopItemForSave);
+    });
+    const res = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops})});
+    return res;
   }
 
   function buildInventoryQtyString(totalQty, unit){ return unit ? (String(totalQty) + ' ' + unit) : String(totalQty); }
   function parseInventoryQtyString(raw){ const m = String(raw ?? '').trim().match(/^(\d+)/); return m ? parseInt(m[1], 10) : parseIntSafe(raw, 0); }
   function isUniqueShopItem(line){ return String(line.notes || '').toLowerCase().includes('unique'); }
 
-  let __shopCheckoutBusy = false;
-
   async function checkoutCurrentCart(){
-    if(__shopCheckoutBusy) return;
     const c = getShopTargetCharacter();
     const shop = getActiveShop();
     if(!c){ toast(SESSION.role === "dm" ? "Select who you are shopping for first" : "Create/select character first"); return; }
@@ -285,9 +310,7 @@
     });
     if(!ok) return;
 
-    __shopCheckoutBusy = true;
-    try{
-      c.inventory ||= [];
+    c.inventory ||= [];
     const grouped = new Map();
     lines.forEach(line => {
       const bundles = Math.max(1, parseIntSafe(line.qty, 1));
@@ -323,18 +346,13 @@
     const saveCharRes = await api('/api/character/save', { method:'POST', body: JSON.stringify({ charId:c.id, character:c }) });
     if(!saveCharRes?.ok){ toast(saveCharRes?.error || 'Failed to save inventory'); return; }
 
-    const saveShopRes = await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
-    if(!saveShopRes?.ok){ toast(saveShopRes?.error || 'Failed to save shop stock'); return; }
+    await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
     await api('/api/notify', { method:'POST', body: JSON.stringify({ type:'Shop Checkout', detail:(shop.name || 'Shop') + ' • ' + lines.length + ' cart item(s)', from: SESSION.name || SESSION.username || 'Player' }) });
 
     bucket.items = [];
     writeCarts(carts);
     toast('Checkout complete');
     await refreshAll();
-    } finally {
-      __shopCheckoutBusy = false;
-      renderShopCart();
-    }
   }
 
   async function loadInventoryCatalogBundle(){
@@ -477,7 +495,7 @@
     };
     shop.items = Array.isArray(shop.items) ? shop.items : [];
     shop.items.push(nextItem);
-    const saveRes = await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
+    const saveRes = await saveShopsState();
     if(!saveRes?.ok){
       toast(saveRes?.error || 'Failed to save item');
       return;
@@ -504,18 +522,20 @@
       okText: 'Save'
     });
     if(!result) return;
-    Object.assign(it, {
+    Object.assign(it, normalizeShopItemForSave({
+      ...it,
       name: result.name,
       category: result.category,
-      cost: parseMoney(result.cost),
+      cost: result.cost,
       weight: result.weight,
-      inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
-      inventoryUnit: String(result.inventoryUnit || '').trim(),
-      ammo_type: String(result.ammo_type || '').trim(),
-      notes: result.notes || '',
+      inventoryQty: result.inventoryQty,
+      inventoryUnit: result.inventoryUnit,
+      ammo_type: result.ammo_type,
+      notes: result.notes,
       stock: result.stock
-    });
-    await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
+    }));
+    const saveRes = await saveShopsState();
+    if(!saveRes?.ok){ toast(saveRes?.error || 'Failed to save item'); return; }
     toast('Item saved');
     await refreshAll();
   }
@@ -532,9 +552,7 @@
   }
 
   function renderShelfCard(currentShop, shops, it, idx){
-    const stockLeft = itemStockLeft(it);
-    const soldOut = stockLeft <= 0;
-    const lowStock = stockLeft !== Infinity && stockLeft > 0 && stockLeft <= 3;
+    const soldOut = itemStockLeft(it) <= 0;
     const hasTarget = !!getShopTargetCharacter();
     const metaBits = [];
     if(it.inventoryQty) metaBits.push(String(itemBundleQty(it)) + (itemBundleUnit(it) ? ' ' + itemBundleUnit(it) : ''));
@@ -554,7 +572,7 @@
           <div class="shop-card-price">$${esc(parseMoney(it.cost).toFixed(2).replace(/\.00$/,''))}</div>
         </div>
         <div class="shop-card-desc">${esc(it.notes || 'Shelf item')}</div>
-        <div class="shop-card-stock">Stock: ${esc(isInfiniteStock(it.stock) ? '∞' : stockLeft)}${lowStock ? ' • Low' : ''}</div>
+        <div class="shop-card-stock">Stock: ${esc(isInfiniteStock(it.stock) ? '∞' : itemStockLeft(it))}${(!isInfiniteStock(it.stock) && itemStockLeft(it) > 0 && itemStockLeft(it) <= 5) ? ' <span class="shop-low-stock">Low</span>' : ''}</div>
         <div class="shop-card-footer">
           ${SESSION.role === 'dm' ? `
             <button class="btn smallbtn" data-act="edit">Edit</button>
@@ -596,7 +614,6 @@
     const editBtn = document.getElementById('editShopBtn');
     const addItemBtn = document.getElementById('addShopItemBtn');
     const help = document.getElementById('shopHelpText');
-    const targetDisplay = document.getElementById('shopTargetDisplay');
     if(!enabledPill || !body || !sel) return;
 
     if(!feat.shop){
@@ -653,13 +670,10 @@
           });
           targetSel.appendChild(og);
         };
-        addGroup('Player Characters', groups.playerChars || []);
-        addGroup('NPCs / DM Characters', groups.npcChars || []);
+        addGroup('Player Characters', groups.owned || []);
+        addGroup('Unassigned / NPCs', groups.unassigned || []);
         targetSel.value = currentId;
         targetSel.onchange = ()=>{ writeDmTargetId(targetSel.value || ''); renderShop(); };
-      } else if(targetDisplay){
-        const playerChar = getShopTargetCharacter();
-        targetDisplay.textContent = 'Shopping for: ' + (playerChar?.name || 'No active character');
       }
     }
 
@@ -722,8 +736,8 @@
 
     if(help){
       help.textContent = SESSION.role === 'dm'
-        ? 'DM can manage shelves here, shop for any named target, and cart items without leaving the storefront.'
-        : 'Browse the shelves, add items to your cart, and purchases will follow the character you are currently viewing.';
+        ? 'DM can manage shelves here and shop for any character or NPC using the Shopping For selector.'
+        : 'Browse the shelves, add items to your cart, then check out when you are ready.';
     }
 
     const aisles = getAisles(currentShop.items || []);
@@ -751,9 +765,7 @@
         wrapper.innerHTML = renderShelfCard(currentShop, shops, it, idx);
         const card = wrapper.firstElementChild;
         grid.appendChild(card);
-        const stockLeft = itemStockLeft(it);
-    const soldOut = stockLeft <= 0;
-    const lowStock = stockLeft !== Infinity && stockLeft > 0 && stockLeft <= 3;
+        const soldOut = itemStockLeft(it) <= 0;
         if(SESSION.role === 'dm'){
           card.querySelector('[data-act="edit"]')?.addEventListener('click', ()=>openEditItemModal(currentShop, it));
           card.querySelector('[data-act="del"]')?.addEventListener('click', async ()=>{
