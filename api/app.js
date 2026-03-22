@@ -421,6 +421,19 @@ function normalizeCluesShape(st){
   return st;
 }
 
+function normalizeSessionRecaps(st){
+  st.sessionRecaps ||= structuredClone(DEFAULT_STATE.sessionRecaps);
+  if(Array.isArray(st.sessionRecaps)) {
+    st.sessionRecaps = {
+      nextId: (st.sessionRecaps.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0) + 1) || 1,
+      items: st.sessionRecaps
+    };
+  }
+  st.sessionRecaps.nextId ||= 1;
+  st.sessionRecaps.items ||= [];
+  return st;
+}
+
 function normalizeFeatures(st){
   if(!st.settings) st.settings = {};
   if(!st.settings.features) st.settings.features = {};
@@ -469,7 +482,6 @@ function fileLoadState(){
     st.settings.features ||= DEFAULT_STATE.settings.features;
     st.shops ||= DEFAULT_STATE.shops;
     st.notifications ||= DEFAULT_STATE.notifications;
-    st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
     normalizeCluesShape(st);
     normalizeFeatures(st);
@@ -777,7 +789,7 @@ function servePublic(req, res, pathname){
 // -----------------------------
 // Server
 // -----------------------------
-let state = normalizeCharacters(normalizeFeatures(structuredClone(DEFAULT_STATE)));
+let state = normalizeCharacters(normalizeSessionRecaps(normalizeFeatures(structuredClone(DEFAULT_STATE))));
 users = [];
 
 const server = http.createServer(async (req,res)=>{
@@ -924,6 +936,7 @@ const server = http.createServer(async (req,res)=>{
   // -------------------------
   if(p === "/api/state" && req.method==="GET"){
     normalizeCluesShape(state);
+    normalizeSessionRecaps(state);
     normalizeCharacters(state);
 
     if(!dm){
@@ -945,13 +958,15 @@ const server = http.createServer(async (req,res)=>{
         items: (safe.notifications?.items || []).filter(n=>{
           const from = String(n.from || "");
           const ownerUserId = String(n.ownerUserId || "");
-          const audience = String(n.audience || "");
-          return (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId) || audience === "players";
+          const audience = String(n.audience || "dm");
+          const isMine = (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId);
+          const isDmPush = audience === "players";
+          return isMine || isDmPush;
         })
       };
       safe.sessionRecaps = {
         nextId: 1,
-        items: (safe.sessionRecaps?.items || [])
+        items: (safe.sessionRecaps?.items || []).filter(r=> String(r.visibility || "players") === "players")
       };
 
       // character visibility: only owned characters (if logged in) else none
@@ -1381,26 +1396,35 @@ if(p === "/api/character/save" && req.method==="POST"){
       detail: body.detail||"",
       from: body.from || user?.username || "",
       ownerUserId: body.ownerUserId || user?.id || null,
-      audience: body.audience || (((body.from || user?.role || "") === "DM" || dm) ? "players" : "dm"),
-      kind: body.kind || "notification",
       status:"open",
       notes: body.notes||"",
+      audience: body.audience || ((body.from === "DM") ? "players" : "dm"),
       createdAt: Date.now()
     });
     saveState(state);
     return json(res, 200, {ok:true});
   }
+  if(p === "/api/recaps/create" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecaps(state);
+    const id = state.sessionRecaps.nextId++;
+    state.sessionRecaps.items.unshift({
+      id,
+      title: body.title || "Session Recap",
+      summary: body.summary || "",
+      date: body.date || "",
+      visibility: body.visibility || "players",
+      createdAt: Date.now()
+    });
+    saveState(state);
+    return json(res, 200, {ok:true, id});
+  }
+
   if(p === "/api/notifications/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications = body.notifications;
-    saveState(state);
-    return json(res, 200, {ok:true});
-  }
-  if(p === "/api/recaps/save" && req.method==="POST"){
-    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
-    const body = JSON.parse(await readBody(req) || "{}");
-    state.sessionRecaps = body.sessionRecaps || { nextId: 1, items: [] };
     saveState(state);
     return json(res, 200, {ok:true});
   }
