@@ -28,7 +28,7 @@
 
 <header>
   <div class="brand">VEILWATCH OS</div>
-  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
+  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn" id="alertToggleBtn" style="margin-left:10px;">Enable Alerts</button><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
@@ -37,7 +37,7 @@
   <div class="nav">
     <button class="btn active" data-tab="home">Home</button>
     <button class="btn" data-tab="character">Character</button>
-    <button class="btn" data-tab="intel">Intel</button>
+    <button class="btn" id="intelTabBtn" data-tab="intel">Intel <span class="nav-alert-badge hidden" id="intelNavBadge">0</span></button>
     <button class="btn" data-tab="shop">Shop</button>
     <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
   </div>
