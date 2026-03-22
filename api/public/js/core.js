@@ -255,10 +255,146 @@ window.__STATE = window.__STATE || {};
 window.SESSION = window.SESSION || { role:null, username:null, userId:null, dmKey:null, activeCharId:null, sessionStart:Date.now() };
 const SESSION = window.SESSION;
 
-// ---- Intel indicator safety stubs (prevents runtime errors if blocks move) ----
-if(typeof window.vwSyncSeenBaseline !== "function") window.vwSyncSeenBaseline = ()=>{};
-if(typeof window.vwComputeUnseen !== "function") window.vwComputeUnseen = ()=>{};
-if(typeof window.vwAcknowledgeIntel !== "function") window.vwAcknowledgeIntel = ()=>{};
+// ---- Intel / alert attention state ----
+window.VW_ALERTS = window.VW_ALERTS || {
+  armed:false,
+  audioUnlocked:false,
+  audioCtx:null,
+  seenPlayerClueIds:[],
+  seenDmNotifIds:[],
+  unseenIntelIds:[]
+};
+
+function vwGetIntelButton(){
+  return document.querySelector('.nav .btn[data-tab="intel"]');
+}
+
+function vwGetAlertItemsFromState(st){
+  const state = st || window.__STATE || {};
+  if(SESSION.role === "dm"){
+    return (state.notifications?.items || []).filter(n=>String(n.status||"open") === "open").map(n=>({ id:'n:'+n.id, label:n.type||'Notification' }));
+  }
+  const clueItems = Array.isArray(state.clues) ? state.clues : (state.clues?.items || state.clues?.active || []);
+  return clueItems.filter(c=>String(c.visibility||"hidden")==="revealed").map(c=>({ id:'c:'+c.id, label:c.title||'Clue' }));
+}
+
+function vwUpdateIntelBadge(){
+  const badge = document.getElementById('intelUnreadBadge');
+  const btn = vwGetIntelButton();
+  const count = (window.VW_ALERTS?.unseenIntelIds || []).length;
+  if(badge){
+    badge.textContent = String(count);
+    badge.classList.toggle('hidden', !count);
+  }
+  if(btn) btn.classList.toggle('intel-tab-attn', !!count);
+}
+
+function vwFlashIntelAlert(){
+  const flash = document.getElementById('vwAlertFlash');
+  if(!flash) return;
+  flash.classList.remove('vw-alert-flash');
+  void flash.offsetWidth;
+  flash.classList.add('vw-alert-flash');
+}
+
+function vwUnlockAlertAudio(){
+  try{
+    if(window.VW_ALERTS.audioUnlocked) return true;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return false;
+    const ctx = window.VW_ALERTS.audioCtx || new Ctx();
+    window.VW_ALERTS.audioCtx = ctx;
+    if(ctx.state === 'suspended' && typeof ctx.resume === 'function') ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = 660;
+    gain.gain.value = 0.0001;
+    osc.connect(gain); gain.connect(ctx.destination);
+    const now = ctx.currentTime;
+    osc.start(now);
+    osc.stop(now + 0.01);
+    window.VW_ALERTS.audioUnlocked = true;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function vwPlayIntelAlert(){
+  try{
+    const ctx = window.VW_ALERTS.audioCtx;
+    if(!window.VW_ALERTS.audioUnlocked || !ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(740, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.035, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.28);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  }catch(e){}
+}
+
+function vwMaybeSystemNotify(newItems){
+  if(!newItems || !newItems.length || document.visibilityState === 'visible') return;
+  try{
+    if('Notification' in window && Notification.permission === 'granted'){
+      const title = SESSION.role === 'dm' ? 'Veilwatch notification' : 'Veilwatch intel';
+      const body = newItems.length === 1 ? (newItems[0].label || 'New alert') : (newItems.length + ' new alerts');
+      new Notification(title, { body });
+    }
+  }catch(e){}
+}
+
+function vwRunIntelAlertEffects(newItems){
+  if(!newItems || !newItems.length) return;
+  vwFlashIntelAlert();
+  vwPlayIntelAlert();
+  try{ if('vibrate' in navigator) navigator.vibrate([180, 90, 180]); }catch(e){}
+  vwMaybeSystemNotify(newItems);
+}
+
+function vwSyncSeenBaseline(st){
+  const items = vwGetAlertItemsFromState(st);
+  const ids = items.map(x=>x.id);
+  if(SESSION.role === 'dm') window.VW_ALERTS.seenDmNotifIds = ids.slice();
+  else window.VW_ALERTS.seenPlayerClueIds = ids.slice();
+  window.VW_ALERTS.unseenIntelIds = [];
+  vwUpdateIntelBadge();
+}
+
+function vwComputeUnseen(st, opts){
+  const options = opts || {};
+  const items = vwGetAlertItemsFromState(st);
+  const ids = items.map(x=>x.id);
+  const prev = SESSION.role === 'dm' ? (window.VW_ALERTS.seenDmNotifIds || []) : (window.VW_ALERTS.seenPlayerClueIds || []);
+  const unseen = (window.VW_ALERTS.unseenIntelIds || []).filter(id=>ids.includes(id));
+  const newItems = items.filter(x=>!prev.includes(x.id) && !unseen.includes(x.id));
+  if(newItems.length){
+    window.VW_ALERTS.unseenIntelIds = unseen.concat(newItems.map(x=>x.id));
+    if(!options.silent) vwRunIntelAlertEffects(newItems);
+  }else{
+    window.VW_ALERTS.unseenIntelIds = unseen;
+  }
+  if(SESSION.role === 'dm') window.VW_ALERTS.seenDmNotifIds = ids.slice();
+  else window.VW_ALERTS.seenPlayerClueIds = ids.slice();
+  if(vwGetActiveTopTab && vwGetActiveTopTab() === 'intel') window.VW_ALERTS.unseenIntelIds = [];
+  vwUpdateIntelBadge();
+}
+
+function vwAcknowledgeIntel(){
+  window.VW_ALERTS.unseenIntelIds = [];
+  vwUpdateIntelBadge();
+}
+
+window.vwSyncSeenBaseline = vwSyncSeenBaseline;
+window.vwComputeUnseen = vwComputeUnseen;
+window.vwAcknowledgeIntel = vwAcknowledgeIntel;
+window.vwUnlockAlertAudio = vwUnlockAlertAudio;
 
 // ---- API helper ----
 async function api(pathname, opts){
@@ -453,8 +589,16 @@ function authInit(){
     await hydrateSession();
   }
 
-  if(loginBtn) loginBtn.onclick = ()=>doAuth("/api/auth/login");
-  if(regBtn) regBtn.onclick = ()=>doAuth("/api/auth/register");
+  const authForm = document.getElementById("authForm");
+
+  async function primeAlertsFromUserAction(){
+    try{ vwUnlockAlertAudio(); }catch(e){}
+    try{ if("Notification" in window && Notification.permission === "default") Notification.requestPermission(); }catch(e){}
+  }
+
+  if(loginBtn) loginBtn.onclick = async ()=>{ await primeAlertsFromUserAction(); await doAuth("/api/auth/login"); };
+  if(regBtn) regBtn.onclick = async ()=>{ await primeAlertsFromUserAction(); await doAuth("/api/auth/register"); };
+  if(authForm) authForm.addEventListener("submit", async (e)=>{ e.preventDefault(); await primeAlertsFromUserAction(); await doAuth("/api/auth/login"); });
 
   if(logoutBtn) logoutBtn.onclick = async ()=>{
     try{ await api("/api/auth/logout", { method:"POST", body: JSON.stringify({}) }); }catch(e){}
@@ -485,13 +629,12 @@ async function refreshAll(){
 
   const st = await api("/api/state");
   window.__STATE = st || {};
-  try{ if(typeof initAlertUiOnce === "function") initAlertUiOnce(); }catch(e){}
 
-  // intel indicator baseline
-  if(window.VW_INTEL_UNSEEN && !window.VW_INTEL_UNSEEN.armed){
-    try{ vwSyncSeenBaseline(); window.VW_INTEL_UNSEEN.armed = true; }catch(e){}
+  // intel / alert baseline
+  if(!window.VW_ALERTS.armed){
+    try{ vwSyncSeenBaseline(st); window.VW_ALERTS.armed = true; }catch(e){}
   }else{
-    try{ vwComputeUnseen(); }catch(e){}
+    try{ vwComputeUnseen(st, { silent:false }); }catch(e){}
   }
 
   // Start stream/poller if available
