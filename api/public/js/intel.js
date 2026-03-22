@@ -63,23 +63,18 @@ function renderIntelPlayer(){
     ? rec.map(r=>{
         const rid = Number(r.id||0);
         return '<div class="card" style="margin-bottom:8px;">'+
-          '<button class="btn" type="button" data-recap-toggle="'+rid+'" style="width:100%;justify-content:space-between;text-align:left;">'+
+          '<button class="btn" type="button" data-recap-open="'+rid+'" style="width:100%;justify-content:space-between;text-align:left;">'+
             '<span><strong>'+esc(r.title||"Session Recap")+'</strong> <span class="badge">'+esc(r.date||"")+'</span></span>'+
-            '<span class="mini">Open</span>'+
+            '<span class="mini">View</span>'+
           '</button>'+
-          '<div class="mini hidden" id="intelRecapItem-'+rid+'" style="margin-top:8px;white-space:pre-wrap">'+esc(r.summary||"")+'</div>'+
         '</div>';
       }).join("")
     : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
-  recap.querySelectorAll('[data-recap-toggle]').forEach(btn=>{
+  recap.querySelectorAll('[data-recap-open]').forEach(btn=>{
     btn.onclick = ()=>{
-      const id = btn.getAttribute('data-recap-toggle');
-      const body = document.getElementById('intelRecapItem-'+id);
-      if(!body) return;
-      const isHidden = body.classList.contains('hidden');
-      body.classList.toggle('hidden', !isHidden);
-      const hint = btn.querySelector('.mini');
-      if(hint) hint.textContent = isHidden ? 'Close' : 'Open';
+      const id = Number(btn.getAttribute('data-recap-open')||0);
+      const item = recaps.find(r=>Number(r.id||0)===id);
+      if(item) openRecapViewer(item);
     };
   });
 
@@ -246,6 +241,37 @@ document.getElementById("newClueBtn")?.addEventListener("click", async ()=>{
 });
 
 
+function openRecapViewer(recap){
+  const modal = document.getElementById("vwModal");
+  const titleEl = document.getElementById("vwModalTitle");
+  const bodyEl = document.getElementById("vwModalBody");
+  const okBtn = document.getElementById("vwModalOk");
+  const cancelBtn = document.getElementById("vwModalCancel");
+  if(!modal || !titleEl || !bodyEl || !okBtn || !cancelBtn) return;
+
+  titleEl.textContent = recap.title || "Session Recap";
+  bodyEl.innerHTML =
+    '<div class="mini" style="margin-bottom:10px;opacity:.85">'+esc(recap.date||"")+'</div>'+
+    '<div style="white-space:pre-wrap;line-height:1.5">'+esc(recap.summary||"")+'</div>';
+
+  cancelBtn.textContent = 'Close';
+  okBtn.classList.add('hidden');
+
+  function close(){
+    modal.style.display = 'none';
+    okBtn.classList.remove('hidden');
+    okBtn.onclick = null;
+    cancelBtn.onclick = null;
+    modal.onclick = null;
+    if(typeof vwSetModalOpen === 'function') vwSetModalOpen(false);
+  }
+
+  cancelBtn.onclick = close;
+  modal.onclick = (e)=>{ if(e.target === modal) close(); };
+  if(typeof vwSetModalOpen === 'function') vwSetModalOpen(true);
+  modal.style.display = 'flex';
+}
+
 function renderDMRecaps(){
   if(SESSION.role !== "dm") return;
   const st = window.__STATE || {};
@@ -280,7 +306,21 @@ function renderDMRecaps(){
       const res = await api("/api/recaps/update", { method:"POST", body: JSON.stringify(payload) });
       if(res.ok){ toast("Recap saved"); await refreshAll(); } else toast(res.error || "Failed");
     };
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn smallbtn';
+    delBtn.textContent = 'Delete';
+    delBtn.onclick = async ()=>{
+      const ok = await vwModalConfirm({
+        title: 'Delete Session Recap',
+        message: 'Delete recap #'+r.id+' "'+(r.title||'')+'"? This cannot be undone.'
+      });
+      if(!ok) return;
+      const res = await api('/api/recaps/delete', { method:'POST', body: JSON.stringify({ id:r.id }) });
+      if(res.ok){ toast('Recap deleted'); await refreshAll(); } else toast(res.error || 'Failed');
+    };
     td.appendChild(editBtn);
+    td.appendChild(document.createTextNode(' '));
+    td.appendChild(delBtn);
     recapBody.appendChild(tr);
   });
 }
