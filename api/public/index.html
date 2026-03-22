@@ -254,16 +254,17 @@
   <section id="tab-intel" class="hidden">
     <div class="panel">
       <div id="intelDisabledMsg" class="mini hidden"></div>
-      <div class="row">
+      <div id="intelDmBanner" class="row">
         <div class="pill">DM Tools</div>
         <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
       </div>
-      <hr/>
+      <hr id="intelDmBannerHr"/>
       <div id="dmPanels" class="hidden">
         <div class="row" style="margin-bottom:10px;">
           <button class="btn active" data-itab="notifications">Notifications</button>
           <button class="btn" data-itab="clues">Clues</button>
           <button class="btn" data-itab="recaps">Recaps</button>
+          <button class="btn" data-itab="requests">Requests</button>
           <button class="btn" data-itab="archived">Archived</button>
         </div>
         <div id="itab-notifications">
@@ -296,6 +297,15 @@
             <tbody id="recapBody"></tbody>
           </table>
         </div>
+        <div id="itab-requests" class="hidden">
+          <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+            <div class="mini" style="color:var(--muted);">Player requests queue. Review, add notes, and approve or deny.</div>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>PLAYER</th><th>TYPE</th><th>DETAIL</th><th>STATUS</th><th>DM NOTES</th><th></th></tr></thead>
+            <tbody id="dmReqBody"></tbody>
+          </table>
+        </div>
         <div id="itab-archived" class="hidden">
           <table>
             <thead><tr><th>CLUE</th><th>NOTES</th><th></th></tr></thead>
@@ -305,13 +315,11 @@
       </div>
 
       <div id="playerIntel">
-        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;">
-          <div class="pill">Intel</div>
-          <input class="input" id="intelSearch" placeholder="Search clues..." style="flex:1;min-width:220px;"/>
-          <input class="input" id="intelTag" placeholder="Tag filter (optional)" style="width:200px;"/>
-          <input class="input" id="intelDistrict" placeholder="District filter (optional)" style="width:200px;"/>
-          <button class="btn smallbtn" id="intelClearFilters">Clear</button>
+        <div class="row" style="gap:10px;align-items:center;">
+          <div class="pill">Session Recaps</div>
+          <div class="mini">DM-written summaries only.</div>
         </div>
+        <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
         <hr/>
         <div class="row" style="gap:10px;align-items:center;">
           <div class="pill">DM Alerts</div>
@@ -322,21 +330,25 @@
           <tbody id="intelAlertBody"></tbody>
         </table>
         <hr/>
-        <div class="row" style="gap:10px;align-items:center;">
-          <div class="pill">Session Recaps</div>
-          <div class="mini">DM-written summaries only.</div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;">
+          <div class="pill">Clues</div>
+          <input class="input" id="intelSearch" placeholder="Search clues..." style="flex:1;min-width:220px;"/>
+          <input class="input" id="intelTag" placeholder="Tag filter (optional)" style="width:200px;"/>
+          <input class="input" id="intelDistrict" placeholder="District filter (optional)" style="width:200px;"/>
+          <button class="btn smallbtn" id="intelClearFilters">Clear</button>
         </div>
-        <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
-        <hr/>
-        <table>
+        <table style="margin-top:8px;">
           <thead><tr><th>TITLE</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th>DETAILS</th></tr></thead>
           <tbody id="intelBody"></tbody>
         </table>
 
         <hr/>
-        <div class="row" style="gap:10px;align-items:center;">
-          <div class="pill">Your Requests</div>
-          <div class="mini">What you have sent to the DM.</div>
+        <div class="row" style="gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+          <div class="row" style="gap:10px;align-items:center;">
+            <div class="pill">Your Requests</div>
+            <div class="mini">What you have sent to the DM.</div>
+          </div>
+          <button class="btn smallbtn" id="newPlayerRequestBtn">New Request</button>
         </div>
         <table style="margin-top:8px;">
           <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>STATUS</th><th>DM NOTES</th></tr></thead>
