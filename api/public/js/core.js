@@ -485,6 +485,7 @@ async function refreshAll(){
 
   const st = await api("/api/state");
   window.__STATE = st || {};
+  try{ if(typeof initAlertUiOnce === "function") initAlertUiOnce(); }catch(e){}
 
   // intel indicator baseline
   if(window.VW_INTEL_UNSEEN && !window.VW_INTEL_UNSEEN.armed){

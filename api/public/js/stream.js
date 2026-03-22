@@ -81,6 +81,7 @@ async function vwSyncRealtimeState(reason = "poll", forceRender = false){
       if(!st || st.ok === false) return;
 
       window.__STATE = st;
+      try{ if(typeof initAlertUiOnce === "function") initAlertUiOnce(); }catch(e){}
       const sig = vwStateSignature(st);
       const changed = forceRender || sig !== __vwLastStateSig;
       __vwLastStateSig = sig;
