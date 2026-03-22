@@ -433,6 +433,8 @@ window.api = api;
 function setRoleUI(){
   const dmPanels = document.getElementById("dmPanels");
   const playerIntel = document.getElementById("playerIntel");
+  const intelDmBanner = document.getElementById("intelDmBanner");
+  const intelDmBannerHr = document.getElementById("intelDmBannerHr");
   const dmShopRow = document.getElementById("dmShopRow");
   const editShopBtn = document.getElementById("editShopBtn");
   const settingsTabBtn = document.getElementById("settingsTabBtn");
@@ -443,6 +445,8 @@ function setRoleUI(){
 
   if(dmPanels) dmPanels.classList.toggle("hidden", SESSION.role !== "dm");
   if(playerIntel) playerIntel.classList.toggle("hidden", SESSION.role === "dm");
+  if(intelDmBanner) intelDmBanner.classList.toggle("hidden", SESSION.role !== "dm");
+  if(intelDmBannerHr) intelDmBannerHr.classList.toggle("hidden", SESSION.role !== "dm");
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
@@ -498,6 +502,7 @@ async function renderTabs(tab){
       if(typeof renderIntelDM === "function") renderIntelDM();
       if(typeof renderIntelPlayer === "function") renderIntelPlayer();
       if(typeof renderDM === "function") renderDM();
+      if(typeof renderDMRequests === "function") renderDMRequests();
     } else if(tab === "shop"){
       if(typeof renderShop === "function") renderShop();
     } else if(tab === "settings"){
@@ -543,12 +548,15 @@ document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   const n = document.getElementById("itab-notifications");
   const c = document.getElementById("itab-clues");
   const r = document.getElementById("itab-recaps");
+  const q = document.getElementById("itab-requests");
   const a = document.getElementById("itab-archived");
   if(n) n.classList.toggle("hidden", b.dataset.itab !== "notifications");
   if(c) c.classList.toggle("hidden", b.dataset.itab !== "clues");
   if(r) r.classList.toggle("hidden", b.dataset.itab !== "recaps");
+  if(q) q.classList.toggle("hidden", b.dataset.itab !== "requests");
   if(a) a.classList.toggle("hidden", b.dataset.itab !== "archived");
   if(b.dataset.itab === "recaps" && typeof renderDMRecaps === "function") renderDMRecaps();
+  if(b.dataset.itab === "requests" && typeof renderDMRequests === "function") renderDMRequests();
 });
 
 // ---- Auth bootstrap ----

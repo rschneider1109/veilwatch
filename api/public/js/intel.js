@@ -95,7 +95,15 @@ function renderIntelPlayer(){
   }
 
   // player requests (notifications from this player)
-  const mine = (st.notifications?.items || []).filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||"") && String(n.audience||"dm") !== "players");
+  const mine = (st.notifications?.items || []).filter(n=>{
+    const audience = String(n.audience||"dm");
+    const from = String(n.from||"");
+    const ownerUserId = String(n.ownerUserId||"");
+    return audience !== "players" && (
+      (!!SESSION.userId && ownerUserId === String(SESSION.userId)) ||
+      from === String(SESSION.username||SESSION.name||"")
+    );
+  });
   reqBody.innerHTML = "";
   if(!mine.length){
     reqBody.innerHTML = '<tr><td colspan="5" class="mini">No requests yet.</td></tr>';
@@ -240,6 +248,35 @@ document.getElementById("newClueBtn")?.addEventListener("click", async ()=>{
   else toast(res.error||"Failed");
 });
 
+
+
+document.getElementById("newPlayerRequestBtn")?.addEventListener("click", async ()=>{
+  if(SESSION.role !== "player") return;
+  const result = await vwModalForm({
+    title:"New Request",
+    fields:[
+      {key:"type",label:"Request Type",type:"select",value:"General",options:[
+        "Loot Claim",
+        "Purchase / Requisition",
+        "Action Approval",
+        "Intel Inquiry",
+        "Character Correction",
+        "General"
+      ]},
+      {key:"detail",label:"Details",value:"",placeholder:"What are you asking the DM for?",type:"textarea"}
+    ],
+    okText:"Send"
+  });
+  if(!result || !String(result.detail||"").trim()) return;
+  const payload = {
+    type: result.type || "General",
+    detail: String(result.detail||"").trim(),
+    audience: "dm"
+  };
+  const res = await api("/api/notify", { method:"POST", body: JSON.stringify(payload) });
+  if(res.ok){ toast("Request sent"); await refreshAll(); }
+  else toast(res.error || "Failed");
+});
 
 function openRecapViewer(recap){
   const modal = document.getElementById("vwModal");
