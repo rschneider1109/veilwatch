@@ -269,8 +269,7 @@
         <div id="itab-notifications">
           <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
             <button class="btn smallbtn" id="dmNewNotifBtn">New Notification</button>
-            <button class="btn smallbtn" id="dmNewRecapBtn">New Session Recap</button>
-          </div>
+                      </div>
           <table>
             <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>FROM</th><th>STATUS</th><th>NOTES</th><th></th></tr></thead>
             <tbody id="notifBody"></tbody>
@@ -288,9 +287,12 @@
           <div class="mini" style="margin-top:8px;color:var(--muted);">Hidden=DM only. Revealed=players see it. Archive moves it to Archived.</div>
         </div>
         <div id="itab-recaps" class="hidden">
-          <div class="mini" style="margin-bottom:10px;color:var(--muted);">Write recap entries here. Players see only entries marked for players.</div>
+          <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="btn smallbtn" id="dmNewRecapBtn">New Session Recap</button>
+          </div>
+          <div class="mini" style="margin-bottom:10px;color:var(--muted);">Write recap entries here. Players see only entries marked for players. Players can open recap titles to read the full entry.</div>
           <table>
-            <thead><tr><th>ID</th><th>TITLE</th><th>DATE</th><th>VISIBILITY</th><th>SUMMARY</th></tr></thead>
+            <thead><tr><th>ID</th><th>TITLE</th><th>DATE</th><th>VISIBILITY</th><th>SUMMARY</th><th></th></tr></thead>
             <tbody id="recapBody"></tbody>
           </table>
         </div>
