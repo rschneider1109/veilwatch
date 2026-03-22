@@ -400,6 +400,7 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
+  sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
   characters: [],
   activeParty: [] // DM-controlled "who is currently being played"
@@ -468,6 +469,7 @@ function fileLoadState(){
     st.settings.features ||= DEFAULT_STATE.settings.features;
     st.shops ||= DEFAULT_STATE.shops;
     st.notifications ||= DEFAULT_STATE.notifications;
+    st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
     normalizeCluesShape(st);
     normalizeFeatures(st);
@@ -495,6 +497,7 @@ async function loadState(){
       fromDb.settings.features ||= DEFAULT_STATE.settings.features;
       fromDb.shops ||= DEFAULT_STATE.shops;
       fromDb.notifications ||= DEFAULT_STATE.notifications;
+      fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
       normalizeCluesShape(fromDb);
       normalizeFeatures(fromDb);
@@ -942,8 +945,13 @@ const server = http.createServer(async (req,res)=>{
         items: (safe.notifications?.items || []).filter(n=>{
           const from = String(n.from || "");
           const ownerUserId = String(n.ownerUserId || "");
-          return (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId);
+          const audience = String(n.audience || "");
+          return (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId) || audience === "players";
         })
+      };
+      safe.sessionRecaps = {
+        nextId: 1,
+        items: (safe.sessionRecaps?.items || [])
       };
 
       // character visibility: only owned characters (if logged in) else none
@@ -997,6 +1005,7 @@ const server = http.createServer(async (req,res)=>{
     incoming.settings.features ||= DEFAULT_STATE.settings.features;
     incoming.shops ||= DEFAULT_STATE.shops;
     incoming.notifications ||= DEFAULT_STATE.notifications;
+    incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
     normalizeCluesShape(incoming);
     normalizeFeatures(incoming);
@@ -1372,8 +1381,11 @@ if(p === "/api/character/save" && req.method==="POST"){
       detail: body.detail||"",
       from: body.from || user?.username || "",
       ownerUserId: body.ownerUserId || user?.id || null,
+      audience: body.audience || (((body.from || user?.role || "") === "DM" || dm) ? "players" : "dm"),
+      kind: body.kind || "notification",
       status:"open",
-      notes: body.notes||""
+      notes: body.notes||"",
+      createdAt: Date.now()
     });
     saveState(state);
     return json(res, 200, {ok:true});
@@ -1382,6 +1394,13 @@ if(p === "/api/character/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications = body.notifications;
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+  if(p === "/api/recaps/save" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    state.sessionRecaps = body.sessionRecaps || { nextId: 1, items: [] };
     saveState(state);
     return json(res, 200, {ok:true});
   }
