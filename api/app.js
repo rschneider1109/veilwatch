@@ -1437,6 +1437,18 @@ if(p === "/api/character/save" && req.method==="POST"){
     return json(res, 200, {ok:true});
   }
 
+  if(p === "/api/recaps/delete" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecaps(state);
+    const id = Number(body.id || 0);
+    const idx = state.sessionRecaps.items.findIndex(r => Number(r.id||0) === id);
+    if(idx < 0) return json(res, 404, {ok:false, error:"Recap not found"});
+    state.sessionRecaps.items.splice(idx, 1);
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
   if(p === "/api/notifications/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
