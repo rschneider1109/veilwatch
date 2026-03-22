@@ -934,8 +934,17 @@ const server = http.createServer(async (req,res)=>{
         safe.clues.items = (safe.clues.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
         safe.clues.archived = [];
       }
-      // hide notifications from players
-      safe.notifications = { nextId: 1, items: [] };
+      // players only receive their own submitted notifications/requests
+      const playerName = String(user?.username || "");
+      const playerId = String(user?.id || "");
+      safe.notifications = {
+        nextId: 1,
+        items: (safe.notifications?.items || []).filter(n=>{
+          const from = String(n.from || "");
+          const ownerUserId = String(n.ownerUserId || "");
+          return (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId);
+        })
+      };
 
       // character visibility: only owned characters (if logged in) else none
       if(user && user.role === "player"){
@@ -1357,7 +1366,15 @@ if(p === "/api/character/save" && req.method==="POST"){
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications ||= { nextId: 1, items: [] };
     const id = state.notifications.nextId++;
-    state.notifications.items.push({ id, type: body.type||"Request", detail: body.detail||"", from: body.from||"", status:"open", notes: body.notes||"" });
+    state.notifications.items.push({
+      id,
+      type: body.type||"Request",
+      detail: body.detail||"",
+      from: body.from || user?.username || "",
+      ownerUserId: body.ownerUserId || user?.id || null,
+      status:"open",
+      notes: body.notes||""
+    });
     saveState(state);
     return json(res, 200, {ok:true});
   }
