@@ -215,57 +215,14 @@ th{color:var(--muted);font-weight:600;}
 }
 
 
-/* Notification attention system */
-.nav-alert-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:18px;
-  height:18px;
-  margin-left:8px;
-  padding:0 6px;
-  border-radius:999px;
-  border:1px solid rgba(255,96,96,.45);
-  background:rgba(255,72,72,.16);
-  color:#ffd6d6;
-  font-size:11px;
-  line-height:18px;
-  vertical-align:middle;
-}
-.nav-has-alert{
-  position:relative;
-  box-shadow:0 0 0 1px rgba(255,96,96,.22) inset, 0 0 18px rgba(255,72,72,.18);
-  animation:vwNavAlertPulse 1.15s ease-in-out infinite;
-}
-@keyframes vwNavAlertPulse{
-  0%{ box-shadow:0 0 0 1px rgba(255,96,96,.18) inset, 0 0 0 rgba(255,72,72,0); }
-  50%{ box-shadow:0 0 0 1px rgba(255,96,96,.28) inset, 0 0 24px rgba(255,72,72,.34); }
-  100%{ box-shadow:0 0 0 1px rgba(255,96,96,.18) inset, 0 0 0 rgba(255,72,72,0); }
-}
-body.vw-alert-flash::before{
-  content:"";
-  position:fixed;
-  inset:-8px;
-  pointer-events:none;
-  z-index:9998;
-  border:4px solid rgba(255,88,88,.78);
-  box-shadow:
-    inset 0 0 70px rgba(255,88,88,.20),
-    0 0 28px rgba(255,88,88,.32),
-    0 0 64px rgba(255,88,88,.26);
-  animation:vwAlertFlash 1450ms cubic-bezier(.22,.61,.36,1) 1;
-}
-@keyframes vwAlertFlash{
-  0%{ opacity:0; transform:scale(1.008); }
-  18%{ opacity:1; transform:scale(1); }
-  55%{ opacity:.72; }
-  100%{ opacity:0; transform:scale(1); }
-}
-#alertToggleBtn.vw-alerts-live{
-  border-color:rgba(0,229,255,.38);
-  box-shadow:0 0 16px rgba(0,229,255,.15);
-}
-#alertToggleBtn.vw-alerts-hot{
-  border-color:rgba(255,96,96,.38);
-  color:#ffd6d6;
-}
+.intel-tab-btn{position:relative;}
+.intel-nav-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;margin-left:8px;padding:0 7px;border-radius:999px;font-size:11px;font-weight:700;color:#ffe7e7;border:1px solid rgba(255,95,95,.55);background:rgba(255,70,70,.18);box-shadow:0 0 18px rgba(255,70,70,.18);}
+.intel-nav-badge.hidden{display:none;}
+.intel-tab-attn{animation:vwIntelPulse 1.8s ease-in-out infinite;}
+@keyframes vwIntelPulse{0%{box-shadow:0 0 0 rgba(255,74,74,0);}50%{box-shadow:0 0 22px rgba(255,74,74,.42), inset 0 0 12px rgba(255,74,74,.12);}100%{box-shadow:0 0 0 rgba(255,74,74,0);}}
+#vwAlertFlash{position:fixed;inset:-12vh;pointer-events:none;opacity:0;border-radius:28px;z-index:9998;box-shadow:0 0 0 0 rgba(255,60,60,0), inset 0 0 0 0 rgba(255,60,60,0);}
+#vwAlertFlash.vw-alert-flash{animation:vwAlertFlashBloom 1.65s ease-out 1;}
+@keyframes vwAlertFlashBloom{0%{opacity:0;box-shadow:0 0 0 0 rgba(255,70,70,0), inset 0 0 0 0 rgba(255,70,70,0);}
+18%{opacity:1;box-shadow:0 0 56px 22px rgba(255,70,70,.20), inset 0 0 50px 18px rgba(255,70,70,.22);}
+55%{opacity:.72;box-shadow:0 0 90px 36px rgba(255,70,70,.14), inset 0 0 90px 28px rgba(255,70,70,.14);}
+100%{opacity:0;box-shadow:0 0 120px 44px rgba(255,70,70,0), inset 0 0 120px 34px rgba(255,70,70,0);}}

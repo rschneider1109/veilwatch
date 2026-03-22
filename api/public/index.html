@@ -16,11 +16,13 @@
       <div style="grid-column:span 12;" class="row">
         <input class="input" id="authUser" placeholder="Username" style="flex:1;min-width:220px;"/>
       </div>
-      <div style="grid-column:span 12;" class="row" style="gap:10px;flex-wrap:wrap;">
-        <input class="input" id="authPass" type="password" placeholder="Password" style="flex:1;min-width:220px;"/>
-        <button class="btn smallbtn" id="loginBtn">Login</button>
-        <button class="btn smallbtn" id="registerBtn">Create</button>
-      </div>
+      <form id="authForm" style="grid-column:span 12;">
+        <div class="row" style="gap:10px;flex-wrap:wrap;">
+          <input class="input" id="authPass" type="password" placeholder="Password" style="flex:1;min-width:220px;"/>
+          <button class="btn smallbtn" type="button" id="loginBtn">Login</button>
+          <button class="btn smallbtn" type="button" id="registerBtn">Create</button>
+        </div>
+      </form>
       <div style="grid-column:span 12;" class="mini" id="authHint" style="color:var(--muted);">Passwords must be 6+ chars.</div>
     </div>
   </div>
@@ -28,7 +30,7 @@
 
 <header>
   <div class="brand">VEILWATCH OS</div>
-  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn" id="alertToggleBtn" style="margin-left:10px;">Enable Alerts</button><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
+  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
@@ -37,7 +39,7 @@
   <div class="nav">
     <button class="btn active" data-tab="home">Home</button>
     <button class="btn" data-tab="character">Character</button>
-    <button class="btn" id="intelTabBtn" data-tab="intel">Intel <span class="nav-alert-badge hidden" id="intelNavBadge">0</span></button>
+    <button class="btn intel-tab-btn" data-tab="intel">Intel <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
     <button class="btn" data-tab="shop">Shop</button>
     <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
   </div>
@@ -396,6 +398,7 @@
 </main>
 
 <div class="toast" id="toast"></div>
+<div id="vwAlertFlash" aria-hidden="true"></div>
 
 <!-- Veilwatch Modal -->
 <div id="vwModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:9999;">
