@@ -579,6 +579,8 @@ function renderCharacter(){
             <button class="btn smallbtn" data-ammo-act="reload" data-wi="${wi}">Reload</button>
             <span style="opacity:.7">Mags</span>
             <input class="input" style="width:70px" data-ammo="mags" data-wi="${wi}" value="${esc(w.ammo.mags ?? "")}" />
+            <span style="opacity:.7">Max</span>
+            <input class="input" style="width:70px" data-ammo="magsMax" data-wi="${wi}" value="${esc(w.ammo.magsMax ?? w.ammo.mags ?? "")}" />
             <button class="btn smallbtn" data-ammo-act="addmag" data-wi="${wi}">+Mag</button>
             <button class="btn smallbtn" data-ammo-act="reloadmags" data-wi="${wi}">Reload Mags</button>
           </div>
@@ -602,7 +604,7 @@ function renderCharacter(){
       let v = inp.value;
 
       // numeric fields
-      if(key==="magSize" || key==="current" || key==="mags"){
+      if(key==="magSize" || key==="current" || key==="mags" || key==="magsMax"){
         const n = parseInt(v,10);
         if(Number.isFinite(n)) v = n;
       }
@@ -659,8 +661,10 @@ function renderCharacter(){
         }
         w.ammo.current = magSize;
       }else if(act==="addmag"){
-        w.ammo.mags = mags + 1;
-        if(!w.ammo.magsMax && w.ammo.magsMax!==0) w.ammo.magsMax = mags + 1;
+        const nextMags = mags + 1;
+        const nextMax = Math.max(magsMax || 0, nextMags);
+        w.ammo.mags = nextMags;
+        w.ammo.magsMax = nextMax;
       }else if(act==="reloadmags"){
         const ammoType = String(w.ammo.type || "").trim();
         if(magSize <= 0){
@@ -2575,9 +2579,11 @@ const result = await new Promise((resolve)=>{
       damage: String(w.damage||""),
       ammo: w.ammo ? {
         type: String(w.ammo.type||""),
-        starting: String(w.ammo.starting||""),
+        magSize: String(w.ammo.magSize ?? w.ammo.starting ?? ""),
+        starting: String(w.ammo.starting ?? w.ammo.magSize ?? ""),
         current: String(w.ammo.current||""),
-        mags: String(w.ammo.mags||"")
+        mags: String(w.ammo.mags||""),
+        magsMax: String(w.ammo.magsMax ?? w.ammo.mags ?? "")
       } : null
     }));
 
