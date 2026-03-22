@@ -7,8 +7,10 @@ window.VW_ALERTS = window.VW_ALERTS || {
   lastTitle: document.title,
   initialized: false,
   prev: { dmOpenIds: [], revealedIds: [] },
+  seenRevealedIds: [],
   audioContext: null
 };
+window.VW_INTEL_UNSEEN = window.VW_INTEL_UNSEEN || { armed: false };
 
 (function initAlertPrefs(){
   try{
@@ -76,7 +78,7 @@ function vwFlashViewport(){
   void document.body.offsetWidth;
   document.body.classList.add("vw-alert-flash");
   clearTimeout(vwFlashViewport.__t);
-  vwFlashViewport.__t = setTimeout(()=>document.body.classList.remove("vw-alert-flash"), 900);
+  vwFlashViewport.__t = setTimeout(()=>document.body.classList.remove("vw-alert-flash"), 1550);
 }
 
 function vwPlayAlertTone(kind){
@@ -150,7 +152,13 @@ function vwSyncSeenBaseline(){
   window.VW_ALERTS.prev = snap;
   window.VW_ALERTS.initialized = true;
   const isIntelOpen = (document.querySelector('.nav .btn.active')?.dataset?.tab || "home") === "intel";
-  vwSetIntelAttention(isIntelOpen ? 0 : snap.revealedIds.length);
+  if(isIntelOpen){
+    window.VW_ALERTS.seenRevealedIds = snap.revealedIds.slice();
+  }
+  const count = SESSION.role === "dm"
+    ? snap.dmOpenIds.length
+    : (isIntelOpen ? 0 : snap.revealedIds.filter(id=>!(window.VW_ALERTS.seenRevealedIds||[]).includes(id)).length);
+  vwSetIntelAttention(count);
 }
 window.vwSyncSeenBaseline = vwSyncSeenBaseline;
 
@@ -158,7 +166,8 @@ function vwAcknowledgeIntel(){
   const st = window.__STATE || {};
   const snap = vwGetAlertSnapshot(st);
   window.VW_ALERTS.prev.revealedIds = snap.revealedIds.slice();
-  vwSetIntelAttention(0);
+  window.VW_ALERTS.seenRevealedIds = snap.revealedIds.slice();
+  vwSetIntelAttention(SESSION.role === "dm" ? snap.dmOpenIds.length : 0);
 }
 window.vwAcknowledgeIntel = vwAcknowledgeIntel;
 
@@ -180,10 +189,16 @@ function vwComputeUnseen(){
   const newDmOpen = snap.dmOpenIds.filter(id=>!prevDmOpen.has(id));
 
   const intelTabOpen = (document.querySelector('.nav .btn.active')?.dataset?.tab || "home") === "intel";
-  const unseenIntel = intelTabOpen ? 0 : newRevealed.length;
-  if(unseenIntel > 0){
-    vwSetIntelAttention((window.VW_ALERTS.unseenCount || 0) + unseenIntel);
+  if(intelTabOpen && SESSION.role !== "dm"){
+    window.VW_ALERTS.seenRevealedIds = snap.revealedIds.slice();
   }
+
+  const seenRevealed = new Set(window.VW_ALERTS.seenRevealedIds || []);
+  const unseenPlayerIntel = intelTabOpen && SESSION.role !== "dm"
+    ? 0
+    : snap.revealedIds.filter(id=>!seenRevealed.has(id)).length;
+  const badgeCount = SESSION.role === "dm" ? snap.dmOpenIds.length : unseenPlayerIntel;
+  vwSetIntelAttention(badgeCount);
 
   const shouldPingPlayer = SESSION.role !== "dm" && newRevealed.length > 0;
   const shouldPingDm = SESSION.role === "dm" && newDmOpen.length > 0;
