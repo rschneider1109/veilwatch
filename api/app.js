@@ -1415,8 +1415,24 @@ if(p === "/api/character/save" && req.method==="POST"){
       summary: body.summary || "",
       date: body.date || "",
       visibility: body.visibility || "players",
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      updatedAt: Date.now()
     });
+    saveState(state);
+    return json(res, 200, {ok:true, id});
+  }
+  if(p === "/api/recaps/update" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecaps(state);
+    const id = Number(body.id || 0);
+    const recap = (state.sessionRecaps.items || []).find(r => Number(r.id||0) === id);
+    if(!recap) return json(res, 404, {ok:false, error:"Recap not found"});
+    recap.title = body.title || recap.title || "Session Recap";
+    recap.summary = body.summary ?? recap.summary ?? "";
+    recap.date = body.date ?? recap.date ?? "";
+    recap.visibility = body.visibility || recap.visibility || "players";
+    recap.updatedAt = Date.now();
     saveState(state);
     return json(res, 200, {ok:true, id});
   }
