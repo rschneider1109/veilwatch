@@ -58,10 +58,35 @@ function renderIntelPlayer(){
     });
   }
 
-  const rec = [...recaps].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
+  const rec = [...recaps].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   recap.innerHTML = rec.length
-    ? rec.map(r=>'<div style="margin-bottom:8px;"><b>'+esc(r.title||"Session Recap")+'</b> <span class="badge">'+esc(r.date||"")+'</span><div style="margin-top:4px;">'+esc(r.summary||"")+'</div></div>').join("")
+    ? rec.map(r=>{
+        const rid = Number(r.id||0);
+        const title = esc(r.title||"Session Recap");
+        const date = esc(r.date||"");
+        const summary = esc(r.summary||"").replace(/\n/g, "<br>");
+        return ''+
+          '<div class="vw-recap-card" style="margin-bottom:10px;">'+
+            '<button class="vw-recap-toggle" type="button" data-recap-id="'+rid+'" aria-expanded="false">'+
+              '<span><b>'+title+'</b>'+(date ? ' <span class="badge">'+date+'</span>' : '')+'</span>'+
+              '<span class="mini" style="opacity:.75">Open</span>'+
+            '</button>'+
+            '<div class="vw-recap-panel hidden" id="vwRecapPanel'+rid+'" style="margin-top:6px;">'+summary+'</div>'+
+          '</div>';
+      }).join("")
     : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
+
+  recap.querySelectorAll('.vw-recap-toggle').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.getAttribute('data-recap-id');
+      const panel = document.getElementById('vwRecapPanel'+id);
+      if(!panel) return;
+      const open = panel.classList.toggle('hidden') === false;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const hint = btn.querySelector('.mini');
+      if(hint) hint.textContent = open ? 'Close' : 'Open';
+    };
+  });
 
   intelBody.innerHTML = "";
   if(!filtered.length){
@@ -239,7 +264,32 @@ function renderDMRecaps(){
   }
   items.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(r=>{
     const tr=document.createElement("tr");
-    tr.innerHTML = "<td>"+r.id+"</td><td>"+esc(r.title||"")+"</td><td>"+esc(r.date||"")+"</td><td>"+esc(r.visibility||"players")+"</td><td>"+esc(r.summary||"")+"</td>";
+    tr.innerHTML = "<td>"+r.id+"</td><td>"+esc(r.title||"")+"</td><td>"+esc(r.date||"")+"</td><td>"+esc(r.visibility||"players")+"</td><td>"+esc(r.summary||"")+"</td><td></td>";
+    const td = tr.lastChild;
+    td.innerHTML = '<button class="btn smallbtn">Edit</button>';
+    td.querySelector('button').onclick = async ()=>{
+      const result = await vwModalForm({
+        title:"Edit Session Recap",
+        fields:[
+          {key:"title",label:"Title",value:r.title||"Session Recap",placeholder:"Session title"},
+          {key:"date",label:"Date",value:r.date||"",placeholder:"YYYY-MM-DD"},
+          {key:"summary",label:"Summary",value:r.summary||"",placeholder:"What happened?",type:"textarea"},
+          {key:"visibility",label:"Visibility",value:r.visibility||"players",placeholder:"players or dm"}
+        ],
+        okText:"Save Changes"
+      });
+      if(!result) return;
+      const payload = {
+        id:r.id,
+        title: result.title,
+        date: result.date,
+        summary: result.summary,
+        visibility: (result.visibility||"players").toLowerCase() === "dm" ? "dm" : "players"
+      };
+      const res = await api("/api/recaps/update", { method:"POST", body: JSON.stringify(payload) });
+      if(res.ok){ toast("Recap updated"); await refreshAll(); }
+      else toast(res.error || "Failed");
+    };
     recapBody.appendChild(tr);
   });
 }
