@@ -542,10 +542,13 @@ document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-itab]").forEach(x=>x.classList.toggle("active", x===b));
   const n = document.getElementById("itab-notifications");
   const c = document.getElementById("itab-clues");
+  const r = document.getElementById("itab-recaps");
   const a = document.getElementById("itab-archived");
   if(n) n.classList.toggle("hidden", b.dataset.itab !== "notifications");
   if(c) c.classList.toggle("hidden", b.dataset.itab !== "clues");
+  if(r) r.classList.toggle("hidden", b.dataset.itab !== "recaps");
   if(a) a.classList.toggle("hidden", b.dataset.itab !== "archived");
+  if(b.dataset.itab === "recaps" && typeof renderDMRecaps === "function") renderDMRecaps();
 });
 
 // ---- Auth bootstrap ----

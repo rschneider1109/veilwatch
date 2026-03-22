@@ -58,33 +58,28 @@ function renderIntelPlayer(){
     });
   }
 
-  const rec = [...recaps].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const rec = [...recaps].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
   recap.innerHTML = rec.length
     ? rec.map(r=>{
         const rid = Number(r.id||0);
-        const title = esc(r.title||"Session Recap");
-        const date = esc(r.date||"");
-        const summary = esc(r.summary||"").replace(/\n/g, "<br>");
-        return ''+
-          '<div class="vw-recap-card" style="margin-bottom:10px;">'+
-            '<button class="vw-recap-toggle" type="button" data-recap-id="'+rid+'" aria-expanded="false">'+
-              '<span><b>'+title+'</b>'+(date ? ' <span class="badge">'+date+'</span>' : '')+'</span>'+
-              '<span class="mini" style="opacity:.75">Open</span>'+
-            '</button>'+
-            '<div class="vw-recap-panel hidden" id="vwRecapPanel'+rid+'" style="margin-top:6px;">'+summary+'</div>'+
-          '</div>';
+        return '<div class="card" style="margin-bottom:8px;">'+
+          '<button class="btn" type="button" data-recap-toggle="'+rid+'" style="width:100%;justify-content:space-between;text-align:left;">'+
+            '<span><strong>'+esc(r.title||"Session Recap")+'</strong> <span class="badge">'+esc(r.date||"")+'</span></span>'+
+            '<span class="mini">Open</span>'+
+          '</button>'+
+          '<div class="mini hidden" id="intelRecapItem-'+rid+'" style="margin-top:8px;white-space:pre-wrap">'+esc(r.summary||"")+'</div>'+
+        '</div>';
       }).join("")
     : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
-
-  recap.querySelectorAll('.vw-recap-toggle').forEach(btn=>{
+  recap.querySelectorAll('[data-recap-toggle]').forEach(btn=>{
     btn.onclick = ()=>{
-      const id = btn.getAttribute('data-recap-id');
-      const panel = document.getElementById('vwRecapPanel'+id);
-      if(!panel) return;
-      const open = panel.classList.toggle('hidden') === false;
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const id = btn.getAttribute('data-recap-toggle');
+      const body = document.getElementById('intelRecapItem-'+id);
+      if(!body) return;
+      const isHidden = body.classList.contains('hidden');
+      body.classList.toggle('hidden', !isHidden);
       const hint = btn.querySelector('.mini');
-      if(hint) hint.textContent = open ? 'Close' : 'Open';
+      if(hint) hint.textContent = isHidden ? 'Close' : 'Open';
     };
   });
 
@@ -259,15 +254,17 @@ function renderDMRecaps(){
   const items = st.sessionRecaps?.items || [];
   recapBody.innerHTML = "";
   if(!items.length){
-    recapBody.innerHTML = '<tr><td colspan="5" class="mini">No session recaps yet.</td></tr>';
+    recapBody.innerHTML = '<tr><td colspan="6" class="mini">No session recaps yet.</td></tr>';
     return;
   }
   items.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(r=>{
     const tr=document.createElement("tr");
     tr.innerHTML = "<td>"+r.id+"</td><td>"+esc(r.title||"")+"</td><td>"+esc(r.date||"")+"</td><td>"+esc(r.visibility||"players")+"</td><td>"+esc(r.summary||"")+"</td><td></td>";
     const td = tr.lastChild;
-    td.innerHTML = '<button class="btn smallbtn">Edit</button>';
-    td.querySelector('button').onclick = async ()=>{
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn smallbtn';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = async ()=>{
       const result = await vwModalForm({
         title:"Edit Session Recap",
         fields:[
@@ -276,20 +273,14 @@ function renderDMRecaps(){
           {key:"summary",label:"Summary",value:r.summary||"",placeholder:"What happened?",type:"textarea"},
           {key:"visibility",label:"Visibility",value:r.visibility||"players",placeholder:"players or dm"}
         ],
-        okText:"Save Changes"
+        okText:"Save"
       });
       if(!result) return;
-      const payload = {
-        id:r.id,
-        title: result.title,
-        date: result.date,
-        summary: result.summary,
-        visibility: (result.visibility||"players").toLowerCase() === "dm" ? "dm" : "players"
-      };
+      const payload = { id:r.id, title: result.title, date: result.date, summary: result.summary, visibility: (result.visibility||"players").toLowerCase() === "dm" ? "dm" : "players" };
       const res = await api("/api/recaps/update", { method:"POST", body: JSON.stringify(payload) });
-      if(res.ok){ toast("Recap updated"); await refreshAll(); }
-      else toast(res.error || "Failed");
+      if(res.ok){ toast("Recap saved"); await refreshAll(); } else toast(res.error || "Failed");
     };
+    td.appendChild(editBtn);
     recapBody.appendChild(tr);
   });
 }
