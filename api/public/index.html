@@ -268,6 +268,7 @@
         <div id="itab-notifications">
           <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
             <button class="btn smallbtn" id="dmNewNotifBtn">New Notification</button>
+            <button class="btn smallbtn" id="dmNewRecapBtn">New Session Recap</button>
           </div>
           <table>
             <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>FROM</th><th>STATUS</th><th>NOTES</th><th></th></tr></thead>
@@ -307,6 +308,16 @@
           <div class="mini">DM-written summaries only.</div>
         </div>
         <div id="intelRecap" class="mini" style="margin-top:8px;"></div>
+        <hr/>
+        <div class="row" style="gap:10px;align-items:center;">
+          <div class="pill">DM Alerts</div>
+          <div class="mini">Pushed by the DM. Separate from clues.</div>
+        </div>
+        <table style="margin-top:8px;">
+          <thead><tr><th>TYPE</th><th>DETAIL</th><th>STATUS</th><th>DM NOTES</th></tr></thead>
+          <tbody id="playerAlertBody"></tbody>
+        </table>
+
         <hr/>
         <table>
           <thead><tr><th>TITLE</th><th>TAGS</th><th>DISTRICT</th><th>DATE</th><th>DETAILS</th></tr></thead>
