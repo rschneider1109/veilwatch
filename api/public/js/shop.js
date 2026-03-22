@@ -393,6 +393,12 @@
     return { items:Object.values(byCategory).flat(), byCategory };
   }
 
+  function inferInventoryUnit(item){
+    const explicit = String(item?.inventoryUnit || item?.inventory_unit || item?.default_unit || item?.unit || '').trim();
+    if(explicit) return explicit;
+    return String(item?.ammo_type || '').trim() ? 'rounds' : '';
+  }
+
   function normalizeCatalogItem(item, categoryHint){
     const category = String(item?.category || item?.item_category || item?.group || categoryHint || 'Misc').trim() || 'Misc';
     return {
@@ -403,6 +409,7 @@
       default_weight: item?.default_weight ?? item?.weight ?? '',
       default_cost: item?.default_cost ?? item?.cost ?? '',
       default_notes: item?.default_notes ?? item?.notes ?? '',
+      inventoryUnit: inferInventoryUnit(item),
       ammo_type: item?.ammo_type ?? '',
       source: item?.source || (item?.is_custom ? 'custom' : 'official'),
       is_custom: !!item?.is_custom
@@ -414,18 +421,45 @@
     const byCategory = bundle?.byCategory || {};
     const categories = Object.keys(byCategory).sort((a,b)=>a.localeCompare(b));
     if(!categories.length){ toast('No catalog items available'); return; }
+
     let selectedCategory = categories[0];
     let selectedName = '';
+    let working = {};
 
     const ui = vwModalBaseSetup ? vwModalBaseSetup('Add Item to Shop', 'Add Item', 'Cancel') : null;
     if(!ui){ toast('Modal UI unavailable'); return; }
 
     function itemsForCategory(cat){ return (byCategory[cat] || []).map(it => normalizeCatalogItem(it, cat)); }
-    function selectedItem(){ return itemsForCategory(selectedCategory).find(it => String(it.name) === String(selectedName)) || itemsForCategory(selectedCategory)[0] || null; }
+    function selectedItem(){
+      const items = itemsForCategory(selectedCategory);
+      return items.find(it => String(it.name) === String(selectedName)) || items[0] || null;
+    }
+    function syncWorkingFromDom(){
+      const costEl = document.getElementById('vwShopCost');
+      const weightEl = document.getElementById('vwShopWeight');
+      const qtyEl = document.getElementById('vwShopQty');
+      const stockEl = document.getElementById('vwShopStock');
+      const notesEl = document.getElementById('vwShopNotes');
+      if(costEl) working.cost = costEl.value;
+      if(weightEl) working.weight = weightEl.value;
+      if(qtyEl) working.inventoryQty = qtyEl.value;
+      if(stockEl) working.stock = stockEl.value;
+      if(notesEl) working.notes = notesEl.value;
+    }
+    function hydrateWorking(current){
+      working = {
+        cost: String(current?.default_cost ?? '0'),
+        weight: String(current?.default_weight ?? ''),
+        inventoryQty: String(current?.default_qty ?? 1),
+        stock: String(working.stock ?? '∞'),
+        notes: String(current?.default_notes ?? '')
+      };
+    }
     function render(){
       const items = itemsForCategory(selectedCategory);
       if(!selectedName || !items.some(it => String(it.name) === String(selectedName))) selectedName = items[0]?.name || '';
       const current = selectedItem();
+      if(!Object.keys(working).length) hydrateWorking(current);
       ui.mBody.innerHTML = `
         <div class="mini" style="margin-bottom:10px;opacity:.85">Pick an item from the inventory database. The shop will place it in its matching aisle automatically based on category.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -447,35 +481,46 @@
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Price ($)</div>
-            <input id="vwShopCost" class="input" value="${esc(String(current?.default_cost ?? '0'))}" />
+            <input id="vwShopCost" class="input" value="${esc(String(working.cost ?? current?.default_cost ?? '0'))}" />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Weight</div>
-            <input id="vwShopWeight" class="input" value="${esc(String(current?.default_weight ?? ''))}" />
+            <input id="vwShopWeight" class="input" value="${esc(String(working.weight ?? current?.default_weight ?? ''))}" />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Inventory quantity per purchase</div>
-            <input id="vwShopQty" class="input" value="${esc(String(current?.default_qty ?? 1))}" />
+            <input id="vwShopQty" class="input" value="${esc(String(working.inventoryQty ?? current?.default_qty ?? 1))}" />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Stock (∞ or number)</div>
-            <input id="vwShopStock" class="input" value="∞" />
+            <input id="vwShopStock" class="input" value="${esc(String(working.stock ?? '∞'))}" />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Inventory unit label</div>
-            <input id="vwShopUnit" class="input" placeholder="rounds" />
+            <input class="input" value="${esc(String(current?.inventoryUnit || ''))}" disabled />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Ammo type</div>
-            <input id="vwShopAmmoType" class="input" value="${esc(String(current?.ammo_type || ''))}" placeholder="Optional" />
+            <input class="input" value="${esc(String(current?.ammo_type || ''))}" disabled />
           </div>
         </div>
         <div style="margin-top:10px;">
           <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
-          <input id="vwShopNotes" class="input" value="${esc(String(current?.default_notes ?? ''))}" placeholder="Optional" />
+          <textarea id="vwShopNotes" style="width:100%;min-height:90px;padding:10px;border-radius:12px;border:1px solid #2b3a4d;background:rgba(255,255,255,.03);color:#e9f1ff;outline:none;resize:vertical;">${esc(String(working.notes ?? current?.default_notes ?? ''))}</textarea>
         </div>`;
-      document.getElementById('vwShopCat')?.addEventListener('change', e=>{ selectedCategory = e.target.value; selectedName = ''; render(); });
-      document.getElementById('vwShopItem')?.addEventListener('change', e=>{ selectedName = e.target.value; render(); });
+      document.getElementById('vwShopCat')?.addEventListener('change', e=>{
+        syncWorkingFromDom();
+        selectedCategory = e.target.value;
+        selectedName = '';
+        working = {};
+        render();
+      });
+      document.getElementById('vwShopItem')?.addEventListener('change', e=>{
+        syncWorkingFromDom();
+        selectedName = e.target.value;
+        working = {};
+        render();
+      });
     }
     render();
 
@@ -488,15 +533,19 @@
         if(typeof vwSetModalOpen === 'function') vwSetModalOpen(false);
         resolve(val);
       }
-      ui.btnOk.onclick = ()=>close(true);
-      ui.btnCan.onclick = ()=>close(false);
-      ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(false); };
+      ui.btnOk.onclick = ()=>{
+        syncWorkingFromDom();
+        close({ ok:true, values:Object.assign({}, working) });
+      };
+      ui.btnCan.onclick = ()=>close(null);
+      ui.modal.onclick = (e)=>{ if(e.target === ui.modal) close(null); };
       if(typeof vwSetModalOpen === 'function') vwSetModalOpen(true);
       ui.modal.style.display = 'flex';
     });
-    if(!result) return;
+    if(!result?.ok) return;
+
     const current = selectedItem();
-    if(!current?.name) return;
+    if(!current?.name){ toast('Select an item first'); return; }
     const nextCategory = String(current.category || selectedCategory || 'Misc').trim() || 'Misc';
     const nextItem = {
       id: 'i_' + Math.random().toString(36).slice(2,8),
@@ -504,13 +553,13 @@
       sourceType: current.is_custom ? 'custom' : 'official',
       name: current.name,
       category: nextCategory,
-      cost: parseMoney(document.getElementById('vwShopCost')?.value || current.default_cost || 0),
-      weight: String(document.getElementById('vwShopWeight')?.value ?? current.default_weight ?? ''),
-      inventoryQty: Math.max(1, parseIntSafe(document.getElementById('vwShopQty')?.value || current.default_qty || 1, 1)),
-      inventoryUnit: String(document.getElementById('vwShopUnit')?.value || '').trim(),
-      ammo_type: String(document.getElementById('vwShopAmmoType')?.value || current.ammo_type || '').trim(),
-      notes: String(document.getElementById('vwShopNotes')?.value || current.default_notes || '').trim(),
-      stock: String(document.getElementById('vwShopStock')?.value || '∞').trim() || '∞'
+      cost: parseMoney(result.values.cost || current.default_cost || 0),
+      weight: String(result.values.weight ?? current.default_weight ?? '').trim(),
+      inventoryQty: Math.max(1, parseIntSafe(result.values.inventoryQty ?? current.default_qty ?? 1, 1)),
+      inventoryUnit: String(current.inventoryUnit || '').trim(),
+      ammo_type: String(current.ammo_type || '').trim(),
+      notes: String(result.values.notes ?? current.default_notes ?? '').trim(),
+      stock: String(result.values.stock || '∞').trim() || '∞'
     };
     shop.items = Array.isArray(shop.items) ? shop.items : [];
     shop.items.push(nextItem);
