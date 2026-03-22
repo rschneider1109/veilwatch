@@ -22,14 +22,9 @@ function renderIntelPlayer(){
 
   const intelBody = document.getElementById("intelBody");
   const recap = document.getElementById("intelRecap");
+  const alertBody = document.getElementById("playerAlertBody");
   const reqBody = document.getElementById("playerReqBody");
-  if(!intelBody || !recap || !reqBody) return;
-
-  // Session Recaps (player) — DM-written only (no auto event feed)
-  if(!recap.dataset.vwInit){
-    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won&#39;t spam this panel.</p>';
-    recap.dataset.vwInit = "1";
-  }
+  if(!intelBody || !recap || !alertBody || !reqBody) return;
 
   const q = (document.getElementById("intelSearch")?.value || "").toLowerCase().trim();
   const tag = (document.getElementById("intelTag")?.value || "").toLowerCase().trim();
@@ -45,11 +40,23 @@ function renderIntelPlayer(){
     return true;
   });
 
-  // recap: last 5 by revealedAt
-  const rec = [...clues].sort((a,b)=>(b.revealedAt||0)-(a.revealedAt||0)).slice(0,5);
+  const rec = (st.sessionRecaps?.items || []).slice().sort((a,b)=>(b.id||0)-(a.id||0)).slice(0,5);
   recap.innerHTML = rec.length
-    ? rec.map(c=>'<div>• <b>'+esc(c.title||"Clue")+'</b> <span class="badge">'+esc(c.district||"")+'</span></div>').join("")
-    : '<div class="mini" style="opacity:.85">No revealed clues yet.</div>';
+    ? rec.map(r=>'<div class="panel" style="padding:10px;margin:0 0 8px 0"><div><b>'+esc(r.title||"Session Recap")+'</b> <span class="badge">'+esc(r.date||"")+'</span></div><div style="margin-top:6px;white-space:pre-wrap">'+esc(r.body||"")+'</div></div>').join("")
+    : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
+
+
+  const opsAlerts = (st.notifications?.items || []).filter(n=>String(n.audience||'')==='players');
+  alertBody.innerHTML = "";
+  if(!opsAlerts.length){
+    alertBody.innerHTML = '<tr><td colspan="4" class="mini">No DM alerts yet.</td></tr>';
+  }else{
+    opsAlerts.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(n=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = '<td>'+esc(n.type||'')+'</td><td>'+esc(n.detail||'')+'</td><td>'+esc(n.status||'open')+'</td><td>'+esc(n.notes||'')+'</td>';
+      alertBody.appendChild(tr);
+    });
+  }
 
   intelBody.innerHTML = "";
   if(!filtered.length){

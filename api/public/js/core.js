@@ -272,10 +272,17 @@ function vwGetIntelButton(){
 function vwGetAlertItemsFromState(st){
   const state = st || window.__STATE || {};
   if(SESSION.role === "dm"){
-    return (state.notifications?.items || []).filter(n=>String(n.status||"open") === "open").map(n=>({ id:'n:'+n.id, label:n.type||'Notification' }));
+    return (state.notifications?.items || [])
+      .filter(n=>String(n.status||"open") === "open" && String(n.audience||"dm") !== "players")
+      .map(n=>({ id:'n:'+n.id, label:n.type||'Notification' }));
   }
-  const clueItems = Array.isArray(state.clues) ? state.clues : (state.clues?.items || state.clues?.active || []);
-  return clueItems.filter(c=>String(c.visibility||"hidden")==="revealed").map(c=>({ id:'c:'+c.id, label:c.title||'Clue' }));
+  const clueItems = (Array.isArray(state.clues) ? state.clues : (state.clues?.items || state.clues?.active || []))
+    .filter(c=>String(c.visibility||"hidden")==="revealed")
+    .map(c=>({ id:'c:'+c.id, label:c.title||'Clue' }));
+  const dmAlerts = (state.notifications?.items || [])
+    .filter(n=>String(n.audience||"")==="players" && String(n.status||"open") === "open")
+    .map(n=>({ id:'a:'+n.id, label:n.type||'Alert' }));
+  return dmAlerts.concat(clueItems);
 }
 
 function vwUpdateIntelBadge(){
