@@ -395,31 +395,15 @@
 
   function normalizeCatalogItem(item, categoryHint){
     const category = String(item?.category || item?.item_category || item?.group || categoryHint || 'Misc').trim() || 'Misc';
-    const name = String(item?.name ?? item ?? '').trim();
-    const ammoType = String(item?.ammo_type ?? item?.ammoType ?? '').trim();
-    const unit = String(item?.inventory_unit ?? item?.inventoryUnit ?? item?.unit_label ?? item?.unit ?? '').trim();
-    const lowerName = name.toLowerCase();
-    const lowerCategory = category.toLowerCase();
-    const lowerUnit = unit.toLowerCase();
-    const looksAmmo = lowerCategory.includes('ammo') || !!ammoType || lowerName.includes('ammo');
-    const defaultQtyRaw = item?.default_qty ?? item?.inventoryQty ?? item?.inventory_qty ?? item?.qty ?? 1;
-    let defaultQty = Math.max(1, parseInt(defaultQtyRaw, 10) || 1);
-    if(looksAmmo && defaultQty === 1){
-      if(lowerUnit.includes('round')) defaultQty = 400;
-      else if(ammoType || lowerName.includes('9mm') || lowerName.includes('5.56') || lowerName.includes('223') || lowerName.includes('7.62') || lowerName.includes('45 acp') || lowerName.includes('.45')) defaultQty = 400;
-    }
-    let inventoryUnit = unit;
-    if(looksAmmo && !inventoryUnit) inventoryUnit = 'rounds';
     return {
       id: item?.id || '',
-      name,
+      name: String(item?.name ?? item ?? '').trim(),
       category,
-      default_qty: defaultQty,
+      default_qty: Math.max(1, parseInt(item?.default_qty ?? item?.qty ?? 1, 10) || 1),
       default_weight: item?.default_weight ?? item?.weight ?? '',
       default_cost: item?.default_cost ?? item?.cost ?? '',
       default_notes: item?.default_notes ?? item?.notes ?? '',
-      ammo_type: ammoType,
-      inventory_unit: inventoryUnit,
+      ammo_type: item?.ammo_type ?? '',
       source: item?.source || (item?.is_custom ? 'custom' : 'official'),
       is_custom: !!item?.is_custom
     };
@@ -479,11 +463,11 @@
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Inventory unit label</div>
-            <input id="vwShopUnit" class="input" value="${esc(String(current?.inventory_unit || ''))}" placeholder="rounds" disabled />
+            <input id="vwShopUnit" class="input" placeholder="rounds" />
           </div>
           <div>
             <div class="mini" style="margin-bottom:6px;opacity:.9">Ammo type</div>
-            <input id="vwShopAmmoType" class="input" value="${esc(String(current?.ammo_type || ''))}" placeholder="Optional" disabled />
+            <input id="vwShopAmmoType" class="input" value="${esc(String(current?.ammo_type || ''))}" placeholder="Optional" />
           </div>
         </div>
         <div style="margin-top:10px;">
@@ -544,14 +528,14 @@
     const result = await vwModalForm({
       title: 'Edit Item',
       fields: [
-        { key:'nameStatic', label:'Item name', type:'static', value:String(it.name || '') },
-        { key:'categoryStatic', label:'Category', type:'static', value:String(it.category || 'Misc') },
+        { key:'name', label:'Item name', type:'static', value:String(it.name || '') },
+        { key:'category', label:'Category', type:'static', value:String(it.category || '') },
         { key:'cost', label:'Cost ($)', value:String(it.cost ?? ''), placeholder:'20' },
         { key:'weight', label:'Weight', value:String(it.weight ?? ''), placeholder:'1' },
-        { key:'inventoryQty', label:'Inventory quantity per purchase', value:String(it.inventoryQty ?? it.qty ?? 1), placeholder:'400' },
-        { key:'inventoryUnitStatic', label:'Inventory unit label', type:'static', value:String(it.inventoryUnit || '') },
-        { key:'ammoTypeStatic', label:'Ammo type', type:'static', value:String(it.ammo_type || '') },
-        { key:'notes', label:'Notes', type:'textarea', value:it.notes || '', placeholder:'Unique / special' },
+        { key:'inventoryQty', label:'Inventory quantity per purchase', value:String(it.inventoryQty ?? it.qty ?? 1), placeholder:'1' },
+        { key:'inventoryUnit', label:'Inventory unit label', type:'static', value:String(it.inventoryUnit || '') },
+        { key:'ammo_type', label:'Ammo type', type:'static', value:String(it.ammo_type || '') },
+        { key:'notes', label:'Notes', value:it.notes || '', placeholder:'Optional notes or description' },
         { key:'stock', label:'Stock (∞ or number)', value:String(it.stock ?? '∞'), placeholder:'∞' }
       ],
       okText: 'Save'
@@ -561,8 +545,8 @@
       cost: parseMoney(result.cost),
       weight: String(result.weight ?? '').trim(),
       inventoryQty: Math.max(1, parseIntSafe(result.inventoryQty, 1)),
-      notes: String(result.notes || '').trim(),
-      stock: String(result.stock || '∞').trim() || '∞'
+      notes: String(result.notes ?? ''),
+      stock: String(result.stock ?? '').trim() || '∞'
     });
     await api('/api/shops/save',{method:'POST',body:JSON.stringify({shops:getShopState()})});
     toast('Item saved');
