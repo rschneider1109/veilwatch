@@ -21,10 +21,15 @@ function renderIntelPlayer(){
   if(!feat.intel) return;
 
   const intelBody = document.getElementById("intelBody");
+  const alertBody = document.getElementById("intelAlertBody");
   const recap = document.getElementById("intelRecap");
-  const alertBody = document.getElementById("playerAlertBody");
   const reqBody = document.getElementById("playerReqBody");
-  if(!intelBody || !recap || !alertBody || !reqBody) return;
+  if(!intelBody || !alertBody || !recap || !reqBody) return;
+
+  if(!recap.dataset.vwInit){
+    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written).</p>';
+    recap.dataset.vwInit = "1";
+  }
 
   const q = (document.getElementById("intelSearch")?.value || "").toLowerCase().trim();
   const tag = (document.getElementById("intelTag")?.value || "").toLowerCase().trim();
@@ -32,6 +37,8 @@ function renderIntelPlayer(){
 
   const clueItems = Array.isArray(st.clues) ? st.clues : (st.clues?.items || st.clues?.active || []);
   const clues = (clueItems || []).filter(c=>String(c.visibility||"hidden")==="revealed");
+  const dmAlerts = (st.notifications?.items || []).filter(n=>String(n.audience||"dm") === "players" && String(n.from||"") === "DM");
+  const recaps = (st.sessionRecaps?.items || []).filter(r=>String(r.visibility||"players") === "players");
   const filtered = clues.filter(c=>{
     const hay = (c.title||"") + " " + (c.details||"") + " " + ((c.tags||[]).join?.(",")||"") + " " + (c.district||"");
     if(q && !hay.toLowerCase().includes(q)) return false;
@@ -40,23 +47,21 @@ function renderIntelPlayer(){
     return true;
   });
 
-  const rec = (st.sessionRecaps?.items || []).slice().sort((a,b)=>(b.id||0)-(a.id||0)).slice(0,5);
-  recap.innerHTML = rec.length
-    ? rec.map(r=>'<div class="panel" style="padding:10px;margin:0 0 8px 0"><div><b>'+esc(r.title||"Session Recap")+'</b> <span class="badge">'+esc(r.date||"")+'</span></div><div style="margin-top:6px;white-space:pre-wrap">'+esc(r.body||"")+'</div></div>').join("")
-    : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
-
-
-  const opsAlerts = (st.notifications?.items || []).filter(n=>String(n.audience||'')==='players');
   alertBody.innerHTML = "";
-  if(!opsAlerts.length){
+  if(!dmAlerts.length){
     alertBody.innerHTML = '<tr><td colspan="4" class="mini">No DM alerts yet.</td></tr>';
   }else{
-    opsAlerts.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(n=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = '<td>'+esc(n.type||'')+'</td><td>'+esc(n.detail||'')+'</td><td>'+esc(n.status||'open')+'</td><td>'+esc(n.notes||'')+'</td>';
+    dmAlerts.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(n=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type||"")+"</td><td>"+esc(n.detail||"")+"</td><td>"+esc(n.notes||"")+"</td>";
       alertBody.appendChild(tr);
     });
   }
+
+  const rec = [...recaps].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
+  recap.innerHTML = rec.length
+    ? rec.map(r=>'<div style="margin-bottom:8px;"><b>'+esc(r.title||"Session Recap")+'</b> <span class="badge">'+esc(r.date||"")+'</span><div style="margin-top:4px;">'+esc(r.summary||"")+'</div></div>').join("")
+    : '<div class="mini" style="opacity:.85">No session recaps yet.</div>';
 
   intelBody.innerHTML = "";
   if(!filtered.length){
@@ -75,7 +80,7 @@ function renderIntelPlayer(){
   }
 
   // player requests (notifications from this player)
-  const mine = (st.notifications?.items || []).filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||""));
+  const mine = (st.notifications?.items || []).filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||"") && String(n.audience||"dm") !== "players");
   reqBody.innerHTML = "";
   if(!mine.length){
     reqBody.innerHTML = '<tr><td colspan="5" class="mini">No requests yet.</td></tr>';
@@ -218,4 +223,42 @@ document.getElementById("newClueBtn")?.addEventListener("click", async ()=>{
   const res = await api("/api/clues/create",{method:"POST",body:JSON.stringify(payload)});
   if(res.ok){ toast("Clue created"); await refreshAll(); }
   else toast(res.error||"Failed");
+});
+
+
+function renderDMRecaps(){
+  if(SESSION.role !== "dm") return;
+  const st = window.__STATE || {};
+  const recapBody = document.getElementById("recapBody");
+  if(!recapBody) return;
+  const items = st.sessionRecaps?.items || [];
+  recapBody.innerHTML = "";
+  if(!items.length){
+    recapBody.innerHTML = '<tr><td colspan="5" class="mini">No session recaps yet.</td></tr>';
+    return;
+  }
+  items.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = "<td>"+r.id+"</td><td>"+esc(r.title||"")+"</td><td>"+esc(r.date||"")+"</td><td>"+esc(r.visibility||"players")+"</td><td>"+esc(r.summary||"")+"</td>";
+    recapBody.appendChild(tr);
+  });
+}
+window.renderDMRecaps = renderDMRecaps;
+
+document.getElementById("dmNewRecapBtn")?.addEventListener("click", async ()=>{
+  if(SESSION.role !== "dm") return;
+  const result = await vwModalForm({
+    title:"New Session Recap",
+    fields:[
+      {key:"title",label:"Title",value:"Session Recap",placeholder:"Session title"},
+      {key:"date",label:"Date",value:"",placeholder:"YYYY-MM-DD"},
+      {key:"summary",label:"Summary",value:"",placeholder:"What happened?",type:"textarea"},
+      {key:"visibility",label:"Visibility",value:"players",placeholder:"players or dm"}
+    ],
+    okText:"Create"
+  });
+  if(!result) return;
+  const payload = { title: result.title, date: result.date, summary: result.summary, visibility: (result.visibility||"players").toLowerCase() === "dm" ? "dm" : "players" };
+  const res = await api("/api/recaps/create", { method:"POST", body: JSON.stringify(payload) });
+  if(res.ok){ toast("Recap created"); await refreshAll(); } else toast(res.error || "Failed");
 });

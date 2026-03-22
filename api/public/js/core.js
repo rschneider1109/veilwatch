@@ -257,11 +257,9 @@ const SESSION = window.SESSION;
 
 // ---- Intel / alert attention state ----
 window.VW_ALERTS = window.VW_ALERTS || {
-  armed:false,
   audioUnlocked:false,
   audioCtx:null,
-  seenPlayerClueIds:[],
-  seenDmNotifIds:[],
+  seenIds:[],
   unseenIntelIds:[]
 };
 
@@ -273,16 +271,19 @@ function vwGetAlertItemsFromState(st){
   const state = st || window.__STATE || {};
   if(SESSION.role === "dm"){
     return (state.notifications?.items || [])
-      .filter(n=>String(n.status||"open") === "open" && String(n.audience||"dm") !== "players")
+      .filter(n=>String(n.status||"open") === "open")
       .map(n=>({ id:'n:'+n.id, label:n.type||'Notification' }));
   }
-  const clueItems = (Array.isArray(state.clues) ? state.clues : (state.clues?.items || state.clues?.active || []))
-    .filter(c=>String(c.visibility||"hidden")==="revealed")
+
+  const clueItems = (state.clues?.items || []).filter(c=>String(c.visibility||"hidden")==="revealed")
     .map(c=>({ id:'c:'+c.id, label:c.title||'Clue' }));
   const dmAlerts = (state.notifications?.items || [])
-    .filter(n=>String(n.audience||"")==="players" && String(n.status||"open") === "open")
-    .map(n=>({ id:'a:'+n.id, label:n.type||'Alert' }));
-  return dmAlerts.concat(clueItems);
+    .filter(n=>String(n.audience||'dm') === 'players' && String(n.from||'') === 'DM' && String(n.status||'open') === 'open')
+    .map(n=>({ id:'n:'+n.id, label:n.type||'DM Alert' }));
+  const recaps = (state.sessionRecaps?.items || [])
+    .filter(r=>String(r.visibility||'players') === 'players')
+    .map(r=>({ id:'r:'+r.id, label:r.title||'Session Recap' }));
+  return dmAlerts.concat(recaps, clueItems);
 }
 
 function vwUpdateIntelBadge(){
@@ -367,9 +368,7 @@ function vwRunIntelAlertEffects(newItems){
 
 function vwSyncSeenBaseline(st){
   const items = vwGetAlertItemsFromState(st);
-  const ids = items.map(x=>x.id);
-  if(SESSION.role === 'dm') window.VW_ALERTS.seenDmNotifIds = ids.slice();
-  else window.VW_ALERTS.seenPlayerClueIds = ids.slice();
+  window.VW_ALERTS.seenIds = items.map(x=>x.id);
   window.VW_ALERTS.unseenIntelIds = [];
   vwUpdateIntelBadge();
 }
@@ -378,7 +377,7 @@ function vwComputeUnseen(st, opts){
   const options = opts || {};
   const items = vwGetAlertItemsFromState(st);
   const ids = items.map(x=>x.id);
-  const prev = SESSION.role === 'dm' ? (window.VW_ALERTS.seenDmNotifIds || []) : (window.VW_ALERTS.seenPlayerClueIds || []);
+  const prev = window.VW_ALERTS.seenIds || [];
   const unseen = (window.VW_ALERTS.unseenIntelIds || []).filter(id=>ids.includes(id));
   const newItems = items.filter(x=>!prev.includes(x.id) && !unseen.includes(x.id));
   if(newItems.length){
@@ -387,8 +386,7 @@ function vwComputeUnseen(st, opts){
   }else{
     window.VW_ALERTS.unseenIntelIds = unseen;
   }
-  if(SESSION.role === 'dm') window.VW_ALERTS.seenDmNotifIds = ids.slice();
-  else window.VW_ALERTS.seenPlayerClueIds = ids.slice();
+  window.VW_ALERTS.seenIds = ids.slice();
   if(vwGetActiveTopTab && vwGetActiveTopTab() === 'intel') window.VW_ALERTS.unseenIntelIds = [];
   vwUpdateIntelBadge();
 }

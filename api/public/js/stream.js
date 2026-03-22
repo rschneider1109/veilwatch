@@ -50,6 +50,7 @@ function vwRenderRealtimeViews(forceAll){
   try{
     if(renderTab === "all" || renderTab === "intel"){
       if(typeof renderIntelDM === "function") renderIntelDM();
+      if(typeof renderDMRecaps === "function") renderDMRecaps();
       if(typeof renderIntelPlayer === "function") renderIntelPlayer();
     }
   }catch(e){}
