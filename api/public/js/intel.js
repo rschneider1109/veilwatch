@@ -95,22 +95,15 @@ function renderIntelPlayer(){
   }
 
   // player requests (notifications from this player)
-  const mine = (st.notifications?.items || []).filter(n=>{
-    const audience = String(n.audience||"dm");
-    const from = String(n.from||"");
-    const ownerUserId = String(n.ownerUserId||"");
-    return audience !== "players" && (
-      (!!SESSION.userId && ownerUserId === String(SESSION.userId)) ||
-      from === String(SESSION.username||SESSION.name||"")
-    );
-  });
+  const mine = (st.notifications?.items || []).filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||"") && String(n.audience||"dm") !== "players");
   reqBody.innerHTML = "";
   if(!mine.length){
     reqBody.innerHTML = '<tr><td colspan="5" class="mini">No requests yet.</td></tr>';
   }else{
-    mine.slice().sort((a,b)=>b.id-a.id).forEach(n=>{
+    mine.slice().sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0) || (b.id-a.id)).forEach(n=>{
       const tr=document.createElement("tr");
-      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type)+"</td><td>"+esc(n.detail)+"</td><td>"+esc(n.status)+"</td><td>"+esc(n.notes||"")+"</td>";
+      const statusText = String(n.archived ? ((n.status||"open")+" (archived)") : (n.status||"open"));
+      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type)+"</td><td>"+esc(n.detail)+"</td><td>"+esc(statusText)+"</td><td>"+esc(n.notes||"")+"</td>";
       reqBody.appendChild(tr);
     });
   }
@@ -249,35 +242,6 @@ document.getElementById("newClueBtn")?.addEventListener("click", async ()=>{
 });
 
 
-
-document.getElementById("newPlayerRequestBtn")?.addEventListener("click", async ()=>{
-  if(SESSION.role !== "player") return;
-  const result = await vwModalForm({
-    title:"New Request",
-    fields:[
-      {key:"type",label:"Request Type",type:"select",value:"General",options:[
-        "Loot Claim",
-        "Purchase / Requisition",
-        "Action Approval",
-        "Intel Inquiry",
-        "Character Correction",
-        "General"
-      ]},
-      {key:"detail",label:"Details",value:"",placeholder:"What are you asking the DM for?",type:"textarea"}
-    ],
-    okText:"Send"
-  });
-  if(!result || !String(result.detail||"").trim()) return;
-  const payload = {
-    type: result.type || "General",
-    detail: String(result.detail||"").trim(),
-    audience: "dm"
-  };
-  const res = await api("/api/notify", { method:"POST", body: JSON.stringify(payload) });
-  if(res.ok){ toast("Request sent"); await refreshAll(); }
-  else toast(res.error || "Failed");
-});
-
 function openRecapViewer(recap){
   const modal = document.getElementById("vwModal");
   const titleEl = document.getElementById("vwModalTitle");
@@ -308,6 +272,111 @@ function openRecapViewer(recap){
   if(typeof vwSetModalOpen === 'function') vwSetModalOpen(true);
   modal.style.display = 'flex';
 }
+
+
+function renderDMRequests(){
+  if(SESSION.role !== "dm") return;
+  const st = window.__STATE || {};
+  const body = document.getElementById("dmReqBody");
+  if(!body) return;
+  const items = (st.notifications?.items || [])
+    .filter(n=>String(n.from||"") !== "DM" && String(n.audience||"dm") !== "players" && !n.archived)
+    .slice()
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0) || (b.id||0)-(a.id||0));
+  body.innerHTML = "";
+  if(!items.length){
+    body.innerHTML = '<tr><td colspan="7" class="mini">No active player requests.</td></tr>';
+    return;
+  }
+
+  const statusOpts = ["open","pending","approved","denied","completed"];
+  items.forEach(n=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td>'+n.id+'</td>'+
+      '<td>'+esc(n.from||"")+'</td>'+
+      '<td>'+esc(n.type||"")+'</td>'+
+      '<td>'+esc(n.detail||"")+'</td>'+
+      '<td></td>'+
+      '<td></td>'+
+      '<td></td>';
+
+    const tdStatus = tr.children[4];
+    const sel = document.createElement("select");
+    sel.className = "input";
+    sel.style.minWidth = "120px";
+    statusOpts.forEach(s=>{
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      if(String(n.status||"open") === s) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    tdStatus.appendChild(sel);
+
+    const tdNotes = tr.children[5];
+    const notes = document.createElement("input");
+    notes.className = "input";
+    notes.value = String(n.notes||"");
+    notes.placeholder = "DM notes";
+    notes.style.minWidth = "180px";
+    tdNotes.appendChild(notes);
+
+    const tdActions = tr.children[6];
+    tdActions.innerHTML = '<button class="btn smallbtn">Save</button> <button class="btn smallbtn">Approve</button> <button class="btn smallbtn">Deny</button> <button class="btn smallbtn">Archive</button>';
+    const [saveBtn, approveBtn, denyBtn, archiveBtn] = tdActions.querySelectorAll("button");
+
+    async function persist(msg){
+      n.status = sel.value;
+      n.notes = notes.value || "";
+      n.updatedAt = Date.now();
+      const res = await api("/api/notifications/save", {method:"POST", body:JSON.stringify({notifications: st.notifications})});
+      if(res.ok){ toast(msg||"Saved"); await refreshAll(); } else toast(res.error || "Failed");
+    }
+
+    saveBtn.onclick = ()=>persist("Request saved");
+    approveBtn.onclick = ()=>{ sel.value = "approved"; persist("Request approved"); };
+    denyBtn.onclick = ()=>{ sel.value = "denied"; persist("Request denied"); };
+    archiveBtn.onclick = async ()=>{
+      n.status = sel.value;
+      n.notes = notes.value || "";
+      n.archived = true;
+      n.archivedAt = Date.now();
+      n.updatedAt = Date.now();
+      const res = await api("/api/notifications/save", {method:"POST", body:JSON.stringify({notifications: st.notifications})});
+      if(res.ok){
+        toast("Request archived");
+        await refreshAll();
+        const ab=document.querySelector('#dmPanels button[data-itab="archived"]');
+        if(ab) ab.click();
+      } else toast(res.error || "Failed");
+    };
+
+    body.appendChild(tr);
+  });
+}
+window.renderDMRequests = renderDMRequests;
+
+document.getElementById("playerNewRequestBtn")?.addEventListener("click", async ()=>{
+  if(SESSION.role === "dm") return;
+  const result = await vwModalForm({
+    title:"New Request",
+    fields:[
+      {key:"type",label:"Type",type:"select",value:"General",options:["Loot Claim","Purchase / Requisition","Action Approval","Intel Inquiry","Character Correction","General"]},
+      {key:"detail",label:"Detail",value:"",placeholder:"What do you need from the DM?",type:"textarea"}
+    ],
+    okText:"Send"
+  });
+  if(!result || !String(result.detail||"").trim()) return;
+  const payload = {
+    type: result.type || "General",
+    detail: result.detail || "",
+    audience: "dm",
+    notes: ""
+  };
+  const res = await api("/api/notify", {method:"POST", body:JSON.stringify(payload)});
+  if(res.ok){ toast("Request sent"); await refreshAll(); } else toast(res.error || "Failed");
+});
 
 function renderDMRecaps(){
   if(SESSION.role !== "dm") return;
