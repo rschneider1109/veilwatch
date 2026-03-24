@@ -99,7 +99,7 @@ function renderDMRequests(){
   const body = document.getElementById("dmReqBody");
   if(!body) return;
   const items = (st.notifications?.items || [])
-    .filter(n=>isPlayerRequest(n) && !n.archived)
+    .filter(n=>isPlayerRequest(n) && !n.archived && !n.dmDeleted)
     .slice()
     .sort((a,b)=>(b.id||0)-(a.id||0));
   body.innerHTML = "";
@@ -161,7 +161,7 @@ function renderDMArchivedRequests(){
   const body = document.getElementById("archReqBody");
   if(!body) return;
   const archived = (st.notifications?.items || [])
-    .filter(n=>isPlayerRequest(n) && !!n.archived)
+    .filter(n=>isPlayerRequest(n) && !!n.archived && !n.dmDeleted)
     .slice()
     .sort((a,b)=>(b.archivedAt||0)-(a.archivedAt||0) || (b.id||0)-(a.id||0));
   body.innerHTML = "";
@@ -184,11 +184,13 @@ function renderDMArchivedRequests(){
     deleteBtn.onclick = async ()=>{
       const ok = await vwModalConfirm({
         title: 'Delete Request',
-        message: 'Delete archived request #' + n.id + ' from both DM archive and player history? This cannot be undone.'
+        message: 'Remove archived request #' + n.id + ' from the DM archive view only? Player request history will remain.'
       });
       if(!ok) return;
-      const res = await api('/api/notifications/delete',{method:'POST', body: JSON.stringify({id:n.id})});
-      if(res.ok){ toast('Deleted'); await refreshAll(); } else toast(res.error || 'Failed');
+      n.dmDeleted = true;
+      n.dmDeletedAt = Date.now();
+      n.updatedAt = Date.now();
+      await saveNotificationsState(st, 'Removed from DM archive');
     };
     body.appendChild(tr);
   });
