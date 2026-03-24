@@ -23,11 +23,11 @@ function renderIntelPlayer(){
   const intelBody = document.getElementById("intelBody");
   const recap = document.getElementById("intelRecap");
   const reqBody = document.getElementById("playerReqBody");
-  if(!intelBody || !recap || !reqBody) return;
+  const alertBody = document.getElementById("intelAlertBody");
+  if(!intelBody || !recap || !reqBody || !alertBody) return;
 
-  // Session Recaps (player) — DM-written only (no auto event feed)
   if(!recap.dataset.vwInit){
-    recap.innerHTML = '<p class="muted">Session recaps will appear here (DM-written). Clue reveals won&#39;t spam this panel.</p>';
+    recap.innerHTML = '<p class="muted">Session recaps will appear here when the recap system is wired into this repo.</p>';
     recap.dataset.vwInit = "1";
   }
 
@@ -45,12 +45,6 @@ function renderIntelPlayer(){
     return true;
   });
 
-  // recap: last 5 by revealedAt
-  const rec = [...clues].sort((a,b)=>(b.revealedAt||0)-(a.revealedAt||0)).slice(0,5);
-  recap.innerHTML = rec.length
-    ? rec.map(c=>'<div>• <b>'+esc(c.title||"Clue")+'</b> <span class="badge">'+esc(c.district||"")+'</span></div>').join("")
-    : '<div class="mini" style="opacity:.85">No revealed clues yet.</div>';
-
   intelBody.innerHTML = "";
   if(!filtered.length){
     intelBody.innerHTML = '<tr><td colspan="5" class="mini">No matching revealed clues.</td></tr>';
@@ -67,15 +61,33 @@ function renderIntelPlayer(){
     });
   }
 
-  // player requests (notifications from this player)
-  const mine = (st.notifications?.items || []).filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||""));
+  const alerts = (st.notifications?.items || [])
+    .filter(n=>String(n.from||"") === "DM" || String(n.audience||"") === "players")
+    .filter(n=>!n.archived)
+    .slice()
+    .sort((a,b)=>(b.id||0)-(a.id||0));
+  alertBody.innerHTML = "";
+  if(!alerts.length){
+    alertBody.innerHTML = '<tr><td colspan="4" class="mini">No DM alerts yet.</td></tr>';
+  }else{
+    alerts.forEach(n=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type||"")+"</td><td>"+esc(n.detail||"")+"</td><td>"+esc(n.notes||"")+"</td>";
+      alertBody.appendChild(tr);
+    });
+  }
+
+  const mine = (st.notifications?.items || [])
+    .filter(n=>String(n.from||"")===String(SESSION.username||SESSION.name||""))
+    .slice()
+    .sort((a,b)=>(b.id||0)-(a.id||0));
   reqBody.innerHTML = "";
   if(!mine.length){
     reqBody.innerHTML = '<tr><td colspan="5" class="mini">No requests yet.</td></tr>';
   }else{
-    mine.slice().sort((a,b)=>b.id-a.id).forEach(n=>{
+    mine.forEach(n=>{
       const tr=document.createElement("tr");
-      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type)+"</td><td>"+esc(n.detail)+"</td><td>"+esc(n.status)+"</td><td>"+esc(n.notes||"")+"</td>";
+      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type||"")+"</td><td>"+esc(n.detail||"")+"</td><td>"+esc(n.status||"open")+"</td><td>"+esc(n.notes||"")+"</td>";
       reqBody.appendChild(tr);
     });
   }
