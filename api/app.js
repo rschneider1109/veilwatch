@@ -1356,10 +1356,22 @@ if(p === "/api/character/save" && req.method==="POST"){
   if(p === "/api/notify" && req.method==="POST"){
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications ||= { nextId: 1, items: [] };
+    state.notifications.items ||= [];
+    state.notifications.nextId ||= 1;
     const id = state.notifications.nextId++;
-    state.notifications.items.push({ id, type: body.type||"Request", detail: body.detail||"", from: body.from||"", status:"open", notes: body.notes||"" });
+    state.notifications.items.push({
+      id,
+      type: String(body.type||"Request").slice(0,80),
+      detail: String(body.detail||"").slice(0,4000),
+      from: String(body.from||"").slice(0,80),
+      audience: String(body.audience||"dm").toLowerCase() === "players" ? "players" : "dm",
+      status: String(body.status||"open").slice(0,32) || "open",
+      notes: String(body.notes||"").slice(0,4000),
+      archived: !!body.archived,
+      createdAt: Date.now()
+    });
     saveState(state);
-    return json(res, 200, {ok:true});
+    return json(res, 200, {ok:true, id});
   }
   if(p === "/api/notifications/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
