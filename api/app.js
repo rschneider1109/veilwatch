@@ -400,7 +400,6 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
-  sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
   characters: [],
   activeParty: [] // DM-controlled "who is currently being played"
@@ -418,19 +417,6 @@ function normalizeCluesShape(st){
   st.clues.nextId ||= 1;
   st.clues.items ||= [];
   st.clues.archived ||= [];
-  return st;
-}
-
-function normalizeSessionRecaps(st){
-  st.sessionRecaps ||= structuredClone(DEFAULT_STATE.sessionRecaps);
-  if(Array.isArray(st.sessionRecaps)) {
-    st.sessionRecaps = {
-      nextId: (st.sessionRecaps.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0) + 1) || 1,
-      items: st.sessionRecaps
-    };
-  }
-  st.sessionRecaps.nextId ||= 1;
-  st.sessionRecaps.items ||= [];
   return st;
 }
 
@@ -509,7 +495,6 @@ async function loadState(){
       fromDb.settings.features ||= DEFAULT_STATE.settings.features;
       fromDb.shops ||= DEFAULT_STATE.shops;
       fromDb.notifications ||= DEFAULT_STATE.notifications;
-      fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
       normalizeCluesShape(fromDb);
       normalizeFeatures(fromDb);
@@ -789,7 +774,7 @@ function servePublic(req, res, pathname){
 // -----------------------------
 // Server
 // -----------------------------
-let state = normalizeCharacters(normalizeSessionRecaps(normalizeFeatures(structuredClone(DEFAULT_STATE))));
+let state = normalizeCharacters(normalizeFeatures(structuredClone(DEFAULT_STATE)));
 users = [];
 
 const server = http.createServer(async (req,res)=>{
@@ -936,7 +921,6 @@ const server = http.createServer(async (req,res)=>{
   // -------------------------
   if(p === "/api/state" && req.method==="GET"){
     normalizeCluesShape(state);
-    normalizeSessionRecaps(state);
     normalizeCharacters(state);
 
     if(!dm){
@@ -950,24 +934,8 @@ const server = http.createServer(async (req,res)=>{
         safe.clues.items = (safe.clues.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
         safe.clues.archived = [];
       }
-      // players only receive their own submitted notifications/requests
-      const playerName = String(user?.username || "");
-      const playerId = String(user?.id || "");
-      safe.notifications = {
-        nextId: 1,
-        items: (safe.notifications?.items || []).filter(n=>{
-          const from = String(n.from || "");
-          const ownerUserId = String(n.ownerUserId || "");
-          const audience = String(n.audience || "dm");
-          const isMine = (!!playerName && from === playerName) || (!!playerId && ownerUserId === playerId);
-          const isDmPush = audience === "players";
-          return isMine || isDmPush;
-        })
-      };
-      safe.sessionRecaps = {
-        nextId: 1,
-        items: (safe.sessionRecaps?.items || []).filter(r=> String(r.visibility || "players") === "players")
-      };
+      // hide notifications from players
+      safe.notifications = { nextId: 1, items: [] };
 
       // character visibility: only owned characters (if logged in) else none
       if(user && user.role === "player"){
@@ -1020,7 +988,6 @@ const server = http.createServer(async (req,res)=>{
     incoming.settings.features ||= DEFAULT_STATE.settings.features;
     incoming.shops ||= DEFAULT_STATE.shops;
     incoming.notifications ||= DEFAULT_STATE.notifications;
-    incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
     normalizeCluesShape(incoming);
     normalizeFeatures(incoming);
@@ -1390,69 +1357,26 @@ if(p === "/api/character/save" && req.method==="POST"){
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications ||= { nextId: 1, items: [] };
     const id = state.notifications.nextId++;
-    state.notifications.items.push({
-      id,
-      type: body.type||"Request",
-      detail: body.detail||"",
-      from: body.from || user?.username || "",
-      ownerUserId: body.ownerUserId || user?.id || null,
-      status:"open",
-      notes: body.notes||"",
-      audience: body.audience || ((body.from === "DM") ? "players" : "dm"),
-      createdAt: Date.now()
-    });
+    state.notifications.items.push({ id, type: body.type||"Request", detail: body.detail||"", from: body.from||"", status:"open", notes: body.notes||"" });
     saveState(state);
     return json(res, 200, {ok:true});
   }
-  if(p === "/api/recaps/create" && req.method==="POST"){
-    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
-    const body = JSON.parse(await readBody(req) || "{}");
-    normalizeSessionRecaps(state);
-    const id = state.sessionRecaps.nextId++;
-    state.sessionRecaps.items.unshift({
-      id,
-      title: body.title || "Session Recap",
-      summary: body.summary || "",
-      date: body.date || "",
-      visibility: body.visibility || "players",
-      createdAt: Date.now()
-    });
-    saveState(state);
-    return json(res, 200, {ok:true, id});
-  }
-
-  if(p === "/api/recaps/update" && req.method==="POST"){
-    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
-    const body = JSON.parse(await readBody(req) || "{}");
-    normalizeSessionRecaps(state);
-    const id = Number(body.id || 0);
-    const item = state.sessionRecaps.items.find(r => Number(r.id||0) === id);
-    if(!item) return json(res, 404, {ok:false, error:"Recap not found"});
-    item.title = body.title || item.title || "Session Recap";
-    item.summary = body.summary || "";
-    item.date = body.date || "";
-    item.visibility = body.visibility || "players";
-    item.updatedAt = Date.now();
-    saveState(state);
-    return json(res, 200, {ok:true});
-  }
-
-  if(p === "/api/recaps/delete" && req.method==="POST"){
-    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
-    const body = JSON.parse(await readBody(req) || "{}");
-    normalizeSessionRecaps(state);
-    const id = Number(body.id || 0);
-    const idx = state.sessionRecaps.items.findIndex(r => Number(r.id||0) === id);
-    if(idx < 0) return json(res, 404, {ok:false, error:"Recap not found"});
-    state.sessionRecaps.items.splice(idx, 1);
-    saveState(state);
-    return json(res, 200, {ok:true});
-  }
-
   if(p === "/api/notifications/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
     state.notifications = body.notifications;
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+  if(p === "/api/notifications/delete" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    const id = Number(body.id||0);
+    state.notifications ||= structuredClone(DEFAULT_STATE.notifications);
+    state.notifications.items ||= [];
+    const before = state.notifications.items.length;
+    state.notifications.items = state.notifications.items.filter(n => Number(n.id||0) !== id);
+    if(state.notifications.items.length === before) return json(res, 404, {ok:false, error:"Not found"});
     saveState(state);
     return json(res, 200, {ok:true});
   }
