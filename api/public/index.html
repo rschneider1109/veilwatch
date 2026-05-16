@@ -280,11 +280,13 @@
   <section id="tab-intel" class="hidden">
     <div class="panel">
       <div id="intelDisabledMsg" class="mini hidden"></div>
-      <div class="row">
-        <div class="pill">DM Tools</div>
-        <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
+      <div id="dmIntelIntro" class="hidden">
+        <div class="row">
+          <div class="pill">DM Tools</div>
+          <div class="mini">Notifications, clues, recaps, requests, and archives.</div>
+        </div>
+        <hr/>
       </div>
-      <hr/>
       <div id="dmPanels" class="hidden">
         <div class="row" style="margin-bottom:10px;">
           <button class="btn active" data-itab="notifications">Notifications</button>
@@ -361,7 +363,7 @@
           <div class="mini">Direct pushes from the DM that are not clues.</div>
         </div>
         <table style="margin-top:8px;">
-          <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>DM NOTES</th></tr></thead>
+          <thead><tr><th>ID</th><th>TYPE</th><th>MESSAGE</th></tr></thead>
           <tbody id="intelAlertBody"></tbody>
         </table>
         <hr/>
