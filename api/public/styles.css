@@ -943,3 +943,116 @@ button,.btn,select,input,textarea{font:inherit;}
     flex:1 1 100% !important;
   }
 }
+
+/* v4.9.7 phone messenger bubble/panel safety pass */
+@media (max-width: 640px){
+  /* Keep the closed Messages bubble small and above mobile browser chrome. */
+  .chat-floating-dock{
+    right:10px !important;
+    left:auto !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 18px) !important;
+    width:auto !important;
+    max-width:150px !important;
+    align-items:flex-end !important;
+    pointer-events:none !important;
+  }
+
+  .chat-float-button{
+    width:auto !important;
+    max-width:150px !important;
+    min-width:0 !important;
+    min-height:38px !important;
+    padding:7px 10px !important;
+    border-radius:999px !important;
+    font-size:12px !important;
+    line-height:1 !important;
+    gap:6px !important;
+    box-shadow:0 8px 22px rgba(0,0,0,.42),0 0 18px rgba(0,229,255,.14) !important;
+  }
+
+  .chat-float-button span:first-child{
+    max-width:82px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  .chat-float-badge{
+    min-width:18px !important;
+    height:18px !important;
+    padding:0 5px !important;
+    font-size:10px !important;
+  }
+
+  /* When open, keep the drawer away from the address bar and bottom controls. */
+  .chat-float-panel{
+    position:fixed !important;
+    left:8px !important;
+    right:8px !important;
+    top:calc(env(safe-area-inset-top, 0px) + 58px) !important;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 58px) !important;
+    width:auto !important;
+    height:auto !important;
+    max-width:calc(100vw - 16px) !important;
+    max-height:none !important;
+    border-radius:16px !important;
+  }
+
+  .chat-float-head{
+    padding:7px 9px !important;
+    min-height:42px !important;
+    align-items:center !important;
+  }
+
+  .chat-float-head h3{
+    font-size:13px !important;
+    margin:0 !important;
+  }
+
+  .chat-float-head .mini{
+    display:none !important;
+  }
+
+  .chat-float-head .btn,
+  #chatFloatCloseBtn{
+    min-height:32px !important;
+    padding:6px 9px !important;
+    font-size:11px !important;
+  }
+
+  .chat-float-body{
+    height:calc(100% - 43px) !important;
+    grid-template-rows:96px minmax(0,1fr) !important;
+  }
+
+  .chat-float-threads{
+    padding:6px !important;
+    gap:5px !important;
+  }
+
+  .chat-float-thread{
+    padding:6px 8px !important;
+    border-radius:10px !important;
+  }
+
+  .chat-float-title{
+    padding:7px 9px !important;
+    font-size:11px !important;
+  }
+
+  .chat-float-messages{
+    padding:8px !important;
+    gap:6px !important;
+  }
+
+  .chat-float-composer{
+    padding:7px !important;
+    gap:6px !important;
+  }
+
+  .chat-float-composer textarea{
+    min-height:34px !important;
+    max-height:68px !important;
+    font-size:13px !important;
+  }
+}
