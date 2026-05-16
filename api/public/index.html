@@ -9,7 +9,7 @@
 <body>
 <div id="loginOverlay">
   <div class="panel loginCard">
-    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.7</span></div>
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.7.2</span></div>
     <div class="mini">Log in or create an account. The <b>first</b> account created becomes the DM automatically.</div>
     <hr/>
     <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
@@ -64,7 +64,34 @@
       <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
         <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
         <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
+        <button class="btn smallbtn dangerbtn" id="sessionClockEndBtn" type="button">End Session</button>
         <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="sessionClockLogPanel" style="grid-column:span 12;">
+      <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Clock Log</h3>
+          <div class="mini">Completed sessions are recorded here when the DM clicks <b>End Session</b>.</div>
+        </div>
+      </div>
+      <div class="tableWrap" style="margin-top:12px;">
+        <table class="dataTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>SESSION</th>
+              <th>DURATION</th>
+              <th>ENDED</th>
+              <th>NOTES</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="sessionClockLogBody">
+            <tr><td colspan="6" class="mini">No session logs yet.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
