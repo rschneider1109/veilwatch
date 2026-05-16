@@ -676,3 +676,185 @@ button,.btn,select,input,textarea{font:inherit;}
   #charSummaryRow{grid-template-columns:1fr;}
   #ctab-actions td[colspan] > div:first-child{grid-template-columns:1fr;}
 }
+
+/* v4.9.5 mobile width clamp pass */
+@media (max-width: 640px){
+  html,
+  body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  *,
+  *::before,
+  *::after{
+    box-sizing:border-box;
+  }
+
+  .app-shell,
+  .main,
+  .panel,
+  .card,
+  .tab-panel,
+  .sheet-panel,
+  .shop-grid,
+  .shop-cart,
+  .shop-shelves,
+  .chat-layout,
+  .chat-thread,
+  .chat-list,
+  .messenger-drawer,
+  .modal,
+  .modal-card,
+  .form-grid,
+  .kv-grid,
+  .toolbar,
+  .button-row,
+  .btn-row{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  .card,
+  .panel,
+  .sheet-panel,
+  .modal-card{
+    padding:10px !important;
+  }
+
+  #tab-character,
+  #tab-character *,
+  #tab-shop,
+  #tab-shop *,
+  #tab-intel,
+  #tab-intel *,
+  #tab-chat,
+  #tab-chat *{
+    min-width:0;
+  }
+
+  #charToolbar,
+  #characterToolbar,
+  #charSummaryRow,
+  #sheetCtabBar,
+  .nav,
+  .topbar,
+  .header-row,
+  .card-head,
+  .row,
+  .inline-row,
+  .actions-row,
+  .filter-row{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    gap:6px !important;
+  }
+
+  #charToolbar > *,
+  #characterToolbar > *,
+  #sheetCtabBar > *,
+  .nav > *,
+  .toolbar > *,
+  .button-row > *,
+  .btn-row > *,
+  .actions-row > *,
+  .filter-row > *{
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  .btn{
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #tab-character table,
+  #tab-character thead,
+  #tab-character tbody,
+  #tab-character tr,
+  #tab-character td{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #tab-character tr{
+    padding:8px !important;
+    margin:0 0 8px !important;
+  }
+
+  #tab-character td{
+    padding:6px 0 !important;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  #tab-character td::before{
+    max-width:100%;
+  }
+
+  #tab-character td .btn,
+  #tab-character td button{
+    width:100% !important;
+    white-space:normal !important;
+  }
+
+  #tab-character td input,
+  #tab-character td select,
+  #tab-character td textarea{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #ctab-actions td[colspan],
+  #ctab-actions td[colspan] > div,
+  #ctab-actions td[colspan] > div:first-child{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+
+  #ctab-actions td[colspan] > div:first-child{
+    grid-template-columns:1fr !important;
+    padding:8px !important;
+  }
+
+  #ctab-actions td[colspan] > div:first-child span,
+  #ctab-actions td[colspan] > div:first-child input,
+  #ctab-actions td[colspan] > div:first-child button{
+    display:block;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    white-space:normal !important;
+  }
+
+  .chat-bubble,
+  .message-bubble,
+  .thread-item,
+  .shop-item-card,
+  .catalog-card,
+  .inventory-card{
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-wrap:anywhere;
+  }
+
+  #floatingMessenger,
+  .messenger-drawer{
+    left:8px !important;
+    right:8px !important;
+    width:auto !important;
+    max-width:calc(100vw - 16px) !important;
+    min-width:0 !important;
+  }
+}
