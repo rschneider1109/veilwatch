@@ -509,3 +509,170 @@ button,.btn,select,input,textarea{font:inherit;}
   #tab-character .panel > .row:first-child{display:flex;grid-template-columns:none;}
   #charSummaryRow{display:flex;grid-template-columns:none;}
 }
+
+/* v4.9.4 mobile no-side-scroll pass */
+@media (max-width: 680px){
+  main{padding-left:10px;padding-right:10px;}
+
+  /* Primary tabs: show everything without horizontal swipe. */
+  .nav{
+    display:grid !important;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:8px;
+    margin:0 0 12px 0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+    scroll-snap-type:none !important;
+  }
+  .nav .btn{width:100%;min-width:0;justify-content:center;padding:10px 6px;font-size:12px;}
+
+  /* Character top controls: no sideways rail. */
+  #tab-character .panel > .row:first-child{
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+  }
+  #charSel{grid-column:1 / -1;width:100%;min-width:0;}
+  #tab-character .panel > .row:first-child .btn{width:100%;min-width:0;}
+
+  /* Character summary: wrap instead of swipe. */
+  #charSummaryRow{
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:7px !important;
+    margin:8px 0 0 0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+  }
+  #charSummaryRow .pill{width:100%;min-width:0;justify-content:center;text-align:center;}
+
+  /* Character subtabs: readable button grid instead of hidden overflow. */
+  #sheetCtabBar{
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px !important;
+    margin:10px 0 0 0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+  }
+  #sheetCtabBar .btn{width:100%;min-width:0;padding:10px 6px;font-size:12px;white-space:normal;line-height:1.1;}
+
+  /* Character tables become cards, so weapons/ammo/inventory never require horizontal scrolling. */
+  #tab-character .tableWrap,
+  #tab-character table{
+    overflow:visible !important;
+    max-width:100% !important;
+    white-space:normal !important;
+  }
+  #tab-character table,
+  #tab-character thead,
+  #tab-character tbody,
+  #tab-character tr,
+  #tab-character td{
+    display:block !important;
+    width:100% !important;
+  }
+  #tab-character thead{display:none !important;}
+  #tab-character tr{
+    border:1px solid rgba(107,255,255,.16);
+    background:rgba(0,0,0,.14);
+    border-radius:14px;
+    padding:10px;
+    margin:0 0 10px 0;
+    box-shadow:0 0 18px rgba(0,255,255,.035) inset;
+  }
+  #tab-character td{
+    border:0 !important;
+    padding:6px 0 !important;
+    min-width:0 !important;
+    white-space:normal !important;
+  }
+  #tab-character td[colspan]{padding:0 !important;}
+  #tab-character td[colspan].mini{
+    color:var(--muted);
+  }
+  #tab-character td:not([colspan])::before{
+    display:block;
+    margin-bottom:4px;
+    color:var(--muted);
+    font-size:10px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+  }
+  #ctab-actions td:nth-child(1)::before{content:"Weapon";}
+  #ctab-actions td:nth-child(2)::before{content:"Range";}
+  #ctab-actions td:nth-child(3)::before{content:"Hit / DC";}
+  #ctab-actions td:nth-child(4)::before{content:"Damage";}
+  #ctab-actions td:nth-child(5)::before{content:"Actions";}
+
+  #ctab-inventory td:nth-child(1)::before{content:"Category";}
+  #ctab-inventory td:nth-child(2)::before{content:"Equipment Name";}
+  #ctab-inventory td:nth-child(3)::before{content:"Weight";}
+  #ctab-inventory td:nth-child(4)::before{content:"Qty";}
+  #ctab-inventory td:nth-child(5)::before{content:"Cost";}
+  #ctab-inventory td:nth-child(6)::before{content:"Notes";}
+  #ctab-inventory td:nth-child(7)::before{content:"Actions";}
+
+  #ctab-abilities td:nth-child(1)::before{content:"Ability";}
+  #ctab-abilities td:nth-child(2)::before{content:"Type";}
+  #ctab-abilities td:nth-child(3)::before{content:"Hit / DC";}
+  #ctab-abilities td:nth-child(4)::before{content:"Effect";}
+  #ctab-abilities td:nth-child(5)::before{content:"Cooldown";}
+  #ctab-abilities td:nth-child(6)::before{content:"Actions";}
+
+  #ctab-spells td:nth-child(1)::before{content:"Spell";}
+  #ctab-spells td:nth-child(2)::before{content:"Tier";}
+  #ctab-spells td:nth-child(3)::before{content:"Cast";}
+  #ctab-spells td:nth-child(4)::before{content:"Conc";}
+  #ctab-spells td:nth-child(5)::before{content:"Summary";}
+  #ctab-spells td:nth-child(6)::before{content:"Actions";}
+
+  #tab-character td input,
+  #tab-character td select,
+  #tab-character td textarea{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+  #tab-character td .btn{width:100%;}
+
+  /* Ammo row: turn the long inline control strip into a stacked phone card. */
+  #ctab-actions td[colspan] > div:first-child{
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px !important;
+    align-items:stretch !important;
+  }
+  #ctab-actions td[colspan] > div:first-child span,
+  #ctab-actions td[colspan] > div:first-child input,
+  #ctab-actions td[colspan] > div:first-child button{
+    width:100% !important;
+    min-width:0 !important;
+  }
+  #ctab-actions td[colspan] > div:first-child span:first-child{
+    grid-column:1 / -1;
+    padding:6px 8px;
+    border-radius:10px;
+    background:rgba(107,255,255,.07);
+  }
+  #ctab-actions td[colspan] > div:first-child span[style*="opacity:.7"]{
+    align-self:end;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* Generic safeguard: no mobile page-level sideways drift. */
+  body, main, .panel, .card, section{max-width:100%;overflow-x:hidden;}
+}
+
+@media (max-width: 420px){
+  .nav{grid-template-columns:repeat(2, minmax(0, 1fr));}
+  #sheetCtabBar{grid-template-columns:repeat(2, minmax(0,1fr));}
+  #charSummaryRow{grid-template-columns:1fr;}
+  #ctab-actions td[colspan] > div:first-child{grid-template-columns:1fr;}
+}
