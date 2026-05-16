@@ -432,6 +432,7 @@ window.api = api;
 // ---- UI role toggles ----
 function setRoleUI(){
   const dmPanels = document.getElementById("dmPanels");
+  const dmIntelIntro = document.getElementById("dmIntelIntro");
   const playerIntel = document.getElementById("playerIntel");
   const dmShopRow = document.getElementById("dmShopRow");
   const editShopBtn = document.getElementById("editShopBtn");
@@ -441,6 +442,7 @@ function setRoleUI(){
   const logoutBtn = document.getElementById("logoutBtn");
 
   if(dmPanels) dmPanels.classList.toggle("hidden", SESSION.role !== "dm");
+  if(dmIntelIntro) dmIntelIntro.classList.toggle("hidden", SESSION.role !== "dm");
   if(playerIntel) playerIntel.classList.toggle("hidden", SESSION.role === "dm");
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");

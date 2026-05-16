@@ -17,7 +17,10 @@ function renderIntelPlayer(){
   const st = window.__STATE || {};
   const feat = (st.settings?.features) || { shop:true, intel:true };
   const dis = document.getElementById("intelDisabledMsg");
-  if(dis) dis.classList.toggle("hidden", !!feat.intel);
+  if(dis){
+    dis.textContent = feat.intel ? "" : "Intel is currently disabled by the DM.";
+    dis.classList.toggle("hidden", !!feat.intel);
+  }
   if(!feat.intel) return;
 
   const intelBody = document.getElementById("intelBody");
@@ -69,11 +72,11 @@ function renderIntelPlayer(){
     .sort((a,b)=>(b.id||0)-(a.id||0));
   alertBody.innerHTML = "";
   if(!alerts.length){
-    alertBody.innerHTML = '<tr><td colspan="4" class="mini">No DM alerts yet.</td></tr>';
+    alertBody.innerHTML = '<tr><td colspan="3" class="mini">No DM alerts yet.</td></tr>';
   }else{
     alerts.forEach(n=>{
       const tr=document.createElement("tr");
-      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type||"")+"</td><td>"+esc(n.detail||"")+"</td><td>"+esc(n.notes||"")+"</td>";
+      tr.innerHTML = "<td>"+n.id+"</td><td>"+esc(n.type||"")+"</td><td>"+esc(n.detail||"")+"</td>";
       alertBody.appendChild(tr);
     });
   }
