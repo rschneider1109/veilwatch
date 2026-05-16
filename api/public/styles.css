@@ -419,3 +419,93 @@ button,.btn,select,input,textarea{font:inherit;}
   .btn,.smallbtn,select,input,textarea{min-height:44px;}
   .chat-thread,.chat-float-thread,.shop-card-footer .btn{min-height:44px;}
 }
+
+/* Mobile declutter pass v4.9.3: make phone screens feel like an app, not a crowded cockpit. */
+@media (max-width: 680px){
+  /* Header: keep the important status visible, tuck the extra pills away. */
+  header{position:sticky;top:0;z-index:70;background:rgba(2,8,12,.88);backdrop-filter:blur(10px);}
+  .brand{font-size:14px;letter-spacing:.12em;}
+  #whoPill,#shopPill,#clockPill{display:none;}
+  #logoutBtn{margin-left:auto !important;min-height:36px;padding:7px 10px;}
+  .sessionClockDock{width:auto;order:0;margin-left:0;}
+  .session-clock-pill{font-size:12px;padding:5px 10px;}
+
+  /* Top app tabs: one swipeable rail instead of a tall grid. */
+  .nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:0 -10px 12px;padding:0 10px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+  .nav::-webkit-scrollbar{height:4px;}
+  .nav::-webkit-scrollbar-thumb{background:rgba(0,229,255,.18);border-radius:999px;}
+  .nav .btn{flex:0 0 auto;width:auto;min-width:94px;scroll-snap-align:start;padding:9px 10px;min-height:40px;}
+
+  /* Cards: reduce chrome and vertical noise. */
+  .panel,.card{padding:11px;border-radius:13px;}
+  .card h3,.panel h3{font-size:13px;}
+  hr{margin:10px 0;}
+  .mini{font-size:11.5px;}
+
+  /* Character: compact control rail instead of stacked button blocks. */
+  #tab-character .panel > .row:first-child{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:0 -2px;padding:0 2px 8px;-webkit-overflow-scrolling:touch;}
+  #tab-character .panel > .row:first-child select{flex:1 0 190px;width:auto;min-width:190px;}
+  #tab-character .panel > .row:first-child .btn{flex:0 0 auto;width:auto;white-space:nowrap;min-height:40px;padding:8px 10px;}
+
+  /* Character summary: one horizontal status strip, not a wall of chips. */
+  #charSummaryRow{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;margin:8px -2px 0;padding:0 2px 7px;-webkit-overflow-scrolling:touch;}
+  #charSummaryRow .pill{flex:0 0 auto;width:auto;text-align:left;white-space:nowrap;font-size:11px;padding:4px 8px;}
+
+  /* Character sub-tabs: swipe rail, not four rows of buttons. */
+  #sheetCtabBar{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:8px -2px 0;padding:0 2px 8px;-webkit-overflow-scrolling:touch;}
+  #sheetCtabBar .btn{flex:0 0 auto;width:auto;min-width:88px;white-space:nowrap;font-size:12px;padding:8px 10px;min-height:39px;}
+
+  /* Sheet fields: tighter, readable phone form rhythm. */
+  #ctab-sheet .row{gap:8px;align-items:flex-start;}
+  #ctab-sheet .row > div{min-width:0 !important;flex:1 1 140px;}
+  #ctab-sheet input.input{width:100% !important;}
+  #ctab-sheet textarea{min-height:92px !important;}
+  #ctab-background textarea,#ctab-traits textarea,#ctab-notes textarea{min-height:150px !important;}
+
+  /* Character tables: keep them contained and reduce row density. */
+  #ctab-actions table,#ctab-inventory table,#ctab-abilities table,#ctab-spells table{font-size:12px;}
+  #ctab-actions th,#ctab-actions td,#ctab-inventory th,#ctab-inventory td,#ctab-abilities th,#ctab-abilities td,#ctab-spells th,#ctab-spells td{padding:8px 7px;}
+  #addWeaponBtn,#addInvBtn,#addAbilityBtn,#addSpellBtn,#saveBgBtn,#saveTraitsBtn,#saveNotesBtn{width:100%;}
+
+  /* Home DM active party: less vertical drag on phones. */
+  #dmActivePartyPanel .row > div{min-width:0 !important;width:100%;}
+  #dmActivePartyPanel .row .row{display:grid;grid-template-columns:1fr 1fr;width:100%;}
+
+  /* Intel: filters and action rows become compact rails instead of stacked clutter. */
+  #tab-intel .row{gap:8px;}
+  #tab-intel .row > .btn,#tab-intel .row > .smallbtn{flex:0 0 auto;}
+  #tab-intel input,#tab-intel select{min-width:0 !important;}
+
+  /* Shop: make the cart feel like a phone checkout card. */
+  .shop-layout{gap:10px;}
+  .shop-cart-panel{position:relative;top:auto;}
+  .shop-cart-actions{gap:8px;}
+  .shop-cart-actions .btn{min-height:40px;}
+  .shop-card{padding:11px;}
+  .shop-card-footer{display:grid;grid-template-columns:1fr;gap:8px;}
+
+  /* Floating messenger: phone drawer gets more room and less header bulk. */
+  .chat-floating-dock{right:8px;bottom:8px;}
+  .chat-float-button{min-height:42px;padding:9px 12px;}
+  .chat-float-panel{width:calc(100vw - 16px);height:calc(100vh - 76px);border-radius:18px;}
+  .chat-float-head{padding:9px 10px;align-items:center;}
+  .chat-float-head h3{font-size:14px;}
+  .chat-float-body{grid-template-rows:118px minmax(0,1fr);}
+  .chat-float-threads{padding:7px;}
+  .chat-float-thread{padding:8px;}
+  .chat-float-title{padding:8px 10px;font-size:12px;}
+  .chat-float-messages{padding:10px;}
+  .chat-float-composer{padding:8px;grid-template-columns:1fr;}
+  .chat-float-composer .btn{width:100%;min-height:38px;}
+
+  /* Modals should breathe on phones. */
+  .modalCard,.loginCard{width:calc(100vw - 20px) !important;max-height:calc(100vh - 24px);overflow:auto;}
+}
+
+@media (max-width: 420px){
+  /* Override the earlier one-column nav/subtab rule: scrolling rails are less cluttered than tall stacks. */
+  .nav{display:flex;grid-template-columns:none;}
+  #sheetCtabBar{display:flex;grid-template-columns:none;}
+  #tab-character .panel > .row:first-child{display:flex;grid-template-columns:none;}
+  #charSummaryRow{display:flex;grid-template-columns:none;}
+}
