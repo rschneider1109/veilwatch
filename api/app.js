@@ -400,10 +400,36 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
+  sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
   characters: [],
   activeParty: [] // DM-controlled "who is currently being played"
 };
+
+function normalizeSessionRecapsShape(st){
+  st.sessionRecaps ||= structuredClone(DEFAULT_STATE.sessionRecaps);
+  if(Array.isArray(st.sessionRecaps)){
+    st.sessionRecaps = {
+      nextId: (st.sessionRecaps.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0) + 1) || 1,
+      items: st.sessionRecaps
+    };
+  }
+  st.sessionRecaps.nextId ||= 1;
+  st.sessionRecaps.items ||= [];
+  st.sessionRecaps.items = st.sessionRecaps.items.map(r=>({
+    id: Number(r.id||0),
+    title: String(r.title||"Untitled Recap").slice(0,140),
+    summary: String(r.summary||r.body||"").slice(0,12000),
+    dmNotes: String(r.dmNotes||"").slice(0,12000),
+    visibility: String(r.visibility||"players") === "dm" ? "dm" : "players",
+    pinned: !!r.pinned,
+    createdAt: Number(r.createdAt||Date.now()),
+    updatedAt: Number(r.updatedAt||r.createdAt||Date.now())
+  })).filter(r=>r.id);
+  const maxId = st.sessionRecaps.items.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0);
+  st.sessionRecaps.nextId = Math.max(Number(st.sessionRecaps.nextId||1), maxId + 1);
+  return st;
+}
 
 function normalizeCluesShape(st){
   st.clues ||= structuredClone(DEFAULT_STATE.clues);
@@ -468,7 +494,9 @@ function fileLoadState(){
     st.settings.features ||= DEFAULT_STATE.settings.features;
     st.shops ||= DEFAULT_STATE.shops;
     st.notifications ||= DEFAULT_STATE.notifications;
+    st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
+    normalizeSessionRecapsShape(st);
     normalizeCluesShape(st);
     normalizeFeatures(st);
     normalizeCharacters(st);
@@ -495,7 +523,9 @@ async function loadState(){
       fromDb.settings.features ||= DEFAULT_STATE.settings.features;
       fromDb.shops ||= DEFAULT_STATE.shops;
       fromDb.notifications ||= DEFAULT_STATE.notifications;
+      fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
+      normalizeSessionRecapsShape(fromDb);
       normalizeCluesShape(fromDb);
       normalizeFeatures(fromDb);
       normalizeCharacters(fromDb);
@@ -510,7 +540,7 @@ async function loadState(){
 }
 
 function saveState(st){
-  try{ normalizeFeatures(st); normalizeCluesShape(st); normalizeCharacters(st); }catch(e){}
+  try{ normalizeFeatures(st); normalizeSessionRecapsShape(st); normalizeCluesShape(st); normalizeCharacters(st); }catch(e){}
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
   try{ sseBroadcast({ type: "state.tick", ts: Date.now() }); }catch(e){}
@@ -920,6 +950,7 @@ const server = http.createServer(async (req,res)=>{
   // State
   // -------------------------
   if(p === "/api/state" && req.method==="GET"){
+    normalizeSessionRecapsShape(state);
     normalizeCluesShape(state);
     normalizeCharacters(state);
 
@@ -934,8 +965,34 @@ const server = http.createServer(async (req,res)=>{
         safe.clues.items = (safe.clues.items||[]).filter(c=>String(c.visibility||"hidden")==="revealed");
         safe.clues.archived = [];
       }
-      // hide notifications from players
-      safe.notifications = { nextId: 1, items: [] };
+      // players receive only public DM alerts and their own request history.
+      // This keeps DM-only notifications hidden without breaking player requests/alerts.
+      const requester = String(user?.username || "");
+      const publicNotifications = (safe.notifications?.items || []).filter(n=>{
+        const from = String(n.from || "");
+        const audience = String(n.audience || "dm");
+        const isPublicDmAlert = from === "DM" && audience === "players" && !n.archived && String(n.status||"open") === "open";
+        const isOwnRequest = requester && from === requester && audience !== "players";
+        return isPublicDmAlert || isOwnRequest;
+      }).map(n=>{
+        const from = String(n.from || "");
+        const audience = String(n.audience || "dm");
+        const out = {
+          id:n.id, type:n.type, detail:n.detail, from:n.from, audience:n.audience,
+          status:n.status, archived:!!n.archived, createdAt:n.createdAt, updatedAt:n.updatedAt, archivedAt:n.archivedAt
+        };
+        // Only a player's own request should show DM response notes. Public DM alerts do not leak DM notes.
+        out.notes = (requester && from === requester && audience !== "players") ? (n.notes || "") : "";
+        return out;
+      });
+      safe.notifications = { nextId: 1, items: publicNotifications };
+
+      // players receive only player-visible recaps, with DM notes stripped.
+      if(safe.sessionRecaps){
+        safe.sessionRecaps.items = (safe.sessionRecaps.items || [])
+          .filter(r=>String(r.visibility||"players") === "players")
+          .map(r=>({ id:r.id, title:r.title, summary:r.summary, visibility:r.visibility, pinned:!!r.pinned, createdAt:r.createdAt, updatedAt:r.updatedAt }));
+      }
 
       // character visibility: only owned characters (if logged in) else none
       if(user && user.role === "player"){
@@ -988,7 +1045,9 @@ const server = http.createServer(async (req,res)=>{
     incoming.settings.features ||= DEFAULT_STATE.settings.features;
     incoming.shops ||= DEFAULT_STATE.shops;
     incoming.notifications ||= DEFAULT_STATE.notifications;
+    incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
+    normalizeSessionRecapsShape(incoming);
     normalizeCluesShape(incoming);
     normalizeFeatures(incoming);
     normalizeCharacters(incoming);
@@ -1414,6 +1473,69 @@ if(p === "/api/character/save" && req.method==="POST"){
       state.settings.dmKey = nk;
     }
 
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
+  // Session recap endpoints
+  if(p === "/api/recaps/create" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecapsShape(state);
+    const id = state.sessionRecaps.nextId++;
+    const now = Date.now();
+    state.sessionRecaps.items.unshift({
+      id,
+      title: String(body.title || "Untitled Recap").slice(0,140),
+      summary: String(body.summary || "").slice(0,12000),
+      dmNotes: String(body.dmNotes || "").slice(0,12000),
+      visibility: String(body.visibility || "players") === "dm" ? "dm" : "players",
+      pinned: !!body.pinned,
+      createdAt: now,
+      updatedAt: now
+    });
+    saveState(state);
+    return json(res, 200, {ok:true, id});
+  }
+
+  if(p === "/api/recaps/update" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecapsShape(state);
+    const id = Number(body.id || 0);
+    const recap = (state.sessionRecaps.items || []).find(r=>Number(r.id||0) === id);
+    if(!recap) return json(res, 404, {ok:false, error:"Not found"});
+    recap.title = String(body.title || "Untitled Recap").slice(0,140);
+    recap.summary = String(body.summary || "").slice(0,12000);
+    recap.dmNotes = String(body.dmNotes || "").slice(0,12000);
+    recap.visibility = String(body.visibility || "players") === "dm" ? "dm" : "players";
+    recap.pinned = !!body.pinned;
+    recap.updatedAt = Date.now();
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
+  if(p === "/api/recaps/delete" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecapsShape(state);
+    const id = Number(body.id || 0);
+    const before = state.sessionRecaps.items.length;
+    state.sessionRecaps.items = state.sessionRecaps.items.filter(r=>Number(r.id||0) !== id);
+    if(state.sessionRecaps.items.length === before) return json(res, 404, {ok:false, error:"Not found"});
+    saveState(state);
+    return json(res, 200, {ok:true});
+  }
+
+  if(p === "/api/recaps/pin" && req.method==="POST"){
+    if(!dm) return json(res, 403, {ok:false, error:"DM only"});
+    const body = JSON.parse(await readBody(req) || "{}");
+    normalizeSessionRecapsShape(state);
+    const id = Number(body.id || 0);
+    const recap = (state.sessionRecaps.items || []).find(r=>Number(r.id||0) === id);
+    if(!recap) return json(res, 404, {ok:false, error:"Not found"});
+    recap.pinned = !!body.pinned;
+    recap.updatedAt = Date.now();
     saveState(state);
     return json(res, 200, {ok:true});
   }
