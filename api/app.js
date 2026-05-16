@@ -400,11 +400,35 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
+  sessionClock: { running: false, accumulatedMs: 0, startedAt: null, updatedAt: null },
   sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
   characters: [],
   activeParty: [] // DM-controlled "who is currently being played"
 };
+
+
+function normalizeSessionClockShape(st){
+  st.sessionClock ||= structuredClone(DEFAULT_STATE.sessionClock);
+
+  // Backward compatibility: older UI-only clock used SESSION.sessionStart.
+  // Server state now owns the table clock so all tabs/users see the same timer.
+  const sc = st.sessionClock || {};
+  sc.running = !!sc.running;
+  sc.accumulatedMs = Math.max(0, Number(sc.accumulatedMs || 0));
+  sc.startedAt = sc.running ? Number(sc.startedAt || Date.now()) : null;
+  sc.updatedAt = Number(sc.updatedAt || Date.now());
+  st.sessionClock = sc;
+  return st;
+}
+
+function sessionClockElapsedMs(sc){
+  sc = sc || DEFAULT_STATE.sessionClock;
+  const base = Math.max(0, Number(sc.accumulatedMs || 0));
+  if(!sc.running) return base;
+  const started = Number(sc.startedAt || Date.now());
+  return Math.max(0, base + Math.max(0, Date.now() - started));
+}
 
 function normalizeSessionRecapsShape(st){
   st.sessionRecaps ||= structuredClone(DEFAULT_STATE.sessionRecaps);
@@ -494,8 +518,10 @@ function fileLoadState(){
     st.settings.features ||= DEFAULT_STATE.settings.features;
     st.shops ||= DEFAULT_STATE.shops;
     st.notifications ||= DEFAULT_STATE.notifications;
+    st.sessionClock ||= DEFAULT_STATE.sessionClock;
     st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
+    normalizeSessionClockShape(st);
     normalizeSessionRecapsShape(st);
     normalizeCluesShape(st);
     normalizeFeatures(st);
@@ -523,8 +549,10 @@ async function loadState(){
       fromDb.settings.features ||= DEFAULT_STATE.settings.features;
       fromDb.shops ||= DEFAULT_STATE.shops;
       fromDb.notifications ||= DEFAULT_STATE.notifications;
+      fromDb.sessionClock ||= DEFAULT_STATE.sessionClock;
       fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
+      normalizeSessionClockShape(fromDb);
       normalizeSessionRecapsShape(fromDb);
       normalizeCluesShape(fromDb);
       normalizeFeatures(fromDb);
@@ -540,7 +568,7 @@ async function loadState(){
 }
 
 function saveState(st){
-  try{ normalizeFeatures(st); normalizeSessionRecapsShape(st); normalizeCluesShape(st); normalizeCharacters(st); }catch(e){}
+  try{ normalizeFeatures(st); normalizeSessionClockShape(st); normalizeSessionRecapsShape(st); normalizeCluesShape(st); normalizeCharacters(st); }catch(e){}
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
   try{ sseBroadcast({ type: "state.tick", ts: Date.now() }); }catch(e){}
@@ -804,7 +832,7 @@ function servePublic(req, res, pathname){
 // -----------------------------
 // Server
 // -----------------------------
-let state = normalizeCharacters(normalizeFeatures(structuredClone(DEFAULT_STATE)));
+let state = normalizeCharacters(normalizeSessionClockShape(normalizeFeatures(structuredClone(DEFAULT_STATE))));
 users = [];
 
 const server = http.createServer(async (req,res)=>{
@@ -1045,8 +1073,10 @@ const server = http.createServer(async (req,res)=>{
     incoming.settings.features ||= DEFAULT_STATE.settings.features;
     incoming.shops ||= DEFAULT_STATE.shops;
     incoming.notifications ||= DEFAULT_STATE.notifications;
+    incoming.sessionClock ||= DEFAULT_STATE.sessionClock;
     incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
+    normalizeSessionClockShape(incoming);
     normalizeSessionRecapsShape(incoming);
     normalizeCluesShape(incoming);
     normalizeFeatures(incoming);
@@ -1070,6 +1100,46 @@ const server = http.createServer(async (req,res)=>{
     saveState(state);
     sseBroadcast({ ts: Date.now(), type:"state.reset", scope:"dm" });
     return json(res, 200, { ok:true });
+  }
+
+  // -------------------------
+  // Session Clock
+  // -------------------------
+  if(p === "/api/session-clock/start" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeSessionClockShape(state);
+    const sc = state.sessionClock;
+    if(!sc.running){
+      sc.running = true;
+      sc.startedAt = Date.now();
+      sc.updatedAt = Date.now();
+      saveState(state);
+      sseBroadcast({ ts: Date.now(), type:"sessionClock.start", scope:"all" });
+    }
+    return json(res, 200, { ok:true, sessionClock: state.sessionClock });
+  }
+
+  if(p === "/api/session-clock/stop" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeSessionClockShape(state);
+    const sc = state.sessionClock;
+    if(sc.running){
+      sc.accumulatedMs = sessionClockElapsedMs(sc);
+      sc.running = false;
+      sc.startedAt = null;
+      sc.updatedAt = Date.now();
+      saveState(state);
+      sseBroadcast({ ts: Date.now(), type:"sessionClock.stop", scope:"all" });
+    }
+    return json(res, 200, { ok:true, sessionClock: state.sessionClock });
+  }
+
+  if(p === "/api/session-clock/reset" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    state.sessionClock = { running:false, accumulatedMs:0, startedAt:null, updatedAt:Date.now() };
+    saveState(state);
+    sseBroadcast({ ts: Date.now(), type:"sessionClock.reset", scope:"all" });
+    return json(res, 200, { ok:true, sessionClock: state.sessionClock });
   }
 
   // -------------------------
