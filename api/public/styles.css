@@ -36,6 +36,22 @@ th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;font-
 th{color:var(--muted);font-weight:600;}
 .smallbtn{padding:8px 10px;border-radius:10px;}
 .right{margin-left:auto;}
+
+/* Persistent session clock */
+.sessionClockDock{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.session-clock-pill{color:var(--ink);border-color:rgba(0,229,255,.34);box-shadow:0 0 18px rgba(0,229,255,.08) inset;}
+.sessionClockControls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.sessionClockControls.hidden{display:none;}
+.tinybtn{padding:5px 8px;border-radius:999px;font-size:11px;line-height:1.1;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.session-clock-home{font-size:18px;color:var(--ink);letter-spacing:.05em;}
+@media (max-width: 760px){
+  header{align-items:flex-start;flex-wrap:wrap;}
+  .sessionClockDock{width:100%;order:10;}
+  .sessionClockControls{width:100%;}
+  .right{margin-left:0;}
+}
+
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(6,16,22,.9);
   border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.5);display:none;}
 /* Login overlay */

@@ -32,6 +32,14 @@
   <div class="brand">VEILWATCH OS</div>
   <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
+  <div class="sessionClockDock" id="sessionClockDock">
+    <div class="pill session-clock-pill" id="sessionClockPill">Session: 00:00:00</div>
+    <div class="sessionClockControls hidden" id="sessionClockControls">
+      <button class="btn tinybtn" id="sessionClockStartBtn" type="button">Start</button>
+      <button class="btn tinybtn" id="sessionClockStopBtn" type="button">Stop</button>
+      <button class="btn tinybtn" id="sessionClockResetBtn" type="button">Reset</button>
+    </div>
+  </div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
 
@@ -56,7 +64,8 @@
     </div>
     <div class="card" style="grid-column:span 4;">
       <h3>Session Clock</h3>
-      <div class="mini" id="sessionClockMini">00:00</div>
+      <div class="mini session-clock-home" id="sessionClockMini">00:00:00</div>
+      <div class="mini" id="sessionClockStatusMini">Stopped</div>
     </div>
 
     <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
