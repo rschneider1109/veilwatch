@@ -96,6 +96,19 @@ async function initDb(){
           INDEX idx_vw_inventory_items_custom_active (is_active)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS vw_session_clock_logs (
+          id INT NOT NULL PRIMARY KEY,
+          title VARCHAR(140) NOT NULL DEFAULT 'Session',
+          duration_ms BIGINT NOT NULL DEFAULT 0,
+          started_at BIGINT NULL,
+          ended_at BIGINT NOT NULL,
+          notes TEXT NULL,
+          created_at BIGINT NOT NULL,
+          updated_at BIGINT NOT NULL,
+          INDEX idx_vw_session_clock_logs_ended_at (ended_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
       await dbEnsureInventoryCatalogSchema();
       await dbSeedInventoryCatalog();
       return;
@@ -120,6 +133,37 @@ async function dbSaveState(st){
     "INSERT INTO vw_state (id, state_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE state_json = VALUES(state_json), updated_at = CURRENT_TIMESTAMP",
     ["main", JSON.stringify(st)]
   );
+}
+
+async function dbUpsertSessionClockLog(item){
+  if(!pool || !item) return;
+  await pool.query(
+    `INSERT INTO vw_session_clock_logs
+      (id, title, duration_ms, started_at, ended_at, notes, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+      title = VALUES(title),
+      duration_ms = VALUES(duration_ms),
+      started_at = VALUES(started_at),
+      ended_at = VALUES(ended_at),
+      notes = VALUES(notes),
+      updated_at = VALUES(updated_at)`,
+    [
+      Number(item.id || 0),
+      String(item.title || "Session").slice(0,140),
+      Math.max(0, Number(item.durationMs || item.duration_ms || 0)),
+      item.startedAt ? Number(item.startedAt) : null,
+      Number(item.endedAt || Date.now()),
+      String(item.notes || "").slice(0,4000),
+      Number(item.createdAt || Date.now()),
+      Number(item.updatedAt || Date.now())
+    ]
+  );
+}
+
+async function dbDeleteSessionClockLog(id){
+  if(!pool) return;
+  await pool.query("DELETE FROM vw_session_clock_logs WHERE id = ?", [Number(id || 0)]);
 }
 
 async function dbLoadUsers(){
@@ -400,7 +444,8 @@ const DEFAULT_STATE = {
     ]
   },
   notifications: { nextId: 1, items: [] },
-  sessionClock: { running: false, accumulatedMs: 0, startedAt: null, updatedAt: null },
+  sessionClock: { running: false, accumulatedMs: 0, startedAt: null, sessionStartedAt: null, updatedAt: null },
+  sessionClockLog: { nextId: 1, items: [] },
   sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
   characters: [],
@@ -417,8 +462,34 @@ function normalizeSessionClockShape(st){
   sc.running = !!sc.running;
   sc.accumulatedMs = Math.max(0, Number(sc.accumulatedMs || 0));
   sc.startedAt = sc.running ? Number(sc.startedAt || Date.now()) : null;
+  sc.sessionStartedAt = sc.sessionStartedAt ? Number(sc.sessionStartedAt) : null;
   sc.updatedAt = Number(sc.updatedAt || Date.now());
   st.sessionClock = sc;
+  return st;
+}
+
+function normalizeSessionClockLogShape(st){
+  st.sessionClockLog ||= structuredClone(DEFAULT_STATE.sessionClockLog);
+  if(Array.isArray(st.sessionClockLog)){
+    st.sessionClockLog = {
+      nextId: (st.sessionClockLog.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0) + 1) || 1,
+      items: st.sessionClockLog
+    };
+  }
+  st.sessionClockLog.nextId ||= 1;
+  st.sessionClockLog.items ||= [];
+  st.sessionClockLog.items = st.sessionClockLog.items.map(r=>({
+    id: Number(r.id || 0),
+    title: String(r.title || `Session ${r.id || ""}` || "Session").slice(0,140),
+    durationMs: Math.max(0, Number(r.durationMs || 0)),
+    startedAt: Number(r.startedAt || 0) || null,
+    endedAt: Number(r.endedAt || r.createdAt || Date.now()),
+    notes: String(r.notes || "").slice(0,4000),
+    createdAt: Number(r.createdAt || Date.now()),
+    updatedAt: Number(r.updatedAt || r.createdAt || Date.now())
+  })).filter(r=>r.id > 0);
+  const maxId = st.sessionClockLog.items.reduce((mx,r)=>Math.max(mx, Number(r.id||0)),0);
+  st.sessionClockLog.nextId = Math.max(Number(st.sessionClockLog.nextId || 1), maxId + 1);
   return st;
 }
 
@@ -522,6 +593,7 @@ function fileLoadState(){
     st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
     normalizeSessionClockShape(st);
+    normalizeSessionClockLogShape(st);
     normalizeSessionRecapsShape(st);
     normalizeCluesShape(st);
     normalizeFeatures(st);
@@ -553,6 +625,7 @@ async function loadState(){
       fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
       normalizeSessionClockShape(fromDb);
+      normalizeSessionClockLogShape(fromDb);
       normalizeSessionRecapsShape(fromDb);
       normalizeCluesShape(fromDb);
       normalizeFeatures(fromDb);
@@ -978,6 +1051,8 @@ const server = http.createServer(async (req,res)=>{
   // State
   // -------------------------
   if(p === "/api/state" && req.method==="GET"){
+    normalizeSessionClockShape(state);
+    normalizeSessionClockLogShape(state);
     normalizeSessionRecapsShape(state);
     normalizeCluesShape(state);
     normalizeCharacters(state);
@@ -1014,6 +1089,9 @@ const server = http.createServer(async (req,res)=>{
         return out;
       });
       safe.notifications = { nextId: 1, items: publicNotifications };
+
+      // session clock history is DM-only; players only need the live clock.
+      safe.sessionClockLog = { nextId: 1, items: [] };
 
       // players receive only player-visible recaps, with DM notes stripped.
       if(safe.sessionRecaps){
@@ -1077,6 +1155,7 @@ const server = http.createServer(async (req,res)=>{
     incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
     normalizeSessionClockShape(incoming);
+    normalizeSessionClockLogShape(incoming);
     normalizeSessionRecapsShape(incoming);
     normalizeCluesShape(incoming);
     normalizeFeatures(incoming);
@@ -1110,9 +1189,11 @@ const server = http.createServer(async (req,res)=>{
     normalizeSessionClockShape(state);
     const sc = state.sessionClock;
     if(!sc.running){
+      const now = Date.now();
       sc.running = true;
-      sc.startedAt = Date.now();
-      sc.updatedAt = Date.now();
+      sc.startedAt = now;
+      if(!sc.sessionStartedAt && Math.max(0, Number(sc.accumulatedMs || 0)) === 0) sc.sessionStartedAt = now;
+      sc.updatedAt = now;
       saveState(state);
       sseBroadcast({ ts: Date.now(), type:"sessionClock.start", scope:"all" });
     }
@@ -1136,10 +1217,72 @@ const server = http.createServer(async (req,res)=>{
 
   if(p === "/api/session-clock/reset" && req.method === "POST"){
     if(!dm) return json(res, 403, { ok:false, error:"DM only" });
-    state.sessionClock = { running:false, accumulatedMs:0, startedAt:null, updatedAt:Date.now() };
+    state.sessionClock = { running:false, accumulatedMs:0, startedAt:null, sessionStartedAt:null, updatedAt:Date.now() };
     saveState(state);
     sseBroadcast({ ts: Date.now(), type:"sessionClock.reset", scope:"all" });
     return json(res, 200, { ok:true, sessionClock: state.sessionClock });
+  }
+
+  if(p === "/api/session-clock/end" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeSessionClockShape(state);
+    normalizeSessionClockLogShape(state);
+    const now = Date.now();
+    const elapsed = sessionClockElapsedMs(state.sessionClock);
+    if(elapsed < 1000) return json(res, 400, { ok:false, error:"Session clock is still at 00:00:00" });
+    let body = {};
+    try{ body = JSON.parse(await readBody(req) || "{}"); }catch(e){ body = {}; }
+    const id = state.sessionClockLog.nextId++;
+    const startedAt = Number(state.sessionClock.sessionStartedAt || (now - elapsed));
+    const item = {
+      id,
+      title: String(body.title || `Session ${id}`).slice(0,140),
+      durationMs: elapsed,
+      startedAt,
+      endedAt: now,
+      notes: String(body.notes || "").slice(0,4000),
+      createdAt: now,
+      updatedAt: now
+    };
+    state.sessionClockLog.items.unshift(item);
+    state.sessionClock = { running:false, accumulatedMs:0, startedAt:null, sessionStartedAt:null, updatedAt:now };
+    saveState(state);
+    try{ await dbUpsertSessionClockLog(item); }catch(e){}
+    sseBroadcast({ ts: now, type:"sessionClock.end", scope:"all" });
+    return json(res, 200, { ok:true, sessionClock: state.sessionClock, sessionClockLog: state.sessionClockLog, item });
+  }
+
+  if(p === "/api/session-clock/log/update" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeSessionClockLogShape(state);
+    let body = {};
+    try{ body = JSON.parse(await readBody(req) || "{}"); }catch(e){ body = {}; }
+    const id = Number(body.id || 0);
+    const item = state.sessionClockLog.items.find(r=>Number(r.id||0) === id);
+    if(!item) return json(res, 404, { ok:false, error:"Log entry not found" });
+    if(typeof body.title !== "undefined") item.title = String(body.title || "Session").slice(0,140);
+    if(typeof body.notes !== "undefined") item.notes = String(body.notes || "").slice(0,4000);
+    if(typeof body.durationMs !== "undefined") item.durationMs = Math.max(0, Number(body.durationMs || 0));
+    item.updatedAt = Date.now();
+    saveState(state);
+    try{ await dbUpsertSessionClockLog(item); }catch(e){}
+    sseBroadcast({ ts: Date.now(), type:"sessionClock.log.update", scope:"dm" });
+    return json(res, 200, { ok:true, sessionClockLog: state.sessionClockLog, item });
+  }
+
+  if(p === "/api/session-clock/log/delete" && req.method === "POST"){
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeSessionClockLogShape(state);
+    let body = {};
+    try{ body = JSON.parse(await readBody(req) || "{}"); }catch(e){ body = {}; }
+    const id = Number(body.id || 0);
+    const before = state.sessionClockLog.items.length;
+    state.sessionClockLog.items = state.sessionClockLog.items.filter(r=>Number(r.id||0) !== id);
+    if(state.sessionClockLog.items.length === before) return json(res, 404, { ok:false, error:"Log entry not found" });
+    saveState(state);
+    try{ await dbDeleteSessionClockLog(id); }catch(e){}
+    sseBroadcast({ ts: Date.now(), type:"sessionClock.log.delete", scope:"dm" });
+    return json(res, 200, { ok:true, sessionClockLog: state.sessionClockLog });
   }
 
   // -------------------------
