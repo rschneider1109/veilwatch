@@ -456,6 +456,11 @@ function setRoleUI(){
   const clockLogPanel = document.getElementById("sessionClockLogPanel");
   if(clockLogPanel) clockLogPanel.classList.toggle("hidden", SESSION.role !== "dm");
 
+  const chatNewThreadBtn = document.getElementById("chatNewThreadBtn");
+  if(chatNewThreadBtn) chatNewThreadBtn.classList.toggle("hidden", SESSION.role !== "dm");
+  const chatNewDmBtn = document.getElementById("chatNewDmBtn");
+  if(chatNewDmBtn) chatNewDmBtn.classList.toggle("hidden", SESSION.role === "dm");
+
   // Who pill
   const who = document.getElementById("whoPill");
   if(who){
@@ -716,7 +721,7 @@ async function renderTabs(tab){
     }catch(e){}
   }
 
-  const tabs = ["home","character","intel","shop","settings"];
+  const tabs = ["home","character","intel","shop","chat","settings"];
   tabs.forEach(t=>{
     const el = document.getElementById("tab-"+t);
     if(el) el.classList.toggle("hidden", t !== tab);
@@ -753,6 +758,8 @@ async function renderTabs(tab){
       if(typeof renderDMArchivedRequests === "function") renderDMArchivedRequests();
     } else if(tab === "shop"){
       if(typeof renderShop === "function") renderShop();
+    } else if(tab === "chat"){
+      if(typeof renderChat === "function") renderChat();
     } else if(tab === "settings"){
       if(typeof renderSettings === "function") renderSettings();
     }
@@ -960,6 +967,7 @@ async function refreshAll(){
 
   // feature renders
   if(typeof renderShop === "function") renderShop();
+  if(typeof renderChat === "function") renderChat();
   if(typeof renderDM === "function") renderDM();
   if(typeof renderDMActiveParty === "function") renderDMActiveParty();
   if(typeof renderIntelDM === "function") renderIntelDM();

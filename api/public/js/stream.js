@@ -68,6 +68,12 @@ function vwRenderRealtimeViews(forceAll){
   }catch(e){}
 
   try{
+    if(renderTab === "all" || renderTab === "chat"){
+      if(typeof renderChat === "function") renderChat();
+    }
+  }catch(e){}
+
+  try{
     if(renderTab === "all" || renderTab === "settings"){
       if(typeof renderSettings === "function") renderSettings();
     }
