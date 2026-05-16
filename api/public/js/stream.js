@@ -26,6 +26,7 @@ function vwRenderRealtimeViews(forceAll){
   try{
     if(typeof vwTickClocks === "function") vwTickClocks();
     if(typeof vwRenderSessionClockControls === "function") vwRenderSessionClockControls();
+    if(typeof vwRenderSessionClockLog === "function") vwRenderSessionClockLog();
   }catch(e){}
 
   // Always refresh shared character-linked surfaces.

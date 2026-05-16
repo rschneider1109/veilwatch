@@ -453,6 +453,8 @@ function setRoleUI(){
 
   const clockControls = document.getElementById("sessionClockControls");
   if(clockControls) clockControls.classList.toggle("hidden", SESSION.role !== "dm");
+  const clockLogPanel = document.getElementById("sessionClockLogPanel");
+  if(clockLogPanel) clockLogPanel.classList.toggle("hidden", SESSION.role !== "dm");
 
   // Who pill
   const who = document.getElementById("whoPill");
@@ -473,6 +475,29 @@ function vwFormatDuration(ms){
 }
 window.vwFormatDuration = vwFormatDuration;
 
+function vwParseDurationToMs(value){
+  const raw = String(value || "").trim();
+  if(!raw) return 0;
+  if(raw.includes(":")){
+    const parts = raw.split(":").map(n=>Number(n));
+    if(parts.some(n=>!Number.isFinite(n) || n < 0)) return 0;
+    let h = 0, m = 0, sec = 0;
+    if(parts.length === 3){ h = parts[0]; m = parts[1]; sec = parts[2]; }
+    else if(parts.length === 2){ m = parts[0]; sec = parts[1]; }
+    else { sec = parts[0]; }
+    return Math.max(0, Math.round((h*3600 + m*60 + sec) * 1000));
+  }
+  const mins = Number(raw);
+  return Number.isFinite(mins) ? Math.max(0, Math.round(mins * 60000)) : 0;
+}
+window.vwParseDurationToMs = vwParseDurationToMs;
+
+function vwFormatDateTime(ts){
+  if(!ts) return "--";
+  try{ return new Date(Number(ts)).toLocaleString(); }catch(e){ return "--"; }
+}
+window.vwFormatDateTime = vwFormatDateTime;
+
 function vwGetSessionClockElapsedMs(){
   const sc = (window.__STATE && window.__STATE.sessionClock) || {};
   const base = Math.max(0, Number(sc.accumulatedMs || 0));
@@ -491,8 +516,10 @@ function vwRenderSessionClockControls(){
 
   const startBtn = document.getElementById("sessionClockStartBtn");
   const stopBtn = document.getElementById("sessionClockStopBtn");
+  const endBtn = document.getElementById("sessionClockEndBtn");
   if(startBtn) startBtn.disabled = running || SESSION.role !== "dm";
   if(stopBtn) stopBtn.disabled = !running || SESSION.role !== "dm";
+  if(endBtn) endBtn.disabled = SESSION.role !== "dm" || vwGetSessionClockElapsedMs() < 1000;
 
   const status = document.getElementById("sessionClockStatusMini");
   if(status) status.textContent = running ? "Running" : "Stopped / Break";
@@ -519,12 +546,136 @@ async function vwSessionClockAction(action){
 }
 window.vwSessionClockAction = vwSessionClockAction;
 
+async function vwEndSessionClock(){
+  if(SESSION.role !== "dm") return;
+  const elapsedMs = vwGetSessionClockElapsedMs();
+  if(elapsedMs < 1000){ toast("Session clock is still at 00:00:00"); return; }
+
+  const form = await vwModalForm({
+    title:"End Session?",
+    okText:"Continue",
+    cancelText:"Cancel",
+    fields:[
+      { key:"title", label:"Log Title", value:"Session " + (((window.__STATE?.sessionClockLog?.nextId) || 1)), placeholder:"Session name or number" },
+      { key:"duration", label:"Duration", type:"static", value:vwFormatDuration(elapsedMs) },
+      { key:"notes", label:"Notes", type:"textarea", value:"", placeholder:"Optional notes for this session log" }
+    ]
+  });
+  if(!form) return;
+
+  const really = await vwModalConfirm({
+    title:"Confirm End Session",
+    message:"This will save the current clock time to the Session Clock Log and reset the active clock to 00:00:00. Are you sure?",
+    okText:"End Session",
+    cancelText:"Keep Clock Open"
+  });
+  if(!really) return;
+
+  const res = await api("/api/session-clock/end", { method:"POST", body: JSON.stringify({ title:form.title, notes:form.notes }) });
+  if(res && res.ok){
+    window.__STATE = window.__STATE || {};
+    if(res.sessionClock) window.__STATE.sessionClock = res.sessionClock;
+    if(res.sessionClockLog) window.__STATE.sessionClockLog = res.sessionClockLog;
+    vwTickClocks();
+    vwRenderSessionClockControls();
+    vwRenderSessionClockLog();
+    toast("Session ended and logged");
+    await refreshAll();
+  }else{
+    toast(res?.error || "Could not end session");
+  }
+}
+window.vwEndSessionClock = vwEndSessionClock;
+
+async function vwEditSessionClockLog(id){
+  if(SESSION.role !== "dm") return;
+  const log = (window.__STATE?.sessionClockLog?.items || []).find(r=>Number(r.id||0) === Number(id));
+  if(!log){ toast("Log entry not found"); return; }
+  const form = await vwModalForm({
+    title:"Edit Session Log",
+    okText:"Save",
+    cancelText:"Cancel",
+    fields:[
+      { key:"title", label:"Log Title", value:log.title || "Session" },
+      { key:"duration", label:"Duration", value:vwFormatDuration(log.durationMs || 0), placeholder:"HH:MM:SS or minutes" },
+      { key:"notes", label:"Notes", type:"textarea", value:log.notes || "" }
+    ]
+  });
+  if(!form) return;
+  const res = await api("/api/session-clock/log/update", { method:"POST", body: JSON.stringify({
+    id:Number(id),
+    title:form.title,
+    durationMs:vwParseDurationToMs(form.duration),
+    notes:form.notes
+  }) });
+  if(res && res.ok){
+    window.__STATE.sessionClockLog = res.sessionClockLog;
+    vwRenderSessionClockLog();
+    toast("Session log updated");
+    await refreshAll();
+  }else{
+    toast(res?.error || "Could not update log");
+  }
+}
+window.vwEditSessionClockLog = vwEditSessionClockLog;
+
+async function vwDeleteSessionClockLog(id){
+  if(SESSION.role !== "dm") return;
+  const ok = await vwModalConfirm({
+    title:"Delete Session Log",
+    message:"Delete this session clock log entry? This is only for fixing mistakes and cannot be undone.",
+    okText:"Delete",
+    cancelText:"Cancel"
+  });
+  if(!ok) return;
+  const res = await api("/api/session-clock/log/delete", { method:"POST", body: JSON.stringify({ id:Number(id) }) });
+  if(res && res.ok){
+    window.__STATE.sessionClockLog = res.sessionClockLog;
+    vwRenderSessionClockLog();
+    toast("Session log deleted");
+    await refreshAll();
+  }else{
+    toast(res?.error || "Could not delete log");
+  }
+}
+window.vwDeleteSessionClockLog = vwDeleteSessionClockLog;
+
+function vwRenderSessionClockLog(){
+  const body = document.getElementById("sessionClockLogBody");
+  const panel = document.getElementById("sessionClockLogPanel");
+  if(panel) panel.classList.toggle("hidden", SESSION.role !== "dm");
+  if(!body) return;
+  if(SESSION.role !== "dm"){ body.innerHTML = ""; return; }
+  const items = (window.__STATE?.sessionClockLog?.items || []).slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0));
+  if(!items.length){
+    body.innerHTML = '<tr><td colspan="6" class="mini">No session logs yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = items.map(r=>{
+    const notes = r.notes ? esc(r.notes).slice(0,220) : '<span class="mini">No notes</span>';
+    return '<tr>' +
+      '<td>#'+esc(r.id)+'</td>' +
+      '<td>'+esc(r.title || "Session")+'</td>' +
+      '<td>'+vwFormatDuration(r.durationMs || 0)+'</td>' +
+      '<td>'+esc(vwFormatDateTime(r.endedAt))+'</td>' +
+      '<td>'+notes+'</td>' +
+      '<td><div class="row" style="gap:8px;flex-wrap:wrap;">' +
+        '<button class="btn smallbtn" type="button" onclick="vwEditSessionClockLog('+Number(r.id)+')">Edit</button>' +
+        '<button class="btn smallbtn dangerbtn" type="button" onclick="vwDeleteSessionClockLog('+Number(r.id)+')">Delete</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join("");
+}
+window.vwRenderSessionClockLog = vwRenderSessionClockLog;
+
 function vwWireSessionClockControls(){
   const startBtn = document.getElementById("sessionClockStartBtn");
   const stopBtn = document.getElementById("sessionClockStopBtn");
+  const endBtn = document.getElementById("sessionClockEndBtn");
   const resetBtn = document.getElementById("sessionClockResetBtn");
   if(startBtn && !startBtn.dataset.wired){ startBtn.dataset.wired = "1"; startBtn.onclick = ()=>vwSessionClockAction("start"); }
   if(stopBtn && !stopBtn.dataset.wired){ stopBtn.dataset.wired = "1"; stopBtn.onclick = ()=>vwSessionClockAction("stop"); }
+  if(endBtn && !endBtn.dataset.wired){ endBtn.dataset.wired = "1"; endBtn.onclick = ()=>vwEndSessionClock(); }
   if(resetBtn && !resetBtn.dataset.wired){ resetBtn.dataset.wired = "1"; resetBtn.onclick = async ()=>{
     const ok = await vwModalConfirm({ title:"Reset Session Clock", message:"Reset the session clock to 00:00:00?" });
     if(ok) vwSessionClockAction("reset");
@@ -584,6 +735,7 @@ async function renderTabs(tab){
     if(tab === "home"){
       if(typeof renderDM === "function") renderDM();
       if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+      if(typeof vwRenderSessionClockLog === "function") vwRenderSessionClockLog();
     } else if(tab === "character"){
       // Always land on the playable Sheet view when the main Character tab is opened.
       // Players can still move to Actions/Inventory/etc. afterward, but opening Character
@@ -748,7 +900,7 @@ async function refreshAll(){
 
   const st = await api("/api/state");
   window.__STATE = st || {};
-  try{ vwWireSessionClockControls(); vwTickClocks(); vwRenderSessionClockControls(); }catch(e){}
+  try{ vwWireSessionClockControls(); vwTickClocks(); vwRenderSessionClockControls(); vwRenderSessionClockLog(); }catch(e){}
 
   // intel / alert baseline
   if(!window.VW_ALERTS.armed){
