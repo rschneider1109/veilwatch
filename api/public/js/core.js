@@ -460,6 +460,27 @@ function setRoleUI(){
 }
 window.setRoleUI = setRoleUI;
 
+// ---- Header + Home clocks ----
+function vwTickClocks(){
+  try{
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    const clock = document.getElementById("clockPill");
+    if(clock) clock.textContent = hh + ":" + mm;
+
+    const start = Number(SESSION?.sessionStart || Date.now());
+    const elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
+    const em = String(Math.floor(elapsed / 60)).padStart(2, "0");
+    const es = String(elapsed % 60).padStart(2, "0");
+    const sessionClock = document.getElementById("sessionClockMini");
+    if(sessionClock) sessionClock.textContent = em + ":" + es;
+  }catch(e){}
+}
+window.vwTickClocks = vwTickClocks;
+setInterval(vwTickClocks, 1000);
+vwTickClocks();
+
 // ---- Tabs ----
 async function renderTabs(tab){
   const currentTab = document.querySelector(".nav .btn.active")?.dataset?.tab || "home";
@@ -491,6 +512,10 @@ async function renderTabs(tab){
       if(typeof renderDM === "function") renderDM();
       if(typeof renderDMActiveParty === "function") renderDMActiveParty();
     } else if(tab === "character"){
+      // Always land on the playable Sheet view when the main Character tab is opened.
+      // Players can still move to Actions/Inventory/etc. afterward, but opening Character
+      // should never strand them on the last utility sub-tab.
+      if(typeof vwSetCharacterSubTab === "function") vwSetCharacterSubTab("sheet");
       if(typeof renderCharacter === "function") renderCharacter();
       if(typeof renderSheet === "function") renderSheet();
     } else if(tab === "intel"){
@@ -515,30 +540,36 @@ document.querySelectorAll(".nav .btn").forEach(b=>b.onclick=()=>{ void renderTab
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ void renderTabs(b.dataset.go); });
 
 // character sub-tabs (supports create-mode bar + sheet-mode bar)
-document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
-  const bar = b.closest("#createCtabBar,#sheetCtabBar") || document;
-  bar.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
+function vwSetCharacterSubTab(tabName){
+  const target = tabName || "sheet";
+  const bars = [document.getElementById("sheetCtabBar"), document.getElementById("createCtabBar")].filter(Boolean);
+  const allButtons = document.querySelectorAll("[data-ctab]");
+  allButtons.forEach(btn=>{
+    const sameBarActive = btn.dataset.ctab === target;
+    btn.classList.toggle("active", sameBarActive);
+  });
 
-  const a  = document.getElementById("ctab-actions");
-  const i  = document.getElementById("ctab-inventory");
-  const ab = document.getElementById("ctab-abilities");
-  const sp = document.getElementById("ctab-spells");
-  const s  = document.getElementById("ctab-sheet");
-  const bg = document.getElementById("ctab-background");
-  const tr = document.getElementById("ctab-traits");
-  const nt = document.getElementById("ctab-notes");
-
-  if(a)  a.classList.toggle("hidden", b.dataset.ctab !== "actions");
-  if(i)  i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
-  if(ab) ab.classList.toggle("hidden", b.dataset.ctab !== "abilities");
-  if(sp) sp.classList.toggle("hidden", b.dataset.ctab !== "spells");
-  if(s)  s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
-  if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
-  if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
-  if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
+  const sections = {
+    actions: document.getElementById("ctab-actions"),
+    inventory: document.getElementById("ctab-inventory"),
+    abilities: document.getElementById("ctab-abilities"),
+    spells: document.getElementById("ctab-spells"),
+    sheet: document.getElementById("ctab-sheet"),
+    background: document.getElementById("ctab-background"),
+    traits: document.getElementById("ctab-traits"),
+    notes: document.getElementById("ctab-notes")
+  };
+  Object.entries(sections).forEach(([key, el])=>{
+    if(el) el.classList.toggle("hidden", key !== target);
+  });
   const sf = document.getElementById("sheetOnlyFooter");
-  if(sf) sf.classList.toggle("hidden", b.dataset.ctab !== "sheet");
-  try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = b.dataset.ctab; }catch(e){}
+  if(sf) sf.classList.toggle("hidden", target !== "sheet");
+  try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = target; }catch(e){}
+}
+window.vwSetCharacterSubTab = vwSetCharacterSubTab;
+
+document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
+  vwSetCharacterSubTab(b.dataset.ctab || "sheet");
 });
 // intel sub-tabs (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
