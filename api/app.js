@@ -448,6 +448,9 @@ const DEFAULT_STATE = {
   sessionClockLog: { nextId: 1, items: [] },
   sessionRecaps: { nextId: 1, items: [] },
   clues: { nextId: 1, items: [], archived: [] },
+  chat: { nextThreadId: 2, nextMessageId: 1, threads: [
+    { id:"chat_table", type:"group", title:"Table Chat", participantIds:["all"], createdBy:"system", createdAt: Date.now(), updatedAt: Date.now(), locked:true }
+  ], messages: [] },
   characters: [],
   activeParty: [] // DM-controlled "who is currently being played"
 };
@@ -541,6 +544,83 @@ function normalizeCluesShape(st){
   return st;
 }
 
+
+function normalizeChatShape(st){
+  st.chat ||= structuredClone(DEFAULT_STATE.chat);
+  if(Array.isArray(st.chat)){
+    st.chat = { nextThreadId: 1, nextMessageId: 1, threads: [], messages: [] };
+  }
+  st.chat.nextThreadId ||= 1;
+  st.chat.nextMessageId ||= 1;
+  st.chat.threads = Array.isArray(st.chat.threads) ? st.chat.threads : [];
+  st.chat.messages = Array.isArray(st.chat.messages) ? st.chat.messages : [];
+
+  const now = Date.now();
+  if(!st.chat.threads.some(t=>String(t.id)==="chat_table")){
+    st.chat.threads.unshift({ id:"chat_table", type:"group", title:"Table Chat", participantIds:["all"], createdBy:"system", createdAt:now, updatedAt:now, locked:true });
+  }
+
+  st.chat.threads = st.chat.threads.map(t=>{
+    const id = String(t.id || ("chat_" + Math.random().toString(36).slice(2,10)));
+    let participantIds = Array.isArray(t.participantIds) ? t.participantIds.map(x=>String(x)) : [];
+    if(id === "chat_table") participantIds = ["all"];
+    participantIds = Array.from(new Set(participantIds.filter(Boolean)));
+    if(!participantIds.length) participantIds = ["dm"];
+    return {
+      id,
+      type: ["dm","group"].includes(String(t.type||"group")) ? String(t.type||"group") : "group",
+      title: String(t.title || "Chat").slice(0,120),
+      participantIds,
+      createdBy: String(t.createdBy || "system").slice(0,80),
+      createdAt: Number(t.createdAt || now),
+      updatedAt: Number(t.updatedAt || t.createdAt || now),
+      locked: !!t.locked || id === "chat_table"
+    };
+  });
+
+  const threadIds = new Set(st.chat.threads.map(t=>t.id));
+  st.chat.messages = st.chat.messages.map(m=>({
+    id: Number(m.id || 0),
+    threadId: String(m.threadId || ""),
+    fromUserId: String(m.fromUserId || "").slice(0,80),
+    fromName: String(m.fromName || "Unknown").slice(0,80),
+    fromRole: String(m.fromRole || "player") === "dm" ? "dm" : "player",
+    body: String(m.body || "").slice(0,2000),
+    createdAt: Number(m.createdAt || now),
+    updatedAt: Number(m.updatedAt || m.createdAt || now),
+    edited: !!m.edited,
+    deleted: !!m.deleted
+  })).filter(m=>m.id > 0 && threadIds.has(m.threadId));
+
+  const maxThreadNum = st.chat.threads.reduce((mx,t)=>{
+    const n = Number(String(t.id||"").replace(/^chat_/,""));
+    return Number.isFinite(n) ? Math.max(mx,n) : mx;
+  }, 1);
+  const maxMsg = st.chat.messages.reduce((mx,m)=>Math.max(mx, Number(m.id||0)),0);
+  st.chat.nextThreadId = Math.max(Number(st.chat.nextThreadId || 1), maxThreadNum + 1);
+  st.chat.nextMessageId = Math.max(Number(st.chat.nextMessageId || 1), maxMsg + 1);
+  return st;
+}
+
+function chatThreadVisibleToUser(thread, userObj, isDm){
+  if(isDm) return true;
+  if(!userObj) return false;
+  const parts = Array.isArray(thread?.participantIds) ? thread.participantIds.map(x=>String(x)) : [];
+  return parts.includes("all") || parts.includes(String(userObj.id));
+}
+
+function chatSafeForUser(st, userObj, isDm){
+  normalizeChatShape(st);
+  const visibleThreads = (st.chat.threads || []).filter(t=>chatThreadVisibleToUser(t, userObj, isDm));
+  const visibleIds = new Set(visibleThreads.map(t=>t.id));
+  return {
+    nextThreadId: isDm ? st.chat.nextThreadId : 1,
+    nextMessageId: isDm ? st.chat.nextMessageId : 1,
+    threads: visibleThreads,
+    messages: (st.chat.messages || []).filter(m=>visibleIds.has(m.threadId))
+  };
+}
+
 function normalizeFeatures(st){
   if(!st.settings) st.settings = {};
   if(!st.settings.features) st.settings.features = {};
@@ -597,10 +677,12 @@ function fileLoadState(){
     st.sessionClock ||= DEFAULT_STATE.sessionClock;
     st.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     st.clues ||= DEFAULT_STATE.clues;
+    st.chat ||= DEFAULT_STATE.chat;
     normalizeSessionClockShape(st);
     normalizeSessionClockLogShape(st);
     normalizeSessionRecapsShape(st);
     normalizeCluesShape(st);
+    normalizeChatShape(st);
     normalizeFeatures(st);
     normalizeCharacters(st);
     fileSaveState(st);
@@ -629,10 +711,12 @@ async function loadState(){
       fromDb.sessionClock ||= DEFAULT_STATE.sessionClock;
       fromDb.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
       fromDb.clues ||= DEFAULT_STATE.clues;
+      fromDb.chat ||= DEFAULT_STATE.chat;
       normalizeSessionClockShape(fromDb);
       normalizeSessionClockLogShape(fromDb);
       normalizeSessionRecapsShape(fromDb);
       normalizeCluesShape(fromDb);
+      normalizeChatShape(fromDb);
       normalizeFeatures(fromDb);
       normalizeCharacters(fromDb);
       fileSaveState(fromDb);
@@ -646,7 +730,7 @@ async function loadState(){
 }
 
 function saveState(st){
-  try{ normalizeFeatures(st); normalizeSessionClockShape(st); normalizeSessionRecapsShape(st); normalizeCluesShape(st); normalizeCharacters(st); }catch(e){}
+  try{ normalizeFeatures(st); normalizeSessionClockShape(st); normalizeSessionRecapsShape(st); normalizeCluesShape(st); normalizeChatShape(st); normalizeCharacters(st); }catch(e){}
   fileSaveState(st);
   dbSaveState(st).catch(()=>{});
   try{ sseBroadcast({ type: "state.tick", ts: Date.now() }); }catch(e){}
@@ -1083,6 +1167,7 @@ const server = http.createServer(async (req,res)=>{
     normalizeSessionClockLogShape(state);
     normalizeSessionRecapsShape(state);
     normalizeCluesShape(state);
+    normalizeChatShape(state);
     normalizeCharacters(state);
 
     if(!dm){
@@ -1127,6 +1212,9 @@ const server = http.createServer(async (req,res)=>{
           .filter(r=>String(r.visibility||"players") === "players")
           .map(r=>({ id:r.id, title:r.title, summary:r.summary, visibility:r.visibility, pinned:!!r.pinned, createdAt:r.createdAt, updatedAt:r.updatedAt }));
       }
+
+      // chat visibility: table chat, DMs with this player, and groups this player belongs to.
+      safe.chat = chatSafeForUser(safe, user, false);
 
       // character visibility: only owned characters (if logged in) else none
       if(user && user.role === "player"){
@@ -1182,10 +1270,12 @@ const server = http.createServer(async (req,res)=>{
     incoming.sessionClock ||= DEFAULT_STATE.sessionClock;
     incoming.sessionRecaps ||= DEFAULT_STATE.sessionRecaps;
     incoming.clues ||= DEFAULT_STATE.clues;
+    incoming.chat ||= DEFAULT_STATE.chat;
     normalizeSessionClockShape(incoming);
     normalizeSessionClockLogShape(incoming);
     normalizeSessionRecapsShape(incoming);
     normalizeCluesShape(incoming);
+    normalizeChatShape(incoming);
     normalizeFeatures(incoming);
     normalizeCharacters(incoming);
 
@@ -1368,6 +1458,192 @@ const server = http.createServer(async (req,res)=>{
   function requireLogin(){
     if(!user) { json(res, 401, { ok:false, error:"Login required" }); return false; }
     return true;
+  }
+
+
+
+  // -------------------------
+  // Chat
+  // -------------------------
+  function chatNextThreadId(){
+    normalizeChatShape(state);
+    const id = "chat_" + String(state.chat.nextThreadId || 1);
+    state.chat.nextThreadId = Number(state.chat.nextThreadId || 1) + 1;
+    return id;
+  }
+
+  function chatFindThread(threadId){
+    normalizeChatShape(state);
+    return (state.chat.threads || []).find(t=>String(t.id) === String(threadId));
+  }
+
+  function chatCanUseThread(thread){
+    return chatThreadVisibleToUser(thread, user, dm);
+  }
+
+  function chatLabelForParticipant(pid){
+    pid = String(pid || "");
+    if(pid === "all") return "Everyone";
+    if(pid === "dm") return "DM";
+    const u = users.find(x=>String(x.id) === pid);
+    return u ? u.username : pid;
+  }
+
+  if(p === "/api/chat/users" && req.method === "GET"){
+    if(!requireLogin()) return;
+    const list = users
+      .filter(u=>u.role === "player" || u.role === "dm")
+      .map(u=>({ id:u.id, username:u.username, role:u.role, activeCharId: dm ? (u.activeCharId || null) : null }));
+    return json(res, 200, { ok:true, users:list });
+  }
+
+  if(p === "/api/chat/thread/create" && req.method === "POST"){
+    if(!requireLogin()) return;
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const now = Date.now();
+
+    // Quick "Message DM" path for players. This keeps the one-tap DM behavior,
+    // but normal New Chat creation below now supports player-to-player and groups.
+    if(!dm && (body.type === "dm" || body.toDm === true)){
+      const existing = (state.chat.threads || []).find(t=>{
+        const parts = Array.isArray(t.participantIds) ? t.participantIds.map(String) : [];
+        return String(t.type) === "dm" && parts.includes("dm") && parts.includes(String(user.id));
+      });
+      if(existing) return json(res, 200, { ok:true, thread: existing });
+      const thread = {
+        id: chatNextThreadId(), type:"dm", title:`DM • ${user.username}`,
+        participantIds:["dm", String(user.id)], createdBy:String(user.id), createdAt:now, updatedAt:now
+      };
+      state.chat.threads.push(thread);
+      saveState(state);
+      sseBroadcast({ ts: now, type:"chat.thread.create", scope:"all" });
+      return json(res, 200, { ok:true, thread });
+    }
+
+    let participantIds = Array.isArray(body.participantIds) ? body.participantIds.map(x=>String(x)).filter(Boolean) : [];
+    const toEveryone = !!body.toEveryone || participantIds.includes("all");
+
+    if(toEveryone){
+      if(!dm) return json(res, 403, { ok:false, error:"Only the DM can create Everyone chats. Use Table Chat for table-wide messages." });
+      participantIds = ["all"];
+    }else if(dm){
+      participantIds = Array.from(new Set(["dm", ...participantIds]));
+      if(participantIds.length <= 1) return json(res, 200, { ok:false, error:"Choose at least one player or Everyone" });
+    }else{
+      const validPlayers = new Set(users.filter(u=>u.role === "player").map(u=>String(u.id)));
+      participantIds = participantIds.filter(pid=>validPlayers.has(pid));
+      participantIds = Array.from(new Set([String(user.id), ...participantIds]));
+      if(participantIds.length <= 1) return json(res, 200, { ok:false, error:"Choose at least one player" });
+    }
+
+    const type = participantIds.includes("all") || participantIds.length > 2 ? "group" : "dm";
+    const fallbackTitle = participantIds.includes("all") ? "Table Chat" : participantIds.filter(x=>x!=="dm" && x!==String(user.id)).map(chatLabelForParticipant).join(", ");
+    const thread = {
+      id: chatNextThreadId(),
+      type,
+      title: String(body.title || fallbackTitle || "New Chat").slice(0,120),
+      participantIds,
+      createdBy: String(user.id), createdAt:now, updatedAt:now
+    };
+    state.chat.threads.push(thread);
+    saveState(state);
+    sseBroadcast({ ts: now, type:"chat.thread.create", scope:"all" });
+    return json(res, 200, { ok:true, thread });
+  }
+
+  if(p === "/api/chat/thread/update" && req.method === "POST"){
+    if(!requireLogin()) return;
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const thread = chatFindThread(body.threadId);
+    if(!thread) return json(res, 404, { ok:false, error:"Thread not found" });
+    if(thread.locked) return json(res, 200, { ok:false, error:"This thread cannot be edited" });
+    if(body.title !== undefined) thread.title = String(body.title || thread.title || "Chat").slice(0,120);
+    if(Array.isArray(body.participantIds)){
+      let participantIds = body.participantIds.map(x=>String(x)).filter(Boolean);
+      if(participantIds.includes("all")) participantIds = ["all"];
+      else participantIds = Array.from(new Set(["dm", ...participantIds]));
+      thread.participantIds = participantIds;
+      thread.type = participantIds.includes("all") || participantIds.length > 2 ? "group" : "dm";
+    }
+    thread.updatedAt = Date.now();
+    saveState(state);
+    sseBroadcast({ ts: thread.updatedAt, type:"chat.thread.update", scope:"all" });
+    return json(res, 200, { ok:true, thread });
+  }
+
+  if(p === "/api/chat/thread/delete" && req.method === "POST"){
+    if(!requireLogin()) return;
+    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const thread = chatFindThread(body.threadId);
+    if(!thread) return json(res, 404, { ok:false, error:"Thread not found" });
+    if(thread.locked || thread.id === "chat_table") return json(res, 200, { ok:false, error:"Table Chat cannot be deleted" });
+    state.chat.threads = state.chat.threads.filter(t=>t.id !== thread.id);
+    state.chat.messages = state.chat.messages.filter(m=>m.threadId !== thread.id);
+    saveState(state);
+    sseBroadcast({ ts: Date.now(), type:"chat.thread.delete", scope:"all" });
+    return json(res, 200, { ok:true });
+  }
+
+  if(p === "/api/chat/send" && req.method === "POST"){
+    if(!requireLogin()) return;
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const thread = chatFindThread(body.threadId || "chat_table");
+    if(!thread) return json(res, 404, { ok:false, error:"Thread not found" });
+    if(!chatCanUseThread(thread)) return json(res, 403, { ok:false, error:"No access to this chat" });
+    const msgBody = String(body.body || "").trim().slice(0,2000);
+    if(!msgBody) return json(res, 200, { ok:false, error:"Type a message first" });
+    const now = Date.now();
+    const msg = {
+      id: Number(state.chat.nextMessageId || 1), threadId: thread.id,
+      fromUserId: String(user.id), fromName: String(user.username), fromRole: dm ? "dm" : "player",
+      body: msgBody, createdAt: now, updatedAt: now, edited:false, deleted:false
+    };
+    state.chat.nextMessageId = Number(state.chat.nextMessageId || 1) + 1;
+    state.chat.messages.push(msg);
+    thread.updatedAt = now;
+    saveState(state);
+    sseBroadcast({ ts: now, type:"chat.message", scope:"all" });
+    return json(res, 200, { ok:true, message: msg });
+  }
+
+  if(p === "/api/chat/message/edit" && req.method === "POST"){
+    if(!requireLogin()) return;
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const msg = (state.chat.messages || []).find(m=>Number(m.id) === Number(body.messageId));
+    if(!msg) return json(res, 404, { ok:false, error:"Message not found" });
+    const thread = chatFindThread(msg.threadId);
+    if(!thread || !chatCanUseThread(thread)) return json(res, 403, { ok:false, error:"No access to this chat" });
+    if(!dm && String(msg.fromUserId) !== String(user.id)) return json(res, 403, { ok:false, error:"You can only edit your own messages" });
+    msg.body = String(body.body || "").trim().slice(0,2000);
+    msg.updatedAt = Date.now();
+    msg.edited = true;
+    saveState(state);
+    sseBroadcast({ ts: msg.updatedAt, type:"chat.message.edit", scope:"all" });
+    return json(res, 200, { ok:true, message: msg });
+  }
+
+  if(p === "/api/chat/message/delete" && req.method === "POST"){
+    if(!requireLogin()) return;
+    normalizeChatShape(state);
+    const body = JSON.parse(await readBody(req) || "{}");
+    const msg = (state.chat.messages || []).find(m=>Number(m.id) === Number(body.messageId));
+    if(!msg) return json(res, 404, { ok:false, error:"Message not found" });
+    const thread = chatFindThread(msg.threadId);
+    if(!thread || !chatCanUseThread(thread)) return json(res, 403, { ok:false, error:"No access to this chat" });
+    if(!dm && String(msg.fromUserId) !== String(user.id)) return json(res, 403, { ok:false, error:"You can only delete your own messages" });
+    msg.deleted = true;
+    msg.body = "Message deleted";
+    msg.updatedAt = Date.now();
+    saveState(state);
+    sseBroadcast({ ts: msg.updatedAt, type:"chat.message.delete", scope:"all" });
+    return json(res, 200, { ok:true });
   }
 
   function getCharIndex(charId){
