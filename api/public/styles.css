@@ -858,3 +858,88 @@ button,.btn,select,input,textarea{font:inherit;}
     min-width:0 !important;
   }
 }
+
+/* v4.9.6 character-sheet mobile cleanup */
+@media (max-width: 640px){
+  /* Character subtabs: keep the grid, but make the buttons less chunky. */
+  #sheetCtabBar{gap:6px !important;}
+  #sheetCtabBar .btn{
+    padding:8px 6px !important;
+    min-height:46px !important;
+    font-size:11.5px !important;
+    border-radius:14px !important;
+  }
+
+  /* The floating messenger button should be compact when closed. */
+  .chat-floating-dock{
+    right:10px !important;
+    left:auto !important;
+    width:auto !important;
+    max-width:calc(100vw - 20px) !important;
+    align-items:flex-end !important;
+  }
+  .chat-float-button{
+    width:auto !important;
+    max-width:180px !important;
+    min-height:44px !important;
+    padding:8px 12px !important;
+    font-size:13px !important;
+    border-radius:18px !important;
+  }
+
+  /* Character sheet first stat block: one clean column, with HP and Money split internally. */
+  #ctab-sheet > .row:first-child{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+    align-items:stretch !important;
+  }
+  #ctab-sheet > .row:first-child > div{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    flex:none !important;
+  }
+  #ctab-sheet > .row:first-child > div:nth-child(1),
+  #ctab-sheet > .row:first-child > div:nth-child(6){
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+    align-items:end !important;
+  }
+  #ctab-sheet > .row:first-child > div:nth-child(1) > .mini:first-child,
+  #ctab-sheet > .row:first-child > div:nth-child(6) > .mini:first-child{
+    grid-column:1 / -1;
+    margin-bottom:0 !important;
+  }
+  #ctab-sheet > .row:first-child > div:nth-child(1) > span.mini,
+  #ctab-sheet > .row:first-child > div:nth-child(6) > span.mini{
+    display:none !important;
+  }
+  #ctab-sheet > .row:first-child input.input{
+    width:100% !important;
+  }
+
+  /* Stats section: tidy two-column mobile grid. */
+  #statSTR,#statDEX,#statCON,#statINT,#statWIS,#statCHA{
+    width:calc(50% - 4px) !important;
+    flex:1 1 calc(50% - 6px) !important;
+  }
+
+  /* Conditions and helper copy can be a little tighter too. */
+  #ctab-sheet .mini{line-height:1.25;}
+  #ctab-sheet .pill{padding:4px 9px !important;font-size:11px !important;}
+}
+
+@media (max-width: 420px){
+  /* On the narrowest phones, keep the summary and stat blocks very readable. */
+  #sheetCtabBar .btn{min-height:42px !important;font-size:11px !important;}
+  #ctab-sheet > .row:first-child > div:nth-child(1),
+  #ctab-sheet > .row:first-child > div:nth-child(6){
+    grid-template-columns:1fr !important;
+  }
+  #statSTR,#statDEX,#statCON,#statINT,#statWIS,#statCHA{
+    width:100% !important;
+    flex:1 1 100% !important;
+  }
+}
