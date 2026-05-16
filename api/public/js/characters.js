@@ -526,10 +526,19 @@ function renderCharacter(){
   const c=getChar();
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
-  weapBody.innerHTML=""; invBody.innerHTML="";
+  const abBody=document.getElementById("abilityBody");
+  const spBody=document.getElementById("spellBody");
+  if(weapBody) weapBody.innerHTML="";
+  if(invBody) invBody.innerHTML="";
+  if(abBody) abBody.innerHTML="";
+  if(spBody) spBody.innerHTML="";
   if(!c){
-    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
-    invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
+    if(weapBody) weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
+    if(invBody) invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
+    if(abBody) abBody.innerHTML = '<tr><td colspan="6" class="mini">No character.</td></tr>';
+    if(spBody) spBody.innerHTML = '<tr><td colspan="6" class="mini">No character.</td></tr>';
+    ["bgText","traitsText","notesText"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
     return;
   }
   // weapons rows
@@ -592,6 +601,10 @@ function renderCharacter(){
       weapBody.appendChild(tr2);
     }
   });
+
+  if(weapBody && !(c.weapons||[]).length){
+    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No weapons yet. Use Add Weapon.</td></tr>';
+  }
 
   // wire ammo controls (after rows exist)
   weapBody.querySelectorAll("input[data-ammo]").forEach(inp=>{
@@ -724,8 +737,11 @@ function renderCharacter(){
     invBody.appendChild(tr);
   });
 
+  if(invBody && !(c.inventory||[]).length){
+    invBody.innerHTML = '<tr><td colspan="7" class="mini">No inventory yet. Use Add Item.</td></tr>';
+  }
+
   // abilities rows
-  const abBody = document.getElementById("abilityBody");
   if(abBody){
     abBody.innerHTML="";
     (c.abilities||[]).forEach((ab,idx)=>{
@@ -750,7 +766,6 @@ function renderCharacter(){
   }
 
   // spells rows
-  const spBody = document.getElementById("spellBody");
   if(spBody){
     spBody.innerHTML="";
     (c.spells||[]).forEach((sp,idx)=>{
@@ -942,7 +957,13 @@ function renderSheet(){
   const ctab = document.getElementById("ctab-sheet");
   if(!ctab) return;
   const c=getChar();
-  if(!c) return;
+  if(!c){
+    const clearIds = ["hpCur","hpMax","hpTemp","acVal","initVal","spdVal","cashVal","bankVal","statSTR","statDEX","statCON","statINT","statWIS","statCHA","bgText","traitsText","notesText"];
+    clearIds.forEach(id=>document.querySelectorAll('[id="'+String(id).replace(/"/g,'\\"')+'"]').forEach(el=>{ try{ el.value=""; }catch(e){} }));
+    const row=document.getElementById("condRow"); if(row) row.innerHTML='<div class="mini">No character selected.</div>';
+    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+    return;
+  }
 
   c.sheet ||= {};
   c.sheet.vitals ||= { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" };
@@ -1009,38 +1030,26 @@ if(ntEl) ntEl.value = c.sheet.notes ?? "";
   });
 
   // DM-only buttons
-  document.getElementById("dupCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
-  document.getElementById("delCharBtn").classList.toggle("hidden", !(SESSION.role==="dm" || (SESSION.role==="player" && c && c.ownerUserId===SESSION.userId)));
+  document.getElementById("dupCharBtn")?.classList.toggle("hidden", SESSION.role!=="dm");
 }
 window.renderSheet = renderSheet;
 
-document.getElementById("saveSheetBtn").onclick = async ()=>{
+document.getElementById("saveSheetBtn")?.addEventListener("click", async ()=>{
   const c=getChar(); if(!c){ toast("No character"); return; }
   if(typeof vwFlushCharAutosave==="function") await vwFlushCharAutosave();
   toast("Saved");
   await refreshAll();
-};
+});
 
-document.getElementById("dupCharBtn").onclick = async ()=>{
+document.getElementById("dupCharBtn")?.addEventListener("click", async ()=>{
   if(SESSION.role!=="dm") return;
   const c=getChar(); if(!c) return;
   const name = await vwModalInput({ title:"Duplicate Character", label:"New name", value: c.name + " (Copy)" });
   if(!name) return;
   const res = await api("/api/character/duplicate",{method:"POST",body:JSON.stringify({charId:c.id, name})});
-  if(res.ok){ SESSION.activeCharId=res.id; toast("Duplicated"); await refreshAll(); }
+  if(res.ok){ if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(res.id, { refresh:false }); else SESSION.activeCharId=res.id; toast("Duplicated"); await refreshAll(); }
   else toast(res.error||"Failed");
-};
-
-document.getElementById("delCharBtn").onclick = async ()=>{
-  const c=getChar(); if(!c) return;
-  const canDelete = (SESSION.role==="dm") || (SESSION.role==="player" && c.ownerUserId===SESSION.userId);
-  if(!canDelete){ toast("You can only delete your own character"); return; }
-  const ok = await vwModalConfirm({ title:"Delete Character", message:'Delete "' + c.name + '"? This cannot be undone.' });
-  if(!ok) return;
-  const res = await api("/api/character/delete",{method:"POST",body:JSON.stringify({charId:c.id})});
-  if(res.ok){ SESSION.activeCharId=null; toast("Deleted"); await refreshAll(); }
-  else toast(res.error||"Failed");
-};
+});
 
 
 
@@ -1285,13 +1294,10 @@ function renderDMActiveParty(){
 
     const btnOpen = card.querySelector('button[data-act="open"]');
     btnOpen.onclick = async ()=>{
-      SESSION.activeCharId = c.id;
+      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(c.id, { refresh:false });
+      else SESSION.activeCharId = c.id;
       renderTabs("character");
-      // Switch character sub-tab to sheet
-      document.querySelectorAll('[data-ctab]').forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
-      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
-      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
+      if(typeof vwSetCharacterSubTab === "function") vwSetCharacterSubTab("sheet");
       await refreshAll();
     };
 
@@ -1419,43 +1425,6 @@ function renderDMActiveParty(){
         await refreshAll();
       };
     }
-  }catch(e){}
-})();
-
-// --- Import Player (DM) ---
-(async function wireImportPlayer(){
-  try{
-    const btn = document.getElementById("importPlayerBtn");
-    if(!btn) return;
-    btn.onclick = async ()=>{
-      if(SESSION.role!=="dm") return;
-      const name = await vwModalInput({ title:"Import Player", label:"Character name", placeholder:"e.g., Mara Kincaid" });
-      if(!name) return;
-
-      const usersRes = await api("/api/dm/users");
-      const all = (usersRes && usersRes.ok && Array.isArray(usersRes.users)) ? usersRes.users : [];
-      const playerNames = all.filter(u=>u.role!=="dm").map(u=>u.username).sort();
-      const tip = playerNames.length ? ("Available players: " + playerNames.join(", ")) : "No player accounts yet (leave blank).";
-      const ownerName = await vwModalInput({ title:"Assign Account", label:"Assign to username (optional)", placeholder: tip });
-      let ownerUserId = null;
-      if(ownerName && ownerName.trim()){
-        const found = all.find(u => String(u.username).toLowerCase() === String(ownerName).trim().toLowerCase());
-        if(!found){ toast("User not found"); return; }
-        ownerUserId = found.id;
-      }
-
-      const created = await api("/api/character/new",{method:"POST",body:JSON.stringify({name, ownerUserId})});
-      if(!created.ok){ toast(created.error||"Failed"); return; }
-
-      const add = await vwModalConfirm({ title:"Add to Active?", message:"Add this character to the Active list?" });
-      if(add){
-        await api("/api/dm/activeParty/add",{method:"POST",body:JSON.stringify({charId: created.id, playerLabel: ownerName||""})});
-      }
-
-      SESSION.activeCharId = created.id;
-      toast("Imported");
-      await refreshAll();
-    };
   }catch(e){}
 })();
 
@@ -2665,7 +2634,8 @@ const result = await new Promise((resolve)=>{
       }
 
       window.SESSION = window.SESSION || {};
-      SESSION.activeCharId = res.id;
+      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(res.id, { refresh:false });
+      else SESSION.activeCharId = res.id;
       SESSION.activeCtab = "sheet";
 
       close(true);
@@ -2722,7 +2692,9 @@ document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
       // pick next available character
       const st = await api("/api/state");
       const list = st.characters || [];
-      SESSION.activeCharId = list.length ? list[0].id : null;
+      const nextId = list.length ? list[0].id : null;
+      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(nextId, { refresh:false });
+      else SESSION.activeCharId = nextId;
       await refreshAll();
     }else{
       toast(res?.error || "Delete failed");
@@ -2762,6 +2734,11 @@ function vwUpdateCharacterModeUI(){
   if(createBar) createBar.classList.add("hidden");
   const cb = document.getElementById("creationBlock");
   if(cb) cb.classList.add("hidden");
+
+  const c = (typeof getChar === "function") ? getChar() : null;
+  const canDelete = !!c && (SESSION.role === "dm" || (SESSION.role === "player" && c.ownerUserId === SESSION.userId));
+  document.getElementById("deleteCharBtn")?.classList.toggle("hidden", !canDelete);
+  document.getElementById("dupCharBtn")?.classList.toggle("hidden", SESSION.role !== "dm");
 }
 
 function vwUpdateCharSummaryRow(){

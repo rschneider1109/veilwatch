@@ -437,7 +437,6 @@ function setRoleUI(){
   const editShopBtn = document.getElementById("editShopBtn");
   const settingsTabBtn = document.getElementById("settingsTabBtn");
   const tabSettings = document.getElementById("tab-settings");
-  const imp = document.getElementById("importPlayerBtn");
   const delCharBtn = document.getElementById("deleteCharBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
@@ -447,7 +446,6 @@ function setRoleUI(){
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
-  if(imp) imp.classList.toggle("hidden", SESSION.role !== "dm");
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
@@ -793,6 +791,22 @@ function vwSetCharacterSubTab(tabName){
 }
 window.vwSetCharacterSubTab = vwSetCharacterSubTab;
 
+async function vwSetActiveCharacter(charId, opts={}){
+  window.SESSION = window.SESSION || {};
+  SESSION.activeCharId = charId || null;
+  const sel = document.getElementById("charSel");
+  if(sel && charId) sel.value = charId;
+  try{
+    await api("/api/user/active-character", { method:"POST", body: JSON.stringify({ charId: SESSION.activeCharId }) });
+  }catch(e){}
+  if(opts.refresh !== false){
+    try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
+    try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
+    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+  }
+}
+window.vwSetActiveCharacter = vwSetActiveCharacter;
+
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
   vwSetCharacterSubTab(b.dataset.ctab || "sheet");
 });
@@ -922,12 +936,17 @@ async function refreshAll(){
       o.value = c.id; o.textContent = c.name;
       sel.appendChild(o);
     });
-    if(!SESSION.activeCharId && (st.characters || []).length) SESSION.activeCharId = st.characters[0].id;
+    const chars = st.characters || [];
+    if(SESSION.activeCharId && !chars.some(c=>c.id === SESSION.activeCharId)) SESSION.activeCharId = null;
+    if(!SESSION.activeCharId && chars.length) SESSION.activeCharId = chars[0].id;
     if(SESSION.activeCharId) sel.value = SESSION.activeCharId;
     sel.onchange = ()=>{
-      SESSION.activeCharId = sel.value;
-      if(typeof renderCharacter === "function") renderCharacter();
-      if(typeof renderSheet === "function") renderSheet();
+      if(typeof vwSetActiveCharacter === "function") vwSetActiveCharacter(sel.value);
+      else {
+        SESSION.activeCharId = sel.value;
+        if(typeof renderCharacter === "function") renderCharacter();
+        if(typeof renderSheet === "function") renderSheet();
+      }
     };
   }
 
