@@ -134,8 +134,9 @@
       <div class="row">
         <select id="charSel"></select>
         <button class="btn smallbtn" id="newCharBtn">New Character</button>
+        <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
+        <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
         <button class="btn smallbtn hidden" id="deleteCharBtn" style="border-color:#7a2f2f;color:#ffd1d1;">Delete Character</button>
-        <button class="btn smallbtn hidden" id="importPlayerBtn">Import Player</button>
       </div>
       <hr/>
       <div class="row" id="charSummaryRow" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -275,13 +276,10 @@
         <div id="sheetOnlyFooter">
 <hr/>
 <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
-          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
           <button class="btn smallbtn hidden" id="finishCharBtn" style="border-color:rgba(0,229,255,.45);">Finish Creation</button>
-          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
-          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
         </div>
 
-        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Delete/Duplicate are DM-only.</div>
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Save/Duplicate/Delete are available in the top Character toolbar.</div>
 </div>
       </div>
     </div>
