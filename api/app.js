@@ -560,11 +560,16 @@ function normalizeCharacters(st){
     c.version ||= 1;
     c.weapons ||= [];
     c.inventory ||= [];
+    c.abilities ||= [];
+    c.spells ||= [];
+    c.kits ||= [];
     c.sheet ||= {};
     c.sheet.vitals ||= { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" };
     c.sheet.money  ||= { cash:"", bank:"" };
     c.sheet.stats  ||= { STR:"",DEX:"",CON:"",INT:"",WIS:"",CHA:"" };
     c.sheet.conditions ||= [];
+    c.sheet.background ||= "";
+    c.sheet.traits ||= "";
     c.sheet.notes ||= "";
   }
   // Remove example characters if any
@@ -1048,6 +1053,29 @@ const server = http.createServer(async (req,res)=>{
   }
 
   // -------------------------
+  // User preference: active character
+  // -------------------------
+  if(p === "/api/user/active-character" && req.method === "POST"){
+    if(!user) return json(res, 401, { ok:false, error:"Login required" });
+    let body = {};
+    try{ body = JSON.parse(await readBody(req) || "{}"); }catch(e){ body = {}; }
+    const charId = String(body.charId || "");
+
+    if(charId){
+      const c = (state.characters || []).find(x => x.id === charId);
+      if(!c) return json(res, 404, { ok:false, error:"Character not found" });
+      const allowed = dm || (user.role === "player" && c.ownerUserId === user.id);
+      if(!allowed) return json(res, 403, { ok:false, error:"Forbidden" });
+      user.activeCharId = charId;
+    }else{
+      user.activeCharId = null;
+    }
+
+    saveUsers(users);
+    return json(res, 200, { ok:true, activeCharId: user.activeCharId || null });
+  }
+
+  // -------------------------
   // State
   // -------------------------
   if(p === "/api/state" && req.method==="GET"){
@@ -1286,14 +1314,6 @@ const server = http.createServer(async (req,res)=>{
   }
 
   // -------------------------
-  // DM: user list for assignment dropdown
-  // -------------------------
-  if(p === "/api/dm/users" && req.method === "GET"){
-    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
-    return json(res, 200, { ok:true, users: users.map(publicUser) });
-  }
-
-  // -------------------------
   // Inventory Catalog
   // -------------------------
   if(p === "/api/catalog/inventory" && req.method === "GET"){
@@ -1427,6 +1447,8 @@ const server = http.createServer(async (req,res)=>{
     };
 
     state.characters.push(c);
+    user.activeCharId = id;
+    saveUsers(users);
     saveState(state);
     return json(res, 200, { ok:true, id, character: c });
   }
@@ -1498,6 +1520,8 @@ if(p === "/api/character/save" && req.method==="POST"){
     c.version = 1;
     c.updatedAt = Date.now();
     state.characters.push(c);
+    user.activeCharId = id;
+    saveUsers(users);
     saveState(state);
     return json(res, 200, { ok:true, id });
   }
@@ -1528,22 +1552,6 @@ if(p === "/api/character/save" && req.method==="POST"){
   saveState(state);
   return json(res, 200, { ok:true });
 }
-// DM assign owner (import workflow)
-  if(p === "/api/dm/character/assign" && req.method === "POST"){
-    if(!dm) return json(res, 403, { ok:false, error:"DM only" });
-    const body = JSON.parse(await readBody(req) || "{}");
-    const charId = String(body.charId||"");
-    const ownerUserId = body.ownerUserId || null;
-    const i = getCharIndex(charId);
-    if(i<0) return json(res, 404, { ok:false, error:"Not found" });
-    const c = state.characters[i];
-    c.ownerUserId = ownerUserId;
-    c.version = Number(c.version||1) + 1;
-    c.updatedAt = Date.now();
-    saveState(state);
-    return json(res, 200, { ok:true });
-  }
-
   // -------------------------
   // DM Active Party
   // -------------------------
