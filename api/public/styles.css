@@ -40,11 +40,11 @@ th{color:var(--muted);font-weight:600;}
 /* Persistent session clock */
 .sessionClockDock{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .session-clock-pill{color:var(--ink);border-color:rgba(0,229,255,.34);box-shadow:0 0 18px rgba(0,229,255,.08) inset;}
-.sessionClockControls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.session-clock-card{position:relative;}
+.sessionClockControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;}
 .sessionClockControls.hidden{display:none;}
-.tinybtn{padding:5px 8px;border-radius:999px;font-size:11px;line-height:1.1;}
 .btn:disabled{opacity:.45;cursor:not-allowed;}
-.session-clock-home{font-size:18px;color:var(--ink);letter-spacing:.05em;}
+.session-clock-home{font-size:24px;color:var(--ink);letter-spacing:.05em;line-height:1.2;margin-top:4px;}
 @media (max-width: 760px){
   header{align-items:flex-start;flex-wrap:wrap;}
   .sessionClockDock{width:100%;order:10;}

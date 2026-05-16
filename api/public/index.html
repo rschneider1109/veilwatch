@@ -9,7 +9,7 @@
 <body>
 <div id="loginOverlay">
   <div class="panel loginCard">
-    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.6</span></div>
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.7</span></div>
     <div class="mini">Log in or create an account. The <b>first</b> account created becomes the DM automatically.</div>
     <hr/>
     <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
@@ -34,11 +34,6 @@
   <div class="pill" id="shopPill">Shop: --</div>
   <div class="sessionClockDock" id="sessionClockDock">
     <div class="pill session-clock-pill" id="sessionClockPill">Session: 00:00:00</div>
-    <div class="sessionClockControls hidden" id="sessionClockControls">
-      <button class="btn tinybtn" id="sessionClockStartBtn" type="button">Start</button>
-      <button class="btn tinybtn" id="sessionClockStopBtn" type="button">Stop</button>
-      <button class="btn tinybtn" id="sessionClockResetBtn" type="button">Reset</button>
-    </div>
   </div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
@@ -62,10 +57,15 @@
       <div class="mini">Auto-saved to server volume</div>
       <div class="mini" id="saveMini">OK</div>
     </div>
-    <div class="card" style="grid-column:span 4;">
+    <div class="card session-clock-card" style="grid-column:span 4;">
       <h3>Session Clock</h3>
       <div class="mini session-clock-home" id="sessionClockMini">00:00:00</div>
       <div class="mini" id="sessionClockStatusMini">Stopped</div>
+      <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
+        <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
+        <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
+        <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
+      </div>
     </div>
 
     <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
