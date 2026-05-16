@@ -26,8 +26,9 @@ function renderIntelPlayer(){
   const alertBody = document.getElementById("intelAlertBody");
   if(!intelBody || !recap || !reqBody || !alertBody) return;
 
-  if(!recap.dataset.vwInit){
-    recap.innerHTML = '<p class="muted">Session recaps will appear here when the recap system is wired into this repo.</p>';
+  if(typeof renderPlayerRecaps === "function") renderPlayerRecaps();
+  else if(!recap.dataset.vwInit){
+    recap.innerHTML = '<p class="muted">No session recaps have been posted yet.</p>';
     recap.dataset.vwInit = "1";
   }
 
