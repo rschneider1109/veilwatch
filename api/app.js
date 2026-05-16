@@ -1625,6 +1625,135 @@ if(p === "/api/character/save" && req.method==="POST"){
   // -------------------------
   // Existing features
   // -------------------------
+
+  if(p === "/api/shop/checkout" && req.method === "POST"){
+    if(!requireLogin()) return;
+    const body = JSON.parse(await readBody(req) || "{}");
+    const charId = String(body.charId || "");
+    const shopId = String(body.shopId || "");
+    const paymentSource = String(body.paymentSource || "cash").toLowerCase() === "bank" ? "bank" : "cash";
+    const lines = Array.isArray(body.lines) ? body.lines : [];
+
+    if(!charId) return json(res, 400, { ok:false, error:"Missing character" });
+    if(!shopId) return json(res, 400, { ok:false, error:"Missing shop" });
+    if(!lines.length) return json(res, 400, { ok:false, error:"Cart is empty" });
+
+    const shops = state.shops || { enabled:true, activeShopId:"", list:[] };
+    if(!dm && !shops.enabled) return json(res, 403, { ok:false, error:"Shop is disabled" });
+    const shop = (shops.list || []).find(s => String(s.id) === shopId);
+    if(!shop) return json(res, 404, { ok:false, error:"Shop not found" });
+
+    const charIndex = getCharIndex(charId);
+    if(charIndex < 0) return json(res, 404, { ok:false, error:"Character not found" });
+    const character = state.characters[charIndex];
+    if(!canEditCharacter(character)) return json(res, 403, { ok:false, error:"Forbidden" });
+
+    function srvParseMoney(raw){
+      const n = Number(String(raw ?? "").replace(/[^0-9.\-]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    }
+    function srvFormatMoney(n){
+      const safe = Math.max(0, Number.isFinite(Number(n)) ? Number(n) : 0);
+      return safe.toFixed(2).replace(/\.00$/, "");
+    }
+    function srvParseInt(raw, fallback=0){
+      const n = parseInt(String(raw ?? "").trim(), 10);
+      return Number.isFinite(n) ? n : fallback;
+    }
+    function srvInfiniteStock(stock){
+      const s = String(stock ?? "").trim().toLowerCase();
+      return s === "" || s === "∞" || s === "inf" || s === "infinite";
+    }
+    function srvItemBundleQty(it){ return Math.max(1, srvParseInt(it?.inventoryQty ?? it?.qty ?? 1, 1)); }
+    function srvItemBundleUnit(it){ return String(it?.inventoryUnit || "").trim(); }
+    function srvBuildInventoryQtyString(totalQty, unit){ return unit ? (String(totalQty) + " " + unit) : String(totalQty); }
+    function srvParseInventoryQtyString(raw){
+      const m = String(raw ?? "").trim().match(/^(\d+)/);
+      return m ? parseInt(m[1], 10) : srvParseInt(raw, 0);
+    }
+    function srvIsUniqueShopItem(item){ return String(item?.notes || "").toLowerCase().includes("unique"); }
+
+    const shopItems = Array.isArray(shop.items) ? shop.items : [];
+    let total = 0;
+    const checked = [];
+
+    for(const line of lines){
+      const qty = Math.max(1, srvParseInt(line.qty, 1));
+      const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
+      if(!current) return json(res, 400, { ok:false, error:"One or more items are no longer sold here" });
+      const stockLeft = srvInfiniteStock(current.stock) ? Infinity : Math.max(0, srvParseInt(current.stock, 0));
+      if(stockLeft !== Infinity && qty > stockLeft) return json(res, 400, { ok:false, error:"Not enough stock for " + (current.name || "item") });
+      if(srvIsUniqueShopItem(current) && (character.inventory || []).some(x => String(x.name || "").toLowerCase() === String(current.name || "").toLowerCase())){
+        return json(res, 400, { ok:false, error:(current.name || "Unique item") + " is already owned" });
+      }
+      const cost = srvParseMoney(current.cost);
+      total += cost * qty;
+      checked.push({ item:current, qty, cost });
+    }
+
+    character.sheet ||= {};
+    character.sheet.money ||= { cash:"0", bank:"0" };
+    const available = srvParseMoney(character.sheet.money[paymentSource]);
+    if(available < total) return json(res, 400, { ok:false, error:"Not enough " + paymentSource });
+
+    character.inventory ||= [];
+    const grouped = new Map();
+    for(const entry of checked){
+      const it = entry.item;
+      const totalQty = entry.qty * srvItemBundleQty(it);
+      const groupKey = [String(it.name || "").toLowerCase(), String(it.category || "").toLowerCase(), String(it.notes || "").toLowerCase(), String(it.weight || ""), String(it.cost || ""), srvItemBundleUnit(it).toLowerCase(), String(it.ammo_type || "").toLowerCase()].join("|");
+      const existing = grouped.get(groupKey) || { category:it.category || "", name:it.name || "Item", weight:String(it.weight ?? ""), qtyValue:0, cost:String(it.cost ?? ""), notes:it.notes || "", inventoryUnit:srvItemBundleUnit(it), ammo_type:it.ammo_type || "" };
+      existing.qtyValue += totalQty;
+      grouped.set(groupKey, existing);
+    }
+
+    grouped.forEach(entry => {
+      const invMatch = (character.inventory || []).find(item =>
+        String(item.name || "").toLowerCase() === String(entry.name || "").toLowerCase() &&
+        String(item.category || "").toLowerCase() === String(entry.category || "").toLowerCase() &&
+        String(item.notes || "").toLowerCase() === String(entry.notes || "").toLowerCase() &&
+        String(item.weight || "") === String(entry.weight || "") &&
+        String(item.ammo_type || "").toLowerCase() === String(entry.ammo_type || "").toLowerCase()
+      );
+      if(invMatch){
+        const currentQty = srvParseInventoryQtyString(invMatch.qty);
+        invMatch.qty = srvBuildInventoryQtyString(currentQty + entry.qtyValue, entry.inventoryUnit);
+        if(entry.ammo_type && !invMatch.ammo_type) invMatch.ammo_type = entry.ammo_type;
+      }else{
+        character.inventory.push({ category:entry.category, name:entry.name, weight:entry.weight, qty:srvBuildInventoryQtyString(entry.qtyValue, entry.inventoryUnit), cost:entry.cost, notes:entry.notes, ammo_type:entry.ammo_type || "" });
+      }
+    });
+
+    for(const entry of checked){
+      if(!srvInfiniteStock(entry.item.stock)) entry.item.stock = Math.max(0, srvParseInt(entry.item.stock, 0) - entry.qty);
+    }
+
+    character.sheet.money[paymentSource] = srvFormatMoney(available - total);
+    character.version = Number(character.version || 1) + 1;
+    character.updatedAt = Date.now();
+    state.characters[charIndex] = character;
+
+    state.notifications ||= { nextId:1, items:[] };
+    state.notifications.items ||= [];
+    state.notifications.nextId ||= 1;
+    const id = state.notifications.nextId++;
+    state.notifications.items.push({
+      id,
+      type:"Shop Checkout",
+      detail:(shop.name || "Shop") + " • " + checked.length + " cart item(s) • $" + srvFormatMoney(total) + " from " + paymentSource,
+      from: dm ? "DM" : (user?.username || "Player"),
+      audience:"dm",
+      status:"open",
+      notes:"",
+      archived:false,
+      createdAt:Date.now(),
+      updatedAt:Date.now()
+    });
+
+    saveState(state);
+    return json(res, 200, { ok:true, character, shops:state.shops });
+  }
+
   if(p === "/api/shops/save" && req.method==="POST"){
     if(!dm) return json(res, 403, {ok:false, error:"DM only"});
     const body = JSON.parse(await readBody(req) || "{}");
