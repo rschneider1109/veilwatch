@@ -23,6 +23,11 @@ function vwRenderRealtimeViews(forceAll){
     if(typeof vwComputeUnseen === "function") vwComputeUnseen();
   }catch(e){}
 
+  try{
+    if(typeof vwTickClocks === "function") vwTickClocks();
+    if(typeof vwRenderSessionClockControls === "function") vwRenderSessionClockControls();
+  }catch(e){}
+
   // Always refresh shared character-linked surfaces.
   try{
     if(typeof renderDMActiveParty === "function") renderDMActiveParty();

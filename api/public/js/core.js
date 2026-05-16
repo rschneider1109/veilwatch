@@ -451,6 +451,9 @@ function setRoleUI(){
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
+  const clockControls = document.getElementById("sessionClockControls");
+  if(clockControls) clockControls.classList.toggle("hidden", SESSION.role !== "dm");
+
   // Who pill
   const who = document.getElementById("whoPill");
   if(who){
@@ -460,7 +463,75 @@ function setRoleUI(){
 }
 window.setRoleUI = setRoleUI;
 
-// ---- Header + Home clocks ----
+// ---- Header + Session clocks ----
+function vwFormatDuration(ms){
+  const total = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+  const h = String(Math.floor(total / 3600)).padStart(2, "0");
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return h + ":" + m + ":" + s;
+}
+window.vwFormatDuration = vwFormatDuration;
+
+function vwGetSessionClockElapsedMs(){
+  const sc = (window.__STATE && window.__STATE.sessionClock) || {};
+  const base = Math.max(0, Number(sc.accumulatedMs || 0));
+  if(!sc.running) return base;
+  const started = Number(sc.startedAt || Date.now());
+  return Math.max(0, base + Math.max(0, Date.now() - started));
+}
+window.vwGetSessionClockElapsedMs = vwGetSessionClockElapsedMs;
+
+function vwRenderSessionClockControls(){
+  const sc = (window.__STATE && window.__STATE.sessionClock) || {};
+  const running = !!sc.running;
+
+  const controls = document.getElementById("sessionClockControls");
+  if(controls) controls.classList.toggle("hidden", SESSION.role !== "dm");
+
+  const startBtn = document.getElementById("sessionClockStartBtn");
+  const stopBtn = document.getElementById("sessionClockStopBtn");
+  if(startBtn) startBtn.disabled = running || SESSION.role !== "dm";
+  if(stopBtn) stopBtn.disabled = !running || SESSION.role !== "dm";
+
+  const status = document.getElementById("sessionClockStatusMini");
+  if(status) status.textContent = running ? "Running" : "Stopped / Break";
+}
+window.vwRenderSessionClockControls = vwRenderSessionClockControls;
+
+async function vwSessionClockAction(action){
+  if(SESSION.role !== "dm") return;
+  const res = await api("/api/session-clock/" + action, { method:"POST", body: JSON.stringify({}) });
+  if(res && res.ok){
+    if(res.sessionClock){
+      window.__STATE = window.__STATE || {};
+      window.__STATE.sessionClock = res.sessionClock;
+    }
+    vwTickClocks();
+    vwRenderSessionClockControls();
+    if(action === "start") toast("Session clock started");
+    else if(action === "stop") toast("Session clock stopped for break");
+    else toast("Session clock reset");
+    await refreshAll();
+  }else{
+    toast(res?.error || "Session clock update failed");
+  }
+}
+window.vwSessionClockAction = vwSessionClockAction;
+
+function vwWireSessionClockControls(){
+  const startBtn = document.getElementById("sessionClockStartBtn");
+  const stopBtn = document.getElementById("sessionClockStopBtn");
+  const resetBtn = document.getElementById("sessionClockResetBtn");
+  if(startBtn && !startBtn.dataset.wired){ startBtn.dataset.wired = "1"; startBtn.onclick = ()=>vwSessionClockAction("start"); }
+  if(stopBtn && !stopBtn.dataset.wired){ stopBtn.dataset.wired = "1"; stopBtn.onclick = ()=>vwSessionClockAction("stop"); }
+  if(resetBtn && !resetBtn.dataset.wired){ resetBtn.dataset.wired = "1"; resetBtn.onclick = async ()=>{
+    const ok = await vwModalConfirm({ title:"Reset Session Clock", message:"Reset the session clock to 00:00:00?" });
+    if(ok) vwSessionClockAction("reset");
+  }; }
+}
+window.vwWireSessionClockControls = vwWireSessionClockControls;
+
 function vwTickClocks(){
   try{
     const d = new Date();
@@ -469,15 +540,17 @@ function vwTickClocks(){
     const clock = document.getElementById("clockPill");
     if(clock) clock.textContent = hh + ":" + mm;
 
-    const start = Number(SESSION?.sessionStart || Date.now());
-    const elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
-    const em = String(Math.floor(elapsed / 60)).padStart(2, "0");
-    const es = String(elapsed % 60).padStart(2, "0");
+    const sessionText = vwFormatDuration(vwGetSessionClockElapsedMs());
     const sessionClock = document.getElementById("sessionClockMini");
-    if(sessionClock) sessionClock.textContent = em + ":" + es;
+    if(sessionClock) sessionClock.textContent = sessionText;
+    const sessionPill = document.getElementById("sessionClockPill");
+    if(sessionPill) sessionPill.textContent = "Session: " + sessionText;
+
+    vwRenderSessionClockControls();
   }catch(e){}
 }
 window.vwTickClocks = vwTickClocks;
+vwWireSessionClockControls();
 setInterval(vwTickClocks, 1000);
 vwTickClocks();
 
@@ -675,6 +748,7 @@ async function refreshAll(){
 
   const st = await api("/api/state");
   window.__STATE = st || {};
+  try{ vwWireSessionClockControls(); vwTickClocks(); vwRenderSessionClockControls(); }catch(e){}
 
   // intel / alert baseline
   if(!window.VW_ALERTS.armed){
