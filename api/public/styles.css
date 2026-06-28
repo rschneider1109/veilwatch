@@ -1145,3 +1145,60 @@ header::before{content:"";position:absolute;inset:10px;border:1px solid rgba(0,2
   #vwWizardSteps [style*="grid-template-columns:repeat(3,1fr)"],#vwWizardSteps [style*="grid-template-columns:1fr 1fr"],#vwWizardSteps [style*="grid-template-columns:repeat(4, 1fr)"],#vwWizardSteps [style*="grid-template-columns:repeat(6, 1fr)"]{grid-template-columns:1fr!important;}
   .vw-stats-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important;}
 }
+
+
+/* === Hologram pass 5 overrides === */
+body{background:radial-gradient(circle at 50% 16%, rgba(0,186,255,.18), rgba(0,0,0,0) 26%), linear-gradient(180deg,#02080e 0%,#02060a 100%);}
+.vw-shell{position:relative;max-width:1680px;margin:0 auto;padding:24px 24px 32px;border-radius:28px;overflow:hidden;}
+.vw-shell-edge{position:absolute;inset:8px;border:1px solid rgba(0,229,255,.22);border-radius:24px;box-shadow:0 0 0 1px rgba(0,229,255,.08) inset, 0 0 40px rgba(0,229,255,.08);clip-path:polygon(2% 0, 18% 0, 19% 2%, 81% 2%, 82% 0, 98% 0, 100% 8%, 100% 92%, 98% 100%, 83% 100%, 82% 98%, 18% 98%, 17% 100%, 2% 100%, 0 92%, 0 8%);}
+.vw-shell-grid{background-image:linear-gradient(rgba(0,229,255,.08) 1px, transparent 1px),linear-gradient(90deg, rgba(0,229,255,.08) 1px, transparent 1px);background-size:40px 40px,40px 40px;opacity:.13;}
+.vw-shell-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 22%, rgba(0,208,255,.18), transparent 28%), radial-gradient(circle at 50% 65%, rgba(0,104,255,.08), transparent 34%);pointer-events:none;}
+.vw-shell-scan{background:linear-gradient(180deg, transparent, rgba(0,229,255,.05) 50%, transparent);background-size:100% 12px;opacity:.16;animation:none;}
+.vw-command-strip{display:grid;grid-template-columns:2.2fr 1fr 1.35fr 1.35fr auto auto auto;gap:12px;align-items:stretch;padding:14px 14px 16px;border-radius:24px;background:linear-gradient(180deg, rgba(2,10,16,.92), rgba(2,10,16,.78));border:1px solid rgba(0,229,255,.24);box-shadow:0 0 0 1px rgba(0,229,255,.08) inset, 0 18px 60px rgba(0,0,0,.35);margin-bottom:16px;position:relative;}
+.vw-command-strip:before{content:"";position:absolute;inset:6px;border:1px solid rgba(0,229,255,.12);border-radius:20px;pointer-events:none;}
+.cmd-block{position:relative;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:12px 14px;border:1px solid rgba(0,229,255,.18);background:linear-gradient(180deg, rgba(0,229,255,.06), rgba(0,229,255,.02));clip-path:polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);}
+.cmd-brand{padding:14px 18px;}
+.brand{font-size:2rem;letter-spacing:.08em;font-weight:800;}
+.brand span{color:var(--warn);}
+.brand-sub{letter-spacing:.28em;font-size:11px;text-transform:uppercase;color:#a6eaff;}
+.cmd-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#a7ecff;}
+.cmd-value{font-size:1.05rem;font-weight:700;color:#dcfbff;}
+.cmd-active{color:#5cf9d2;}
+.cmd-clock-value{font-size:3rem;line-height:1;font-weight:800;letter-spacing:.08em;color:#86efff;text-shadow:0 0 20px rgba(0,229,255,.16);}
+.cmd-user,.cmd-session-pill,.cmd-clock{align-items:center;justify-content:center;}
+.cmd-user{flex-direction:row;gap:10px;}
+.hud-main{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:start;}
+.hud-rail{position:sticky;top:18px;display:flex;flex-direction:column;gap:10px;padding:14px 10px 14px;border:1px solid rgba(0,229,255,.18);border-radius:22px;background:linear-gradient(180deg, rgba(1,8,13,.9), rgba(1,8,13,.75));box-shadow:0 0 0 1px rgba(0,229,255,.08) inset;}
+.hud-rail .btn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:66px;padding:14px 16px;border-radius:14px;}
+.hud-rail .btn.active{box-shadow:0 0 24px rgba(0,229,255,.14), inset 0 0 22px rgba(0,229,255,.08);}
+.nav-title{font-size:1rem;font-weight:700;color:#e8fdff;}
+.nav-sub{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#93e5f5;}
+.system-uplink{margin-top:auto;padding:14px 12px;border:1px solid rgba(0,229,255,.18);border-radius:16px;background:linear-gradient(180deg, rgba(0,229,255,.06), rgba(0,229,255,.02));}
+.uplink-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#9ce8f7;}
+.uplink-state{margin-top:4px;font-size:12px;color:#e0f9ff;}
+.hud-home-grid{grid-template-columns:repeat(12,minmax(0,1fr));align-items:start;}
+.hud-card,.panel{position:relative;background:linear-gradient(180deg, rgba(4,16,22,.82), rgba(3,11,17,.74));border:1px solid rgba(0,229,255,.22);border-radius:0;clip-path:polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);box-shadow:0 0 0 1px rgba(0,229,255,.08) inset, 0 10px 34px rgba(0,0,0,.35);}
+.hud-card:before,.panel:before{content:"";position:absolute;inset:8px;border:1px solid rgba(0,229,255,.1);pointer-events:none;clip-path:polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);}
+.card h3,.panel h3{letter-spacing:.08em;text-transform:uppercase;}
+.live-notifications-card,.session-overview-card,.quick-actions-card,.recent-activity-card,.system-health-card{grid-column:span 3;}
+#sessionClockLogPanel{grid-column:span 9 !important;}
+#dmActivePartyPanel{grid-column:span 9 !important;}
+.hud-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.hud-list-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.12);font-size:12px;color:#d8faff;}
+.overview-metric{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,229,255,.1);font-size:13px;}
+.quick-actions-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;}
+.quick-actions-grid .btn{min-height:60px;justify-content:center;text-align:center;}
+.health-state{margin-top:10px;font-size:1.2rem;font-weight:800;color:#5cf9d2;letter-spacing:.08em;text-transform:uppercase;}
+.health-graph{margin-top:12px;height:54px;border-radius:12px;border:1px solid rgba(0,229,255,.14);background:linear-gradient(180deg, rgba(0,229,255,.06), rgba(0,229,255,.02)), repeating-linear-gradient(90deg, transparent 0 12px, rgba(0,229,255,.08) 12px 13px), linear-gradient(90deg, transparent 0 10%, rgba(92,249,210,.7) 10% 16%, transparent 16% 22%, rgba(92,249,210,.6) 22% 35%, transparent 35% 40%, rgba(92,249,210,.75) 40% 54%, transparent 54% 60%, rgba(92,249,210,.6) 60% 70%, transparent 70% 100%);mask:linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);}
+.appearance-forge-dock{margin:12px 0 14px;display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:center;}
+.appearance-dock-copy{padding:10px 2px;}
+.dock-kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9ce8f7;}
+.dock-title{font-size:1.35rem;font-weight:800;letter-spacing:.06em;margin-top:6px;}
+.appearance-dock-stage{min-height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.dock-stage-ring{width:190px;height:190px;border-radius:50%;border:1px solid rgba(0,229,255,.35);box-shadow:0 0 0 16px rgba(0,229,255,.04), 0 0 50px rgba(0,229,255,.12) inset;position:relative;}
+.dock-stage-ring:before,.dock-stage-ring:after{content:"";position:absolute;border-radius:50%;inset:14px;border:1px solid rgba(0,229,255,.18);}
+.dock-stage-ring:after{inset:36px;border-style:dashed;}
+.dock-stage-label{position:absolute;bottom:20px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#a7ecff;}
+#tab-home .mini, #tab-character .mini{color:#aee4ef;}
+@media (max-width: 1350px){.vw-command-strip{grid-template-columns:1.5fr 1fr 1fr 1.15fr auto auto auto}.hud-main{grid-template-columns:150px minmax(0,1fr)}.live-notifications-card,.session-overview-card,.quick-actions-card,.recent-activity-card,.system-health-card{grid-column:span 4;}#sessionClockLogPanel,#dmActivePartyPanel{grid-column:span 12 !important;}}
+@media (max-width: 1080px){.vw-command-strip{grid-template-columns:1fr 1fr;}.cmd-brand,.cmd-status,.cmd-case,.cmd-clock-main{grid-column:span 1;}.cmd-user,.cmd-session-pill,.cmd-clock{grid-column:span 1;}.hud-main{grid-template-columns:1fr;}.hud-rail{position:static;}.appearance-forge-dock{grid-template-columns:1fr;}}

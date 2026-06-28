@@ -29,41 +29,60 @@
 </div>
 
 <div class="vw-shell">
+<div class="vw-shell-edge"></div>
 <div class="vw-shell-grid"></div>
+<div class="vw-shell-glow"></div>
 <div class="vw-shell-scan"></div>
-<header>
-  <div class="brand-wrap"><div class="brand">VEILWATCH OS</div><div class="brand-sub">TACTICAL TABLETOP COMMAND INTERFACE</div></div>
-  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
-  <div class="sessionClockDock" id="sessionClockDock">
-    <div class="pill session-clock-pill" id="sessionClockPill">Session: 00:00:00</div>
+<header class="vw-command-strip">
+  <div class="cmd-block cmd-brand">
+    <div class="brand-wrap"><div class="brand">VEILWATCH <span>OS</span></div><div class="brand-sub">TACTICAL TABLETOP COMMAND INTERFACE</div></div>
   </div>
-  <div class="pill right" id="clockPill">--:--</div>
+  <div class="cmd-block cmd-status">
+    <div class="cmd-label">Session Status</div>
+    <div class="cmd-value cmd-active">Active</div>
+  </div>
+  <div class="cmd-block cmd-case">
+    <div class="cmd-label">Operation / Case</div>
+    <div class="cmd-value">Command Center</div>
+  </div>
+  <div class="cmd-block cmd-clock-main">
+    <div class="cmd-label">Session Clock</div>
+    <div class="cmd-clock-value" id="sessionClockMini">00:00:00</div>
+    <div class="mini" id="sessionClockStatusMini">Stopped / Break</div>
+  </div>
+  <div class="cmd-block cmd-user"><div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn">Logout</button></div>
+  <div class="cmd-block cmd-session-pill"><div class="pill session-clock-pill" id="sessionClockPill">Session: 00:00:00</div></div>
+  <div class="cmd-block cmd-clock"><div class="pill right" id="clockPill">--:--</div></div>
 </header>
 
-<main>
-  <div class="nav">
-    <button class="btn active" data-tab="home">Home</button>
-    <button class="btn" data-tab="character">Character</button>
-    <button class="btn intel-tab-btn" data-tab="intel">Intel <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
-    <button class="btn" data-tab="shop">Shop</button>
-    <button class="btn chat-tab-btn" data-tab="chat">Chat <span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
-    <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
-  </div>
+<main class="hud-main">
+  <aside class="nav hud-rail">
+    <button class="btn active" data-tab="home"><span class="nav-title">Home</span><span class="nav-sub">Command Center</span></button>
+    <button class="btn" data-tab="character"><span class="nav-title">Character</span><span class="nav-sub">Heroes &amp; Sheets</span></button>
+    <button class="btn intel-tab-btn" data-tab="intel"><span class="nav-title">Intel</span><span class="nav-sub">Notes &amp; Data</span><span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
+    <button class="btn" data-tab="shop"><span class="nav-title">Shop</span><span class="nav-sub">Gear &amp; Services</span></button>
+    <button class="btn chat-tab-btn" data-tab="chat"><span class="nav-title">Chat</span><span class="nav-sub">Comms Channels</span><span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
+    <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span class="nav-title">Settings</span><span class="nav-sub">System &amp; Prefs</span></button>
+    <div class="system-uplink">
+      <div class="uplink-label">System Uplink</div>
+      <div class="uplink-state">Secure • Encrypted</div>
+    </div>
+  </aside>
 
-  <section id="tab-home" class="grid cards">
-    <div class="card" style="grid-column:span 4;">
+  <section id="tab-home" class="grid cards hud-home-grid">
+    <div class="card hud-card active-character-card" style="grid-column:span 4;">
       <h3>Active Character</h3>
       <div class="mini" id="activeCharMini">None selected</div>
     </div>
-    <div class="card" style="grid-column:span 4;">
+    <div class="card hud-card save-state-card" style="grid-column:span 4;">
       <h3>Save State</h3>
       <div class="mini">Auto-saved to server volume</div>
       <div class="mini" id="saveMini">OK</div>
     </div>
-    <div class="card session-clock-card" style="grid-column:span 4;">
+    <div class="card hud-card session-clock-card" style="grid-column:span 4;">
       <h3>Session Clock</h3>
-      <div class="mini session-clock-home" id="sessionClockMini">00:00:00</div>
-      <div class="mini" id="sessionClockStatusMini">Stopped</div>
+      <div class="mini session-clock-home">00:00:00</div>
+      <div class="mini" id="sessionClockStatusMiniMirror">Stopped / Break</div>
       <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
         <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
         <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
@@ -72,7 +91,23 @@
       </div>
     </div>
 
-    <div class="panel hidden" id="sessionClockLogPanel" style="grid-column:span 12;">
+    <div class="card hud-card live-notifications-card" style="grid-column:span 3;">
+      <h3>Live Notifications</h3>
+      <div class="hud-list">
+        <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
+        <div class="hud-list-row"><span>Whisper queued</span><span>2:16 PM</span></div>
+        <div class="hud-list-row"><span>Item added to loadout</span><span>2:15 PM</span></div>
+      </div>
+    </div>
+    <div class="card hud-card session-overview-card" style="grid-column:span 3;">
+      <h3>Session Overview</h3>
+      <div class="overview-metric"><span>Players</span><span>4</span></div>
+      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
+      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
+      <div class="overview-metric"><span>Notes</span><span>12</span></div>
+    </div>
+
+    <div class="panel hidden hud-card" id="sessionClockLogPanel" style="grid-column:span 9;">
       <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
         <div>
           <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Clock Log</h3>
@@ -122,6 +157,32 @@
       <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (player characters).</div>
     </div>
 
+    <div class="card hud-card quick-actions-card" style="grid-column:span 3;">
+      <h3>Quick Actions</h3>
+      <div class="quick-actions-grid">
+        <button class="btn smallbtn">Add Note</button>
+        <button class="btn smallbtn">Add NPC</button>
+        <button class="btn smallbtn">Add Item</button>
+        <button class="btn smallbtn">Roll Dice</button>
+      </div>
+    </div>
+
+    <div class="card hud-card recent-activity-card" style="grid-column:span 3;">
+      <h3>Recent Activity</h3>
+      <div class="hud-list">
+        <div class="hud-list-row"><span>Alex updated initiative</span><span>2m</span></div>
+        <div class="hud-list-row"><span>Sarah added note</span><span>8m</span></div>
+        <div class="hud-list-row"><span>Tom rolled 1d20 + 5</span><span>16m</span></div>
+        <div class="hud-list-row"><span>DM started session</span><span>22m</span></div>
+      </div>
+    </div>
+
+    <div class="card hud-card system-health-card" style="grid-column:span 3;">
+      <h3>System Health</h3>
+      <div class="health-state">Optimal</div>
+      <div class="health-graph"></div>
+    </div>
+
   </section>
 
   <section id="tab-character" class="hidden">
@@ -134,6 +195,17 @@
         <button class="btn smallbtn hidden" id="deleteCharBtn" style="border-color:#7a2f2f;color:#ffd1d1;">Delete Character</button>
       </div>
       <hr/>
+      <div class="panel appearance-forge-dock">
+        <div class="appearance-dock-copy">
+          <div class="dock-kicker">Character Builder / Appearance Forge</div>
+          <div class="dock-title">Future 3D preview dock</div>
+          <div class="mini">This area is being prepared for the live character visualizer, portrait dock, and appearance summary.</div>
+        </div>
+        <div class="appearance-dock-stage">
+          <div class="dock-stage-ring"></div>
+          <div class="dock-stage-label">Preview online soon</div>
+        </div>
+      </div>
       <div class="row" id="charSummaryRow" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center;">
         <div class="pill" id="charSummaryPlayer">Player: —</div>
         <div class="pill" id="charSummaryClass">Class: —</div>
@@ -483,13 +555,28 @@
     </div>
   </section>
 
-  <section id="tab-settings" class="hidden" style="display:none !important;">
-    <div class="panel" style="display:none !important;" aria-hidden="true">
-      <button class="btn smallbtn hidden" id="exportStateBtn" type="button">Export State JSON</button>
-      <button class="btn smallbtn hidden" id="importStateBtn" type="button">Import State JSON</button>
-      <button class="btn smallbtn hidden" id="resetStateBtn" type="button">Reset State</button>
-      <input class="input hidden" id="dmKeyNew" placeholder="New DM passkey" />
-      <button class="btn smallbtn hidden" id="saveDmKeyBtn" type="button">Save DM Passkey</button>
+  <section id="tab-settings" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <div class="pill">Admin / Settings</div>
+        <div class="mini">DM only. Export/import state, reset, feature toggles.</div>
+      </div>
+      <hr/>
+      <div class="row" style="gap:10px;flex-wrap:wrap;">
+        <button class="btn smallbtn" id="exportStateBtn">Export State JSON</button>
+        <button class="btn smallbtn" id="importStateBtn">Import State JSON</button>
+        <button class="btn smallbtn" id="resetStateBtn">Reset State</button>
+      </div>
+      <hr/>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="min-width:240px;">
+          <div class="mini" style="margin-bottom:6px;">DM Passkey (UI change only if env var is not set)</div>
+          <input class="input" id="dmKeyNew" placeholder="New DM passkey" style="width:100%;"/>
+        </div>
+        <button class="btn smallbtn" id="saveDmKeyBtn">Save DM Passkey</button>
+      </div>
+
+      <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: keep backups before imports. State is auto-saved.</div>
     </div>
   </section>
 </main>
