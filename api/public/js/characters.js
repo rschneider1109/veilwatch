@@ -1573,13 +1573,13 @@ const result = await new Promise((resolve)=>{
       height: "5'10\"",
       build: "average",
       ageLook: "adult",
-      skinTone: "light",
-      eyeColor: "brown",
-      hairStyle: "short",
-      hairColor: "black",
-      beardStyle: "none",
-      faceDetail: "clean",
-      scars: "",
+      skinTone: "Light",
+      eyeColor: "Brown",
+      hairStyle: "Short",
+      hairColor: "Black",
+      beardStyle: "None",
+      faceDetail: "Clean",
+      scars: "None",
       top: "t_shirt",
       outerwear: "none",
       bottoms: "jeans",
@@ -1607,6 +1607,32 @@ const result = await new Promise((resolve)=>{
 
   // Convenience
   function qs(id){ return document.getElementById(id); }
+  const modalCard = document.getElementById("vwModalCard");
+  if(modalCard) modalCard.classList.add("vw-character-build-modal");
+
+  const heightOptions = ["4'10\"","5'0\"","5'2\"","5'4\"","5'6\"","5'8\"","5'10\"","6'0\"","6'2\"","6'4\"","6'6\""];
+  const speciesOptions = ["Human","Awakened Human","Vampire","Werewolf","Ghoul","Ghost-Touched","Witchborn","Synthetic","Unknown"];
+  const skinToneOptions = ["Very Light","Light","Light Tan","Tan","Warm Olive","Brown","Deep Brown","Dark","Very Dark"];
+  const eyeColorOptions = ["Brown","Hazel","Blue","Green","Gray","Amber","Black","Red","Violet"];
+  const faceDetailOptions = ["Clean","Soft Features","Sharp Features","Tired Eyes","Freckled","Weathered","Scarred","Baby Face","Hardened"];
+  const hairStyleOptions = ["Bald","Buzz Cut","Short","Short Fade","Crew Cut","Medium","Long","Long Wavy","Ponytail","Bun","Braids","Curly","Shaved Sides"];
+  const hairColorOptions = ["Black","Dark Brown","Brown","Light Brown","Blonde","Dirty Blonde","Red","Auburn","Gray","White","Dyed Blue","Dyed Pink"];
+  const beardOptions = ["None","Stubble","Trimmed Beard","Full Beard","Mustache","Goatee","Short Boxed Beard"];
+  const scarsOptions = ["None","Left Brow Scar","Right Brow Scar","Cheek Scar","Lip Scar","Neck Scar","Freckles","Birthmark","Arcane Mark"];
+  const topOptions = [["t_shirt","T-Shirt"],["long_sleeve","Long Sleeve"],["button_up","Button-Up"],["hoodie","Hoodie"],["polo","Polo"],["blouse","Blouse"],["tank_top","Tank Top"],["sweater","Sweater"]];
+  const outerwearOptions = [["none","None"],["light_jacket","Light Jacket"],["heavy_jacket","Heavy Jacket"],["blazer","Blazer"],["hoodie_zip","Zip Hoodie"],["denim_jacket","Denim Jacket"],["bomber_jacket","Bomber Jacket"],["coat","Coat"]];
+  const bottomsOptions = [["jeans","Jeans"],["cargo_pants","Cargo Pants"],["dress_pants","Dress Pants"],["joggers","Joggers"],["leggings","Leggings"],["shorts","Shorts"],["skirt","Skirt"],["work_pants","Work Pants"]];
+  const hatOptions = [["none","None"],["baseball_cap","Baseball Cap"],["beanie","Beanie"],["brimmed_hat","Brimmed Hat"],["bucket_hat","Bucket Hat"],["headband","Headband"]];
+  const shoesOptions = [["sneakers","Sneakers"],["boots","Boots"],["dress_shoes","Dress Shoes"],["work_boots","Work Boots"],["casual_shoes","Casual Shoes"],["sandals","Sandals"],["heels","Heels"]];
+  const glovesOptions = [["none","None"],["light_gloves","Light Gloves"],["leather_gloves","Leather Gloves"],["fingerless_gloves","Fingerless Gloves"],["winter_gloves","Winter Gloves"]];
+  function optList(list, selected){
+    return list.map(item=>{
+      const value = Array.isArray(item) ? item[0] : item;
+      const label = Array.isArray(item) ? item[1] : item;
+      const sel = String(value) === String(selected) ? ' selected' : '';
+      return `<option value="${esc(value)}"${sel}>${esc(label)}</option>`;
+    }).join("");
+  }
 
   // ---------- Build UI (all steps live in DOM; we swap visibility) ----------
   ui.mBody.innerHTML = `
@@ -1615,206 +1641,114 @@ const result = await new Promise((resolve)=>{
     </div>
 
     <div id="vwWizardSteps">
-
-      <!-- Step 1 -->
       <div class="vwStep" data-step="1">
-        <div class="mini" style="opacity:.85;margin-bottom:10px;">
-          Name + Class first. This is your “D&amp;D Beyond” creation flow; the Character tab becomes your finished sheet.
+        <div class="vw-build-step-intro">Set the identity first. This becomes the backbone of the finished character sheet.</div>
+        <div class="vw-build-grid-2">
+          <div class="vw-build-field"><div class="mini vw-build-label">Character Name</div><input id="vwCreateName" class="input" placeholder="e.g., Bob" /></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Starting Level</div><input id="vwCreateLevel" class="input" value="3" /></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Character Type</div><select id="vwCreateCharacterType" class="input"><option value="pc">Player Character</option><option value="npc">NPC</option></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Species</div><select id="vwCreateSpecies" class="input">${optList(speciesOptions, state.species || "Human")}</select></div>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Character Name</div>
-            <input id="vwCreateName" class="input" placeholder="e.g., Bob" />
+        <div class="vw-build-block">
+          <div class="vw-build-block-title">Class</div>
+          <div class="vw-build-grid-2">
+            <div class="vw-build-field"><div class="mini vw-build-label">Class</div><select id="vwCreateClass" class="input"></select></div>
+            <div class="vw-build-field"><div class="mini vw-build-label">Subclass</div><select id="vwCreateSubclass" class="input"></select></div>
           </div>
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Starting Level</div>
-            <input id="vwCreateLevel" class="input" value="3" />
-          </div>
-        </div>
-
-        <div style="margin-top:10px;">
-          <div class="mini" style="margin-bottom:6px;opacity:.9">Class</div>
-          <select id="vwCreateClass" class="input" style="width:100%"></select>
         </div>
       </div>
 
-      <!-- Step 2 -->
       <div class="vwStep" data-step="2" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Subclass</div>
-            <select id="vwCreateSubclass" class="input" style="width:100%"></select>
-          </div>
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Background</div>
-            <select id="vwCreateBackground" class="input" style="width:100%"></select>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;">
-          <div style="font-weight:800;margin-bottom:8px;">Traits & Notes</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Traits</div>
-              <textarea id="vwCreateTraits" class="input" style="min-height:120px"></textarea>
-            </div>
-            <div>
-              <div class="mini" style="margin-bottom:6px;opacity:.9">Notes</div>
-              <textarea id="vwCreateNotes" class="input" style="min-height:120px"></textarea>
-            </div>
-          </div>
+        <div class="vw-build-step-intro">Personal details and the body base live here. This is the human under the gear.</div>
+        <div class="vw-build-grid-4">
+          <div class="vw-build-field"><div class="mini vw-build-label">Body Type</div><select id="vwCreateBodyType" class="input"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Height</div><select id="vwCreateHeight" class="input">${optList(heightOptions, state.appearance.height)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Build</div><select id="vwCreateBuild" class="input"><option value="slim">Slim</option><option value="average">Average</option><option value="athletic">Athletic</option><option value="broad">Broad</option></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Age Look</div><select id="vwCreateAgeLook" class="input"><option value="young_adult">Young Adult</option><option value="adult">Adult</option><option value="middle_aged">Middle Aged</option><option value="older">Older</option></select></div>
+          <div class="vw-build-field" id="vwCreateBustWrap"><div class="mini vw-build-label">Bust Size</div><select id="vwCreateBust" class="input"><option value="small">Small</option><option value="medium">Medium</option><option value="full">Full</option></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Skin Tone</div><select id="vwCreateSkinTone" class="input">${optList(skinToneOptions, state.appearance.skinTone)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Eye Color</div><select id="vwCreateEyeColor" class="input">${optList(eyeColorOptions, state.appearance.eyeColor)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Face Detail</div><select id="vwCreateFaceDetail" class="input">${optList(faceDetailOptions, state.appearance.faceDetail)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Hair Style</div><select id="vwCreateHairStyle" class="input">${optList(hairStyleOptions, state.appearance.hairStyle)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Hair Color</div><select id="vwCreateHairColor" class="input">${optList(hairColorOptions, state.appearance.hairColor)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Beard / Facial Hair</div><select id="vwCreateBeardStyle" class="input">${optList(beardOptions, state.appearance.beardStyle)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Scars / Markings</div><select id="vwCreateScars" class="input">${optList(scarsOptions, state.appearance.scars || "None")}</select></div>
         </div>
       </div>
 
-      <!-- Step 3 -->
       <div class="vwStep" data-step="3" style="display:none;">
-        <div class="mini" style="opacity:.85;margin-bottom:10px;">Body and base clothing live here. Armor, weapons, and operational gear still come from the character sheet.</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Character Type</div><select id="vwCreateCharacterType" class="input" style="width:100%"><option value="pc">Player Character</option><option value="npc">NPC</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Body Type</div><select id="vwCreateBodyType" class="input" style="width:100%"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Height</div><input id="vwCreateHeight" class="input" placeholder="5'10&amp;quot;" /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Build</div><select id="vwCreateBuild" class="input" style="width:100%"><option value="slim">Slim</option><option value="average">Average</option><option value="athletic">Athletic</option><option value="broad">Broad</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Age Look</div><select id="vwCreateAgeLook" class="input" style="width:100%"><option value="young_adult">Young Adult</option><option value="adult">Adult</option><option value="middle_aged">Middle Aged</option><option value="older">Older</option></select></div>
-          <div id="vwCreateBustWrap"><div class="mini" style="margin-bottom:6px;opacity:.9">Bust Size</div><select id="vwCreateBust" class="input" style="width:100%"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></div>
+        <div class="vw-build-step-intro">Choose the everyday look here. Armor, weapons, and operational gear still come from the character sheet.</div>
+        <div class="vw-build-block-title">Base Clothing</div>
+        <div class="vw-build-grid-3">
+          <div class="vw-build-field"><div class="mini vw-build-label">Top</div><select id="vwCreateTop" class="input">${optList(topOptions, state.appearance.top)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Outerwear</div><select id="vwCreateOuterwear" class="input">${optList(outerwearOptions, state.appearance.outerwear)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Bottoms</div><select id="vwCreateBottoms" class="input">${optList(bottomsOptions, state.appearance.bottoms)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Hat</div><select id="vwCreateHat" class="input">${optList(hatOptions, state.appearance.hat)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Shoes</div><select id="vwCreateShoes" class="input">${optList(shoesOptions, state.appearance.shoes)}</select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Gloves</div><select id="vwCreateGloves" class="input">${optList(glovesOptions, state.appearance.gloves)}</select></div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><input id="vwCreateSkinTone" class="input" placeholder="light / tan / deep / etc." /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Eye Color</div><input id="vwCreateEyeColor" class="input" placeholder="brown" /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Face Detail</div><input id="vwCreateFaceDetail" class="input" placeholder="clean / scarred / tired / etc." /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><input id="vwCreateHairStyle" class="input" placeholder="short fade / long straight / bun / etc." /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Color</div><input id="vwCreateHairColor" class="input" placeholder="black" /></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Beard / Facial Hair</div><input id="vwCreateBeardStyle" class="input" placeholder="none / trimmed / full / mustache" /></div>
-        </div>
-        <div style="margin-top:12px;"><div class="mini" style="margin-bottom:6px;opacity:.9">Scars / Markings</div><input id="vwCreateScars" class="input" placeholder="Optional" /></div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Base Clothing</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Top</div><select id="vwCreateTop" class="input" style="width:100%"><option value="t_shirt">T-Shirt</option><option value="long_sleeve">Long Sleeve</option><option value="button_up">Button-Up</option><option value="hoodie">Hoodie</option><option value="polo">Polo</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Outerwear</div><select id="vwCreateOuterwear" class="input" style="width:100%"><option value="none">None</option><option value="light_jacket">Light Jacket</option><option value="heavy_jacket">Heavy Jacket</option><option value="blazer">Blazer</option><option value="hoodie_zip">Zip Hoodie</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Bottoms</div><select id="vwCreateBottoms" class="input" style="width:100%"><option value="jeans">Jeans</option><option value="cargo_pants">Cargo Pants</option><option value="dress_pants">Dress Pants</option><option value="joggers">Joggers</option><option value="leggings">Leggings</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hat</div><select id="vwCreateHat" class="input" style="width:100%"><option value="none">None</option><option value="baseball_cap">Baseball Cap</option><option value="beanie">Beanie</option><option value="brimmed_hat">Brimmed Hat</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Shoes</div><select id="vwCreateShoes" class="input" style="width:100%"><option value="sneakers">Sneakers</option><option value="boots">Boots</option><option value="dress_shoes">Dress Shoes</option><option value="work_boots">Work Boots</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Gloves</div><select id="vwCreateGloves" class="input" style="width:100%"><option value="none">None</option><option value="light_gloves">Light Gloves</option><option value="leather_gloves">Leather Gloves</option><option value="fingerless_gloves">Fingerless Gloves</option></select></div>
+        <div id="vwCreateNpcUniformBlock" class="vw-build-block" style="display:none;">
+          <div class="vw-build-block-title">NPC Uniform Preset</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Uniforms are mainly for DM-controlled NPCs. Pick a clean preset here before sheet gear overlays.</div>
+          <div class="vw-build-grid-2">
+            <div class="vw-build-field"><div class="mini vw-build-label">Uniform Category</div><select id="vwCreateUniformCategory" class="input"><option value="none">None</option><option value="law_enforcement">Law Enforcement</option><option value="sheriff">Sheriff</option><option value="ems">EMS</option><option value="fire">Fire</option><option value="security">Security</option><option value="corporate">Corporate</option><option value="medical">Medical</option><option value="custom">Custom Faction</option></select></div>
+            <div class="vw-build-field"><div class="mini vw-build-label">Uniform Preset</div><select id="vwCreateUniformPreset" class="input"><option value="none">None</option><option value="standard_patrol">Standard Patrol</option><option value="supervisor">Supervisor</option><option value="duty_uniform">Duty Uniform</option><option value="station_uniform">Station Uniform</option><option value="business_formal">Business Formal</option><option value="custom_uniform">Custom Uniform</option></select></div>
           </div>
         </div>
-        <div id="vwCreateNpcUniformBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;display:none;">
-          <div style="font-weight:800;margin-bottom:8px;">NPC Uniform Preset</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Uniforms are mainly for DM-controlled NPCs. This picks a clean base look before sheet gear overlays.</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Category</div><select id="vwCreateUniformCategory" class="input" style="width:100%"><option value="none">None</option><option value="law_enforcement">Law Enforcement</option><option value="fire">Fire</option><option value="ems">EMS</option><option value="security">Security</option><option value="corporate">Corporate</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Preset</div><select id="vwCreateUniformPreset" class="input" style="width:100%"><option value="none">None</option><option value="patrol_standard">Patrol Standard</option><option value="fire_station">Fire Station</option><option value="ems_duty">EMS Duty</option><option value="security_polo">Security Polo</option><option value="corporate_formal">Corporate Formal</option></select></div>
+        <div class="vw-build-block">
+          <div class="vw-build-block-title">Background Notes</div>
+          <div class="vw-build-grid-2">
+            <div class="vw-build-field"><div class="mini vw-build-label">Traits</div><textarea id="vwCreateTraits" class="input" style="min-height:140px"></textarea></div>
+            <div class="vw-build-field"><div class="mini vw-build-label">Notes</div><textarea id="vwCreateNotes" class="input" style="min-height:140px"></textarea></div>
           </div>
         </div>
       </div>
 
-      <!-- Step 4 -->
       <div class="vwStep" data-step="4" style="display:none;">
-        <div style="margin-bottom:10px;">
-          <div class="mini" style="margin-bottom:6px;opacity:.9">Species</div>
-          <input id="vwCreateSpecies" class="input" placeholder="e.g., Human / Elf / Synth / etc." />
-        </div>
-
-        <div style="padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Abilities (Talents)</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add talents available to your class at your starting level.</div>
-          <input id="vwCreateTalentSearch" class="input" placeholder="Search talents…" />
-          <div id="vwCreateTalentResults" style="margin-top:8px;max-height:240px;overflow:auto;padding-right:6px;"></div>
-
-          <div style="margin-top:10px;">
-            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
-            <div id="vwCreateSelectedTalents"></div>
+        <div class="vw-build-step-intro">Choose the class extras here. Search and add from the filtered catalogs instead of typing loose values.</div>
+        <div class="vw-build-grid-2">
+          <div class="vw-build-block" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="vw-build-block-title">Background</div>
+            <div class="vw-build-field"><div class="mini vw-build-label">Background</div><select id="vwCreateBackground" class="input"></select></div>
+          </div>
+          <div class="vw-build-block" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="vw-build-block-title">Talents</div>
+            <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add talents available to your class at your starting level.</div>
+            <input id="vwCreateTalentSearch" class="input" placeholder="Search talents…" />
+            <div id="vwCreateTalentResults" class="vw-build-picker"></div>
+            <div style="margin-top:10px;"><div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div><div id="vwCreateSelectedTalents"></div></div>
           </div>
         </div>
-
-        <div id="vwCreateSpellsBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Spells</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add spells (filtered by your class, level, and tier unlocks).</div>
+        <div id="vwCreateSpellsBlock" class="vw-build-block">
+          <div class="vw-build-block-title">Spells</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Search and add spells filtered by your class, level, and unlock tier.</div>
           <input id="vwCreateSpellSearch" class="input" placeholder="Search spells…" />
-          <div id="vwCreateSpellResults" style="margin-top:8px;max-height:260px;overflow:auto;padding-right:6px;"></div>
-
-          <div style="margin-top:10px;">
-            <div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div>
-            <div id="vwCreateSelectedSpells"></div>
-          </div>
+          <div id="vwCreateSpellResults" class="vw-build-picker"></div>
+          <div style="margin-top:10px;"><div class="mini" style="opacity:.8;margin-bottom:6px;">Selected</div><div id="vwCreateSelectedSpells"></div></div>
         </div>
       </div>
 
-      <!-- Step 5 -->
       <div class="vwStep" data-step="5" style="display:none;">
-        <div style="font-weight:800;margin-bottom:8px;">Weapons & Gear</div>
-        <div class="mini" style="opacity:.8;margin-bottom:10px;">
-          Choose a Starter Pack (auto adds 1 sidearm + 1 primary), optionally add a Kit, then add any extra gear.
+        <div class="vw-build-step-intro">Pick the starting package first, then fine-tune weapons and possessions below.</div>
+        <div class="vw-build-grid-4">
+          <div class="vw-build-field"><div class="mini vw-build-label">Starter Pack</div><select id="vwCreateStarterPack" class="input"></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Starter Kit</div><select id="vwCreateKit" class="input"></select></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Cash</div><input id="vwCreateCash" class="input" placeholder="0" /></div>
+          <div class="vw-build-field"><div class="mini vw-build-label">Bank</div><input id="vwCreateBank" class="input" placeholder="0" /></div>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Pack</div>
-            <select id="vwCreateStarterPack" class="input" style="width:100%"></select>
-          </div>
-          <div>
-            <div class="mini" style="margin-bottom:6px;opacity:.9">Starter Kit</div>
-            <select id="vwCreateKit" class="input" style="width:100%"></select>
-          </div>
-        </div>
-
         <div id="vwCreateGearPreview" class="mini" style="opacity:.85;margin-top:10px;"></div>
-
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Starting Money</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Cash</div><input id="vwCreateCash" class="input" placeholder="0" /></div>
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Bank</div><input id="vwCreateBank" class="input" placeholder="0" /></div>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Weapons</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Starter Pack weapons will appear here. Edit details or add custom weapons.</div>
-          <div id="vwCreateWeapons"></div>
-          <button id="vwCreateAddWeapon" class="btn smallbtn" style="margin-top:10px;">Add Weapon</button>
-        </div>
-
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Possessions & Inventory</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Kit and starter items are auto-added. Add extra items you want to start with.</div>
-          <div id="vwCreateInvAuto" class="mini" style="opacity:.85"></div>
-
-          <div id="vwCreateInvExtra" style="margin-top:10px;"></div>
-          <button id="vwCreateAddInv" class="btn smallbtn" style="margin-top:10px;">Add Inventory Item</button>
-        </div>
+        <div class="vw-build-block"><div class="vw-build-block-title">Weapons</div><div class="mini" style="opacity:.8;margin-bottom:8px;">Starter Pack weapons appear here. Edit details or add custom weapons when needed.</div><div id="vwCreateWeapons"></div><button id="vwCreateAddWeapon" class="btn smallbtn" style="margin-top:10px;">Add Weapon</button></div>
+        <div class="vw-build-block"><div class="vw-build-block-title">Possessions & Inventory</div><div class="mini" style="opacity:.8;margin-bottom:8px;">Kit and starter items are auto-added. Add extra items you want to start with.</div><div id="vwCreateInvAuto" class="mini" style="opacity:.85"></div><div id="vwCreateInvExtra" style="margin-top:10px;"></div><button id="vwCreateAddInv" class="btn smallbtn" style="margin-top:10px;">Add Inventory Item</button></div>
       </div>
 
-      <!-- Step 6 -->
       <div class="vwStep" data-step="6" style="display:none;">
-        <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
-        <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA here (these are treated as creation-locked).</div>
-
-        <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
-          ${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`
-            <div>
-              <div class="mini" style="opacity:.8;margin-bottom:4px;">${k}</div>
-              <input id="vwCreateStat_${k}" class="input" placeholder="10" />
-            </div>
-          `).join("")}
-        </div>
-
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Vitals</div>
-          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;">
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">HP Max</div><input id="vwCreateHpMax" class="input" placeholder="32" /></div>
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">AC</div><input id="vwCreateAC" class="input" placeholder="14" /></div>
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Init</div><input id="vwCreateInit" class="input" placeholder="+2" /></div>
-            <div><div class="mini" style="opacity:.8;margin-bottom:4px;">Speed</div><input id="vwCreateSpeed" class="input" placeholder="30" /></div>
-          </div>
-        </div>
-
-        <div class="mini" style="opacity:.8;margin-top:12px;">
-          When you click <b>Create</b>, this character becomes “sheet-only” and is meant to be played from the Character tab.
-        </div>
+        <div class="vw-build-step-intro">Finish the sheet here. Random Generate fills the six ability scores if the player does not want to roll manually.</div>
+        <div class="vw-build-chiprow"><div class="pill">Final Step</div><div class="mini">Review vitals, scores, then create the sheet.</div></div>
+        <div class="vw-build-actions"><button id="vwRandomStatsBtn" class="btn smallbtn" type="button">Random Generate</button><button id="vwClearStatsBtn" class="btn smallbtn" type="button">Clear Scores</button></div>
+        <div class="vw-build-block"><div class="vw-build-block-title">Ability Scores</div><div class="vw-build-grid-6">${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`<div class="vw-build-field"><div class="mini vw-build-label">${k}</div><input id="vwCreateStat_${k}" class="input" placeholder="10" /></div>`).join("")}</div></div>
+        <div class="vw-build-block"><div class="vw-build-block-title">Vitals</div><div class="vw-build-grid-4"><div class="vw-build-field"><div class="mini vw-build-label">HP Max</div><input id="vwCreateHpMax" class="input" placeholder="32" /></div><div class="vw-build-field"><div class="mini vw-build-label">AC</div><input id="vwCreateAC" class="input" placeholder="14" /></div><div class="vw-build-field"><div class="mini vw-build-label">Init</div><input id="vwCreateInit" class="input" placeholder="+2" /></div><div class="vw-build-field"><div class="mini vw-build-label">Speed</div><input id="vwCreateSpeed" class="input" placeholder="30" /></div></div></div>
+        <div class="mini" style="opacity:.8;margin-top:12px;">When you click <b>Create</b>, this character becomes sheet-only and is meant to be played from the Character tab.</div>
       </div>
-
-    </div>
   `;
 
   // ---------- Populate selects from catalog ----------
@@ -1902,7 +1836,7 @@ const result = await new Promise((resolve)=>{
   function showStep(n){
     step = n;
     ui.mBody.scrollTop = 0;
-    qs("vwWizardStepLabel").textContent = `Step ${step} of 5`;
+    qs("vwWizardStepLabel").textContent = `Step ${step} of 6`;
 
     document.querySelectorAll(".vwStep").forEach(el=>{
       el.style.display = (Number(el.getAttribute("data-step")) === step) ? "block" : "none";
@@ -2450,6 +2384,8 @@ const result = await new Promise((resolve)=>{
   qs("vwCreateSpellSearch") && (qs("vwCreateSpellSearch").oninput = rerenderSpellResults);
   qs("vwCreateCharacterType")?.addEventListener("change", updateAppearanceModeUI);
   qs("vwCreateBodyType")?.addEventListener("change", updateAppearanceModeUI);
+  qs("vwRandomStatsBtn")?.addEventListener("click", randomizeAbilityScores);
+  qs("vwClearStatsBtn")?.addEventListener("click", clearAbilityScores);
   updateAppearanceModeUI();
 
   qs("vwCreateAddWeapon")?.addEventListener("click", (e)=>{
@@ -2480,42 +2416,50 @@ const result = await new Promise((resolve)=>{
     if(bustWrap) bustWrap.style.display = bodyType === "female" ? "block" : "none";
   }
 
+  function rollAbilityScore(){
+    const dice = Array.from({length:4}, ()=>1 + Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+    return dice[0] + dice[1] + dice[2];
+  }
+
+  function randomizeAbilityScores(){
+    ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
+      const el = qs(`vwCreateStat_${k}`);
+      if(el) el.value = String(rollAbilityScore());
+    });
+    toast("Ability scores generated");
+  }
+
+  function clearAbilityScores(){
+    ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
+      const el = qs(`vwCreateStat_${k}`);
+      if(el) el.value = "";
+    });
+  }
+
   // ---------- Validation + persistence per step ----------
   function validateStep(n){
     if(n === 1){
       const name = String(qs("vwCreateName")?.value||"").trim();
       const classId = getClassId();
       const level = getLevel();
+      const subclassId = String(qs("vwCreateSubclass")?.value||"");
+      const species = String(qs("vwCreateSpecies")?.value||"").trim();
 
       if(!name){ toast("Name is required"); return false; }
       if(!classId){ toast("Class is required"); return false; }
+      if(!species){ toast("Species is required"); return false; }
 
       state.name = name;
       state.classId = classId;
+      state.subclassId = subclassId;
       state.level = level;
+      state.species = species;
       return true;
     }
 
     if(n === 2){
-      const subclassId = String(qs("vwCreateSubclass")?.value||"");
-      const bgId = String(qs("vwCreateBackground")?.value||"");
-      const traits = String(qs("vwCreateTraits")?.value||"").trim();
-      const notes = String(qs("vwCreateNotes")?.value||"").trim();
-
-      const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
-      const bgName = (bgObj?.name || bgId || "");
-
-      if(!bgName){ toast("Background is required"); return false; }
-
-      state.subclassId = subclassId;
-      state.backgroundId = bgId;
-      state.traits = traits;
-      state.notes = notes;
-      return true;
-    }
-
-    if(n === 3){
       const appearance = {
+        ...state.appearance,
         characterType: String(qs("vwCreateCharacterType")?.value||"pc"),
         bodyType: String(qs("vwCreateBodyType")?.value||"male"),
         height: String(qs("vwCreateHeight")?.value||"").trim(),
@@ -2528,7 +2472,16 @@ const result = await new Promise((resolve)=>{
         hairStyle: String(qs("vwCreateHairStyle")?.value||"").trim(),
         hairColor: String(qs("vwCreateHairColor")?.value||"").trim(),
         beardStyle: String(qs("vwCreateBeardStyle")?.value||"").trim(),
-        scars: String(qs("vwCreateScars")?.value||"").trim(),
+        scars: String(qs("vwCreateScars")?.value||"").trim()
+      };
+      if(!appearance.height){ toast("Height is required"); return false; }
+      state.appearance = appearance;
+      return true;
+    }
+
+    if(n === 3){
+      state.appearance = {
+        ...state.appearance,
         top: String(qs("vwCreateTop")?.value||"t_shirt"),
         outerwear: String(qs("vwCreateOuterwear")?.value||"none"),
         bottoms: String(qs("vwCreateBottoms")?.value||"jeans"),
@@ -2538,15 +2491,17 @@ const result = await new Promise((resolve)=>{
         uniformCategory: String(qs("vwCreateUniformCategory")?.value||"none"),
         uniformPreset: String(qs("vwCreateUniformPreset")?.value||"none")
       };
-      if(!appearance.height){ toast("Height is required"); return false; }
-      state.appearance = appearance;
+      state.traits = String(qs("vwCreateTraits")?.value||"").trim();
+      state.notes = String(qs("vwCreateNotes")?.value||"").trim();
       return true;
     }
 
     if(n === 4){
-      const species = String(qs("vwCreateSpecies")?.value||"").trim();
-      if(!species){ toast("Species is required"); return false; }
-      state.species = species;
+      const bgId = String(qs("vwCreateBackground")?.value||"");
+      const bgObj = backgrounds.find(b=>String(b.id||b.name)===bgId) || null;
+      const bgName = (bgObj?.name || bgId || "");
+      if(!bgName){ toast("Background is required"); return false; }
+      state.backgroundId = bgId;
 
       // ensure spell block rules
       toggleSpellsBlock();
@@ -2590,6 +2545,7 @@ const result = await new Promise((resolve)=>{
 
   // ---------- Close ----------
   function close(val){
+    if(modalCard) modalCard.classList.remove("vw-character-build-modal");
     ui.modal.style.display = "none";
     ui.btnOk.onclick = null;
     ui.btnCan.onclick = null;
