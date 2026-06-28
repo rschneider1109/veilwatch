@@ -49,9 +49,18 @@
     <div class="cmd-label">Session Clock</div>
     <div class="cmd-clock-value" id="sessionClockMini">00:00:00</div>
     <div class="mini" id="sessionClockStatusMini">Stopped / Break</div>
+    <div class="hidden" id="sessionClockStatusMiniMirror">Stopped / Break</div>
+    <div class="hidden" id="sessionClockPill">Session: 00:00:00</div>
+  </div>
+  <div class="cmd-block cmd-control-strip">
+    <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
+      <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
+      <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
+      <button class="btn smallbtn dangerbtn" id="sessionClockEndBtn" type="button">End Session</button>
+      <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
+    </div>
   </div>
   <div class="cmd-block cmd-user"><div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn">Logout</button></div>
-  <div class="cmd-block cmd-session-pill"><div class="pill session-clock-pill" id="sessionClockPill">Session: 00:00:00</div></div>
   <div class="cmd-block cmd-clock"><div class="pill right" id="clockPill">--:--</div></div>
 </header>
 
@@ -69,49 +78,33 @@
     </div>
   </aside>
 
-  <section id="tab-home" class="grid cards hud-home-grid">
-    <div class="card hud-card active-character-card" style="grid-column:span 4;">
-      <h3>Active Character</h3>
-      <div class="mini" id="activeCharMini">None selected</div>
-    </div>
-    <div class="card hud-card save-state-card" style="grid-column:span 4;">
-      <h3>Save State</h3>
-      <div class="mini">Auto-saved to server volume</div>
-      <div class="mini" id="saveMini">OK</div>
-    </div>
-    <div class="card hud-card session-clock-card" style="grid-column:span 4;">
-      <h3>Session Clock</h3>
-      <div class="mini session-clock-home">00:00:00</div>
-      <div class="mini" id="sessionClockStatusMiniMirror">Stopped / Break</div>
-      <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
-        <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
-        <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
-        <button class="btn smallbtn dangerbtn" id="sessionClockEndBtn" type="button">End Session</button>
-        <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
+  <section id="tab-home" class="hud-home-screen">
+  <div class="hud-home-main">
+    <div class="hud-top-band">
+      <div class="card hud-card active-character-card">
+        <h3>Active Character</h3>
+        <div class="mini" id="activeCharMini">None selected</div>
+      </div>
+      <div class="card hud-card save-state-card">
+        <h3>Save State</h3>
+        <div class="mini">Auto-saved to server volume</div>
+        <div class="mini" id="saveMini">OK</div>
+      </div>
+      <div class="card hud-card live-notifications-card">
+        <h3>Live Notifications</h3>
+        <div class="hud-list">
+          <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
+          <div class="hud-list-row"><span>Whisper from Alara</span><span>2:16 PM</span></div>
+          <div class="hud-list-row"><span>Item “Neural Disruptor” added</span><span>2:15 PM</span></div>
+        </div>
       </div>
     </div>
 
-    <div class="card hud-card live-notifications-card" style="grid-column:span 3;">
-      <h3>Live Notifications</h3>
-      <div class="hud-list">
-        <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
-        <div class="hud-list-row"><span>Whisper queued</span><span>2:16 PM</span></div>
-        <div class="hud-list-row"><span>Item added to loadout</span><span>2:15 PM</span></div>
-      </div>
-    </div>
-    <div class="card hud-card session-overview-card" style="grid-column:span 3;">
-      <h3>Session Overview</h3>
-      <div class="overview-metric"><span>Players</span><span>4</span></div>
-      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
-      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
-      <div class="overview-metric"><span>Notes</span><span>12</span></div>
-    </div>
-
-    <div class="panel hidden hud-card" id="sessionClockLogPanel" style="grid-column:span 9;">
+    <div class="panel hud-card" id="sessionClockLogPanel">
       <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
         <div>
           <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Clock Log</h3>
-          <div class="mini">Completed sessions are recorded here when the DM clicks <b>End Session</b>.</div>
+          <div class="mini">Completed sessions are recorded here when the DM clicks End Session.</div>
         </div>
       </div>
       <div class="tableWrap" style="margin-top:12px;">
@@ -133,8 +126,8 @@
       </div>
     </div>
 
-    <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
-      <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters</h3>
+    <div class="panel hud-card tactical-party-panel" id="dmActivePartyPanel">
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters / Tactical Party</h3>
       <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
         <div style="min-width:240px;flex:1;">
           <div class="mini" style="margin-bottom:6px;">Add to Active</div>
@@ -156,8 +149,20 @@
       <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP/AC/Stats/Init pills to edit (autosaves).</div>
       <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (player characters).</div>
     </div>
+  </div>
 
-    <div class="card hud-card quick-actions-card" style="grid-column:span 3;">
+  <aside class="hud-home-side">
+    <div class="card hud-card session-overview-card">
+      <h3>Session Overview</h3>
+      <div class="overview-metric"><span>Players</span><span>4</span></div>
+      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
+      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
+      <div class="overview-metric"><span>Notes</span><span>12</span></div>
+      <div class="overview-metric"><span>Maps</span><span>2</span></div>
+      <div class="overview-metric"><span>Items</span><span>18</span></div>
+    </div>
+
+    <div class="card hud-card quick-actions-card">
       <h3>Quick Actions</h3>
       <div class="quick-actions-grid">
         <button class="btn smallbtn">Add Note</button>
@@ -167,23 +172,23 @@
       </div>
     </div>
 
-    <div class="card hud-card recent-activity-card" style="grid-column:span 3;">
+    <div class="card hud-card recent-activity-card">
       <h3>Recent Activity</h3>
       <div class="hud-list">
         <div class="hud-list-row"><span>Alex updated initiative</span><span>2m</span></div>
-        <div class="hud-list-row"><span>Sarah added note</span><span>8m</span></div>
-        <div class="hud-list-row"><span>Tom rolled 1d20 + 5</span><span>16m</span></div>
-        <div class="hud-list-row"><span>DM started session</span><span>22m</span></div>
+        <div class="hud-list-row"><span>Sarah added note “Hidden Passage”</span><span>8m</span></div>
+        <div class="hud-list-row"><span>Tom rolled 1d20 + 5</span><span>18</span></div>
+        <div class="hud-list-row"><span>Jeff (DM) started session</span><span>22m</span></div>
       </div>
     </div>
 
-    <div class="card hud-card system-health-card" style="grid-column:span 3;">
+    <div class="card hud-card system-health-card">
       <h3>System Health</h3>
       <div class="health-state">Optimal</div>
       <div class="health-graph"></div>
     </div>
-
-  </section>
+  </aside>
+</section>
 
   <section id="tab-character" class="hidden">
     <div class="panel">
