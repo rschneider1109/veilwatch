@@ -1112,3 +1112,28 @@ main{max-width:1480px;padding:0 0 18px;margin:0 auto;display:grid;grid-template-
 #tab-home.grid.cards{align-content:start;}
 @media (max-width: 1100px){main{grid-template-columns:1fr;}.nav{position:relative;top:auto;flex-direction:row;flex-wrap:wrap;}.appearance-stage-wrap{grid-template-columns:1fr;}}
 @media (max-width: 760px){.vw-shell{padding:10px;}header{padding:14px;}.brand{font-size:18px;}main{gap:12px;}.nav{padding:10px;}}
+
+
+/* --- Character build station --- */
+.vw-modal-card{position:relative;}
+.vw-modal-card.vw-character-build-modal{width:min(1180px,96vw)!important;max-height:94vh!important;border-radius:22px!important;padding:20px!important;background:linear-gradient(180deg, rgba(4,22,31,.96), rgba(3,12,18,.92))!important;box-shadow:0 0 0 1px rgba(0,229,255,.12) inset, 0 24px 60px rgba(0,0,0,.52), 0 0 32px rgba(0,229,255,.08)!important;}
+.vw-modal-card.vw-character-build-modal::before{content:"";position:absolute;inset:12px;border:1px solid rgba(0,229,255,.10);clip-path:polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);pointer-events:none;}
+.vw-modal-card.vw-character-build-modal #vwModalBody{padding-right:10px!important;}
+.vw-build-step-intro{opacity:.86;margin-bottom:12px;line-height:1.45;}
+.vw-build-grid-2,.vw-build-grid-3,.vw-build-grid-4,.vw-build-grid-6{display:grid;gap:12px;min-width:0;}
+.vw-build-grid-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.vw-build-grid-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.vw-build-grid-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+.vw-build-grid-6{grid-template-columns:repeat(6,minmax(0,1fr));}
+.vw-build-field,.vw-build-block{min-width:0;}
+.vw-build-block{margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,229,255,.12);}
+.vw-build-block-title{font-weight:800;margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;color:#c8f7ff;}
+.vw-build-label{margin-bottom:6px;opacity:.92;}
+.vw-build-field select,.vw-build-field input,.vw-build-field textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;}
+.vw-build-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.vw-build-chiprow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.vw-build-picker{margin-top:8px;max-height:260px;overflow:auto;padding-right:6px;border:1px solid rgba(0,229,255,.08);border-radius:14px;padding:10px;background:rgba(0,0,0,.14);}
+#vwCreateTalentResults .row, #vwCreateSpellResults .row{align-items:flex-start;}
+#vwCreateWeapons > .panel, #vwCreateInvExtra > .panel{overflow:hidden;}
+@media (max-width: 1100px){.vw-build-grid-6{grid-template-columns:repeat(3,minmax(0,1fr));}.vw-build-grid-4{grid-template-columns:repeat(2,minmax(0,1fr));}.vw-build-grid-3{grid-template-columns:repeat(2,minmax(0,1fr));}.vw-modal-card.vw-character-build-modal{width:min(980px,97vw)!important;}}
+@media (max-width: 760px){.vw-build-grid-2,.vw-build-grid-3,.vw-build-grid-4,.vw-build-grid-6{grid-template-columns:1fr;}.vw-modal-card.vw-character-build-modal{width:min(98vw,98vw)!important;padding:14px!important;border-radius:16px!important;}}
