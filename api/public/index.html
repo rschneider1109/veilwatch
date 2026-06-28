@@ -79,36 +79,47 @@
   </aside>
 
   <section id="tab-home" class="hud-home-screen">
-  <div class="hud-home-main">
-    <div class="hud-top-band">
-      <div class="card hud-card active-character-card">
-        <h3>Active Character</h3>
-        <div class="active-character-shell">
-          <div class="active-character-silhouette"></div>
-          <div class="active-character-copy">
-            <div class="active-character-name" id="activeCharMini">None selected</div>
-            <div class="mini" id="activeCharStatusMini">No active character</div>
-          </div>
+  <div class="hud-home-grid">
+    <div class="card hud-card active-character-card grid-active">
+      <h3>Active Character</h3>
+      <div class="active-character-shell">
+        <div class="active-character-silhouette"></div>
+        <div class="active-character-copy">
+          <div class="active-character-name" id="activeCharMini">None selected</div>
+          <div class="mini" id="activeCharStatusMini">No active character</div>
         </div>
-      </div>
-      <div class="card hud-card save-state-card">
-        <h3>Save State</h3>
-        <div class="save-status-line">Auto-saved to server volume</div>
-        <div class="save-status-ok" id="saveMini">OK</div>
-        <div class="save-status-time" id="saveTimeMini">Last save: --</div>
-      </div>
-      <div class="card hud-card live-notifications-card">
-        <h3>Live Notifications</h3>
-        <div class="hud-list" id="homeNotifList">
-          <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
-          <div class="hud-list-row"><span>Whisper from Alara</span><span>2:16 PM</span></div>
-          <div class="hud-list-row"><span>Item “Neural Disruptor” added</span><span>2:15 PM</span></div>
-        </div>
-        <div class="hud-footer-link">View all (3)</div>
       </div>
     </div>
 
-    <div class="panel hud-card" id="sessionClockLogPanel">
+    <div class="card hud-card save-state-card grid-save">
+      <h3>Save State</h3>
+      <div class="save-status-line">Auto-saved to server volume</div>
+      <div class="save-status-ok" id="saveMini">OK</div>
+      <div class="save-status-time" id="saveTimeMini">Last save: --</div>
+    </div>
+
+    <div class="card hud-card live-notifications-card grid-live">
+      <h3>Live Notifications</h3>
+      <div class="hud-list" id="homeNotifList">
+        <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
+        <div class="hud-list-row"><span>Whisper from Alara</span><span>2:16 PM</span></div>
+        <div class="hud-list-row"><span>Item “Neural Disruptor” added</span><span>2:15 PM</span></div>
+      </div>
+      <div class="hud-footer-link">View all (3)</div>
+    </div>
+
+    <div class="card hud-card session-overview-card grid-overview">
+      <h3>Session Overview</h3>
+      <div class="overview-radar"></div>
+      <div class="overview-metric"><span>Players</span><span>4</span></div>
+      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
+      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
+      <div class="overview-metric"><span>Notes</span><span>12</span></div>
+      <div class="overview-metric"><span>Maps</span><span>2</span></div>
+      <div class="overview-metric"><span>Items</span><span>18</span></div>
+    </div>
+
+    <div class="panel hud-card grid-log" id="sessionClockLogPanel">
       <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
         <div>
           <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Clock Log</h3>
@@ -119,12 +130,7 @@
         <table class="dataTable">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>SESSION</th>
-              <th>DURATION</th>
-              <th>ENDED</th>
-              <th>NOTES</th>
-              <th>ACTIONS</th>
+              <th>ID</th><th>SESSION</th><th>DURATION</th><th>ENDED</th><th>NOTES</th><th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="sessionClockLogBody">
@@ -134,7 +140,49 @@
       </div>
     </div>
 
-    <div class="panel hud-card tactical-party-panel" id="dmActivePartyPanel">
+    <div class="panel hud-card home-forge-panel grid-forge">
+      <div class="forge-header">
+        <h3>Character Builder / Appearance Forge</h3>
+        <div class="mini">Live Preview</div>
+      </div>
+      <div class="forge-grid">
+        <div class="forge-left">
+          <div class="forge-portrait-card">
+            <div class="forge-kicker">Portrait</div>
+            <div class="forge-portrait"></div>
+          </div>
+          <div class="forge-view-stack">
+            <div class="forge-kicker">View</div>
+            <button class="btn smallbtn active">Front</button>
+            <button class="btn smallbtn">Back</button>
+            <button class="btn smallbtn">Left</button>
+            <button class="btn smallbtn">Right</button>
+          </div>
+          <div class="forge-rotate-stack">
+            <div class="forge-kicker">Rotate</div>
+            <div class="forge-rotate-ring"></div>
+            <div class="mini">Auto</div>
+          </div>
+        </div>
+        <div class="forge-stage">
+          <div class="forge-stage-ring"></div>
+          <div class="forge-stage-figure"></div>
+        </div>
+        <div class="forge-right">
+          <label class="forge-field"><span>Role / Class</span><select><option>Rogue (Scout)</option></select></label>
+          <label class="forge-field"><span>Species</span><select><option>Human</option></select></label>
+          <label class="forge-field"><span>Outfit</span><select><option>Shadow Stalker</option></select></label>
+          <label class="forge-field"><span>Gear Set</span><select><option>Light Armor</option></select></label>
+          <label class="forge-field"><span>Hair</span><select><option>Medium / Dark</option></select></label>
+          <label class="forge-field"><span>Face</span><select><option>Scarred (Left Eye)</option></select></label>
+          <div class="forge-colors"><span>Colors</span><div class="color-swatch"></div><div class="color-swatch"></div><div class="color-swatch"></div><div class="color-swatch warm"></div></div>
+          <label class="forge-field"><span>Accessories</span><select><option>Cloak, Pouches, Dagger</option></select></label>
+          <button class="btn smallbtn forge-randomize">Randomize Appearance</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel hud-card tactical-party-panel grid-party" id="dmActivePartyPanel">
       <div class="party-panel-header">
         <h3 style="margin:0;color:var(--accent);">Active Characters / Tactical Party</h3>
         <div class="mini">1 / 6 active</div>
@@ -160,21 +208,8 @@
       <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP/AC/Stats/Init pills to edit (autosaves).</div>
       <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (player characters).</div>
     </div>
-  </div>
 
-  <aside class="hud-home-side">
-    <div class="card hud-card session-overview-card">
-      <h3>Session Overview</h3>
-      <div class="overview-radar"></div>
-      <div class="overview-metric"><span>Players</span><span>4</span></div>
-      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
-      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
-      <div class="overview-metric"><span>Notes</span><span>12</span></div>
-      <div class="overview-metric"><span>Maps</span><span>2</span></div>
-      <div class="overview-metric"><span>Items</span><span>18</span></div>
-    </div>
-
-    <div class="card hud-card quick-actions-card">
+    <div class="card hud-card quick-actions-card grid-quick">
       <h3>Quick Actions</h3>
       <div class="quick-actions-grid">
         <button class="btn smallbtn" id="qaAddNote">Add Note</button>
@@ -184,7 +219,7 @@
       </div>
     </div>
 
-    <div class="card hud-card recent-activity-card">
+    <div class="card hud-card recent-activity-card grid-recent">
       <h3>Recent Activity</h3>
       <div class="hud-list" id="recentActivityList">
         <div class="hud-list-row"><span>Alex updated initiative</span><span>2m ago</span></div>
@@ -195,14 +230,14 @@
       <div class="hud-footer-link">View full activity log</div>
     </div>
 
-    <div class="card hud-card system-health-card">
+    <div class="card hud-card system-health-card grid-health">
       <h3>System Health</h3>
       <div class="health-state">Optimal</div>
       <div class="health-graph">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
     </div>
-  </aside>
+  </div>
 </section>
 
 <section id="tab-character" class="hidden">
