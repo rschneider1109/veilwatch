@@ -1701,7 +1701,8 @@ const server = http.createServer(async (req,res)=>{
       conditions: clampArr(incomingSheet.conditions, 40).map(x=>str(x, 50)),
       background: str(incomingSheet.background ?? "", 200),
       traits: str(incomingSheet.traits ?? "", 2000),
-      notes: str(incomingSheet.notes ?? "", 4000)
+      notes: str(incomingSheet.notes ?? "", 4000),
+      appearance: (incomingSheet.appearance && typeof incomingSheet.appearance === "object") ? incomingSheet.appearance : {}
     };
 
     const c = {
