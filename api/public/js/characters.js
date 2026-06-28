@@ -1567,6 +1567,29 @@ const result = await new Promise((resolve)=>{
     species: "",
     traits: "",
     notes: "",
+    appearance: {
+      characterType: "pc",
+      bodyType: "male",
+      height: "5'10\"",
+      build: "average",
+      ageLook: "adult",
+      skinTone: "light",
+      eyeColor: "brown",
+      hairStyle: "short",
+      hairColor: "black",
+      beardStyle: "none",
+      faceDetail: "clean",
+      scars: "",
+      top: "t_shirt",
+      outerwear: "none",
+      bottoms: "jeans",
+      hat: "none",
+      shoes: "sneakers",
+      gloves: "none",
+      uniformCategory: "none",
+      uniformPreset: "none",
+      bust: "medium"
+    },
     // gear
     starterPackSel: "recommended",
     kitId: "",
@@ -1588,7 +1611,7 @@ const result = await new Promise((resolve)=>{
   // ---------- Build UI (all steps live in DOM; we swap visibility) ----------
   ui.mBody.innerHTML = `
     <div class="mini" id="vwWizardStepLabel" style="opacity:.9;margin-bottom:10px;">
-      Step 1 of 5
+      Step 1 of 6
     </div>
 
     <div id="vwWizardSteps">
@@ -1646,6 +1669,47 @@ const result = await new Promise((resolve)=>{
 
       <!-- Step 3 -->
       <div class="vwStep" data-step="3" style="display:none;">
+        <div class="mini" style="opacity:.85;margin-bottom:10px;">Body and base clothing live here. Armor, weapons, and operational gear still come from the character sheet.</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Character Type</div><select id="vwCreateCharacterType" class="input" style="width:100%"><option value="pc">Player Character</option><option value="npc">NPC</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Body Type</div><select id="vwCreateBodyType" class="input" style="width:100%"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Height</div><input id="vwCreateHeight" class="input" placeholder="5'10&amp;quot;" /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Build</div><select id="vwCreateBuild" class="input" style="width:100%"><option value="slim">Slim</option><option value="average">Average</option><option value="athletic">Athletic</option><option value="broad">Broad</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Age Look</div><select id="vwCreateAgeLook" class="input" style="width:100%"><option value="young_adult">Young Adult</option><option value="adult">Adult</option><option value="middle_aged">Middle Aged</option><option value="older">Older</option></select></div>
+          <div id="vwCreateBustWrap"><div class="mini" style="margin-bottom:6px;opacity:.9">Bust Size</div><select id="vwCreateBust" class="input" style="width:100%"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><input id="vwCreateSkinTone" class="input" placeholder="light / tan / deep / etc." /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Eye Color</div><input id="vwCreateEyeColor" class="input" placeholder="brown" /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Face Detail</div><input id="vwCreateFaceDetail" class="input" placeholder="clean / scarred / tired / etc." /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><input id="vwCreateHairStyle" class="input" placeholder="short fade / long straight / bun / etc." /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Color</div><input id="vwCreateHairColor" class="input" placeholder="black" /></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Beard / Facial Hair</div><input id="vwCreateBeardStyle" class="input" placeholder="none / trimmed / full / mustache" /></div>
+        </div>
+        <div style="margin-top:12px;"><div class="mini" style="margin-bottom:6px;opacity:.9">Scars / Markings</div><input id="vwCreateScars" class="input" placeholder="Optional" /></div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
+          <div style="font-weight:800;margin-bottom:8px;">Base Clothing</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Top</div><select id="vwCreateTop" class="input" style="width:100%"><option value="t_shirt">T-Shirt</option><option value="long_sleeve">Long Sleeve</option><option value="button_up">Button-Up</option><option value="hoodie">Hoodie</option><option value="polo">Polo</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Outerwear</div><select id="vwCreateOuterwear" class="input" style="width:100%"><option value="none">None</option><option value="light_jacket">Light Jacket</option><option value="heavy_jacket">Heavy Jacket</option><option value="blazer">Blazer</option><option value="hoodie_zip">Zip Hoodie</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Bottoms</div><select id="vwCreateBottoms" class="input" style="width:100%"><option value="jeans">Jeans</option><option value="cargo_pants">Cargo Pants</option><option value="dress_pants">Dress Pants</option><option value="joggers">Joggers</option><option value="leggings">Leggings</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hat</div><select id="vwCreateHat" class="input" style="width:100%"><option value="none">None</option><option value="baseball_cap">Baseball Cap</option><option value="beanie">Beanie</option><option value="brimmed_hat">Brimmed Hat</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Shoes</div><select id="vwCreateShoes" class="input" style="width:100%"><option value="sneakers">Sneakers</option><option value="boots">Boots</option><option value="dress_shoes">Dress Shoes</option><option value="work_boots">Work Boots</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Gloves</div><select id="vwCreateGloves" class="input" style="width:100%"><option value="none">None</option><option value="light_gloves">Light Gloves</option><option value="leather_gloves">Leather Gloves</option><option value="fingerless_gloves">Fingerless Gloves</option></select></div>
+          </div>
+        </div>
+        <div id="vwCreateNpcUniformBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;display:none;">
+          <div style="font-weight:800;margin-bottom:8px;">NPC Uniform Preset</div>
+          <div class="mini" style="opacity:.8;margin-bottom:8px;">Uniforms are mainly for DM-controlled NPCs. This picks a clean base look before sheet gear overlays.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Category</div><select id="vwCreateUniformCategory" class="input" style="width:100%"><option value="none">None</option><option value="law_enforcement">Law Enforcement</option><option value="fire">Fire</option><option value="ems">EMS</option><option value="security">Security</option><option value="corporate">Corporate</option></select></div>
+            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Preset</div><select id="vwCreateUniformPreset" class="input" style="width:100%"><option value="none">None</option><option value="patrol_standard">Patrol Standard</option><option value="fire_station">Fire Station</option><option value="ems_duty">EMS Duty</option><option value="security_polo">Security Polo</option><option value="corporate_formal">Corporate Formal</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="vwStep" data-step="4" style="display:none;">
         <div style="margin-bottom:10px;">
           <div class="mini" style="margin-bottom:6px;opacity:.9">Species</div>
           <input id="vwCreateSpecies" class="input" placeholder="e.g., Human / Elf / Synth / etc." />
@@ -1676,8 +1740,8 @@ const result = await new Promise((resolve)=>{
         </div>
       </div>
 
-      <!-- Step 4 -->
-      <div class="vwStep" data-step="4" style="display:none;">
+      <!-- Step 5 -->
+      <div class="vwStep" data-step="5" style="display:none;">
         <div style="font-weight:800;margin-bottom:8px;">Weapons & Gear</div>
         <div class="mini" style="opacity:.8;margin-bottom:10px;">
           Choose a Starter Pack (auto adds 1 sidearm + 1 primary), optionally add a Kit, then add any extra gear.
@@ -1721,8 +1785,8 @@ const result = await new Promise((resolve)=>{
         </div>
       </div>
 
-      <!-- Step 5 -->
-      <div class="vwStep" data-step="5" style="display:none;">
+      <!-- Step 6 -->
+      <div class="vwStep" data-step="6" style="display:none;">
         <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
         <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA here (these are treated as creation-locked).</div>
 
@@ -2384,6 +2448,9 @@ const result = await new Promise((resolve)=>{
 
   qs("vwCreateTalentSearch") && (qs("vwCreateTalentSearch").oninput = rerenderTalentResults);
   qs("vwCreateSpellSearch") && (qs("vwCreateSpellSearch").oninput = rerenderSpellResults);
+  qs("vwCreateCharacterType")?.addEventListener("change", updateAppearanceModeUI);
+  qs("vwCreateBodyType")?.addEventListener("change", updateAppearanceModeUI);
+  updateAppearanceModeUI();
 
   qs("vwCreateAddWeapon")?.addEventListener("click", (e)=>{
     e.preventDefault();
@@ -2403,6 +2470,15 @@ const result = await new Promise((resolve)=>{
     state.invExtra.push({ category:"General", name:"", qty:"1", notes:"" });
     renderInvExtra();
   });
+
+  function updateAppearanceModeUI(){
+    const type = String(qs("vwCreateCharacterType")?.value || state.appearance.characterType || "pc");
+    const bodyType = String(qs("vwCreateBodyType")?.value || state.appearance.bodyType || "male");
+    const npcBlock = qs("vwCreateNpcUniformBlock");
+    const bustWrap = qs("vwCreateBustWrap");
+    if(npcBlock) npcBlock.style.display = type === "npc" ? "block" : "none";
+    if(bustWrap) bustWrap.style.display = bodyType === "female" ? "block" : "none";
+  }
 
   // ---------- Validation + persistence per step ----------
   function validateStep(n){
@@ -2439,6 +2515,35 @@ const result = await new Promise((resolve)=>{
     }
 
     if(n === 3){
+      const appearance = {
+        characterType: String(qs("vwCreateCharacterType")?.value||"pc"),
+        bodyType: String(qs("vwCreateBodyType")?.value||"male"),
+        height: String(qs("vwCreateHeight")?.value||"").trim(),
+        build: String(qs("vwCreateBuild")?.value||"average"),
+        ageLook: String(qs("vwCreateAgeLook")?.value||"adult"),
+        bust: String(qs("vwCreateBust")?.value||"medium"),
+        skinTone: String(qs("vwCreateSkinTone")?.value||"").trim(),
+        eyeColor: String(qs("vwCreateEyeColor")?.value||"").trim(),
+        faceDetail: String(qs("vwCreateFaceDetail")?.value||"").trim(),
+        hairStyle: String(qs("vwCreateHairStyle")?.value||"").trim(),
+        hairColor: String(qs("vwCreateHairColor")?.value||"").trim(),
+        beardStyle: String(qs("vwCreateBeardStyle")?.value||"").trim(),
+        scars: String(qs("vwCreateScars")?.value||"").trim(),
+        top: String(qs("vwCreateTop")?.value||"t_shirt"),
+        outerwear: String(qs("vwCreateOuterwear")?.value||"none"),
+        bottoms: String(qs("vwCreateBottoms")?.value||"jeans"),
+        hat: String(qs("vwCreateHat")?.value||"none"),
+        shoes: String(qs("vwCreateShoes")?.value||"sneakers"),
+        gloves: String(qs("vwCreateGloves")?.value||"none"),
+        uniformCategory: String(qs("vwCreateUniformCategory")?.value||"none"),
+        uniformPreset: String(qs("vwCreateUniformPreset")?.value||"none")
+      };
+      if(!appearance.height){ toast("Height is required"); return false; }
+      state.appearance = appearance;
+      return true;
+    }
+
+    if(n === 4){
       const species = String(qs("vwCreateSpecies")?.value||"").trim();
       if(!species){ toast("Species is required"); return false; }
       state.species = species;
@@ -2448,7 +2553,7 @@ const result = await new Promise((resolve)=>{
       return true;
     }
 
-    if(n === 4){
+    if(n === 5){
       state.cash = String(qs("vwCreateCash")?.value||"0").trim() || "0";
       state.bank = String(qs("vwCreateBank")?.value||"0").trim() || "0";
       state.starterPackSel = String(qs("vwCreateStarterPack")?.value||state.starterPackSel||"none");
@@ -2457,7 +2562,7 @@ const result = await new Promise((resolve)=>{
       return true;
     }
 
-    if(n === 5){
+    if(n === 6){
       // Stats
       const stats = {};
       ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
@@ -2510,12 +2615,12 @@ const result = await new Promise((resolve)=>{
   ui.btnOk.onclick = async ()=>{
     if(!validateStep(step)) return;
 
-    if(step < 5){
+    if(step < 6){
       showStep(step + 1);
       return;
     }
 
-    // Step 5: Create payload
+    // Step 6: Create payload
     const classId = state.classId;
     const subclassId = state.subclassId ? state.subclassId : null;
     const level = state.level;
@@ -2598,7 +2703,8 @@ const result = await new Promise((resolve)=>{
       background: bgName,
       species: state.species,
       traits: state.traits,
-      notes: state.notes
+      notes: state.notes,
+      appearance: state.appearance
     };
 
     ui.btnOk.textContent = "Creating…";
@@ -2810,6 +2916,38 @@ function vwUpdateCharSummaryRow(){
   set("charSummaryInit", initTxt);
   set("charSummarySpeed", speedTxt);
   set("charSummaryMoney", moneyTxt);
+}
+
+
+function vwFormatAppearanceLabel(v){
+  return String(v||"").replace(/_/g," ").replace(/\w/g, c=>c.toUpperCase());
+}
+function vwRenderCharacterAppearance(){
+  const c = (typeof getChar === "function") ? getChar() : null;
+  const box = document.getElementById("appearancePills");
+  if(!box) return;
+  const ap = c?.sheet?.appearance || null;
+  if(!ap){
+    box.innerHTML = '<div class="pill">No appearance data yet</div>';
+    return;
+  }
+  const pills = [
+    `Type: ${vwFormatAppearanceLabel(ap.characterType || "pc")}`,
+    `Body: ${vwFormatAppearanceLabel(ap.bodyType || "male")}`,
+    `Height: ${ap.height || "—"}`,
+    `Build: ${vwFormatAppearanceLabel(ap.build || "average")}`,
+    `Hair: ${vwFormatAppearanceLabel(ap.hairStyle || "")}${ap.hairColor ? ' • ' + vwFormatAppearanceLabel(ap.hairColor) : ''}`,
+    `Face: ${vwFormatAppearanceLabel(ap.faceDetail || "clean")}`,
+    `Top: ${vwFormatAppearanceLabel(ap.top || "")}`,
+    `Outerwear: ${vwFormatAppearanceLabel(ap.outerwear || "none")}`,
+    `Bottoms: ${vwFormatAppearanceLabel(ap.bottoms || "")}`,
+    `Hat: ${vwFormatAppearanceLabel(ap.hat || "none")}`,
+    `Shoes: ${vwFormatAppearanceLabel(ap.shoes || "")}`,
+    `Gloves: ${vwFormatAppearanceLabel(ap.gloves || "none")}`
+  ];
+  if(String(ap.bodyType||"") === "female" && ap.bust) pills.splice(4,0,`Bust: ${vwFormatAppearanceLabel(ap.bust)}`);
+  if(ap.characterType === "npc" && ap.uniformPreset && ap.uniformPreset !== "none") pills.push(`Uniform: ${vwFormatAppearanceLabel(ap.uniformPreset)}`);
+  box.innerHTML = pills.map(t=>`<div class="pill">${vwEscapeHtml(t)}</div>`).join("");
 }
 
 
