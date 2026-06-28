@@ -483,28 +483,13 @@
     </div>
   </section>
 
-  <section id="tab-settings" class="hidden">
-    <div class="panel">
-      <div class="row">
-        <div class="pill">Admin / Settings</div>
-        <div class="mini">DM only. Export/import state, reset, feature toggles.</div>
-      </div>
-      <hr/>
-      <div class="row" style="gap:10px;flex-wrap:wrap;">
-        <button class="btn smallbtn" id="exportStateBtn">Export State JSON</button>
-        <button class="btn smallbtn" id="importStateBtn">Import State JSON</button>
-        <button class="btn smallbtn" id="resetStateBtn">Reset State</button>
-      </div>
-      <hr/>
-      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="min-width:240px;">
-          <div class="mini" style="margin-bottom:6px;">DM Passkey (UI change only if env var is not set)</div>
-          <input class="input" id="dmKeyNew" placeholder="New DM passkey" style="width:100%;"/>
-        </div>
-        <button class="btn smallbtn" id="saveDmKeyBtn">Save DM Passkey</button>
-      </div>
-
-      <div class="mini" style="margin-top:10px;color:var(--muted);">Tip: keep backups before imports. State is auto-saved.</div>
+  <section id="tab-settings" class="hidden" style="display:none !important;">
+    <div class="panel" style="display:none !important;" aria-hidden="true">
+      <button class="btn smallbtn hidden" id="exportStateBtn" type="button">Export State JSON</button>
+      <button class="btn smallbtn hidden" id="importStateBtn" type="button">Import State JSON</button>
+      <button class="btn smallbtn hidden" id="resetStateBtn" type="button">Reset State</button>
+      <input class="input hidden" id="dmKeyNew" placeholder="New DM passkey" />
+      <button class="btn smallbtn hidden" id="saveDmKeyBtn" type="button">Save DM Passkey</button>
     </div>
   </section>
 </main>
