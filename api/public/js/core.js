@@ -447,7 +447,9 @@ function setRoleUI(){
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
-  if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
+  // Keep the Settings tab section hidden unless it is the active tab.
+  // Role UI should control access to the nav button, not force the tab content visible on Home.
+  if(tabSettings && SESSION.role !== "dm") tabSettings.classList.add("hidden");
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
