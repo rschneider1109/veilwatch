@@ -447,7 +447,7 @@ function setRoleUI(){
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
-  if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
+  if(tabSettings && SESSION.role !== "dm") tabSettings.classList.add("hidden");
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
@@ -858,8 +858,10 @@ function authInit(){
 
         if(overlay) overlay.style.display = "none";
         setRoleUI();
+        await renderTabs("home");
 
         await refreshAll();
+        await renderTabs("home");
         if(typeof vwStartStream === "function") vwStartStream();
         if(typeof vwStartFallbackPoller === "function") vwStartFallbackPoller();
         return true;
