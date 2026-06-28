@@ -447,7 +447,7 @@ function setRoleUI(){
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
-  if(tabSettings && SESSION.role !== "dm") tabSettings.classList.add("hidden");
+  if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
 
@@ -858,10 +858,9 @@ function authInit(){
 
         if(overlay) overlay.style.display = "none";
         setRoleUI();
-        await renderTabs("home");
 
         await refreshAll();
-        await renderTabs("home");
+        try{ await renderTabs("home"); }catch(e){}
         if(typeof vwStartStream === "function") vwStartStream();
         if(typeof vwStartFallbackPoller === "function") vwStartFallbackPoller();
         return true;
@@ -900,6 +899,7 @@ function authInit(){
     try{ await api("/api/auth/logout", { method:"POST", body: JSON.stringify({}) }); }catch(e){}
     SESSION.role = null; SESSION.username = null; SESSION.userId = null; SESSION.activeCharId = null;
     if(overlay) overlay.style.display = "flex";
+    try{ renderTabs("home"); }catch(e){}
     setRoleUI();
   };
 
