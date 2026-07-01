@@ -9,16 +9,16 @@
 <body>
 <div id="loginOverlay">
   <div class="panel loginCard">
-    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.9.4</span></div>
+    <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.5</span></div>
     <div class="mini">Log in or create an account. The <b>first</b> account created becomes the DM automatically.</div>
     <hr/>
     <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:10px;">
+      <div style="grid-column:span 12;" class="row">
+        <input class="input" id="authUser" placeholder="Username" autocomplete="username" style="flex:1;min-width:220px;"/>
+      </div>
       <form id="authForm" style="grid-column:span 12;">
-        <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-          <input class="input" id="authUser" name="username" placeholder="Username" autocomplete="username" style="flex:1;min-width:220px;"/>
-        </div>
         <div class="row" style="gap:10px;flex-wrap:wrap;">
-          <input class="input" id="authPass" name="password" type="password" placeholder="Password" autocomplete="current-password" style="flex:1;min-width:220px;"/>
+          <input class="input" id="authPass" type="password" placeholder="Password" autocomplete="current-password" style="flex:1;min-width:220px;"/>
           <button class="btn smallbtn" type="button" id="loginBtn">Login</button>
           <button class="btn smallbtn" type="button" id="registerBtn">Create</button>
         </div>
@@ -28,141 +28,50 @@
   </div>
 </div>
 
-<div class="vw-shell">
-<div class="vw-shell-edge"></div>
-<div class="vw-shell-grid"></div>
-<div class="vw-shell-glow"></div>
-<div class="vw-shell-scan"></div>
-<header class="vw-command-strip">
-  <div class="cmd-block cmd-brand">
-    <div class="brand-wrap"><div class="brand">VEILWATCH <span>OS</span></div><div class="brand-sub">TACTICAL CAMPAIGN COMMAND INTERFACE</div></div>
-  </div>
-  <div class="cmd-block cmd-status">
-    <div class="cmd-label">Session State</div>
-    <div class="cmd-value cmd-active">Active</div>
-  </div>
-  <div class="cmd-block cmd-case">
-    <div class="cmd-label">Active Operation</div>
-    <div class="cmd-value">Command Center</div>
-  </div>
-  <div class="cmd-block cmd-clock-main">
-    <div class="cmd-label">Elapsed Session</div>
-    <div class="cmd-clock-value" id="sessionClockMini">00:00:00</div>
-    <div class="mini" id="sessionClockStatusMini">Stopped / Break</div>
-    <div class="hidden" id="sessionClockStatusMiniMirror">Stopped / Break</div>
-    <div class="hidden" id="sessionClockPill">Session: 00:00:00</div>
-  </div>
-  <div class="cmd-block cmd-control-strip">
-    <div class="sessionClockControls hidden" id="sessionClockControls" aria-label="DM session clock controls">
-      <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
-      <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
-      <button class="btn smallbtn dangerbtn" id="sessionClockEndBtn" type="button">End Session</button>
-      <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
-    </div>
-  </div>
-  <div class="cmd-block cmd-user"><div class="cmd-label">Operator Node</div><div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn">Logout</button></div>
-  <div class="cmd-block cmd-clock"><div class="cmd-label">System Time</div><div class="pill right" id="clockPill">--:--</div></div>
+<header>
+  <div class="brand">VEILWATCH OS</div>
+  <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
+  <div class="pill" id="shopPill">Shop: --</div>
+  <div class="pill right" id="clockPill">--:--</div>
 </header>
 
-<main class="hud-main">
-  <aside class="nav hud-rail">
-    <button class="btn active" data-tab="home"><span class="nav-title">Command Core</span><span class="nav-sub">Session Control</span></button>
-    <button class="btn" data-tab="character"><span class="nav-title">Sheets</span><span class="nav-sub">Character Records</span></button>
-    <button class="btn intel-tab-btn" data-tab="intel"><span class="nav-title">Intel</span><span class="nav-sub">Notes &amp; Data</span><span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
-    <button class="btn" data-tab="shop"><span class="nav-title">Shop</span><span class="nav-sub">Gear &amp; Services</span></button>
-    <button class="btn chat-tab-btn" data-tab="chat"><span class="nav-title">Comms</span><span class="nav-sub">Secure Channels</span><span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
-    <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span class="nav-title">System</span><span class="nav-sub">Access &amp; Interface</span></button>
-    <div class="system-uplink">
-      <div class="uplink-label">System Uplink</div>
-      <div class="uplink-state">Secure • Encrypted</div>
-    </div>
-  </aside>
+<main>
+  <div class="nav">
+    <button class="btn active" data-tab="home">Home</button>
+    <button class="btn" data-tab="character">Character</button>
+    <button class="btn intel-tab-btn" data-tab="intel">Intel <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
+    <button class="btn" data-tab="shop">Shop</button>
+    <button class="btn chat-tab-btn" data-tab="chat">Chat <span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
+    <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
+  </div>
 
-  <section id="tab-home" class="hud-home-screen">
-  <div class="hud-home-grid command-deck-home-grid">
-    <div class="panel hud-card command-deck-panel grid-commanddeck">
-      <div class="command-deck-header">
-        <div>
-          <h3>DM Command Deck</h3>
-          <div class="mini">Run the live session from here: confirm the table is ready, watch the incoming queue, and keep the campaign moving without digging through tabs.</div>
-        </div>
-        <div class="command-chip-row">
-          <div class="command-chip"><span>Party Ready</span><strong>1 / 6</strong></div>
-          <div class="command-chip"><span>Open Requests</span><strong>2</strong></div>
-          <div class="command-chip"><span>Unread Messages</span><strong>0</strong></div>
-          <div class="command-chip"><span>Intel Alerts</span><strong>3</strong></div>
-        </div>
-      </div>
-      <div class="command-deck-columns">
-        <div class="command-subpanel">
-          <div class="command-subpanel-title">Pre-Flight Checklist</div>
-          <div class="command-checklist">
-            <div class="command-checklist-item"><span class="tick on"></span><span>Player accounts confirmed</span></div>
-            <div class="command-checklist-item"><span class="tick on"></span><span>Active party assigned</span></div>
-            <div class="command-checklist-item"><span class="tick on"></span><span>Intel feed online</span></div>
-            <div class="command-checklist-item"><span class="tick"></span><span>Requests reviewed before launch</span></div>
-            <div class="command-checklist-item"><span class="tick"></span><span>Session clock waiting to start</span></div>
-          </div>
-        </div>
-        <div class="command-subpanel">
-          <div class="command-subpanel-title">Latest Recap</div>
-          <div class="recap-card-lite">
-            <div class="recap-card-title">Previously On // Dead Channel</div>
-            <p>The team recovered the blackout symbol, heard a whisper from the harbor echo, and marked one unresolved lead tied to Alara’s message.</p>
-            <div class="mini">Pinned for player home • ready to broadcast</div>
-          </div>
-        </div>
-        <div class="command-subpanel">
-          <div class="command-subpanel-title">DM Attention Queue</div>
-          <div class="attention-queue">
-            <div class="attention-row high"><span>Pending request</span><strong>Mike wants to investigate the blackout symbol</strong></div>
-            <div class="attention-row"><span>Player note</span><strong>Sarah added “Hidden Passage”</strong></div>
-            <div class="attention-row"><span>Scene prep</span><strong>Encounter clock not yet started</strong></div>
-            <div class="attention-row"><span>Intel sync</span><strong>3 recent clue updates available</strong></div>
-          </div>
-        </div>
-      </div>
+  <section id="tab-home" class="grid cards">
+    <div class="card" style="grid-column:span 4;">
+      <h3>Active Character</h3>
+      <div class="mini" id="activeCharMini">None selected</div>
+    </div>
+    <div class="card" style="grid-column:span 4;">
+      <h3>Save State</h3>
+      <div class="mini">Auto-saved to server volume</div>
+      <div class="mini" id="saveMini">OK</div>
+    </div>
+    <div class="card" style="grid-column:span 4;">
+      <h3>Session Clock</h3>
+      <div class="mini" id="sessionClockMini">00:00</div>
     </div>
 
-    <div class="card hud-card live-notifications-card grid-live">
-      <h3>Live Event Stream</h3>
-      <div class="hud-list" id="homeNotifList">
-        <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
-        <div class="hud-list-row"><span>Whisper from Alara</span><span>2:16 PM</span></div>
-        <div class="hud-list-row"><span>Item “Neural Disruptor” added</span><span>2:15 PM</span></div>
-      </div>
-      <div class="hud-footer-link">Open feed (3)</div>
-    </div>
-
-    <div class="card hud-card session-overview-card grid-overview">
-      <h3>Operational Overview</h3>
-      <div class="overview-radar"></div>
-      <div class="overview-metric"><span>Players</span><span>4</span></div>
-      <div class="overview-metric"><span>NPCs</span><span>7</span></div>
-      <div class="overview-metric"><span>Encounters</span><span>1</span></div>
-      <div class="overview-metric"><span>Notes</span><span>12</span></div>
-      <div class="overview-metric"><span>Maps</span><span>2</span></div>
-      <div class="overview-metric"><span>Items</span><span>18</span></div>
-    </div>
-
-    <div class="panel hud-card tactical-party-panel grid-party" id="dmActivePartyPanel">
-      <div class="party-panel-header">
-        <div>
-          <h3 style="margin:0;color:var(--accent);">Tactical Party Control</h3>
-          <div class="mini party-header-copy">This is your live roster control block. Add the current party, open sheets fast, and keep the scene-focused characters ready to run.</div>
-        </div>
-        <div class="mini">1 / 6 active</div>
-      </div>
-      <div class="row party-entry-row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="min-width:260px;flex:1;">
-          <div class="mini" style="margin-bottom:6px;">Add to Party</div>
+    <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters</h3>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="min-width:240px;flex:1;">
+          <div class="mini" style="margin-bottom:6px;">Add to Active</div>
           <select id="dmActiveAddSel" style="width:100%;"></select>
         </div>
-        <div style="min-width:220px;flex:1;">
-          <div class="mini" style="margin-bottom:6px;">Player Tag (optional)</div>
+        <div style="min-width:220px;">
+          <div class="mini" style="margin-bottom:6px;">Player Label (optional)</div>
           <input class="input" id="dmActivePlayerLabel" placeholder="e.g., Alex" style="width:100%;"/>
         </div>
-        <div style="min-width:170px;">
+        <div style="min-width:180px;">
           <div class="mini" style="margin-bottom:6px;">&nbsp;</div>
           <div class="row" style="gap:10px;">
             <button class="btn smallbtn" id="dmActiveAddBtn">Add</button>
@@ -170,158 +79,30 @@
           </div>
         </div>
       </div>
-      <div class="grid cards" id="dmActivePartyCards" style="margin-top:14px;"></div>
-      <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP / AC / Stats / Init pills to edit. This block should stay usable during live play, so it intentionally gets more space than the decorative panels.</div>
+      <div class="grid cards" id="dmActivePartyCards" style="margin-top:12px;"></div>
+      <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP/AC/Stats/Init pills to edit (autosaves).</div>
+      <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (player characters).</div>
     </div>
 
-    <div class="panel hud-card home-forge-panel grid-forge">
-      <div class="forge-header">
-        <div>
-          <h3>Entity Projection Bay</h3>
-          <div class="mini forge-subcopy">The holographic projection area stays built in, but it is treated as a secondary command tool rather than the entire home screen.</div>
-        </div>
-        <div class="mini">Projection Live</div>
-      </div>
-      <div class="forge-grid">
-        <div class="forge-left">
-          <div class="forge-portrait-card">
-            <div class="forge-kicker">Portrait</div>
-            <div class="forge-portrait"></div>
-          </div>
-          <div class="forge-view-stack">
-            <div class="forge-kicker">View</div>
-            <button class="btn smallbtn active">Front</button>
-            <button class="btn smallbtn">Back</button>
-            <button class="btn smallbtn">Left</button>
-            <button class="btn smallbtn">Right</button>
-          </div>
-          <div class="forge-rotate-stack">
-            <div class="forge-kicker">Rotate</div>
-            <div class="forge-rotate-ring"></div>
-            <div class="mini">Auto</div>
-          </div>
-        </div>
-        <div class="forge-stage">
-          <div class="forge-stage-ring"></div>
-          <div class="forge-stage-figure"></div>
-          <div class="forge-stage-tag stage-tag-top">PRIMARY ENTITY</div>
-          <div class="forge-stage-tag stage-tag-left">BIO-SIGN</div>
-          <div class="forge-stage-tag stage-tag-right">LOADOUT</div>
-        </div>
-        <div class="forge-right">
-          <label class="forge-field"><span>Role / Class</span><select><option>Rogue (Scout)</option></select></label>
-          <label class="forge-field"><span>Species</span><select><option>Human</option></select></label>
-          <label class="forge-field"><span>Outfit</span><select><option>Shadow Stalker</option></select></label>
-          <label class="forge-field"><span>Gear Set</span><select><option>Light Armor</option></select></label>
-          <label class="forge-field"><span>Hair</span><select><option>Medium / Dark</option></select></label>
-          <label class="forge-field"><span>Face</span><select><option>Scarred (Left Eye)</option></select></label>
-          <div class="forge-colors"><span>Colors</span><div class="color-swatch"></div><div class="color-swatch"></div><div class="color-swatch"></div><div class="color-swatch warm"></div></div>
-          <label class="forge-field"><span>Accessories</span><select><option>Cloak, Pouches, Dagger</option></select></label>
-          <button class="btn smallbtn forge-randomize">Randomize Appearance</button>
-        </div>
+    <div class="panel" style="grid-column:span 12;">
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Quick Launch</h3>
+      <div class="row">
+        <button class="btn" data-go="character">Character</button>
+        <button class="btn" data-go="intel">Intel</button>
+        <button class="btn" data-go="shop">Shop</button>
       </div>
     </div>
+  </section>
 
-    <div class="card hud-card active-character-card grid-active">
-      <h3>Primary Focus</h3>
-      <div class="active-character-shell">
-        <div class="active-character-silhouette"></div>
-        <div class="active-character-copy">
-          <div class="active-character-name" id="activeCharMini">Jeff</div>
-          <div class="mini" id="activeCharStatusMini">No primary focus selected</div>
-        </div>
-      </div>
-      <div class="focus-kv">
-        <div><span>Role</span><strong>Field Lead</strong></div>
-        <div><span>Status</span><strong>Ready</strong></div>
-      </div>
-    </div>
-
-    <div class="card hud-card save-state-card grid-save">
-      <h3>Session State</h3>
-      <div class="save-status-line">Control state synced to server volume</div>
-      <div class="save-status-ok" id="saveMini">OK</div>
-      <div class="save-status-time" id="saveTimeMini">Last save: --</div>
-      <div class="state-mini-grid">
-        <div><span>Clock</span><strong>Stopped</strong></div>
-        <div><span>Mode</span><strong>DM Live</strong></div>
-      </div>
-    </div>
-
-    <div class="panel hud-card grid-log" id="sessionClockLogPanel">
-      <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
-        <div>
-          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Archive</h3>
-          <div class="mini">Completed sessions are recorded here when the DM clicks End Session. This should become the official campaign run log.</div>
-        </div>
-      </div>
-      <div class="tableWrap command-log-wrap" style="margin-top:12px;">
-        <table class="dataTable">
-          <thead>
-            <tr>
-              <th>ID</th><th>SESSION</th><th>DURATION</th><th>ENDED</th><th>NOTES</th><th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="sessionClockLogBody">
-            <tr><td colspan="6" class="mini">No session logs yet.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card hud-card recent-activity-card grid-recent">
-      <h3>Event Archive</h3>
-      <div class="hud-list" id="recentActivityList">
-        <div class="hud-list-row"><span>Alex updated initiative</span><span>2m ago</span></div>
-        <div class="hud-list-row"><span>Sarah added note “Hidden Passage”</span><span>8m ago</span></div>
-        <div class="hud-list-row"><span>Tom rolled 1d20 + 5</span><span>16m ago</span></div>
-        <div class="hud-list-row"><span>Jeff (DM) started session</span><span>22m ago</span></div>
-      </div>
-      <div class="hud-footer-link">Open event archive</div>
-    </div>
-
-    <div class="card hud-card quick-actions-card grid-quick">
-      <h3>Command Actions</h3>
-      <div class="quick-actions-grid">
-        <button class="btn smallbtn" id="qaAddNote">Add Note</button>
-        <button class="btn smallbtn" id="qaAddNpc">Add NPC</button>
-        <button class="btn smallbtn" id="qaAddItem">Add Item</button>
-        <button class="btn smallbtn" id="qaRollDice">Roll Dice</button>
-      </div>
-      <div class="mini" style="margin-top:10px;">Primary DM shortcuts live here so you don’t have to hunt through the interface mid-session.</div>
-    </div>
-
-    <div class="card hud-card system-health-card grid-health">
-      <h3>System Integrity</h3>
-      <div class="health-state">Optimal</div>
-      <div class="health-graph">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="tab-character" class="hidden">
+  <section id="tab-character" class="hidden">
     <div class="panel">
       <div class="row">
         <select id="charSel"></select>
         <button class="btn smallbtn" id="newCharBtn">New Character</button>
-        <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
-        <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
         <button class="btn smallbtn hidden" id="deleteCharBtn" style="border-color:#7a2f2f;color:#ffd1d1;">Delete Character</button>
+        <button class="btn smallbtn hidden" id="importPlayerBtn">Import Player</button>
       </div>
       <hr/>
-      <div class="panel appearance-forge-dock">
-        <div class="appearance-dock-copy">
-          <div class="dock-kicker">Entity Projection Bay</div>
-          <div class="dock-title">Future 3D preview dock</div>
-          <div class="mini">This area is being prepared for the live character visualizer, portrait dock, and appearance summary.</div>
-        </div>
-        <div class="appearance-dock-stage">
-          <div class="dock-stage-ring"></div>
-          <div class="dock-stage-label">Preview online soon</div>
-        </div>
-      </div>
       <div class="row" id="charSummaryRow" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center;">
         <div class="pill" id="charSummaryPlayer">Player: —</div>
         <div class="pill" id="charSummaryClass">Class: —</div>
@@ -343,7 +124,7 @@
   <button class="btn" data-ctab="notes">Notes</button>
 </div>
 
-      <div id="ctab-actions" class="hidden" style="margin-top:12px;">
+      <div id="ctab-actions" style="margin-top:12px;">
         <table>
           <thead><tr><th>WEAPON</th><th>RANGE</th><th>HIT/DC</th><th>DAMAGE</th><th></th></tr></thead>
           <tbody id="weapBody"></tbody>
@@ -403,7 +184,7 @@
   </div>
 </div>
 
-<div id="ctab-sheet" style="margin-top:12px;">
+<div id="ctab-sheet" class="hidden" style="margin-top:12px;">
         <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
           <div style="min-width:160px;">
             <div class="mini" style="margin-bottom:6px;">HP (current / max)</div>
@@ -459,10 +240,13 @@
         <div id="sheetOnlyFooter">
 <hr/>
 <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;">
+          <button class="btn smallbtn" id="saveSheetBtn">Save Sheet</button>
           <button class="btn smallbtn hidden" id="finishCharBtn" style="border-color:rgba(0,229,255,.45);">Finish Creation</button>
+          <button class="btn smallbtn hidden" id="dupCharBtn">Duplicate Character</button>
+          <button class="btn smallbtn hidden" id="delCharBtn">Delete Character</button>
         </div>
 
-        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Save/Duplicate/Delete are available in the top Character toolbar.</div>
+        <div class="mini" style="margin-top:8px;color:var(--muted);">Autosave is enabled. Delete/Duplicate are DM-only.</div>
 </div>
       </div>
     </div>
@@ -471,13 +255,11 @@
   <section id="tab-intel" class="hidden">
     <div class="panel">
       <div id="intelDisabledMsg" class="mini hidden"></div>
-      <div id="dmIntelIntro" class="hidden">
-        <div class="row">
-          <div class="pill">DM Tools</div>
-          <div class="mini">Notifications, clues, recaps, requests, and archives.</div>
-        </div>
-        <hr/>
+      <div class="row">
+        <div class="pill">DM Tools</div>
+        <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
       </div>
+      <hr/>
       <div id="dmPanels" class="hidden">
         <div class="row" style="margin-bottom:10px;">
           <button class="btn active" data-itab="notifications">Notifications</button>
@@ -512,7 +294,7 @@
             <div class="mini" style="color:var(--muted);">Write recap entries here. Players see only entries marked for players.</div>
           </div>
           <table>
-            <thead><tr><th>ID</th><th>TITLE</th><th>VISIBILITY</th><th>PINNED</th><th>UPDATED</th><th>SUMMARY</th><th></th></tr></thead>
+            <thead><tr><th>ID</th><th>TITLE</th><th>DATE</th><th>VISIBILITY</th><th>SUMMARY</th><th></th></tr></thead>
             <tbody id="recapBody"></tbody>
           </table>
         </div>
@@ -554,7 +336,7 @@
           <div class="mini">Direct pushes from the DM that are not clues.</div>
         </div>
         <table style="margin-top:8px;">
-          <thead><tr><th>ID</th><th>TYPE</th><th>MESSAGE</th></tr></thead>
+          <thead><tr><th>ID</th><th>TYPE</th><th>DETAIL</th><th>DM NOTES</th></tr></thead>
           <tbody id="intelAlertBody"></tbody>
         </table>
         <hr/>
@@ -621,13 +403,12 @@
             <button class="btn smallbtn" id="shopClearCartBtn">Clear Cart</button>
             <button class="btn smallbtn" id="shopCheckoutBtn">Checkout</button>
           </div>
-          <div class="mini">Checkout validates cash/bank, adds items to inventory, and updates shop stock.</div>
+          <div class="mini">This pass builds the cart and inventory checkout flow. Cash/bank validation plugs in later.</div>
         </aside>
       </div>
       <div class="mini" style="margin-top:10px;" id="shopHelpText">Players can add shop items to Inventory. DM can customize each shop.</div>
     </div>
   </section>
-
 
   <section id="tab-chat" class="hidden">
     <div class="panel chat-shell">
