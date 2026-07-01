@@ -35,18 +35,18 @@
 <div class="vw-shell-scan"></div>
 <header class="vw-command-strip">
   <div class="cmd-block cmd-brand">
-    <div class="brand-wrap"><div class="brand">VEILWATCH <span>OS</span></div><div class="brand-sub">TACTICAL TABLETOP COMMAND INTERFACE</div></div>
+    <div class="brand-wrap"><div class="brand">VEILWATCH <span>OS</span></div><div class="brand-sub">TACTICAL CAMPAIGN COMMAND INTERFACE</div></div>
   </div>
   <div class="cmd-block cmd-status">
-    <div class="cmd-label">Session Status</div>
+    <div class="cmd-label">Session State</div>
     <div class="cmd-value cmd-active">Active</div>
   </div>
   <div class="cmd-block cmd-case">
-    <div class="cmd-label">Operation / Case</div>
+    <div class="cmd-label">Active Operation</div>
     <div class="cmd-value">Command Center</div>
   </div>
   <div class="cmd-block cmd-clock-main">
-    <div class="cmd-label">Session Clock</div>
+    <div class="cmd-label">Elapsed Session</div>
     <div class="cmd-clock-value" id="sessionClockMini">00:00:00</div>
     <div class="mini" id="sessionClockStatusMini">Stopped / Break</div>
     <div class="hidden" id="sessionClockStatusMiniMirror">Stopped / Break</div>
@@ -60,18 +60,18 @@
       <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
     </div>
   </div>
-  <div class="cmd-block cmd-user"><div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn">Logout</button></div>
-  <div class="cmd-block cmd-clock"><div class="pill right" id="clockPill">--:--</div></div>
+  <div class="cmd-block cmd-user"><div class="cmd-label">Operator Node</div><div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn">Logout</button></div>
+  <div class="cmd-block cmd-clock"><div class="cmd-label">System Time</div><div class="pill right" id="clockPill">--:--</div></div>
 </header>
 
 <main class="hud-main">
   <aside class="nav hud-rail">
-    <button class="btn active" data-tab="home"><span class="nav-title">Home</span><span class="nav-sub">Command Center</span></button>
-    <button class="btn" data-tab="character"><span class="nav-title">Character</span><span class="nav-sub">Heroes &amp; Sheets</span></button>
+    <button class="btn active" data-tab="home"><span class="nav-title">Command Core</span><span class="nav-sub">Session Control</span></button>
+    <button class="btn" data-tab="character"><span class="nav-title">Sheets</span><span class="nav-sub">Character Records</span></button>
     <button class="btn intel-tab-btn" data-tab="intel"><span class="nav-title">Intel</span><span class="nav-sub">Notes &amp; Data</span><span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
     <button class="btn" data-tab="shop"><span class="nav-title">Shop</span><span class="nav-sub">Gear &amp; Services</span></button>
-    <button class="btn chat-tab-btn" data-tab="chat"><span class="nav-title">Chat</span><span class="nav-sub">Comms Channels</span><span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
-    <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span class="nav-title">Settings</span><span class="nav-sub">System &amp; Prefs</span></button>
+    <button class="btn chat-tab-btn" data-tab="chat"><span class="nav-title">Comms</span><span class="nav-sub">Secure Channels</span><span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
+    <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span class="nav-title">System</span><span class="nav-sub">Access &amp; Interface</span></button>
     <div class="system-uplink">
       <div class="uplink-label">System Uplink</div>
       <div class="uplink-state">Secure • Encrypted</div>
@@ -81,35 +81,35 @@
   <section id="tab-home" class="hud-home-screen">
   <div class="hud-home-grid">
     <div class="card hud-card active-character-card grid-active">
-      <h3>Active Character</h3>
+      <h3>Primary Focus</h3>
       <div class="active-character-shell">
         <div class="active-character-silhouette"></div>
         <div class="active-character-copy">
           <div class="active-character-name" id="activeCharMini">None selected</div>
-          <div class="mini" id="activeCharStatusMini">No active character</div>
+          <div class="mini" id="activeCharStatusMini">No primary focus selected</div>
         </div>
       </div>
     </div>
 
     <div class="card hud-card save-state-card grid-save">
-      <h3>Save State</h3>
-      <div class="save-status-line">Auto-saved to server volume</div>
+      <h3>Session State</h3>
+      <div class="save-status-line">Control state synced to server volume</div>
       <div class="save-status-ok" id="saveMini">OK</div>
       <div class="save-status-time" id="saveTimeMini">Last save: --</div>
     </div>
 
     <div class="card hud-card live-notifications-card grid-live">
-      <h3>Live Notifications</h3>
+      <h3>Live Event Stream</h3>
       <div class="hud-list" id="homeNotifList">
         <div class="hud-list-row"><span>Initiative order updated</span><span>2:17 PM</span></div>
         <div class="hud-list-row"><span>Whisper from Alara</span><span>2:16 PM</span></div>
         <div class="hud-list-row"><span>Item “Neural Disruptor” added</span><span>2:15 PM</span></div>
       </div>
-      <div class="hud-footer-link">View all (3)</div>
+      <div class="hud-footer-link">Open feed (3)</div>
     </div>
 
     <div class="card hud-card session-overview-card grid-overview">
-      <h3>Session Overview</h3>
+      <h3>Operational Overview</h3>
       <div class="overview-radar"></div>
       <div class="overview-metric"><span>Players</span><span>4</span></div>
       <div class="overview-metric"><span>NPCs</span><span>7</span></div>
@@ -122,7 +122,7 @@
     <div class="panel hud-card grid-log" id="sessionClockLogPanel">
       <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
         <div>
-          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Clock Log</h3>
+          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Archive</h3>
           <div class="mini">Completed sessions are recorded here when the DM clicks End Session.</div>
         </div>
       </div>
@@ -142,8 +142,8 @@
 
     <div class="panel hud-card home-forge-panel grid-forge">
       <div class="forge-header">
-        <h3>Character Builder / Appearance Forge</h3>
-        <div class="mini">Live Preview</div>
+        <h3>Entity Projection Bay</h3>
+        <div class="mini">Projection Live</div>
       </div>
       <div class="forge-grid">
         <div class="forge-left">
@@ -184,16 +184,16 @@
 
     <div class="panel hud-card tactical-party-panel grid-party" id="dmActivePartyPanel">
       <div class="party-panel-header">
-        <h3 style="margin:0;color:var(--accent);">Active Characters / Tactical Party</h3>
+        <h3 style="margin:0;color:var(--accent);">Tactical Party Control</h3>
         <div class="mini">1 / 6 active</div>
       </div>
       <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
         <div style="min-width:240px;flex:1;">
-          <div class="mini" style="margin-bottom:6px;">Add to Active</div>
+          <div class="mini" style="margin-bottom:6px;">Add to Party</div>
           <select id="dmActiveAddSel" style="width:100%;"></select>
         </div>
         <div style="min-width:220px;">
-          <div class="mini" style="margin-bottom:6px;">Player Label (optional)</div>
+          <div class="mini" style="margin-bottom:6px;">Player Tag (optional)</div>
           <input class="input" id="dmActivePlayerLabel" placeholder="e.g., Alex" style="width:100%;"/>
         </div>
         <div style="min-width:180px;">
@@ -210,7 +210,7 @@
     </div>
 
     <div class="card hud-card quick-actions-card grid-quick">
-      <h3>Quick Actions</h3>
+      <h3>Command Actions</h3>
       <div class="quick-actions-grid">
         <button class="btn smallbtn" id="qaAddNote">Add Note</button>
         <button class="btn smallbtn" id="qaAddNpc">Add NPC</button>
@@ -220,18 +220,18 @@
     </div>
 
     <div class="card hud-card recent-activity-card grid-recent">
-      <h3>Recent Activity</h3>
+      <h3>Event Archive</h3>
       <div class="hud-list" id="recentActivityList">
         <div class="hud-list-row"><span>Alex updated initiative</span><span>2m ago</span></div>
         <div class="hud-list-row"><span>Sarah added note “Hidden Passage”</span><span>8m ago</span></div>
         <div class="hud-list-row"><span>Tom rolled 1d20 + 5</span><span>16m ago</span></div>
         <div class="hud-list-row"><span>Jeff (DM) started session</span><span>22m ago</span></div>
       </div>
-      <div class="hud-footer-link">View full activity log</div>
+      <div class="hud-footer-link">Open event archive</div>
     </div>
 
     <div class="card hud-card system-health-card grid-health">
-      <h3>System Health</h3>
+      <h3>System Integrity</h3>
       <div class="health-state">Optimal</div>
       <div class="health-graph">
         <span></span><span></span><span></span><span></span><span></span>
@@ -252,7 +252,7 @@
       <hr/>
       <div class="panel appearance-forge-dock">
         <div class="appearance-dock-copy">
-          <div class="dock-kicker">Character Builder / Appearance Forge</div>
+          <div class="dock-kicker">Entity Projection Bay</div>
           <div class="dock-title">Future 3D preview dock</div>
           <div class="mini">This area is being prepared for the live character visualizer, portrait dock, and appearance summary.</div>
         </div>

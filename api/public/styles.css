@@ -2121,3 +2121,26 @@ body{
       "health" !important;
   }
 }
+
+
+/* =========================================================
+   VEILWATCH FACE RESKIN V5
+   Command-identity pass
+   ========================================================= */
+.cmd-user,.cmd-clock{justify-content:flex-start; gap:8px;}
+.cmd-user .btn.smallbtn{margin-top:2px;}
+.cmd-user .pill,.cmd-clock .pill{font-weight:700; letter-spacing:.04em;}
+.nav-title{font-size:1.06rem;}
+.nav-sub{font-size:10px; letter-spacing:.16em;}
+.hud-footer-link{
+  font-size:12px;
+  font-weight:700;
+  color:#8defff;
+  text-shadow:0 0 10px rgba(89,239,255,.14);
+}
+#dmActivePartyPanel .mini,
+#sessionClockLogPanel .mini,
+.recent-activity-card .mini,
+.live-notifications-card .mini{
+  color:#9fe7f2;
+}
