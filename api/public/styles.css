@@ -829,3 +829,293 @@ td:first-child, th:first-child{padding-left:12px;}
   #tab-home > .panel:last-child .row .btn{min-width:0;}
 }
 
+
+/* v5.5 controlled console-density pass: CSS-only, no hook or backend changes */
+body.vw-dm-console{
+  --console-edge:rgba(0,229,255,.46);
+  --console-faint:rgba(0,229,255,.085);
+  --console-ghost:rgba(131,190,208,.46);
+}
+body.vw-dm-console header{
+  box-shadow:
+    0 18px 54px rgba(0,0,0,.42),
+    inset 0 -1px 0 rgba(0,229,255,.18),
+    inset 0 -18px 42px rgba(0,229,255,.025);
+}
+body.vw-dm-console header::before{
+  height:2px;
+  opacity:.74;
+  background:linear-gradient(90deg, transparent 0 2%, rgba(0,229,255,.95) 10%, transparent 28%, transparent 72%, rgba(255,177,59,.80) 86%, transparent 98%);
+}
+body.vw-dm-console main{
+  border-color:rgba(0,229,255,.24);
+  box-shadow:
+    inset 0 0 62px rgba(0,229,255,.052),
+    inset 0 0 0 1px rgba(255,255,255,.018),
+    0 24px 70px rgba(0,0,0,.40);
+}
+body.vw-dm-console main::before{
+  width:86px;
+  height:86px;
+  border-color:rgba(213,251,255,.82);
+}
+body.vw-dm-console main::after{
+  width:86px;
+  height:86px;
+  border-color:rgba(0,229,255,.48);
+}
+.nav{
+  justify-content:space-between;
+  align-items:stretch;
+}
+.nav .btn{
+  flex:1 1 0;
+  min-width:176px;
+  max-width:none;
+  min-height:58px;
+}
+.nav .btn span,
+.nav .btn em{
+  white-space:nowrap;
+}
+.nav .btn span{
+  letter-spacing:.07em;
+}
+.nav .btn em{
+  color:#9cd7e4;
+}
+.nav .btn:hover::before{
+  transform:translateY(-50%) scale(1.12);
+}
+.card,
+.panel,
+.shop-cart-panel,
+.shop-aisle,
+.shop-card{
+  border-left-color:rgba(0,229,255,.40);
+  border-top-color:rgba(0,229,255,.34);
+}
+.card::after,
+.panel::after,
+.shop-cart-panel::after,
+.shop-aisle::after,
+.shop-card::after{
+  opacity:.92;
+}
+.card h3,
+.panel h3,
+.shop-cart-title,
+.shop-aisle-title{
+  color:#35f1ff;
+  text-shadow:0 0 10px rgba(0,229,255,.42), 0 0 28px rgba(0,229,255,.14);
+}
+#activeCharMini,
+#saveMini{
+  position:relative;
+  display:block;
+  margin-top:8px;
+  color:#f0fdff;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:.035em;
+}
+#activeCharMini::before,
+#saveMini::before{
+  display:block;
+  margin-bottom:5px;
+  color:rgba(131,190,208,.72);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+#activeCharMini::before{content:"CURRENT TABLE ASSET";}
+#saveMini::before{content:"SERVER VOLUME STATE";}
+#tab-home > .card:nth-child(1)::before{
+  opacity:.24;
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.10) 1px, transparent 1px),
+    linear-gradient(rgba(0,229,255,.065) 1px, transparent 1px),
+    linear-gradient(120deg, transparent 0 64%, rgba(0,229,255,.10) 65%, transparent 66% 100%);
+  background-size:24px 24px,24px 24px,100% 100%;
+}
+#tab-home > .card:nth-child(2){
+  box-shadow:
+    inset 0 0 34px rgba(0,255,122,.035),
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 16px 38px rgba(0,0,0,.30);
+}
+#tab-home > .card:nth-child(2) #saveMini{
+  color:#25ff91;
+  text-shadow:0 0 16px rgba(0,255,122,.42);
+}
+#tab-home > .card:nth-child(3){
+  min-height:126px;
+}
+#tab-home > .card:nth-child(3) h3::after{
+  background:linear-gradient(90deg, rgba(0,229,255,.46), transparent 74%, rgba(255,177,59,.36));
+}
+#sessionClockMini::after{
+  content:"SESSION RECORD / OFFICIAL TIMER";
+  display:block;
+  margin-top:9px;
+  color:rgba(131,190,208,.72);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.22em;
+  text-shadow:none;
+  text-transform:uppercase;
+}
+#dmActivePartyPanel{
+  border-color:rgba(0,229,255,.32);
+  border-left-color:rgba(0,229,255,.52);
+}
+#dmActivePartyPanel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    linear-gradient(90deg, transparent 0 48%, rgba(0,229,255,.08) 49%, transparent 50% 100%),
+    linear-gradient(180deg, transparent 0 68%, rgba(0,229,255,.075) 69%, transparent 70% 100%),
+    repeating-linear-gradient(90deg, rgba(0,229,255,.035) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(180deg, rgba(0,229,255,.028) 0 1px, transparent 1px 42px),
+    radial-gradient(circle at 82% 54%, rgba(0,229,255,.145), transparent 28%);
+  opacity:.86;
+}
+#dmActivePartyPanel > h3{
+  margin-bottom:12px!important;
+}
+#dmActivePartyPanel > h3::after{
+  background:linear-gradient(90deg, rgba(0,229,255,.48), transparent 52%, rgba(255,177,59,.30), transparent);
+}
+#dmActivePartyPanel > .row:first-of-type{
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.055), rgba(0,0,0,.10) 64%, rgba(0,229,255,.035)),
+    rgba(0,10,16,.38);
+  border-color:rgba(0,229,255,.18);
+  box-shadow:inset 0 0 24px rgba(0,229,255,.035);
+}
+#dmActivePartyCards{
+  position:relative;
+  min-height:116px;
+}
+#dmActivePartyCards::after{
+  content:"PARTY TELEMETRY FIELD";
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  color:rgba(131,190,208,.22);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  pointer-events:none;
+}
+#dmActivePartyCards .card{
+  border-color:rgba(0,229,255,.30);
+  border-left-color:rgba(0,229,255,.55);
+}
+#dmActivePartyCards .card h3,
+#dmActivePartyCards .card b,
+#dmActivePartyCards .card strong{
+  color:#f2fdff;
+}
+#dmActivePartyCards .pill{
+  background:rgba(0,229,255,.055);
+}
+#tab-home > .panel:last-child{
+  min-height:100%;
+  overflow:hidden;
+}
+#tab-home > .panel:last-child::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 84% 18%, rgba(255,177,59,.11), transparent 22%),
+    radial-gradient(circle at 48% 78%, rgba(0,229,255,.13), transparent 24%),
+    repeating-linear-gradient(180deg, rgba(0,229,255,.032) 0 1px, transparent 1px 24px);
+  opacity:.85;
+}
+#tab-home > .panel:last-child h3{
+  color:#ffca72;
+  text-shadow:0 0 12px rgba(255,177,59,.30), 0 0 26px rgba(0,229,255,.10);
+}
+#tab-home > .panel:last-child .row{
+  align-items:stretch;
+}
+#tab-home > .panel:last-child .row .btn{
+  justify-content:flex-start;
+  text-align:left;
+  min-height:46px;
+  border-color:rgba(255,177,59,.26);
+  background:
+    linear-gradient(90deg, rgba(255,177,59,.075), transparent 34%),
+    linear-gradient(180deg, rgba(0,229,255,.075), rgba(0,229,255,.018));
+}
+#tab-home > .panel:last-child .row .btn::before{
+  content:"›";
+  color:var(--amber);
+  font-size:20px;
+  line-height:1;
+  text-shadow:0 0 12px rgba(255,177,59,.45);
+}
+#tab-home > .panel:last-child .row .btn:hover{
+  border-color:rgba(255,177,59,.48);
+  box-shadow:0 0 24px rgba(255,177,59,.09), inset 0 0 22px rgba(0,229,255,.055);
+}
+.input:focus,
+select:focus,
+textarea:focus{
+  outline:none;
+  border-color:rgba(0,229,255,.62);
+  box-shadow:0 0 0 1px rgba(0,229,255,.16), 0 0 20px rgba(0,229,255,.12), inset 0 0 18px rgba(0,229,255,.035);
+}
+button:focus-visible,
+.btn:focus-visible{
+  outline:1px solid rgba(255,177,59,.86);
+  outline-offset:3px;
+  box-shadow:0 0 0 1px rgba(255,177,59,.22), 0 0 24px rgba(255,177,59,.18), inset 0 0 20px rgba(0,229,255,.05);
+}
+@media (min-width:1101px){
+  #tab-home.cards{
+    grid-template-columns:repeat(16,minmax(0,1fr));
+    align-items:stretch;
+  }
+  #tab-home > .card:nth-child(1){grid-column:span 4!important;}
+  #tab-home > .card:nth-child(2){grid-column:span 6!important;}
+  #tab-home > .card:nth-child(3){grid-column:span 6!important;}
+  #dmActivePartyPanel{grid-column:span 11!important;}
+  #tab-home > .panel:last-child{
+    grid-column:span 5!important;
+    display:flex;
+    flex-direction:column;
+  }
+  #tab-home > .panel:last-child .row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    margin-top:auto;
+  }
+  #tab-home > .panel:last-child .row .btn{
+    width:100%;
+    min-width:0;
+  }
+  #dmActivePartyCards .card{
+    grid-column:span 5;
+    max-width:420px;
+  }
+}
+@media (max-width:1320px) and (min-width:1101px){
+  .nav .btn{min-width:150px;padding-left:43px;}
+  .nav .btn::before{left:14px;width:16px;height:16px;}
+  .nav .btn span{font-size:12px;}
+  .nav .btn em{font-size:9px;letter-spacing:.08em;}
+}
+@media (max-width:980px){
+  #dmActivePartyCards::after{display:none;}
+}
