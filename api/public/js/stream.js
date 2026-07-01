@@ -23,12 +23,6 @@ function vwRenderRealtimeViews(forceAll){
     if(typeof vwComputeUnseen === "function") vwComputeUnseen();
   }catch(e){}
 
-  try{
-    if(typeof vwTickClocks === "function") vwTickClocks();
-    if(typeof vwRenderSessionClockControls === "function") vwRenderSessionClockControls();
-    if(typeof vwRenderSessionClockLog === "function") vwRenderSessionClockLog();
-  }catch(e){}
-
   // Always refresh shared character-linked surfaces.
   try{
     if(typeof renderDMActiveParty === "function") renderDMActiveParty();
@@ -64,12 +58,6 @@ function vwRenderRealtimeViews(forceAll){
   try{
     if(renderTab === "all" || renderTab === "shop"){
       if(typeof renderShop === "function") renderShop();
-    }
-  }catch(e){}
-
-  try{
-    if(renderTab === "all" || renderTab === "chat"){
-      if(typeof renderChat === "function") renderChat();
     }
   }catch(e){}
 

@@ -432,34 +432,24 @@ window.api = api;
 // ---- UI role toggles ----
 function setRoleUI(){
   const dmPanels = document.getElementById("dmPanels");
-  const dmIntelIntro = document.getElementById("dmIntelIntro");
   const playerIntel = document.getElementById("playerIntel");
   const dmShopRow = document.getElementById("dmShopRow");
   const editShopBtn = document.getElementById("editShopBtn");
   const settingsTabBtn = document.getElementById("settingsTabBtn");
   const tabSettings = document.getElementById("tab-settings");
+  const imp = document.getElementById("importPlayerBtn");
   const delCharBtn = document.getElementById("deleteCharBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
   if(dmPanels) dmPanels.classList.toggle("hidden", SESSION.role !== "dm");
-  if(dmIntelIntro) dmIntelIntro.classList.toggle("hidden", SESSION.role !== "dm");
   if(playerIntel) playerIntel.classList.toggle("hidden", SESSION.role === "dm");
   if(dmShopRow) dmShopRow.classList.toggle("hidden", SESSION.role !== "dm");
   if(editShopBtn) editShopBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(settingsTabBtn) settingsTabBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(tabSettings) tabSettings.classList.toggle("hidden", SESSION.role !== "dm");
+  if(imp) imp.classList.toggle("hidden", SESSION.role !== "dm");
   if(delCharBtn) delCharBtn.classList.toggle("hidden", SESSION.role !== "dm");
   if(logoutBtn) logoutBtn.classList.toggle("hidden", !SESSION.role);
-
-  const clockControls = document.getElementById("sessionClockControls");
-  if(clockControls) clockControls.classList.toggle("hidden", SESSION.role !== "dm");
-  const clockLogPanel = document.getElementById("sessionClockLogPanel");
-  if(clockLogPanel) clockLogPanel.classList.toggle("hidden", SESSION.role !== "dm");
-
-  const chatNewThreadBtn = document.getElementById("chatNewThreadBtn");
-  if(chatNewThreadBtn) chatNewThreadBtn.classList.toggle("hidden", SESSION.role !== "dm");
-  const chatNewDmBtn = document.getElementById("chatNewDmBtn");
-  if(chatNewDmBtn) chatNewDmBtn.classList.toggle("hidden", SESSION.role === "dm");
 
   // Who pill
   const who = document.getElementById("whoPill");
@@ -469,246 +459,6 @@ function setRoleUI(){
   }
 }
 window.setRoleUI = setRoleUI;
-
-// ---- Header + Session clocks ----
-function vwFormatDuration(ms){
-  const total = Math.max(0, Math.floor(Number(ms || 0) / 1000));
-  const h = String(Math.floor(total / 3600)).padStart(2, "0");
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-  const s = String(total % 60).padStart(2, "0");
-  return h + ":" + m + ":" + s;
-}
-window.vwFormatDuration = vwFormatDuration;
-
-function vwParseDurationToMs(value){
-  const raw = String(value || "").trim();
-  if(!raw) return 0;
-  if(raw.includes(":")){
-    const parts = raw.split(":").map(n=>Number(n));
-    if(parts.some(n=>!Number.isFinite(n) || n < 0)) return 0;
-    let h = 0, m = 0, sec = 0;
-    if(parts.length === 3){ h = parts[0]; m = parts[1]; sec = parts[2]; }
-    else if(parts.length === 2){ m = parts[0]; sec = parts[1]; }
-    else { sec = parts[0]; }
-    return Math.max(0, Math.round((h*3600 + m*60 + sec) * 1000));
-  }
-  const mins = Number(raw);
-  return Number.isFinite(mins) ? Math.max(0, Math.round(mins * 60000)) : 0;
-}
-window.vwParseDurationToMs = vwParseDurationToMs;
-
-function vwFormatDateTime(ts){
-  if(!ts) return "--";
-  try{ return new Date(Number(ts)).toLocaleString(); }catch(e){ return "--"; }
-}
-window.vwFormatDateTime = vwFormatDateTime;
-
-function vwGetSessionClockElapsedMs(){
-  const sc = (window.__STATE && window.__STATE.sessionClock) || {};
-  const base = Math.max(0, Number(sc.accumulatedMs || 0));
-  if(!sc.running) return base;
-  const started = Number(sc.startedAt || Date.now());
-  return Math.max(0, base + Math.max(0, Date.now() - started));
-}
-window.vwGetSessionClockElapsedMs = vwGetSessionClockElapsedMs;
-
-function vwRenderSessionClockControls(){
-  const sc = (window.__STATE && window.__STATE.sessionClock) || {};
-  const running = !!sc.running;
-
-  const controls = document.getElementById("sessionClockControls");
-  if(controls) controls.classList.toggle("hidden", SESSION.role !== "dm");
-
-  const startBtn = document.getElementById("sessionClockStartBtn");
-  const stopBtn = document.getElementById("sessionClockStopBtn");
-  const endBtn = document.getElementById("sessionClockEndBtn");
-  if(startBtn) startBtn.disabled = running || SESSION.role !== "dm";
-  if(stopBtn) stopBtn.disabled = !running || SESSION.role !== "dm";
-  if(endBtn) endBtn.disabled = SESSION.role !== "dm" || vwGetSessionClockElapsedMs() < 1000;
-
-  const status = document.getElementById("sessionClockStatusMini");
-  if(status) status.textContent = running ? "Running" : "Stopped / Break";
-}
-window.vwRenderSessionClockControls = vwRenderSessionClockControls;
-
-async function vwSessionClockAction(action){
-  if(SESSION.role !== "dm") return;
-  const res = await api("/api/session-clock/" + action, { method:"POST", body: JSON.stringify({}) });
-  if(res && res.ok){
-    if(res.sessionClock){
-      window.__STATE = window.__STATE || {};
-      window.__STATE.sessionClock = res.sessionClock;
-    }
-    vwTickClocks();
-    vwRenderSessionClockControls();
-    if(action === "start") toast("Session clock started");
-    else if(action === "stop") toast("Session clock stopped for break");
-    else toast("Session clock reset");
-    await refreshAll();
-  }else{
-    toast(res?.error || "Session clock update failed");
-  }
-}
-window.vwSessionClockAction = vwSessionClockAction;
-
-async function vwEndSessionClock(){
-  if(SESSION.role !== "dm") return;
-  const elapsedMs = vwGetSessionClockElapsedMs();
-  if(elapsedMs < 1000){ toast("Session clock is still at 00:00:00"); return; }
-
-  const form = await vwModalForm({
-    title:"End Session?",
-    okText:"Continue",
-    cancelText:"Cancel",
-    fields:[
-      { key:"title", label:"Log Title", value:"Session " + (((window.__STATE?.sessionClockLog?.nextId) || 1)), placeholder:"Session name or number" },
-      { key:"duration", label:"Duration", type:"static", value:vwFormatDuration(elapsedMs) },
-      { key:"notes", label:"Notes", type:"textarea", value:"", placeholder:"Optional notes for this session log" }
-    ]
-  });
-  if(!form) return;
-
-  const really = await vwModalConfirm({
-    title:"Confirm End Session",
-    message:"This will save the current clock time to the Session Clock Log and reset the active clock to 00:00:00. Are you sure?",
-    okText:"End Session",
-    cancelText:"Keep Clock Open"
-  });
-  if(!really) return;
-
-  const res = await api("/api/session-clock/end", { method:"POST", body: JSON.stringify({ title:form.title, notes:form.notes }) });
-  if(res && res.ok){
-    window.__STATE = window.__STATE || {};
-    if(res.sessionClock) window.__STATE.sessionClock = res.sessionClock;
-    if(res.sessionClockLog) window.__STATE.sessionClockLog = res.sessionClockLog;
-    vwTickClocks();
-    vwRenderSessionClockControls();
-    vwRenderSessionClockLog();
-    toast("Session ended and logged");
-    await refreshAll();
-  }else{
-    toast(res?.error || "Could not end session");
-  }
-}
-window.vwEndSessionClock = vwEndSessionClock;
-
-async function vwEditSessionClockLog(id){
-  if(SESSION.role !== "dm") return;
-  const log = (window.__STATE?.sessionClockLog?.items || []).find(r=>Number(r.id||0) === Number(id));
-  if(!log){ toast("Log entry not found"); return; }
-  const form = await vwModalForm({
-    title:"Edit Session Log",
-    okText:"Save",
-    cancelText:"Cancel",
-    fields:[
-      { key:"title", label:"Log Title", value:log.title || "Session" },
-      { key:"duration", label:"Duration", value:vwFormatDuration(log.durationMs || 0), placeholder:"HH:MM:SS or minutes" },
-      { key:"notes", label:"Notes", type:"textarea", value:log.notes || "" }
-    ]
-  });
-  if(!form) return;
-  const res = await api("/api/session-clock/log/update", { method:"POST", body: JSON.stringify({
-    id:Number(id),
-    title:form.title,
-    durationMs:vwParseDurationToMs(form.duration),
-    notes:form.notes
-  }) });
-  if(res && res.ok){
-    window.__STATE.sessionClockLog = res.sessionClockLog;
-    vwRenderSessionClockLog();
-    toast("Session log updated");
-    await refreshAll();
-  }else{
-    toast(res?.error || "Could not update log");
-  }
-}
-window.vwEditSessionClockLog = vwEditSessionClockLog;
-
-async function vwDeleteSessionClockLog(id){
-  if(SESSION.role !== "dm") return;
-  const ok = await vwModalConfirm({
-    title:"Delete Session Log",
-    message:"Delete this session clock log entry? This is only for fixing mistakes and cannot be undone.",
-    okText:"Delete",
-    cancelText:"Cancel"
-  });
-  if(!ok) return;
-  const res = await api("/api/session-clock/log/delete", { method:"POST", body: JSON.stringify({ id:Number(id) }) });
-  if(res && res.ok){
-    window.__STATE.sessionClockLog = res.sessionClockLog;
-    vwRenderSessionClockLog();
-    toast("Session log deleted");
-    await refreshAll();
-  }else{
-    toast(res?.error || "Could not delete log");
-  }
-}
-window.vwDeleteSessionClockLog = vwDeleteSessionClockLog;
-
-function vwRenderSessionClockLog(){
-  const body = document.getElementById("sessionClockLogBody");
-  const panel = document.getElementById("sessionClockLogPanel");
-  if(panel) panel.classList.toggle("hidden", SESSION.role !== "dm");
-  if(!body) return;
-  if(SESSION.role !== "dm"){ body.innerHTML = ""; return; }
-  const items = (window.__STATE?.sessionClockLog?.items || []).slice().sort((a,b)=>Number(b.endedAt||0)-Number(a.endedAt||0));
-  if(!items.length){
-    body.innerHTML = '<tr><td colspan="6" class="mini">No session logs yet.</td></tr>';
-    return;
-  }
-  body.innerHTML = items.map(r=>{
-    const notes = r.notes ? esc(r.notes).slice(0,220) : '<span class="mini">No notes</span>';
-    return '<tr>' +
-      '<td>#'+esc(r.id)+'</td>' +
-      '<td>'+esc(r.title || "Session")+'</td>' +
-      '<td>'+vwFormatDuration(r.durationMs || 0)+'</td>' +
-      '<td>'+esc(vwFormatDateTime(r.endedAt))+'</td>' +
-      '<td>'+notes+'</td>' +
-      '<td><div class="row" style="gap:8px;flex-wrap:wrap;">' +
-        '<button class="btn smallbtn" type="button" onclick="vwEditSessionClockLog('+Number(r.id)+')">Edit</button>' +
-        '<button class="btn smallbtn dangerbtn" type="button" onclick="vwDeleteSessionClockLog('+Number(r.id)+')">Delete</button>' +
-      '</div></td>' +
-    '</tr>';
-  }).join("");
-}
-window.vwRenderSessionClockLog = vwRenderSessionClockLog;
-
-function vwWireSessionClockControls(){
-  const startBtn = document.getElementById("sessionClockStartBtn");
-  const stopBtn = document.getElementById("sessionClockStopBtn");
-  const endBtn = document.getElementById("sessionClockEndBtn");
-  const resetBtn = document.getElementById("sessionClockResetBtn");
-  if(startBtn && !startBtn.dataset.wired){ startBtn.dataset.wired = "1"; startBtn.onclick = ()=>vwSessionClockAction("start"); }
-  if(stopBtn && !stopBtn.dataset.wired){ stopBtn.dataset.wired = "1"; stopBtn.onclick = ()=>vwSessionClockAction("stop"); }
-  if(endBtn && !endBtn.dataset.wired){ endBtn.dataset.wired = "1"; endBtn.onclick = ()=>vwEndSessionClock(); }
-  if(resetBtn && !resetBtn.dataset.wired){ resetBtn.dataset.wired = "1"; resetBtn.onclick = async ()=>{
-    const ok = await vwModalConfirm({ title:"Reset Session Clock", message:"Reset the session clock to 00:00:00?" });
-    if(ok) vwSessionClockAction("reset");
-  }; }
-}
-window.vwWireSessionClockControls = vwWireSessionClockControls;
-
-function vwTickClocks(){
-  try{
-    const d = new Date();
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    const clock = document.getElementById("clockPill");
-    if(clock) clock.textContent = hh + ":" + mm;
-
-    const sessionText = vwFormatDuration(vwGetSessionClockElapsedMs());
-    const sessionClock = document.getElementById("sessionClockMini");
-    if(sessionClock) sessionClock.textContent = sessionText;
-    const sessionPill = document.getElementById("sessionClockPill");
-    if(sessionPill) sessionPill.textContent = "Session: " + sessionText;
-
-    vwRenderSessionClockControls();
-  }catch(e){}
-}
-window.vwTickClocks = vwTickClocks;
-vwWireSessionClockControls();
-setInterval(vwTickClocks, 1000);
-vwTickClocks();
 
 // ---- Tabs ----
 async function renderTabs(tab){
@@ -740,12 +490,7 @@ async function renderTabs(tab){
     if(tab === "home"){
       if(typeof renderDM === "function") renderDM();
       if(typeof renderDMActiveParty === "function") renderDMActiveParty();
-      if(typeof vwRenderSessionClockLog === "function") vwRenderSessionClockLog();
     } else if(tab === "character"){
-      // Always land on the playable Sheet view when the main Character tab is opened.
-      // Players can still move to Actions/Inventory/etc. afterward, but opening Character
-      // should never strand them on the last utility sub-tab.
-      if(typeof vwSetCharacterSubTab === "function") vwSetCharacterSubTab("sheet");
       if(typeof renderCharacter === "function") renderCharacter();
       if(typeof renderSheet === "function") renderSheet();
     } else if(tab === "intel"){
@@ -758,8 +503,6 @@ async function renderTabs(tab){
       if(typeof renderDMArchivedRequests === "function") renderDMArchivedRequests();
     } else if(tab === "shop"){
       if(typeof renderShop === "function") renderShop();
-    } else if(tab === "chat"){
-      if(typeof renderChat === "function") renderChat();
     } else if(tab === "settings"){
       if(typeof renderSettings === "function") renderSettings();
     }
@@ -772,52 +515,30 @@ document.querySelectorAll(".nav .btn").forEach(b=>b.onclick=()=>{ void renderTab
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ void renderTabs(b.dataset.go); });
 
 // character sub-tabs (supports create-mode bar + sheet-mode bar)
-function vwSetCharacterSubTab(tabName){
-  const target = tabName || "sheet";
-  const bars = [document.getElementById("sheetCtabBar"), document.getElementById("createCtabBar")].filter(Boolean);
-  const allButtons = document.querySelectorAll("[data-ctab]");
-  allButtons.forEach(btn=>{
-    const sameBarActive = btn.dataset.ctab === target;
-    btn.classList.toggle("active", sameBarActive);
-  });
-
-  const sections = {
-    actions: document.getElementById("ctab-actions"),
-    inventory: document.getElementById("ctab-inventory"),
-    abilities: document.getElementById("ctab-abilities"),
-    spells: document.getElementById("ctab-spells"),
-    sheet: document.getElementById("ctab-sheet"),
-    background: document.getElementById("ctab-background"),
-    traits: document.getElementById("ctab-traits"),
-    notes: document.getElementById("ctab-notes")
-  };
-  Object.entries(sections).forEach(([key, el])=>{
-    if(el) el.classList.toggle("hidden", key !== target);
-  });
-  const sf = document.getElementById("sheetOnlyFooter");
-  if(sf) sf.classList.toggle("hidden", target !== "sheet");
-  try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = target; }catch(e){}
-}
-window.vwSetCharacterSubTab = vwSetCharacterSubTab;
-
-async function vwSetActiveCharacter(charId, opts={}){
-  window.SESSION = window.SESSION || {};
-  SESSION.activeCharId = charId || null;
-  const sel = document.getElementById("charSel");
-  if(sel && charId) sel.value = charId;
-  try{
-    await api("/api/user/active-character", { method:"POST", body: JSON.stringify({ charId: SESSION.activeCharId }) });
-  }catch(e){}
-  if(opts.refresh !== false){
-    try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
-    try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
-    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-  }
-}
-window.vwSetActiveCharacter = vwSetActiveCharacter;
-
 document.querySelectorAll("[data-ctab]").forEach(b=>b.onclick=()=>{
-  vwSetCharacterSubTab(b.dataset.ctab || "sheet");
+  const bar = b.closest("#createCtabBar,#sheetCtabBar") || document;
+  bar.querySelectorAll("[data-ctab]").forEach(x=>x.classList.toggle("active", x===b));
+
+  const a  = document.getElementById("ctab-actions");
+  const i  = document.getElementById("ctab-inventory");
+  const ab = document.getElementById("ctab-abilities");
+  const sp = document.getElementById("ctab-spells");
+  const s  = document.getElementById("ctab-sheet");
+  const bg = document.getElementById("ctab-background");
+  const tr = document.getElementById("ctab-traits");
+  const nt = document.getElementById("ctab-notes");
+
+  if(a)  a.classList.toggle("hidden", b.dataset.ctab !== "actions");
+  if(i)  i.classList.toggle("hidden", b.dataset.ctab !== "inventory");
+  if(ab) ab.classList.toggle("hidden", b.dataset.ctab !== "abilities");
+  if(sp) sp.classList.toggle("hidden", b.dataset.ctab !== "spells");
+  if(s)  s.classList.toggle("hidden", b.dataset.ctab !== "sheet");
+  if(bg) bg.classList.toggle("hidden", b.dataset.ctab !== "background");
+  if(tr) tr.classList.toggle("hidden", b.dataset.ctab !== "traits");
+  if(nt) nt.classList.toggle("hidden", b.dataset.ctab !== "notes");
+  const sf = document.getElementById("sheetOnlyFooter");
+  if(sf) sf.classList.toggle("hidden", b.dataset.ctab !== "sheet");
+  try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = b.dataset.ctab; }catch(e){}
 });
 // intel sub-tabs (DM)
 document.querySelectorAll("[data-itab]").forEach(b=>b.onclick=()=>{
@@ -860,7 +581,6 @@ function authInit(){
         setRoleUI();
 
         await refreshAll();
-        try{ await renderTabs("home"); }catch(e){}
         if(typeof vwStartStream === "function") vwStartStream();
         if(typeof vwStartFallbackPoller === "function") vwStartFallbackPoller();
         return true;
@@ -899,7 +619,6 @@ function authInit(){
     try{ await api("/api/auth/logout", { method:"POST", body: JSON.stringify({}) }); }catch(e){}
     SESSION.role = null; SESSION.username = null; SESSION.userId = null; SESSION.activeCharId = null;
     if(overlay) overlay.style.display = "flex";
-    try{ renderTabs("home"); }catch(e){}
     setRoleUI();
   };
 
@@ -925,7 +644,6 @@ async function refreshAll(){
 
   const st = await api("/api/state");
   window.__STATE = st || {};
-  try{ vwWireSessionClockControls(); vwTickClocks(); vwRenderSessionClockControls(); vwRenderSessionClockLog(); }catch(e){}
 
   // intel / alert baseline
   if(!window.VW_ALERTS.armed){
@@ -947,17 +665,12 @@ async function refreshAll(){
       o.value = c.id; o.textContent = c.name;
       sel.appendChild(o);
     });
-    const chars = st.characters || [];
-    if(SESSION.activeCharId && !chars.some(c=>c.id === SESSION.activeCharId)) SESSION.activeCharId = null;
-    if(!SESSION.activeCharId && chars.length) SESSION.activeCharId = chars[0].id;
+    if(!SESSION.activeCharId && (st.characters || []).length) SESSION.activeCharId = st.characters[0].id;
     if(SESSION.activeCharId) sel.value = SESSION.activeCharId;
     sel.onchange = ()=>{
-      if(typeof vwSetActiveCharacter === "function") vwSetActiveCharacter(sel.value);
-      else {
-        SESSION.activeCharId = sel.value;
-        if(typeof renderCharacter === "function") renderCharacter();
-        if(typeof renderSheet === "function") renderSheet();
-      }
+      SESSION.activeCharId = sel.value;
+      if(typeof renderCharacter === "function") renderCharacter();
+      if(typeof renderSheet === "function") renderSheet();
     };
   }
 
@@ -969,7 +682,6 @@ async function refreshAll(){
 
   // feature renders
   if(typeof renderShop === "function") renderShop();
-  if(typeof renderChat === "function") renderChat();
   if(typeof renderDM === "function") renderDM();
   if(typeof renderDMActiveParty === "function") renderDMActiveParty();
   if(typeof renderIntelDM === "function") renderIntelDM();

@@ -526,19 +526,10 @@ function renderCharacter(){
   const c=getChar();
   const weapBody=document.getElementById("weapBody");
   const invBody=document.getElementById("invBody");
-  const abBody=document.getElementById("abilityBody");
-  const spBody=document.getElementById("spellBody");
-  if(weapBody) weapBody.innerHTML="";
-  if(invBody) invBody.innerHTML="";
-  if(abBody) abBody.innerHTML="";
-  if(spBody) spBody.innerHTML="";
+  weapBody.innerHTML=""; invBody.innerHTML="";
   if(!c){
-    if(weapBody) weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
-    if(invBody) invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
-    if(abBody) abBody.innerHTML = '<tr><td colspan="6" class="mini">No character.</td></tr>';
-    if(spBody) spBody.innerHTML = '<tr><td colspan="6" class="mini">No character.</td></tr>';
-    ["bgText","traitsText","notesText"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
-    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
+    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No character. Click New Character.</td></tr>';
+    invBody.innerHTML = '<tr><td colspan="7" class="mini">No character.</td></tr>';
     return;
   }
   // weapons rows
@@ -601,10 +592,6 @@ function renderCharacter(){
       weapBody.appendChild(tr2);
     }
   });
-
-  if(weapBody && !(c.weapons||[]).length){
-    weapBody.innerHTML = '<tr><td colspan="5" class="mini">No weapons yet. Use Add Weapon.</td></tr>';
-  }
 
   // wire ammo controls (after rows exist)
   weapBody.querySelectorAll("input[data-ammo]").forEach(inp=>{
@@ -737,11 +724,8 @@ function renderCharacter(){
     invBody.appendChild(tr);
   });
 
-  if(invBody && !(c.inventory||[]).length){
-    invBody.innerHTML = '<tr><td colspan="7" class="mini">No inventory yet. Use Add Item.</td></tr>';
-  }
-
   // abilities rows
+  const abBody = document.getElementById("abilityBody");
   if(abBody){
     abBody.innerHTML="";
     (c.abilities||[]).forEach((ab,idx)=>{
@@ -766,6 +750,7 @@ function renderCharacter(){
   }
 
   // spells rows
+  const spBody = document.getElementById("spellBody");
   if(spBody){
     spBody.innerHTML="";
     (c.spells||[]).forEach((sp,idx)=>{
@@ -957,13 +942,7 @@ function renderSheet(){
   const ctab = document.getElementById("ctab-sheet");
   if(!ctab) return;
   const c=getChar();
-  if(!c){
-    const clearIds = ["hpCur","hpMax","hpTemp","acVal","initVal","spdVal","cashVal","bankVal","statSTR","statDEX","statCON","statINT","statWIS","statCHA","bgText","traitsText","notesText"];
-    clearIds.forEach(id=>document.querySelectorAll('[id="'+String(id).replace(/"/g,'\\"')+'"]').forEach(el=>{ try{ el.value=""; }catch(e){} }));
-    const row=document.getElementById("condRow"); if(row) row.innerHTML='<div class="mini">No character selected.</div>';
-    try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
-    return;
-  }
+  if(!c) return;
 
   c.sheet ||= {};
   c.sheet.vitals ||= { hpCur:"", hpMax:"", hpTemp:"", ac:"", init:"", speed:"" };
@@ -1030,26 +1009,38 @@ if(ntEl) ntEl.value = c.sheet.notes ?? "";
   });
 
   // DM-only buttons
-  document.getElementById("dupCharBtn")?.classList.toggle("hidden", SESSION.role!=="dm");
+  document.getElementById("dupCharBtn").classList.toggle("hidden", SESSION.role!=="dm");
+  document.getElementById("delCharBtn").classList.toggle("hidden", !(SESSION.role==="dm" || (SESSION.role==="player" && c && c.ownerUserId===SESSION.userId)));
 }
 window.renderSheet = renderSheet;
 
-document.getElementById("saveSheetBtn")?.addEventListener("click", async ()=>{
+document.getElementById("saveSheetBtn").onclick = async ()=>{
   const c=getChar(); if(!c){ toast("No character"); return; }
   if(typeof vwFlushCharAutosave==="function") await vwFlushCharAutosave();
   toast("Saved");
   await refreshAll();
-});
+};
 
-document.getElementById("dupCharBtn")?.addEventListener("click", async ()=>{
+document.getElementById("dupCharBtn").onclick = async ()=>{
   if(SESSION.role!=="dm") return;
   const c=getChar(); if(!c) return;
   const name = await vwModalInput({ title:"Duplicate Character", label:"New name", value: c.name + " (Copy)" });
   if(!name) return;
   const res = await api("/api/character/duplicate",{method:"POST",body:JSON.stringify({charId:c.id, name})});
-  if(res.ok){ if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(res.id, { refresh:false }); else SESSION.activeCharId=res.id; toast("Duplicated"); await refreshAll(); }
+  if(res.ok){ SESSION.activeCharId=res.id; toast("Duplicated"); await refreshAll(); }
   else toast(res.error||"Failed");
-});
+};
+
+document.getElementById("delCharBtn").onclick = async ()=>{
+  const c=getChar(); if(!c) return;
+  const canDelete = (SESSION.role==="dm") || (SESSION.role==="player" && c.ownerUserId===SESSION.userId);
+  if(!canDelete){ toast("You can only delete your own character"); return; }
+  const ok = await vwModalConfirm({ title:"Delete Character", message:'Delete "' + c.name + '"? This cannot be undone.' });
+  if(!ok) return;
+  const res = await api("/api/character/delete",{method:"POST",body:JSON.stringify({charId:c.id})});
+  if(res.ok){ SESSION.activeCharId=null; toast("Deleted"); await refreshAll(); }
+  else toast(res.error||"Failed");
+};
 
 
 
@@ -1294,10 +1285,13 @@ function renderDMActiveParty(){
 
     const btnOpen = card.querySelector('button[data-act="open"]');
     btnOpen.onclick = async ()=>{
-      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(c.id, { refresh:false });
-      else SESSION.activeCharId = c.id;
+      SESSION.activeCharId = c.id;
       renderTabs("character");
-      if(typeof vwSetCharacterSubTab === "function") vwSetCharacterSubTab("sheet");
+      // Switch character sub-tab to sheet
+      document.querySelectorAll('[data-ctab]').forEach(b=>b.classList.toggle("active", b.dataset.ctab==="sheet"));
+      document.getElementById("ctab-actions")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-inventory")?.classList.toggle("hidden", true);
+      document.getElementById("ctab-sheet")?.classList.toggle("hidden", false);
       await refreshAll();
     };
 
@@ -1428,6 +1422,43 @@ function renderDMActiveParty(){
   }catch(e){}
 })();
 
+// --- Import Player (DM) ---
+(async function wireImportPlayer(){
+  try{
+    const btn = document.getElementById("importPlayerBtn");
+    if(!btn) return;
+    btn.onclick = async ()=>{
+      if(SESSION.role!=="dm") return;
+      const name = await vwModalInput({ title:"Import Player", label:"Character name", placeholder:"e.g., Mara Kincaid" });
+      if(!name) return;
+
+      const usersRes = await api("/api/dm/users");
+      const all = (usersRes && usersRes.ok && Array.isArray(usersRes.users)) ? usersRes.users : [];
+      const playerNames = all.filter(u=>u.role!=="dm").map(u=>u.username).sort();
+      const tip = playerNames.length ? ("Available players: " + playerNames.join(", ")) : "No player accounts yet (leave blank).";
+      const ownerName = await vwModalInput({ title:"Assign Account", label:"Assign to username (optional)", placeholder: tip });
+      let ownerUserId = null;
+      if(ownerName && ownerName.trim()){
+        const found = all.find(u => String(u.username).toLowerCase() === String(ownerName).trim().toLowerCase());
+        if(!found){ toast("User not found"); return; }
+        ownerUserId = found.id;
+      }
+
+      const created = await api("/api/character/new",{method:"POST",body:JSON.stringify({name, ownerUserId})});
+      if(!created.ok){ toast(created.error||"Failed"); return; }
+
+      const add = await vwModalConfirm({ title:"Add to Active?", message:"Add this character to the Active list?" });
+      if(add){
+        await api("/api/dm/activeParty/add",{method:"POST",body:JSON.stringify({charId: created.id, playerLabel: ownerName||""})});
+      }
+
+      SESSION.activeCharId = created.id;
+      toast("Imported");
+      await refreshAll();
+    };
+  }catch(e){}
+})();
+
 // Wire autosave inputs once the DOM exists.
 try{ vwWireSheetAutosave(); }catch(e){}
 
@@ -1539,11 +1570,6 @@ document.getElementById("newCharBtn")?.addEventListener("click", async ()=>{
 
 const result = await new Promise((resolve)=>{
   const ui = vwModalBaseSetup("Character Creation", "Next", "Cancel");
-  try{
-    ui.modal.classList.add("vw-build-modal-open");
-    const card = ui.mTitle?.parentElement;
-    if(card){ card.classList.add("vw-build-station"); }
-  }catch(e){}
 
   // Add a Back button to the footer (modal has only OK + Cancel by default)
   let btnBack = document.getElementById("vwModalBack");
@@ -1572,29 +1598,6 @@ const result = await new Promise((resolve)=>{
     species: "",
     traits: "",
     notes: "",
-    appearance: {
-      characterType: "pc",
-      bodyType: "male",
-      height: "5'10\"",
-      build: "average",
-      ageLook: "adult",
-      skinTone: "light",
-      eyeColor: "brown",
-      hairStyle: "short",
-      hairColor: "black",
-      beardStyle: "none",
-      faceDetail: "clean",
-      scars: "",
-      top: "t_shirt",
-      outerwear: "none",
-      bottoms: "jeans",
-      hat: "none",
-      shoes: "sneakers",
-      gloves: "none",
-      uniformCategory: "none",
-      uniformPreset: "none",
-      bust: "medium"
-    },
     // gear
     starterPackSel: "recommended",
     kitId: "",
@@ -1616,7 +1619,7 @@ const result = await new Promise((resolve)=>{
   // ---------- Build UI (all steps live in DOM; we swap visibility) ----------
   ui.mBody.innerHTML = `
     <div class="mini" id="vwWizardStepLabel" style="opacity:.9;margin-bottom:10px;">
-      Step 1 of 6
+      Step 1 of 5
     </div>
 
     <div id="vwWizardSteps">
@@ -1674,50 +1677,9 @@ const result = await new Promise((resolve)=>{
 
       <!-- Step 3 -->
       <div class="vwStep" data-step="3" style="display:none;">
-        <div class="mini" style="opacity:.85;margin-bottom:10px;">Body and base clothing live here. Armor, weapons, and operational gear still come from the character sheet.</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Character Type</div><select id="vwCreateCharacterType" class="input" style="width:100%"><option value="pc">Player Character</option><option value="npc">NPC</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Body Type</div><select id="vwCreateBodyType" class="input" style="width:100%"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Height</div><select id="vwCreateHeight" class="input" style="width:100%"><option value="4-10">4'10</option><option value="5-0">5'0</option><option value="5-2">5'2</option><option value="5-4">5'4</option><option value="5-6">5'6</option><option value="5-8">5'8</option><option value="5-10" selected>5'10</option><option value="6-0">6'0</option><option value="6-2">6'2</option><option value="6-4">6'4</option><option value="6-6">6'6</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Build</div><select id="vwCreateBuild" class="input" style="width:100%"><option value="slim">Slim</option><option value="average">Average</option><option value="athletic">Athletic</option><option value="broad">Broad</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Age Look</div><select id="vwCreateAgeLook" class="input" style="width:100%"><option value="young_adult">Young Adult</option><option value="adult">Adult</option><option value="middle_aged">Middle Aged</option><option value="older">Older</option></select></div>
-          <div id="vwCreateBustWrap"><div class="mini" style="margin-bottom:6px;opacity:.9">Bust Size</div><select id="vwCreateBust" class="input" style="width:100%"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><select id="vwCreateSkinTone" class="input" style="width:100%"><option value="light">Light</option><option value="fair">Fair</option><option value="warm">Warm</option><option value="tan">Tan</option><option value="olive">Olive</option><option value="brown">Brown</option><option value="deep">Deep</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Eye Color</div><select id="vwCreateEyeColor" class="input" style="width:100%"><option value="brown">Brown</option><option value="hazel">Hazel</option><option value="blue">Blue</option><option value="green">Green</option><option value="gray">Gray</option><option value="amber">Amber</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Face Detail</div><select id="vwCreateFaceDetail" class="input" style="width:100%"><option value="clean">Clean</option><option value="sharp">Sharp</option><option value="tired">Tired</option><option value="scarred">Scarred</option><option value="weathered">Weathered</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><select id="vwCreateHairStyle" class="input" style="width:100%"><option value="short">Short</option><option value="buzz">Buzz Cut</option><option value="fade">Fade</option><option value="long_straight">Long Straight</option><option value="wavy">Wavy</option><option value="curly">Curly</option><option value="bun">Bun</option><option value="ponytail">Ponytail</option><option value="bald">Bald</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Color</div><select id="vwCreateHairColor" class="input" style="width:100%"><option value="black">Black</option><option value="dark_brown">Dark Brown</option><option value="brown">Brown</option><option value="blonde">Blonde</option><option value="auburn">Auburn</option><option value="red">Red</option><option value="gray">Gray</option><option value="white">White</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Beard / Facial Hair</div><select id="vwCreateBeardStyle" class="input" style="width:100%"><option value="none">None</option><option value="stubble">Stubble</option><option value="trimmed">Trimmed</option><option value="full">Full Beard</option><option value="mustache">Mustache</option><option value="goatee">Goatee</option></select></div>
-        </div>
-        <div style="margin-top:12px;"><div class="mini" style="margin-bottom:6px;opacity:.9">Scars / Markings</div><select id="vwCreateScars" class="input" style="width:100%"><option value="">None</option><option value="left_brow_scar">Left Brow Scar</option><option value="cheek_scar">Cheek Scar</option><option value="eye_scar">Eye Scar</option><option value="freckles">Freckles</option><option value="tattoo_small">Small Tattoo</option><option value="birthmark">Birthmark</option></select></div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
-          <div style="font-weight:800;margin-bottom:8px;">Base Clothing</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Top</div><select id="vwCreateTop" class="input" style="width:100%"><option value="t_shirt">T-Shirt</option><option value="long_sleeve">Long Sleeve</option><option value="button_up">Button-Up</option><option value="hoodie">Hoodie</option><option value="polo">Polo</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Outerwear</div><select id="vwCreateOuterwear" class="input" style="width:100%"><option value="none">None</option><option value="light_jacket">Light Jacket</option><option value="heavy_jacket">Heavy Jacket</option><option value="blazer">Blazer</option><option value="hoodie_zip">Zip Hoodie</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Bottoms</div><select id="vwCreateBottoms" class="input" style="width:100%"><option value="jeans">Jeans</option><option value="cargo_pants">Cargo Pants</option><option value="dress_pants">Dress Pants</option><option value="joggers">Joggers</option><option value="leggings">Leggings</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hat</div><select id="vwCreateHat" class="input" style="width:100%"><option value="none">None</option><option value="baseball_cap">Baseball Cap</option><option value="beanie">Beanie</option><option value="brimmed_hat">Brimmed Hat</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Shoes</div><select id="vwCreateShoes" class="input" style="width:100%"><option value="sneakers">Sneakers</option><option value="boots">Boots</option><option value="dress_shoes">Dress Shoes</option><option value="work_boots">Work Boots</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Gloves</div><select id="vwCreateGloves" class="input" style="width:100%"><option value="none">None</option><option value="light_gloves">Light Gloves</option><option value="leather_gloves">Leather Gloves</option><option value="fingerless_gloves">Fingerless Gloves</option></select></div>
-          </div>
-        </div>
-        <div id="vwCreateNpcUniformBlock" style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;display:none;">
-          <div style="font-weight:800;margin-bottom:8px;">NPC Uniform Preset</div>
-          <div class="mini" style="opacity:.8;margin-bottom:8px;">Uniforms are mainly for DM-controlled NPCs. This picks a clean base look before sheet gear overlays.</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Category</div><select id="vwCreateUniformCategory" class="input" style="width:100%"><option value="none">None</option><option value="law_enforcement">Law Enforcement</option><option value="fire">Fire</option><option value="ems">EMS</option><option value="security">Security</option><option value="corporate">Corporate</option></select></div>
-            <div><div class="mini" style="margin-bottom:6px;opacity:.9">Uniform Preset</div><select id="vwCreateUniformPreset" class="input" style="width:100%"><option value="none">None</option><option value="patrol_standard">Patrol Standard</option><option value="fire_station">Fire Station</option><option value="ems_duty">EMS Duty</option><option value="security_polo">Security Polo</option><option value="corporate_formal">Corporate Formal</option></select></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4 -->
-      <div class="vwStep" data-step="4" style="display:none;">
         <div style="margin-bottom:10px;">
           <div class="mini" style="margin-bottom:6px;opacity:.9">Species</div>
-          <select id="vwCreateSpecies" class="input" style="width:100%"><option value="Human">Human</option><option value="Elf">Elf</option><option value="Dwarf">Dwarf</option><option value="Orc">Orc</option><option value="Halfling">Halfling</option><option value="Tiefling">Tiefling</option><option value="Synth">Synth</option></select>
+          <input id="vwCreateSpecies" class="input" placeholder="e.g., Human / Elf / Synth / etc." />
         </div>
 
         <div style="padding-top:12px;border-top:1px solid #2b3a4d;">
@@ -1745,8 +1707,8 @@ const result = await new Promise((resolve)=>{
         </div>
       </div>
 
-      <!-- Step 5 -->
-      <div class="vwStep" data-step="5" style="display:none;">
+      <!-- Step 4 -->
+      <div class="vwStep" data-step="4" style="display:none;">
         <div style="font-weight:800;margin-bottom:8px;">Weapons & Gear</div>
         <div class="mini" style="opacity:.8;margin-bottom:10px;">
           Choose a Starter Pack (auto adds 1 sidearm + 1 primary), optionally add a Kit, then add any extra gear.
@@ -1777,7 +1739,7 @@ const result = await new Promise((resolve)=>{
           <div style="font-weight:800;margin-bottom:8px;">Weapons</div>
           <div class="mini" style="opacity:.8;margin-bottom:8px;">Starter Pack weapons will appear here. Edit details or add custom weapons.</div>
           <div id="vwCreateWeapons"></div>
-          <div class="vw-create-weapon-addrow" style="margin-top:10px;"><select id="vwCreateWeaponSelect" class="input" style="min-width:240px;flex:1;"></select><button id="vwCreateAddWeapon" class="btn smallbtn">Add Weapon</button></div>
+          <button id="vwCreateAddWeapon" class="btn smallbtn" style="margin-top:10px;">Add Weapon</button>
         </div>
 
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2b3a4d;">
@@ -1790,18 +1752,12 @@ const result = await new Promise((resolve)=>{
         </div>
       </div>
 
-      <!-- Step 6 -->
-      <div class="vwStep" data-step="6" style="display:none;">
-        <div class="row between" style="align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
-          <div style="font-weight:800;">Ability Scores</div>
-          <div class="row" style="gap:8px;flex-wrap:wrap;">
-            <button id="vwCreateRandomStats" type="button" class="btn smallbtn">Random Generate</button>
-            <button id="vwCreateClearStats" type="button" class="btn smallbtn">Clear Scores</button>
-          </div>
-        </div>
+      <!-- Step 5 -->
+      <div class="vwStep" data-step="5" style="display:none;">
+        <div style="font-weight:800;margin-bottom:8px;">Ability Scores</div>
         <div class="mini" style="opacity:.8;margin-bottom:10px;">Set STR/DEX/CON/INT/WIS/CHA here (these are treated as creation-locked).</div>
 
-        <div class="vw-stats-grid" style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
+        <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;">
           ${["STR","DEX","CON","INT","WIS","CHA"].map(k=>`
             <div>
               <div class="mini" style="opacity:.8;margin-bottom:4px;">${k}</div>
@@ -1849,14 +1805,6 @@ const result = await new Promise((resolve)=>{
   const bgOpts = backgrounds
     .map(b=>({ value:(b.id||b.name||""), label:(b.name||b.id||"") }))
     .filter(o=>o.value);
-
-  const weaponSelectOptions = [{ value:"", label:"Select weapon..." }].concat(
-    (weaponBuckets.sidearms||[]).map(w=>({ value:w.id || ("name:"+(w.name||"")), label:"Sidearm • "+(w.name||"") })),
-    (weaponBuckets.primaries||[]).map(w=>({ value:w.id || ("name:"+(w.name||"")), label:"Primary • "+(w.name||"") })),
-    (weaponBuckets.nonlethal||[]).map(w=>({ value:w.id || ("name:"+(w.name||"")), label:"Nonlethal • "+(w.name||"") })),
-    (weaponBuckets.melee||[]).map(w=>({ value:w.id || ("name:"+(w.name||"")), label:"Melee • "+(w.name||"") })),
-    [{ value:"__custom__", label:"Custom Weapon..." }]
-  );
 
   // Kits
   const kitsById = (cat && cat.kits && cat.kits.byId) ? cat.kits.byId : {};
@@ -1921,7 +1869,7 @@ const result = await new Promise((resolve)=>{
   function showStep(n){
     step = n;
     ui.mBody.scrollTop = 0;
-    qs("vwWizardStepLabel").textContent = `Step ${step} of 6`;
+    qs("vwWizardStepLabel").textContent = `Step ${step} of 5`;
 
     document.querySelectorAll(".vwStep").forEach(el=>{
       el.style.display = (Number(el.getAttribute("data-step")) === step) ? "block" : "none";
@@ -1979,41 +1927,6 @@ const result = await new Promise((resolve)=>{
     });
     sel.innerHTML = html;
     if(state.kitId) sel.value = state.kitId;
-  }
-
-  function populateCreateWeaponSelect(){
-    const sel = qs("vwCreateWeaponSelect");
-    if(!sel) return;
-    sel.innerHTML = weaponSelectOptions.map(o=>`<option value="${esc(o.value)}">${esc(o.label)}</option>`).join("");
-  }
-
-  function addWeaponTemplateByPick(pick){
-    if(!pick) return;
-    if(pick === "__custom__") {
-      state.weapons.push({ id: "custom_"+Math.random().toString(36).slice(2,9), name: "", range: "", hit: "", damage: "", ammo: null });
-      renderWeapons();
-      return;
-    }
-    let w = weaponById[pick];
-    if(!w && String(pick).startsWith("name:")) w = allWeapons.find(x => String(x.name||"") === String(pick).slice(5));
-    if(!w){ return; }
-    const ammoDefaults = vwWeaponDefaultsForAmmoModel(w.ammo_type || "", w.ammo_model || "");
-    const hasAmmo = !!(w.ammo_type || w.ammo_model);
-    state.weapons.push({
-      id: w.id || ("w_"+Math.random().toString(36).slice(2,9)),
-      name: w.name || "",
-      range: w.range || "",
-      hit: w.hit || "",
-      damage: w.damage || "",
-      ammo: hasAmmo ? {
-        type: String(ammoDefaults.type || w.ammo_type || ""),
-        magSize: String(ammoDefaults.magSize || ""),
-        current: String(ammoDefaults.current || ""),
-        mags: String(ammoDefaults.mags || ""),
-        magsMax: String(ammoDefaults.magsMax || "")
-      } : null
-    });
-    renderWeapons();
   }
 
   function computeAutoGear(){
@@ -2452,7 +2365,6 @@ const result = await new Promise((resolve)=>{
   // Step 4: packs/kits
   rebuildStarterPack();
   rebuildKit();
-  populateCreateWeaponSelect();
   computeAutoGear();
   renderWeapons();
   renderInvExtra();
@@ -2503,16 +2415,18 @@ const result = await new Promise((resolve)=>{
 
   qs("vwCreateTalentSearch") && (qs("vwCreateTalentSearch").oninput = rerenderTalentResults);
   qs("vwCreateSpellSearch") && (qs("vwCreateSpellSearch").oninput = rerenderSpellResults);
-  qs("vwCreateCharacterType")?.addEventListener("change", updateAppearanceModeUI);
-  qs("vwCreateBodyType")?.addEventListener("change", updateAppearanceModeUI);
-  updateAppearanceModeUI();
 
   qs("vwCreateAddWeapon")?.addEventListener("click", (e)=>{
     e.preventDefault();
-    const pick = String(qs("vwCreateWeaponSelect")?.value || "");
-    if(!pick){ toast("Pick a weapon first"); return; }
-    addWeaponTemplateByPick(pick);
-    if(qs("vwCreateWeaponSelect")) qs("vwCreateWeaponSelect").value = "";
+    state.weapons.push({
+      id: "custom_"+Math.random().toString(36).slice(2,9),
+      name: "",
+      range: "",
+      hit: "",
+      damage: "",
+      ammo: null
+    });
+    renderWeapons();
   });
 
   qs("vwCreateAddInv")?.addEventListener("click", (e)=>{
@@ -2520,28 +2434,6 @@ const result = await new Promise((resolve)=>{
     state.invExtra.push({ category:"General", name:"", qty:"1", notes:"" });
     renderInvExtra();
   });
-
-  qs("vwCreateRandomStats")?.addEventListener("click", (e)=>{
-    e.preventDefault();
-    const rolls = Array.from({length:6}, ()=>{
-      const dice = Array.from({length:4}, ()=>1 + Math.floor(Math.random()*6)).sort((a,b)=>b-a);
-      return dice[0] + dice[1] + dice[2];
-    });
-    ["STR","DEX","CON","INT","WIS","CHA"].forEach((k,idx)=>{ const el = qs("vwCreateStat_"+k); if(el) el.value = String(rolls[idx]); });
-  });
-  qs("vwCreateClearStats")?.addEventListener("click", (e)=>{
-    e.preventDefault();
-    ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{ const el = qs("vwCreateStat_"+k); if(el) el.value = ""; });
-  });
-
-  function updateAppearanceModeUI(){
-    const type = String(qs("vwCreateCharacterType")?.value || state.appearance.characterType || "pc");
-    const bodyType = String(qs("vwCreateBodyType")?.value || state.appearance.bodyType || "male");
-    const npcBlock = qs("vwCreateNpcUniformBlock");
-    const bustWrap = qs("vwCreateBustWrap");
-    if(npcBlock) npcBlock.style.display = type === "npc" ? "block" : "none";
-    if(bustWrap) bustWrap.style.display = bodyType === "female" ? "block" : "none";
-  }
 
   // ---------- Validation + persistence per step ----------
   function validateStep(n){
@@ -2578,35 +2470,6 @@ const result = await new Promise((resolve)=>{
     }
 
     if(n === 3){
-      const appearance = {
-        characterType: String(qs("vwCreateCharacterType")?.value||"pc"),
-        bodyType: String(qs("vwCreateBodyType")?.value||"male"),
-        height: String(qs("vwCreateHeight")?.value||"").trim(),
-        build: String(qs("vwCreateBuild")?.value||"average"),
-        ageLook: String(qs("vwCreateAgeLook")?.value||"adult"),
-        bust: String(qs("vwCreateBust")?.value||"medium"),
-        skinTone: String(qs("vwCreateSkinTone")?.value||"").trim(),
-        eyeColor: String(qs("vwCreateEyeColor")?.value||"").trim(),
-        faceDetail: String(qs("vwCreateFaceDetail")?.value||"").trim(),
-        hairStyle: String(qs("vwCreateHairStyle")?.value||"").trim(),
-        hairColor: String(qs("vwCreateHairColor")?.value||"").trim(),
-        beardStyle: String(qs("vwCreateBeardStyle")?.value||"").trim(),
-        scars: String(qs("vwCreateScars")?.value||"").trim(),
-        top: String(qs("vwCreateTop")?.value||"t_shirt"),
-        outerwear: String(qs("vwCreateOuterwear")?.value||"none"),
-        bottoms: String(qs("vwCreateBottoms")?.value||"jeans"),
-        hat: String(qs("vwCreateHat")?.value||"none"),
-        shoes: String(qs("vwCreateShoes")?.value||"sneakers"),
-        gloves: String(qs("vwCreateGloves")?.value||"none"),
-        uniformCategory: String(qs("vwCreateUniformCategory")?.value||"none"),
-        uniformPreset: String(qs("vwCreateUniformPreset")?.value||"none")
-      };
-      if(!appearance.height){ toast("Height is required"); return false; }
-      state.appearance = appearance;
-      return true;
-    }
-
-    if(n === 4){
       const species = String(qs("vwCreateSpecies")?.value||"").trim();
       if(!species){ toast("Species is required"); return false; }
       state.species = species;
@@ -2616,7 +2479,7 @@ const result = await new Promise((resolve)=>{
       return true;
     }
 
-    if(n === 5){
+    if(n === 4){
       state.cash = String(qs("vwCreateCash")?.value||"0").trim() || "0";
       state.bank = String(qs("vwCreateBank")?.value||"0").trim() || "0";
       state.starterPackSel = String(qs("vwCreateStarterPack")?.value||state.starterPackSel||"none");
@@ -2625,7 +2488,7 @@ const result = await new Promise((resolve)=>{
       return true;
     }
 
-    if(n === 6){
+    if(n === 5){
       // Stats
       const stats = {};
       ["STR","DEX","CON","INT","WIS","CHA"].forEach(k=>{
@@ -2659,7 +2522,6 @@ const result = await new Promise((resolve)=>{
     btnBack.onclick = null;
     try{ btnBack.remove(); }catch(e){}
     ui.modal.onclick = null;
-    try{ ui.modal.classList.remove("vw-build-modal-open"); ui.mTitle?.parentElement?.classList.remove("vw-build-station"); }catch(e){}
     vwSetModalOpen(false);
     resolve(val);
   }
@@ -2679,12 +2541,12 @@ const result = await new Promise((resolve)=>{
   ui.btnOk.onclick = async ()=>{
     if(!validateStep(step)) return;
 
-    if(step < 6){
+    if(step < 5){
       showStep(step + 1);
       return;
     }
 
-    // Step 6: Create payload
+    // Step 5: Create payload
     const classId = state.classId;
     const subclassId = state.subclassId ? state.subclassId : null;
     const level = state.level;
@@ -2767,8 +2629,7 @@ const result = await new Promise((resolve)=>{
       background: bgName,
       species: state.species,
       traits: state.traits,
-      notes: state.notes,
-      appearance: state.appearance
+      notes: state.notes
     };
 
     ui.btnOk.textContent = "Creating…";
@@ -2804,8 +2665,7 @@ const result = await new Promise((resolve)=>{
       }
 
       window.SESSION = window.SESSION || {};
-      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(res.id, { refresh:false });
-      else SESSION.activeCharId = res.id;
+      SESSION.activeCharId = res.id;
       SESSION.activeCtab = "sheet";
 
       close(true);
@@ -2862,9 +2722,7 @@ document.getElementById("deleteCharBtn")?.addEventListener("click", async ()=>{
       // pick next available character
       const st = await api("/api/state");
       const list = st.characters || [];
-      const nextId = list.length ? list[0].id : null;
-      if(typeof vwSetActiveCharacter === "function") await vwSetActiveCharacter(nextId, { refresh:false });
-      else SESSION.activeCharId = nextId;
+      SESSION.activeCharId = list.length ? list[0].id : null;
       await refreshAll();
     }else{
       toast(res?.error || "Delete failed");
@@ -2904,11 +2762,6 @@ function vwUpdateCharacterModeUI(){
   if(createBar) createBar.classList.add("hidden");
   const cb = document.getElementById("creationBlock");
   if(cb) cb.classList.add("hidden");
-
-  const c = (typeof getChar === "function") ? getChar() : null;
-  const canDelete = !!c && (SESSION.role === "dm" || (SESSION.role === "player" && c.ownerUserId === SESSION.userId));
-  document.getElementById("deleteCharBtn")?.classList.toggle("hidden", !canDelete);
-  document.getElementById("dupCharBtn")?.classList.toggle("hidden", SESSION.role !== "dm");
 }
 
 function vwUpdateCharSummaryRow(){
@@ -2980,38 +2833,6 @@ function vwUpdateCharSummaryRow(){
   set("charSummaryInit", initTxt);
   set("charSummarySpeed", speedTxt);
   set("charSummaryMoney", moneyTxt);
-}
-
-
-function vwFormatAppearanceLabel(v){
-  return String(v||"").replace(/_/g," ").replace(/\w/g, c=>c.toUpperCase());
-}
-function vwRenderCharacterAppearance(){
-  const c = (typeof getChar === "function") ? getChar() : null;
-  const box = document.getElementById("appearancePills");
-  if(!box) return;
-  const ap = c?.sheet?.appearance || null;
-  if(!ap){
-    box.innerHTML = '<div class="pill">No appearance data yet</div>';
-    return;
-  }
-  const pills = [
-    `Type: ${vwFormatAppearanceLabel(ap.characterType || "pc")}`,
-    `Body: ${vwFormatAppearanceLabel(ap.bodyType || "male")}`,
-    `Height: ${ap.height || "—"}`,
-    `Build: ${vwFormatAppearanceLabel(ap.build || "average")}`,
-    `Hair: ${vwFormatAppearanceLabel(ap.hairStyle || "")}${ap.hairColor ? ' • ' + vwFormatAppearanceLabel(ap.hairColor) : ''}`,
-    `Face: ${vwFormatAppearanceLabel(ap.faceDetail || "clean")}`,
-    `Top: ${vwFormatAppearanceLabel(ap.top || "")}`,
-    `Outerwear: ${vwFormatAppearanceLabel(ap.outerwear || "none")}`,
-    `Bottoms: ${vwFormatAppearanceLabel(ap.bottoms || "")}`,
-    `Hat: ${vwFormatAppearanceLabel(ap.hat || "none")}`,
-    `Shoes: ${vwFormatAppearanceLabel(ap.shoes || "")}`,
-    `Gloves: ${vwFormatAppearanceLabel(ap.gloves || "none")}`
-  ];
-  if(String(ap.bodyType||"") === "female" && ap.bust) pills.splice(4,0,`Bust: ${vwFormatAppearanceLabel(ap.bust)}`);
-  if(ap.characterType === "npc" && ap.uniformPreset && ap.uniformPreset !== "none") pills.push(`Uniform: ${vwFormatAppearanceLabel(ap.uniformPreset)}`);
-  box.innerHTML = pills.map(t=>`<div class="pill">${vwEscapeHtml(t)}</div>`).join("");
 }
 
 
