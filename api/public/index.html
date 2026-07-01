@@ -41,7 +41,6 @@
     <button class="btn" data-tab="character">Character</button>
     <button class="btn intel-tab-btn" data-tab="intel">Intel <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
     <button class="btn" data-tab="shop">Shop</button>
-    <button class="btn chat-tab-btn" data-tab="chat">Chat <span class="intel-nav-badge hidden" id="chatUnreadBadge">0</span></button>
     <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
   </div>
 
@@ -410,48 +409,6 @@
     </div>
   </section>
 
-  <section id="tab-chat" class="hidden">
-    <div class="panel chat-shell">
-      <div class="chat-topbar">
-        <div>
-          <div class="pill">Messenger</div>
-          <div class="mini">Table chat, direct messages, group messages, and DM conversations.</div>
-        </div>
-        <div class="row right chat-actions" style="gap:8px;">
-          <button class="btn smallbtn" id="chatNewDmBtn" type="button">Message DM</button>
-          <button class="btn smallbtn" id="chatNewThreadBtn" type="button">New Chat</button>
-          <button class="btn smallbtn" id="chatRefreshBtn" type="button">Refresh</button>
-        </div>
-      </div>
-      <hr/>
-      <div class="chat-layout">
-        <aside class="chat-thread-panel">
-          <div class="chat-search-wrap">
-            <input class="input" id="chatSearchInput" placeholder="Search chats" />
-          </div>
-          <div id="chatThreadList" class="chat-thread-list"></div>
-        </aside>
-        <section class="chat-conversation-panel">
-          <div class="chat-convo-head">
-            <div>
-              <h3 id="chatActiveTitle">Select a chat</h3>
-              <div class="mini" id="chatActiveMeta">No conversation selected</div>
-            </div>
-            <div class="row right hidden" id="chatThreadDmActions" style="gap:8px;">
-              <button class="btn smallbtn" id="chatEditThreadBtn" type="button">Edit</button>
-              <button class="btn smallbtn dangerbtn" id="chatDeleteThreadBtn" type="button">Delete</button>
-            </div>
-          </div>
-          <div id="chatMessageList" class="chat-message-list"></div>
-          <div class="chat-composer">
-            <textarea id="chatComposerInput" placeholder="Write a message..." rows="2"></textarea>
-            <button class="btn" id="chatSendBtn" type="button">Send</button>
-          </div>
-        </section>
-      </div>
-    </div>
-  </section>
-
   <section id="tab-settings" class="hidden">
     <div class="panel">
       <div class="row">
@@ -504,9 +461,7 @@
 <script src="/js/stream.js" defer></script>
 <script src="/js/characters.js" defer></script>
 <script src="/js/shop.js" defer></script>
-<script src="/js/chat.js" defer></script>
 <script src="/js/notifications.js" defer></script>
-<script src="/js/recaps.js" defer></script>
 <script src="/js/intel.js" defer></script>
 </body>
 </html>
