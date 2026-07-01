@@ -1,18 +1,11 @@
 <!doctype html>
-<html>
-<head>
+<html><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Veilwatch OS Preview</title>
+<title>VeilWatch OS Preview</title>
 <link rel="stylesheet" href="styles.css"/>
 <style>#loginOverlay{display:none!important}</style>
 </head>
 <body>
-<script>
-fetch('index.html').then(r=>r.text()).then(html=>{
-  const body = html.split('<body>')[1].split('</body>')[0];
-  document.body.innerHTML = '<style>#loginOverlay{display:none!important}</style>' + body;
-});
-</script>
-</body>
-</html>
+<script>location.replace("./index.html");</script>
+</body></html>
