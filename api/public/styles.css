@@ -2049,3 +2049,75 @@ body{
   .forge-left{ order:2; grid-template-columns: 1fr 1fr 1fr; display:grid; }
   .forge-right{ order:3; }
 }
+
+
+
+/* =========================================================
+   VEILWATCH FACE RESKIN V4B
+   Layout fix for broken home-grid on live repo
+   ========================================================= */
+
+.hud-home-grid{
+  display:grid;
+  grid-template-columns: 1.05fr 1.18fr 1.18fr 0.92fr !important;
+  grid-template-areas:
+    "active save live overview"
+    "party party forge forge"
+    "party party forge forge"
+    "log log forge forge"
+    "recent recent quick health" !important;
+  gap:18px !important;
+  align-items:start;
+}
+
+.grid-active{ grid-area:active; min-height:210px; }
+.grid-save{ grid-area:save; min-height:210px; }
+.grid-live{ grid-area:live; min-height:210px; }
+.grid-overview{ grid-area:overview; min-height:390px; }
+.grid-log{ grid-area:log; min-height:260px; }
+.grid-forge{ grid-area:forge; min-height:940px; }
+.grid-party{ grid-area:party; min-height:620px; }
+.grid-quick{ grid-area:quick; min-height:220px; }
+.grid-recent{ grid-area:recent; min-height:220px; }
+.grid-health{ grid-area:health; min-height:170px; }
+
+#sessionClockLogPanel{ grid-column:auto !important; }
+#dmActivePartyPanel{ grid-column:auto !important; }
+
+#dmActivePartyPanel .cards{
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:16px;
+}
+
+@media (max-width: 1280px){
+  .hud-home-grid{
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    grid-template-areas:
+      "active save"
+      "live overview"
+      "party party"
+      "forge forge"
+      "log log"
+      "recent quick"
+      "health health" !important;
+  }
+  .grid-forge{ min-height:760px; }
+  .grid-party{ min-height:520px; }
+}
+
+@media (max-width: 980px){
+  .hud-home-grid{
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "active"
+      "save"
+      "live"
+      "overview"
+      "party"
+      "forge"
+      "log"
+      "recent"
+      "quick"
+      "health" !important;
+  }
+}
