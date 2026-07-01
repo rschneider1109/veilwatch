@@ -6,7 +6,7 @@
 <title>Veilwatch OS</title>
 <link rel="stylesheet" href="/styles.css"/>
 </head>
-<body>
+<body class="vw-dm-console">
 <div id="loginOverlay">
   <div class="panel loginCard">
     <div class="loginTitle"><span>VEILWATCH ACCESS</span><span class="badge" id="buildTag">v4.5</span></div>
@@ -29,7 +29,7 @@
 </div>
 
 <header>
-  <div class="brand">VEILWATCH OS</div>
+  <div class="brandStack"><div class="brand">VEILWATCH <span>OS</span></div><div class="brandSub">Tactical Tabletop Command Interface</div></div>
   <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
   <div class="pill right" id="clockPill">--:--</div>
@@ -37,11 +37,11 @@
 
 <main>
   <div class="nav">
-    <button class="btn active" data-tab="home">Home</button>
-    <button class="btn" data-tab="character">Character</button>
-    <button class="btn intel-tab-btn" data-tab="intel">Intel <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
-    <button class="btn" data-tab="shop">Shop</button>
-    <button class="btn hidden" id="settingsTabBtn" data-tab="settings">Settings</button>
+    <button class="btn active" data-tab="home"><span>Home</span><em>Command Center</em></button>
+    <button class="btn" data-tab="character"><span>Character</span><em>Heroes & Sheets</em></button>
+    <button class="btn intel-tab-btn" data-tab="intel"><span>Intel</span><em>Notes & Data</em> <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
+    <button class="btn" data-tab="shop"><span>Shop</span><em>Gear & Services</em></button>
+    <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span>Settings</span><em>System & Prefs</em></button>
   </div>
 
   <section id="tab-home" class="grid cards">
@@ -84,11 +84,11 @@
     </div>
 
     <div class="panel" style="grid-column:span 12;">
-      <h3 style="margin:0 0 8px 0;color:var(--accent);">Quick Launch</h3>
+      <h3 style="margin:0 0 8px 0;color:var(--accent);">Command Routing</h3>
       <div class="row">
-        <button class="btn" data-go="character">Character</button>
-        <button class="btn" data-go="intel">Intel</button>
-        <button class="btn" data-go="shop">Shop</button>
+        <button class="btn" data-go="character">Open Character Sheet</button>
+        <button class="btn" data-go="intel">Review Intel</button>
+        <button class="btn" data-go="shop">Open Gear Shop</button>
       </div>
     </div>
   </section>
