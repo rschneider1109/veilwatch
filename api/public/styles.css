@@ -492,3 +492,340 @@ tr:hover td{background:rgba(0,229,255,.025);}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important;}
 }
+
+/* v5.4 controlled polish pass: command-surface refinement, no hook changes */
+body.vw-dm-console{
+  --panel:rgba(1,18,27,.48);
+  --panel2:rgba(0,35,50,.30);
+  --line:rgba(0,229,255,.30);
+  --line2:rgba(0,229,255,.15);
+}
+body.vw-dm-console::before{
+  animation:vwAmbientGrid 16s linear infinite;
+}
+@keyframes vwAmbientGrid{
+  0%{background-position:0 0,0 0,0 0;}
+  100%{background-position:40px 40px,-40px 40px,0 28px;}
+}
+header{
+  min-height:88px;
+  padding-top:16px;
+  padding-bottom:16px;
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.12), transparent 19%, transparent 70%, rgba(255,177,59,.08)),
+    repeating-linear-gradient(90deg, transparent 0 84px, rgba(0,229,255,.045) 85px, transparent 86px),
+    linear-gradient(180deg, rgba(1,8,13,.96), rgba(3,16,25,.72));
+}
+header .btn{
+  border-color:rgba(0,229,255,.30);
+  background:linear-gradient(180deg, rgba(0,229,255,.085), rgba(0,229,255,.025));
+}
+.brandStack::after{
+  content:"DM COMMAND SURFACE";
+  position:absolute;
+  left:16px;
+  bottom:-13px;
+  color:rgba(0,229,255,.62);
+  font-size:9px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+#clockPill{
+  min-width:82px;
+  justify-content:center;
+  border-color:rgba(0,229,255,.44);
+  background:radial-gradient(circle at 50% 50%, rgba(0,229,255,.15), rgba(0,229,255,.035) 62%, transparent 100%);
+}
+main{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 76% 11%, rgba(0,229,255,.09), transparent 20%),
+    radial-gradient(circle at 18% 82%, rgba(255,177,59,.045), transparent 30%),
+    linear-gradient(180deg, rgba(0,229,255,.04), rgba(0,0,0,.10));
+}
+main > *{position:relative;z-index:1;}
+main::before{z-index:2;}
+main::after{z-index:2;}
+main .nav::before{
+  content:"VEILWATCH FIELD TERMINAL // DM SHELL";
+  position:absolute;
+  left:18px;
+  top:-13px;
+  padding:0 8px;
+  color:rgba(131,190,208,.75);
+  background:rgba(2,8,14,.94);
+  font-size:9px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.nav{
+  position:relative;
+  padding:18px 18px 12px;
+  gap:10px;
+  border-color:rgba(0,229,255,.19);
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.07), transparent 58%, rgba(255,177,59,.035)),
+    rgba(0,8,13,.34);
+  box-shadow:inset 0 0 28px rgba(0,229,255,.035);
+  clip-path:polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+.nav .btn{
+  flex:0 1 230px;
+  min-width:210px;
+  isolation:isolate;
+  overflow:hidden;
+}
+.nav .btn::before{
+  background:radial-gradient(circle, rgba(0,229,255,.10), transparent 58%);
+}
+.nav .btn.active::before{
+  border-color:#dffbff;
+  box-shadow:0 0 18px rgba(0,229,255,.62), inset 0 0 14px rgba(0,229,255,.22);
+}
+.nav .btn.active::after{
+  opacity:.95;
+  height:2px;
+  box-shadow:0 0 10px rgba(0,229,255,.65);
+}
+.card,
+.panel,
+.shop-cart-panel,
+.shop-aisle,
+.shop-card{
+  border-color:rgba(0,229,255,.26);
+  background:
+    linear-gradient(180deg, rgba(0,229,255,.052), rgba(0,229,255,.015)),
+    radial-gradient(circle at 4% 0%, rgba(0,229,255,.11), transparent 31%),
+    linear-gradient(135deg, rgba(255,255,255,.035), transparent 18%),
+    rgba(1,14,22,.57);
+  box-shadow:
+    inset 0 0 32px rgba(0,229,255,.035),
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 16px 38px rgba(0,0,0,.30);
+}
+.card:hover,
+.panel:hover,
+.shop-card:hover{
+  border-color:rgba(0,229,255,.34);
+  box-shadow:
+    inset 0 0 34px rgba(0,229,255,.045),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 18px 42px rgba(0,0,0,.32),
+    0 0 20px rgba(0,229,255,.045);
+}
+.card h3,
+.panel h3,
+.shop-cart-title,
+.shop-aisle-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+.card h3::before,
+.panel h3::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border:1px solid rgba(0,229,255,.85);
+  border-radius:50%;
+  box-shadow:0 0 10px rgba(0,229,255,.48), inset 0 0 6px rgba(0,229,255,.24);
+  flex:0 0 auto;
+}
+.card h3::after,
+.panel h3::after{
+  content:"";
+  height:1px;
+  flex:1 1 auto;
+  min-width:48px;
+  background:linear-gradient(90deg, rgba(0,229,255,.30), transparent);
+  opacity:.72;
+}
+#tab-home > .card:nth-child(1){
+  background:
+    radial-gradient(circle at 92% 18%, rgba(0,229,255,.10), transparent 24%),
+    linear-gradient(180deg, rgba(0,229,255,.06), rgba(0,229,255,.014)),
+    rgba(1,14,22,.57);
+}
+#tab-home > .card:nth-child(1)::after{
+  inset:auto 18px 16px auto;
+  width:58px;
+  height:58px;
+  border:1px solid rgba(0,229,255,.20);
+  border-radius:50%;
+  background:
+    radial-gradient(circle, rgba(0,229,255,.20) 0 2px, transparent 3px),
+    conic-gradient(from 20deg, rgba(0,229,255,.46), transparent 18%, rgba(0,229,255,.26), transparent 52%, rgba(255,177,59,.42), transparent 70%);
+  mask:radial-gradient(circle, transparent 0 17px, #000 18px 21px, transparent 22px 100%);
+  opacity:.88;
+}
+#tab-home > .card:nth-child(2){
+  border-color:rgba(0,255,122,.30);
+}
+#tab-home > .card:nth-child(2)::after{
+  content:"";
+  position:absolute;
+  right:14px;
+  top:14px;
+  width:80px;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,255,122,.45));
+  box-shadow:0 0 12px rgba(0,255,122,.18);
+  border:0;
+}
+#tab-home > .card:nth-child(3)::after{
+  inset:14px;
+  width:auto;
+  height:auto;
+  border:1px solid rgba(0,229,255,.16);
+  border-radius:50%;
+  background:
+    radial-gradient(circle, rgba(0,229,255,.20) 0 2px, transparent 3px),
+    repeating-conic-gradient(from -30deg, rgba(0,229,255,.36) 0deg 4deg, transparent 5deg 16deg);
+  mask:radial-gradient(circle, transparent 0 38%, #000 39% 42%, transparent 43% 100%);
+  opacity:.60;
+}
+#sessionClockMini{
+  font-variant-numeric:tabular-nums;
+}
+#dmActivePartyPanel{
+  min-height:268px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 85% 54%, rgba(0,229,255,.12), transparent 19%),
+    linear-gradient(180deg, rgba(0,229,255,.045), rgba(0,0,0,.08)),
+    rgba(1,14,22,.60);
+}
+#dmActivePartyPanel::after{
+  z-index:-1;
+  inset:auto 52px 34px auto;
+  width:220px;
+  height:220px;
+  border:1px solid rgba(0,229,255,.18);
+  border-radius:50%;
+  background:
+    radial-gradient(circle, rgba(0,229,255,.22) 0 2px, transparent 3px),
+    repeating-conic-gradient(from 0deg, rgba(0,229,255,.28) 0deg 3deg, transparent 4deg 16deg),
+    radial-gradient(circle, transparent 0 35%, rgba(0,229,255,.10) 36% 37%, transparent 38% 52%, rgba(0,229,255,.13) 53% 54%, transparent 55% 100%);
+  mask:radial-gradient(circle, #000 0 100%);
+  opacity:.36;
+}
+#dmActivePartyPanel > .row:first-of-type{
+  position:relative;
+  padding:10px;
+  border:1px solid rgba(0,229,255,.13);
+  background:linear-gradient(90deg, rgba(0,229,255,.04), rgba(0,0,0,.10));
+  clip-path:polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+#dmActivePartyCards{
+  grid-template-columns:repeat(12,1fr);
+  align-items:start;
+}
+#dmActivePartyCards .card{
+  min-height:0;
+  padding:14px;
+  background:
+    linear-gradient(180deg, rgba(0,229,255,.065), rgba(0,229,255,.018)),
+    rgba(1,11,18,.72);
+}
+.vwTapEdit{
+  cursor:pointer;
+  user-select:none;
+  transition:border-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.vwTapEdit:hover{
+  color:#f5feff;
+  border-color:rgba(0,229,255,.55);
+  box-shadow:0 0 18px rgba(0,229,255,.10), inset 0 0 16px rgba(0,229,255,.055);
+}
+#tab-home > .panel:last-child{
+  border-color:rgba(255,177,59,.28);
+  background:
+    linear-gradient(90deg, rgba(255,177,59,.055), transparent 28%),
+    linear-gradient(180deg, rgba(0,229,255,.04), rgba(0,0,0,.08)),
+    rgba(1,14,22,.58);
+}
+#tab-home > .panel:last-child .row .btn{
+  min-width:188px;
+}
+#sheetCtabBar,
+#dmPanels > .row:first-of-type{
+  padding:8px;
+  border:1px solid rgba(0,229,255,.13);
+  background:rgba(0,229,255,.025);
+  clip-path:polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+#sheetCtabBar .btn,
+#dmPanels > .row:first-of-type .btn{
+  min-height:34px;
+  padding:8px 11px;
+}
+.pill{
+  border-radius:2px;
+  clip-path:polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+.input,select,textarea{
+  border-radius:2px;
+  background:
+    linear-gradient(180deg, rgba(0,229,255,.035), transparent),
+    rgba(1,10,16,.82);
+}
+select{
+  min-height:42px;
+}
+table{
+  border:1px solid rgba(0,229,255,.12);
+  background:rgba(0,6,10,.28);
+}
+th{
+  color:#aeefff;
+  background:linear-gradient(90deg, rgba(0,229,255,.075), rgba(0,0,0,.10));
+}
+td:first-child, th:first-child{padding-left:12px;}
+#vwModal{
+  background:radial-gradient(circle at 50% 42%, rgba(0,229,255,.16), transparent 42%), rgba(0,0,0,.78)!important;
+}
+#vwModal > div{
+  background:linear-gradient(180deg, rgba(0,229,255,.07), rgba(0,0,0,.12)), rgba(2,13,20,.96)!important;
+  border:1px solid rgba(0,229,255,.34)!important;
+  border-radius:3px!important;
+  color:var(--ink)!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.62), 0 0 42px rgba(0,229,255,.14), inset 0 0 24px rgba(0,229,255,.04)!important;
+  clip-path:polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px)!important;
+}
+#vwModalTitle{
+  color:var(--accent)!important;
+  font-weight:900!important;
+  letter-spacing:.10em!important;
+  text-transform:uppercase!important;
+  text-shadow:0 0 14px rgba(0,229,255,.34)!important;
+}
+#vwModalCancel,
+#vwModalOk{
+  border:1px solid rgba(0,229,255,.30)!important;
+  border-radius:2px!important;
+  background:linear-gradient(180deg, rgba(0,229,255,.10), rgba(0,229,255,.025))!important;
+  color:var(--ink)!important;
+  text-transform:uppercase!important;
+  font-weight:800!important;
+  letter-spacing:.06em!important;
+}
+#vwModalOk{
+  border-color:rgba(0,229,255,.55)!important;
+  background:linear-gradient(180deg, rgba(0,229,255,.20), rgba(0,229,255,.055))!important;
+}
+@media (max-width:980px){
+  .nav .btn{flex:1 1 220px;min-width:min(220px,100%);} 
+  #dmActivePartyPanel{min-height:0;}
+  #dmActivePartyPanel::after{display:none;}
+}
+@media (max-width:680px){
+  header{min-height:0;}
+  .brandStack::after{display:none;}
+  main .nav::before{position:static;display:block;width:100%;margin-bottom:6px;background:transparent;padding:0;}
+  .nav{padding:12px;}
+  .nav .btn{flex:1 1 100%;min-width:0;}
+  #tab-home > .panel:last-child .row .btn{min-width:0;}
+}
+
