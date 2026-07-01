@@ -317,52 +317,19 @@
     __shopCheckoutBusy = true;
     renderShopCart();
     try{
-      c.inventory ||= [];
-      c.sheet ||= {};
-      c.sheet.money ||= { cash:'0', bank:'0' };
-      const grouped = new Map();
-      lines.forEach(line => {
-        const bundles = Math.max(1, parseIntSafe(line.qty, 1));
-        const totalQty = bundles * itemBundleQty(line);
-        const groupKey = [String(line.name || '').toLowerCase(), String(line.category || '').toLowerCase(), String(line.notes || '').toLowerCase(), String(line.weight || ''), String(line.cost || ''), String(line.inventoryUnit || '').toLowerCase(), String(line.ammo_type || '').toLowerCase()].join('|');
-        const existing = grouped.get(groupKey) || { category: line.category || '', name: line.name || 'Item', weight: String(line.weight ?? ''), qtyValue: 0, cost: String(line.cost ?? ''), notes: line.notes || '', inventoryUnit: itemBundleUnit(line), ammo_type: line.ammo_type || '' };
-        existing.qtyValue += totalQty;
-        grouped.set(groupKey, existing);
+      const checkoutRes = await api('/api/shop/checkout', {
+        method:'POST',
+        body: JSON.stringify({
+          charId: c.id,
+          shopId: shop.id,
+          paymentSource: paySource,
+          lines: lines.map(line => ({ id: line.id, itemId: line.itemId || line.id, qty: Math.max(1, parseIntSafe(line.qty, 1)) }))
+        })
       });
-
-      grouped.forEach(entry => {
-        const invMatch = (c.inventory || []).find(item =>
-          String(item.name || '').toLowerCase() === String(entry.name || '').toLowerCase() &&
-          String(item.category || '').toLowerCase() === String(entry.category || '').toLowerCase() &&
-          String(item.notes || '').toLowerCase() === String(entry.notes || '').toLowerCase() &&
-          String(item.weight || '') === String(entry.weight || '') &&
-          String(item.ammo_type || '').toLowerCase() === String(entry.ammo_type || '').toLowerCase()
-        );
-        if(invMatch){
-          const currentQty = parseInventoryQtyString(invMatch.qty);
-          invMatch.qty = buildInventoryQtyString(currentQty + entry.qtyValue, entry.inventoryUnit);
-          if(entry.ammo_type && !invMatch.ammo_type) invMatch.ammo_type = entry.ammo_type;
-        }else{
-          c.inventory.push({ category: entry.category, name: entry.name, weight: entry.weight, qty: buildInventoryQtyString(entry.qtyValue, entry.inventoryUnit), cost: entry.cost, notes: entry.notes, ammo_type: entry.ammo_type || '' });
-        }
-      });
-
-      lines.forEach(line => {
-        const current = shopItems.find(x => String(x.id) === String(line.itemId || line.id));
-        if(current && !isInfiniteStock(current.stock)) current.stock = Math.max(0, itemStockLeft(current) - Math.max(1, parseIntSafe(line.qty, 1)));
-      });
-
-      const nextMoney = Math.max(0, available - total);
-      if(paySource === 'bank') c.sheet.money.bank = formatMoneyValue(nextMoney);
-      else c.sheet.money.cash = formatMoneyValue(nextMoney);
-
-      const saveCharRes = await api('/api/character/save', { method:'POST', body: JSON.stringify({ charId:c.id, character:c }) });
-      if(!saveCharRes?.ok){ toast(saveCharRes?.error || 'Failed to save inventory'); return; }
-
-      const saveShopRes = await api('/api/shops/save', { method:'POST', body: JSON.stringify({ shops: getShopState() }) });
-      if(!saveShopRes?.ok){ toast(saveShopRes?.error || 'Failed to save shop stock'); return; }
-
-      await api('/api/notify', { method:'POST', body: JSON.stringify({ type:'Shop Checkout', detail:(shop.name || 'Shop') + ' • ' + lines.length + ' cart item(s) • ' + formatMoneyText(total) + ' from ' + paySource, from: SESSION.name || SESSION.username || 'Player' }) });
+      if(!checkoutRes?.ok){
+        toast(checkoutRes?.error || 'Checkout failed');
+        return;
+      }
 
       bucket.items = [];
       writeCarts(carts);
@@ -676,6 +643,7 @@
     const sel = document.getElementById('shopSel');
     const targetSel = document.getElementById('shopTargetSel');
     const targetWrap = document.getElementById('shopTargetWrap');
+    const targetDisplay = document.getElementById('shopTargetDisplay');
     const editBtn = document.getElementById('editShopBtn');
     const addItemBtn = document.getElementById('addShopItemBtn');
     const help = document.getElementById('shopHelpText');
@@ -693,6 +661,7 @@
     enabledPill.textContent = enabled ? 'Shop: Enabled' : 'Shop: Disabled';
 
     sel.innerHTML = '';
+    sel.disabled = SESSION.role !== 'dm';
     (shops.list || []).forEach(s => {
       const o = document.createElement('option');
       o.value = s.id;
@@ -710,6 +679,11 @@
         renderShopCart();
       }
     };
+
+    if(targetDisplay){
+      const target = getShopTargetCharacter();
+      targetDisplay.textContent = 'Shopping for: ' + (target ? (target.name || 'Character') : (SESSION.role === 'dm' ? 'Select a target' : 'No character selected'));
+    }
 
     if(targetWrap && targetSel){
       targetWrap.classList.toggle('hidden', SESSION.role !== 'dm');
