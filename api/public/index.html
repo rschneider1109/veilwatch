@@ -79,23 +79,49 @@
   </aside>
 
   <section id="tab-home" class="hud-home-screen">
-  <div class="hud-home-grid">
-    <div class="card hud-card active-character-card grid-active">
-      <h3>Primary Focus</h3>
-      <div class="active-character-shell">
-        <div class="active-character-silhouette"></div>
-        <div class="active-character-copy">
-          <div class="active-character-name" id="activeCharMini">None selected</div>
-          <div class="mini" id="activeCharStatusMini">No primary focus selected</div>
+  <div class="hud-home-grid command-deck-home-grid">
+    <div class="panel hud-card command-deck-panel grid-commanddeck">
+      <div class="command-deck-header">
+        <div>
+          <h3>DM Command Deck</h3>
+          <div class="mini">Run the live session from here: confirm the table is ready, watch the incoming queue, and keep the campaign moving without digging through tabs.</div>
+        </div>
+        <div class="command-chip-row">
+          <div class="command-chip"><span>Party Ready</span><strong>1 / 6</strong></div>
+          <div class="command-chip"><span>Open Requests</span><strong>2</strong></div>
+          <div class="command-chip"><span>Unread Messages</span><strong>0</strong></div>
+          <div class="command-chip"><span>Intel Alerts</span><strong>3</strong></div>
         </div>
       </div>
-    </div>
-
-    <div class="card hud-card save-state-card grid-save">
-      <h3>Session State</h3>
-      <div class="save-status-line">Control state synced to server volume</div>
-      <div class="save-status-ok" id="saveMini">OK</div>
-      <div class="save-status-time" id="saveTimeMini">Last save: --</div>
+      <div class="command-deck-columns">
+        <div class="command-subpanel">
+          <div class="command-subpanel-title">Pre-Flight Checklist</div>
+          <div class="command-checklist">
+            <div class="command-checklist-item"><span class="tick on"></span><span>Player accounts confirmed</span></div>
+            <div class="command-checklist-item"><span class="tick on"></span><span>Active party assigned</span></div>
+            <div class="command-checklist-item"><span class="tick on"></span><span>Intel feed online</span></div>
+            <div class="command-checklist-item"><span class="tick"></span><span>Requests reviewed before launch</span></div>
+            <div class="command-checklist-item"><span class="tick"></span><span>Session clock waiting to start</span></div>
+          </div>
+        </div>
+        <div class="command-subpanel">
+          <div class="command-subpanel-title">Latest Recap</div>
+          <div class="recap-card-lite">
+            <div class="recap-card-title">Previously On // Dead Channel</div>
+            <p>The team recovered the blackout symbol, heard a whisper from the harbor echo, and marked one unresolved lead tied to Alara’s message.</p>
+            <div class="mini">Pinned for player home • ready to broadcast</div>
+          </div>
+        </div>
+        <div class="command-subpanel">
+          <div class="command-subpanel-title">DM Attention Queue</div>
+          <div class="attention-queue">
+            <div class="attention-row high"><span>Pending request</span><strong>Mike wants to investigate the blackout symbol</strong></div>
+            <div class="attention-row"><span>Player note</span><strong>Sarah added “Hidden Passage”</strong></div>
+            <div class="attention-row"><span>Scene prep</span><strong>Encounter clock not yet started</strong></div>
+            <div class="attention-row"><span>Intel sync</span><strong>3 recent clue updates available</strong></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card hud-card live-notifications-card grid-live">
@@ -119,32 +145,40 @@
       <div class="overview-metric"><span>Items</span><span>18</span></div>
     </div>
 
-    <div class="panel hud-card grid-log" id="sessionClockLogPanel">
-      <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
+    <div class="panel hud-card tactical-party-panel grid-party" id="dmActivePartyPanel">
+      <div class="party-panel-header">
         <div>
-          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Archive</h3>
-          <div class="mini">Completed sessions are recorded here when the DM clicks End Session.</div>
+          <h3 style="margin:0;color:var(--accent);">Tactical Party Control</h3>
+          <div class="mini party-header-copy">This is your live roster control block. Add the current party, open sheets fast, and keep the scene-focused characters ready to run.</div>
+        </div>
+        <div class="mini">1 / 6 active</div>
+      </div>
+      <div class="row party-entry-row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="min-width:260px;flex:1;">
+          <div class="mini" style="margin-bottom:6px;">Add to Party</div>
+          <select id="dmActiveAddSel" style="width:100%;"></select>
+        </div>
+        <div style="min-width:220px;flex:1;">
+          <div class="mini" style="margin-bottom:6px;">Player Tag (optional)</div>
+          <input class="input" id="dmActivePlayerLabel" placeholder="e.g., Alex" style="width:100%;"/>
+        </div>
+        <div style="min-width:170px;">
+          <div class="mini" style="margin-bottom:6px;">&nbsp;</div>
+          <div class="row" style="gap:10px;">
+            <button class="btn smallbtn" id="dmActiveAddBtn">Add</button>
+            <button class="btn smallbtn" id="dmActiveClearBtn">Clear</button>
+          </div>
         </div>
       </div>
-      <div class="tableWrap" style="margin-top:12px;">
-        <table class="dataTable">
-          <thead>
-            <tr>
-              <th>ID</th><th>SESSION</th><th>DURATION</th><th>ENDED</th><th>NOTES</th><th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="sessionClockLogBody">
-            <tr><td colspan="6" class="mini">No session logs yet.</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="grid cards" id="dmActivePartyCards" style="margin-top:14px;"></div>
+      <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP / AC / Stats / Init pills to edit. This block should stay usable during live play, so it intentionally gets more space than the decorative panels.</div>
     </div>
 
     <div class="panel hud-card home-forge-panel grid-forge">
       <div class="forge-header">
         <div>
           <h3>Entity Projection Bay</h3>
-          <div class="mini forge-subcopy">Inspect and adjust the current focus entity from the command surface.</div>
+          <div class="mini forge-subcopy">The holographic projection area stays built in, but it is treated as a secondary command tool rather than the entire home screen.</div>
         </div>
         <div class="mini">Projection Live</div>
       </div>
@@ -188,43 +222,50 @@
       </div>
     </div>
 
-    <div class="panel hud-card tactical-party-panel grid-party" id="dmActivePartyPanel">
-      <div class="party-panel-header">
-        <div>
-          <h3 style="margin:0;color:var(--accent);">Tactical Party Control</h3>
-          <div class="mini party-header-copy">Run the live party roster, open sheets, and keep active characters ready for scene control.</div>
-        </div>
-        <div class="mini">1 / 6 active</div>
-      </div>
-      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="min-width:240px;flex:1;">
-          <div class="mini" style="margin-bottom:6px;">Add to Party</div>
-          <select id="dmActiveAddSel" style="width:100%;"></select>
-        </div>
-        <div style="min-width:220px;">
-          <div class="mini" style="margin-bottom:6px;">Player Tag (optional)</div>
-          <input class="input" id="dmActivePlayerLabel" placeholder="e.g., Alex" style="width:100%;"/>
-        </div>
-        <div style="min-width:180px;">
-          <div class="mini" style="margin-bottom:6px;">&nbsp;</div>
-          <div class="row" style="gap:10px;">
-            <button class="btn smallbtn" id="dmActiveAddBtn">Add</button>
-            <button class="btn smallbtn" id="dmActiveClearBtn">Clear</button>
-          </div>
+    <div class="card hud-card active-character-card grid-active">
+      <h3>Primary Focus</h3>
+      <div class="active-character-shell">
+        <div class="active-character-silhouette"></div>
+        <div class="active-character-copy">
+          <div class="active-character-name" id="activeCharMini">Jeff</div>
+          <div class="mini" id="activeCharStatusMini">No primary focus selected</div>
         </div>
       </div>
-      <div class="grid cards" id="dmActivePartyCards" style="margin-top:12px;"></div>
-      <div class="mini" style="margin-top:8px;color:var(--muted);">Tip: click HP/AC/Stats/Init pills to edit (autosaves).</div>
-      <div class="mini" style="margin-top:4px;color:var(--muted);">Active = the characters currently being played at the table (player characters).</div>
+      <div class="focus-kv">
+        <div><span>Role</span><strong>Field Lead</strong></div>
+        <div><span>Status</span><strong>Ready</strong></div>
+      </div>
     </div>
 
-    <div class="card hud-card quick-actions-card grid-quick">
-      <h3>Command Actions</h3>
-      <div class="quick-actions-grid">
-        <button class="btn smallbtn" id="qaAddNote">Add Note</button>
-        <button class="btn smallbtn" id="qaAddNpc">Add NPC</button>
-        <button class="btn smallbtn" id="qaAddItem">Add Item</button>
-        <button class="btn smallbtn" id="qaRollDice">Roll Dice</button>
+    <div class="card hud-card save-state-card grid-save">
+      <h3>Session State</h3>
+      <div class="save-status-line">Control state synced to server volume</div>
+      <div class="save-status-ok" id="saveMini">OK</div>
+      <div class="save-status-time" id="saveTimeMini">Last save: --</div>
+      <div class="state-mini-grid">
+        <div><span>Clock</span><strong>Stopped</strong></div>
+        <div><span>Mode</span><strong>DM Live</strong></div>
+      </div>
+    </div>
+
+    <div class="panel hud-card grid-log" id="sessionClockLogPanel">
+      <div class="row between" style="align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0 0 8px 0;color:var(--accent);">Session Archive</h3>
+          <div class="mini">Completed sessions are recorded here when the DM clicks End Session. This should become the official campaign run log.</div>
+        </div>
+      </div>
+      <div class="tableWrap command-log-wrap" style="margin-top:12px;">
+        <table class="dataTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>SESSION</th><th>DURATION</th><th>ENDED</th><th>NOTES</th><th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="sessionClockLogBody">
+            <tr><td colspan="6" class="mini">No session logs yet.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -237,6 +278,17 @@
         <div class="hud-list-row"><span>Jeff (DM) started session</span><span>22m ago</span></div>
       </div>
       <div class="hud-footer-link">Open event archive</div>
+    </div>
+
+    <div class="card hud-card quick-actions-card grid-quick">
+      <h3>Command Actions</h3>
+      <div class="quick-actions-grid">
+        <button class="btn smallbtn" id="qaAddNote">Add Note</button>
+        <button class="btn smallbtn" id="qaAddNpc">Add NPC</button>
+        <button class="btn smallbtn" id="qaAddItem">Add Item</button>
+        <button class="btn smallbtn" id="qaRollDice">Roll Dice</button>
+      </div>
+      <div class="mini" style="margin-top:10px;">Primary DM shortcuts live here so you don’t have to hunt through the interface mid-session.</div>
     </div>
 
     <div class="card hud-card system-health-card grid-health">
