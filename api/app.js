@@ -521,6 +521,9 @@ function normalizeSessionRecapsShape(st){
     dmNotes: String(r.dmNotes||"").slice(0,12000),
     visibility: String(r.visibility||"players") === "dm" ? "dm" : "players",
     pinned: !!r.pinned,
+    sessionLogId: Number(r.sessionLogId || 0) || null,
+    sessionTitle: String(r.sessionTitle || "").slice(0,140),
+    sessionEndedAt: Number(r.sessionEndedAt || 0) || null,
     createdAt: Number(r.createdAt||Date.now()),
     updatedAt: Number(r.updatedAt||r.createdAt||Date.now())
   })).filter(r=>r.id);
@@ -1210,7 +1213,7 @@ const server = http.createServer(async (req,res)=>{
       if(safe.sessionRecaps){
         safe.sessionRecaps.items = (safe.sessionRecaps.items || [])
           .filter(r=>String(r.visibility||"players") === "players")
-          .map(r=>({ id:r.id, title:r.title, summary:r.summary, visibility:r.visibility, pinned:!!r.pinned, createdAt:r.createdAt, updatedAt:r.updatedAt }));
+          .map(r=>({ id:r.id, title:r.title, summary:r.summary, visibility:r.visibility, pinned:!!r.pinned, sessionLogId:r.sessionLogId || null, sessionTitle:r.sessionTitle || "", sessionEndedAt:r.sessionEndedAt || null, createdAt:r.createdAt, updatedAt:r.updatedAt }));
       }
 
       // chat visibility: table chat, DMs with this player, and groups this player belongs to.
@@ -2111,6 +2114,17 @@ if(p === "/api/character/save" && req.method==="POST"){
     normalizeSessionRecapsShape(state);
     const id = state.sessionRecaps.nextId++;
     const now = Date.now();
+    const sessionLogId = Number(body.sessionLogId || 0) || null;
+    let sessionTitle = String(body.sessionTitle || "").slice(0,140);
+    let sessionEndedAt = Number(body.sessionEndedAt || 0) || null;
+    if(sessionLogId){
+      normalizeSessionClockLogShape(state);
+      const log = (state.sessionClockLog.items || []).find(r=>Number(r.id||0) === sessionLogId);
+      if(log){
+        sessionTitle = String(sessionTitle || log.title || `Session ${log.id}`).slice(0,140);
+        sessionEndedAt = sessionEndedAt || Number(log.endedAt || 0) || null;
+      }
+    }
     state.sessionRecaps.items.unshift({
       id,
       title: String(body.title || "Untitled Recap").slice(0,140),
@@ -2118,10 +2132,14 @@ if(p === "/api/character/save" && req.method==="POST"){
       dmNotes: String(body.dmNotes || "").slice(0,12000),
       visibility: String(body.visibility || "players") === "dm" ? "dm" : "players",
       pinned: !!body.pinned,
+      sessionLogId,
+      sessionTitle,
+      sessionEndedAt,
       createdAt: now,
       updatedAt: now
     });
     saveState(state);
+    sseBroadcast({ ts: now, type:"recaps.create", scope:"all" });
     return json(res, 200, {ok:true, id});
   }
 
@@ -2137,8 +2155,20 @@ if(p === "/api/character/save" && req.method==="POST"){
     recap.dmNotes = String(body.dmNotes || "").slice(0,12000);
     recap.visibility = String(body.visibility || "players") === "dm" ? "dm" : "players";
     recap.pinned = !!body.pinned;
+    recap.sessionLogId = Number(body.sessionLogId || 0) || null;
+    recap.sessionTitle = String(body.sessionTitle || "").slice(0,140);
+    recap.sessionEndedAt = Number(body.sessionEndedAt || 0) || null;
+    if(recap.sessionLogId){
+      normalizeSessionClockLogShape(state);
+      const log = (state.sessionClockLog.items || []).find(r=>Number(r.id||0) === Number(recap.sessionLogId));
+      if(log){
+        recap.sessionTitle = String(recap.sessionTitle || log.title || `Session ${log.id}`).slice(0,140);
+        recap.sessionEndedAt = recap.sessionEndedAt || Number(log.endedAt || 0) || null;
+      }
+    }
     recap.updatedAt = Date.now();
     saveState(state);
+    sseBroadcast({ ts: recap.updatedAt, type:"recaps.update", scope:"all" });
     return json(res, 200, {ok:true});
   }
 
@@ -2151,6 +2181,7 @@ if(p === "/api/character/save" && req.method==="POST"){
     state.sessionRecaps.items = state.sessionRecaps.items.filter(r=>Number(r.id||0) !== id);
     if(state.sessionRecaps.items.length === before) return json(res, 404, {ok:false, error:"Not found"});
     saveState(state);
+    sseBroadcast({ ts: Date.now(), type:"recaps.delete", scope:"all" });
     return json(res, 200, {ok:true});
   }
 
@@ -2164,6 +2195,7 @@ if(p === "/api/character/save" && req.method==="POST"){
     recap.pinned = !!body.pinned;
     recap.updatedAt = Date.now();
     saveState(state);
+    sseBroadcast({ ts: recap.updatedAt, type:"recaps.pin", scope:"all" });
     return json(res, 200, {ok:true});
   }
 
