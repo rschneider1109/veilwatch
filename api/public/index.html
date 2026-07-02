@@ -32,6 +32,7 @@
   <div class="brandStack"><div class="brand">VEILWATCH <span>OS</span></div><div class="brandSub">Tactical Tabletop Command Interface</div></div>
   <div class="pill" id="whoPill">Not logged in</div><button class="btn smallbtn hidden" id="logoutBtn" style="margin-left:10px;">Logout</button>
   <div class="pill" id="shopPill">Shop: --</div>
+  <div class="pill" id="sessionClockPill">Session: 00:00:00</div>
   <div class="pill right" id="clockPill">--:--</div>
 </header>
 
@@ -41,6 +42,7 @@
     <button class="btn" data-tab="character"><span>Character</span><em>Heroes & Sheets</em></button>
     <button class="btn intel-tab-btn" data-tab="intel"><span>Intel</span><em>Notes & Data</em> <span class="intel-nav-badge hidden" id="intelUnreadBadge">0</span></button>
     <button class="btn" data-tab="shop"><span>Shop</span><em>Gear & Services</em></button>
+    <button class="btn" data-tab="chat"><span>Chat</span><em>Comms Channels</em> <span class="chat-float-badge hidden" id="chatUnreadBadge">0</span></button>
     <button class="btn hidden" id="settingsTabBtn" data-tab="settings"><span>Settings</span><em>System & Prefs</em></button>
   </div>
 
@@ -54,9 +56,27 @@
       <div class="mini">Auto-saved to server volume</div>
       <div class="mini" id="saveMini">OK</div>
     </div>
-    <div class="card" style="grid-column:span 4;">
+    <div class="card session-clock-card" style="grid-column:span 4;">
       <h3>Session Clock</h3>
-      <div class="mini" id="sessionClockMini">00:00</div>
+      <div class="mini" id="sessionClockStatusMini">Stopped / Break</div>
+      <div class="mini" id="sessionClockMini">00:00:00</div>
+      <div class="row session-clock-controls hidden" id="sessionClockControls" style="gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn smallbtn" id="sessionClockStartBtn" type="button">Start</button>
+        <button class="btn smallbtn" id="sessionClockStopBtn" type="button">Stop</button>
+        <button class="btn smallbtn" id="sessionClockEndBtn" type="button">End Session</button>
+        <button class="btn smallbtn" id="sessionClockResetBtn" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="sessionClockLogPanel" style="grid-column:span 12;">
+      <div class="row" style="gap:10px;align-items:center;justify-content:space-between;">
+        <h3 style="margin:0;color:var(--accent);">Session Clock Log</h3>
+        <div class="mini">Completed sessions are recorded when the DM clicks End Session.</div>
+      </div>
+      <table style="margin-top:10px;">
+        <thead><tr><th>ID</th><th>SESSION</th><th>DURATION</th><th>ENDED</th><th>NOTES</th><th>ACTIONS</th></tr></thead>
+        <tbody id="sessionClockLogBody"></tbody>
+      </table>
     </div>
 
     <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
@@ -111,6 +131,10 @@
         <div class="pill" id="charSummaryInit">Init: —</div>
         <div class="pill" id="charSummarySpeed">Speed: —</div>
         <div class="pill" id="charSummaryMoney">Money: —</div>
+      </div>
+      <div class="appearance-strip" style="margin-top:10px;">
+        <div class="mini" style="margin-bottom:6px;">Appearance Telemetry</div>
+        <div class="row" id="appearancePills" style="gap:8px;flex-wrap:wrap;align-items:center;"></div>
       </div>
 <div class="row" id="sheetCtabBar" style="margin-top:10px;">
   <button class="btn active" data-ctab="sheet">Sheet</button>
@@ -254,7 +278,7 @@
   <section id="tab-intel" class="hidden">
     <div class="panel">
       <div id="intelDisabledMsg" class="mini hidden"></div>
-      <div class="row">
+      <div class="row" id="dmIntelIntro">
         <div class="pill">DM Tools</div>
         <div class="mini">Notifications + Archived Clues appear when logged in as DM.</div>
       </div>
@@ -293,7 +317,7 @@
             <div class="mini" style="color:var(--muted);">Write recap entries here. Players see only entries marked for players.</div>
           </div>
           <table>
-            <thead><tr><th>ID</th><th>TITLE</th><th>DATE</th><th>VISIBILITY</th><th>SUMMARY</th><th></th></tr></thead>
+            <thead><tr><th>ID</th><th>TITLE</th><th>VISIBILITY</th><th>PINNED</th><th>UPDATED</th><th>SUMMARY</th><th>ACTIONS</th></tr></thead>
             <tbody id="recapBody"></tbody>
           </table>
         </div>
@@ -409,6 +433,43 @@
     </div>
   </section>
 
+  <section id="tab-chat" class="hidden">
+    <div class="panel chat-shell">
+      <div class="row chat-toolbar" style="gap:10px;flex-wrap:wrap;align-items:center;">
+        <div class="pill">Live Comms</div>
+        <input class="input" id="chatSearchInput" placeholder="Search channels..." style="flex:1;min-width:220px;"/>
+        <button class="btn smallbtn" id="chatRefreshBtn" type="button">Refresh</button>
+        <button class="btn smallbtn" id="chatNewThreadBtn" type="button">New Channel</button>
+        <button class="btn smallbtn" id="chatNewDmBtn" type="button">Message DM</button>
+      </div>
+      <hr/>
+      <div class="chat-layout">
+        <aside class="chat-thread-panel">
+          <div class="mini chat-panel-label">Channels / Direct Lines</div>
+          <div id="chatThreadList" class="chat-thread-list"></div>
+        </aside>
+        <section class="chat-conversation-panel">
+          <div class="chat-active-head">
+            <div>
+              <h3 id="chatActiveTitle" style="margin:0;color:var(--accent);">Table Chat</h3>
+              <div class="mini" id="chatActiveMeta">Everyone at the table</div>
+            </div>
+            <div class="row hidden" id="chatThreadDmActions" style="gap:8px;flex-wrap:wrap;">
+              <button class="btn smallbtn" id="chatEditThreadBtn" type="button">Edit</button>
+              <button class="btn smallbtn dangerbtn" id="chatDeleteThreadBtn" type="button">Delete</button>
+            </div>
+          </div>
+          <div id="chatMessageList" class="chat-message-list"></div>
+          <div class="chat-composer">
+            <textarea class="input" id="chatComposerInput" rows="2" placeholder="Transmit table message..."></textarea>
+            <button class="btn smallbtn" id="chatSendBtn" type="button">Send</button>
+          </div>
+        </section>
+      </div>
+      <div class="mini chat-help-text">Chat is for live table communication. Permanent rulings and evidence should be stored in Intel or Session Recaps.</div>
+    </div>
+  </section>
+
   <section id="tab-settings" class="hidden">
     <div class="panel">
       <div class="row">
@@ -463,5 +524,7 @@
 <script src="/js/shop.js" defer></script>
 <script src="/js/notifications.js" defer></script>
 <script src="/js/intel.js" defer></script>
+<script src="/js/recaps.js" defer></script>
+<script src="/js/chat.js" defer></script>
 </body>
 </html>
