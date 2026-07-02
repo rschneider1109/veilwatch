@@ -2524,3 +2524,82 @@ body.vw-dm-console #sessionClockLogPanel{
   .dm-rail-actions{grid-template-columns:1fr 1fr;}
   .dm-rail-head{align-items:stretch;flex-direction:column;}
 }
+
+/* v6.3 Session Record / Recap Forge */
+.session-log-row.session-due td:first-child,
+tr.session-due td:first-child{
+  color:#ffd99a;
+  text-shadow:0 0 10px rgba(255,177,59,.30);
+}
+.session-due-note,
+.session-linked-note{
+  display:block;
+  margin-top:4px;
+  font-size:10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.session-due-note{color:#ffd99a;text-shadow:0 0 10px rgba(255,177,59,.18);}
+.session-linked-note{color:#49ffad;text-shadow:0 0 10px rgba(0,255,122,.18);}
+.btn.smallbtn.session-due{
+  border-color:rgba(255,177,59,.42)!important;
+  color:#ffe4ad!important;
+  background:linear-gradient(90deg, rgba(255,177,59,.12), rgba(0,229,255,.035))!important;
+}
+.btn.smallbtn.session-linked{
+  border-color:rgba(73,255,173,.35)!important;
+  color:#adffdc!important;
+  background:linear-gradient(90deg, rgba(73,255,173,.10), rgba(0,229,255,.035))!important;
+}
+.session-log-actions .btn{white-space:nowrap;}
+.session-record-modal{
+  display:grid;
+  gap:12px;
+  color:#dffcff;
+}
+.session-record-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.session-record-grid > div,
+.session-record-block{
+  border:1px solid rgba(0,229,255,.18);
+  background:linear-gradient(90deg, rgba(0,229,255,.035), rgba(255,177,59,.025)), rgba(0,9,14,.18);
+  padding:10px 12px;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.session-record-grid span,
+.session-record-block span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.session-record-grid b,
+.session-record-block b{
+  display:block;
+  color:#f4feff;
+  font-size:13px;
+  line-height:1.35;
+}
+.session-record-block p{
+  margin:4px 0 0;
+  color:#b9eaf4;
+  white-space:pre-wrap;
+  line-height:1.45;
+}
+.session-record-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:8px;
+}
+@media (max-width:700px){
+  .session-record-grid{grid-template-columns:1fr;}
+  .session-log-actions{display:grid!important;grid-template-columns:1fr 1fr;width:100%;}
+  .session-log-actions .btn{width:100%;justify-content:center;}
+}
