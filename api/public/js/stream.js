@@ -34,6 +34,9 @@ function vwRenderRealtimeViews(forceAll){
     if(typeof renderDMActiveParty === "function") renderDMActiveParty();
   }catch(e){}
   try{
+    if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
+  }catch(e){}
+  try{
     if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
   }catch(e){}
 
@@ -43,6 +46,7 @@ function vwRenderRealtimeViews(forceAll){
   try{
     if(renderTab === "all" || renderTab === "home"){
       if(typeof renderDM === "function") renderDM();
+      if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
     }
   }catch(e){}
 

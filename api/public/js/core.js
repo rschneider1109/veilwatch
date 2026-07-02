@@ -732,6 +732,7 @@ async function renderTabs(tab){
   // redraw from the most recent local/server state.
   try{
     if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+    if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
     if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow();
   }catch(e){}
 
@@ -741,6 +742,7 @@ async function renderTabs(tab){
       if(typeof renderDM === "function") renderDM();
       if(typeof renderDMActiveParty === "function") renderDMActiveParty();
       if(typeof vwRenderSessionClockLog === "function") vwRenderSessionClockLog();
+      if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
     } else if(tab === "character"){
       // Always land on the playable Sheet view when the main Character tab is opened.
       // Players can still move to Actions/Inventory/etc. afterward, but opening Character
@@ -972,6 +974,7 @@ async function refreshAll(){
   if(typeof renderChat === "function") renderChat();
   if(typeof renderDM === "function") renderDM();
   if(typeof renderDMActiveParty === "function") renderDMActiveParty();
+  if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
   if(typeof renderIntelDM === "function") renderIntelDM();
   if(typeof renderIntelPlayer === "function") renderIntelPlayer();
   if(typeof renderCharacter === "function") renderCharacter();
