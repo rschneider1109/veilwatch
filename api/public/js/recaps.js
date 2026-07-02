@@ -11,6 +11,19 @@ function vwRecapItems(){
   return Array.isArray(box) ? box : (box.items || []);
 }
 
+function vwRecapSessionLabel(r){
+  if(r?.sessionLogId){
+    const title = r.sessionTitle || ('Session #' + r.sessionLogId);
+    return '#' + r.sessionLogId + ' • ' + title;
+  }
+  return 'Unlinked';
+}
+
+function vwRecapSessionPayload(sessionLogId){
+  if(typeof vwSessionLogMetaForPayload === 'function') return vwSessionLogMetaForPayload(sessionLogId);
+  return { sessionLogId:Number(sessionLogId || 0) || null, sessionTitle:'', sessionEndedAt:null };
+}
+
 function renderPlayerRecaps(){
   const el = document.getElementById('intelRecap');
   if(!el) return;
@@ -31,10 +44,11 @@ function renderPlayerRecaps(){
   el.innerHTML = items.map(r=>{
     const pin = r.pinned ? '<span class="badge">Pinned</span> ' : '';
     const when = vwFormatDate(r.updatedAt || r.createdAt);
+    const session = r.sessionTitle ? '<span class="mini session-linked-note">' + esc(vwRecapSessionLabel(r)) + '</span>' : '';
     return ''+
       '<div class="panel" style="margin:8px 0;padding:12px;">'+
         '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;">'+
-          '<strong>'+pin+esc(r.title || 'Session Recap')+'</strong>'+
+          '<strong>'+pin+esc(r.title || 'Session Recap')+'</strong>'+ session +
           '<span class="mini">'+esc(when)+'</span>'+
         '</div>'+
         '<div style="white-space:pre-wrap;margin-top:8px;line-height:1.45;">'+esc(r.summary || '')+'</div>'+
@@ -55,29 +69,38 @@ function renderDMRecaps(){
 
   body.innerHTML = '';
   if(!items.length){
-    body.innerHTML = '<tr><td colspan="7" class="mini">No session recaps yet.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8" class="mini">No session recaps yet.</td></tr>';
     return;
   }
 
   items.forEach(r=>{
     const tr = document.createElement('tr');
+    tr.className = r.sessionLogId ? 'session-linked' : 'session-due';
     tr.innerHTML =
       '<td>'+esc(r.id)+'</td>'+
       '<td>'+esc(r.title || '')+'</td>'+
+      '<td>'+esc(vwRecapSessionLabel(r))+'</td>'+
       '<td>'+esc(r.visibility || 'players')+'</td>'+
       '<td>'+(r.pinned ? 'yes' : 'no')+'</td>'+
       '<td>'+esc(vwFormatDate(r.updatedAt || r.createdAt))+'</td>'+
       '<td>'+esc((r.summary || '').slice(0,180))+(String(r.summary || '').length > 180 ? '…' : '')+'</td>'+
       '<td></td>';
     const td = tr.lastChild;
-    td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Pin</button> <button class="btn smallbtn">Delete</button>';
-    const [editBtn, pinBtn, delBtn] = td.querySelectorAll('button');
+    td.innerHTML = '<button class="btn smallbtn">Edit</button> <button class="btn smallbtn">Pin</button> <button class="btn smallbtn">Session</button> <button class="btn smallbtn">Delete</button>';
+    const [editBtn, pinBtn, sessionBtn, delBtn] = td.querySelectorAll('button');
     pinBtn.textContent = r.pinned ? 'Unpin' : 'Pin';
+    sessionBtn.disabled = !r.sessionLogId;
+    if(!r.sessionLogId) sessionBtn.classList.add('hidden');
 
     editBtn.onclick = async ()=>{
+      const sessionOptions = (typeof vwSessionLogSelectOptions === 'function') ? vwSessionLogSelectOptions(true) : [{value:String(r.sessionLogId || ''), label:vwRecapSessionLabel(r)}];
+      if(r.sessionLogId && !sessionOptions.some(o=>String(o.value) === String(r.sessionLogId))){
+        sessionOptions.push({ value:String(r.sessionLogId), label:vwRecapSessionLabel(r) + ' (record unavailable)' });
+      }
       const result = await vwModalForm({
         title:'Edit Session Recap',
         fields:[
+          {key:'sessionLogId', label:'Linked Session Record', value:String(r.sessionLogId || ''), type:'select', options:sessionOptions},
           {key:'title', label:'Title', value:r.title || '', placeholder:'Session title'},
           {key:'summary', label:'Player Recap', value:r.summary || '', placeholder:'What players should see', type:'textarea'},
           {key:'dmNotes', label:'DM Notes', value:r.dmNotes || '', placeholder:'Private DM continuity notes', type:'textarea'},
@@ -87,13 +110,15 @@ function renderDMRecaps(){
         okText:'Save'
       });
       if(!result) return;
+      const meta = vwRecapSessionPayload(result.sessionLogId);
       const res = await api('/api/recaps/update', {method:'POST', body:JSON.stringify({
         id:r.id,
         title:result.title,
         summary:result.summary,
         dmNotes:result.dmNotes,
         visibility:result.visibility,
-        pinned:String(result.pinned || 'no') === 'yes'
+        pinned:String(result.pinned || 'no') === 'yes',
+        ...meta
       })});
       if(res.ok){ toast('Recap saved'); await refreshAll(); }
       else toast(res.error || 'Failed');
@@ -103,6 +128,10 @@ function renderDMRecaps(){
       const res = await api('/api/recaps/pin', {method:'POST', body:JSON.stringify({id:r.id, pinned:!r.pinned})});
       if(res.ok){ toast(r.pinned ? 'Unpinned' : 'Pinned'); await refreshAll(); }
       else toast(res.error || 'Failed');
+    };
+
+    sessionBtn.onclick = ()=>{
+      if(typeof vwOpenRecapSessionRecord === 'function') vwOpenRecapSessionRecord(r.id);
     };
 
     delBtn.onclick = async ()=>{
@@ -120,9 +149,11 @@ window.renderDMRecaps = renderDMRecaps;
 
 document.getElementById('dmNewRecapBtn')?.addEventListener('click', async ()=>{
   if(SESSION.role !== 'dm') return;
+  const sessionOptions = (typeof vwSessionLogSelectOptions === 'function') ? vwSessionLogSelectOptions(true) : [{value:'', label:'No linked session'}];
   const result = await vwModalForm({
     title:'New Session Recap',
     fields:[
+      {key:'sessionLogId', label:'Linked Session Record', value:'', type:'select', options:sessionOptions},
       {key:'title', label:'Title', value:'', placeholder:'Session 1: The Blackout'},
       {key:'summary', label:'Player Recap', value:'', placeholder:'What players should see', type:'textarea'},
       {key:'dmNotes', label:'DM Notes', value:'', placeholder:'Private DM continuity notes', type:'textarea'},
@@ -132,12 +163,14 @@ document.getElementById('dmNewRecapBtn')?.addEventListener('click', async ()=>{
     okText:'Create'
   });
   if(!result || !String(result.title || '').trim()) return;
+  const meta = vwRecapSessionPayload(result.sessionLogId);
   const res = await api('/api/recaps/create', {method:'POST', body:JSON.stringify({
     title:result.title,
     summary:result.summary,
     dmNotes:result.dmNotes,
     visibility:result.visibility,
-    pinned:String(result.pinned || 'no') === 'yes'
+    pinned:String(result.pinned || 'no') === 'yes',
+    ...meta
   })});
   if(res.ok){ toast('Recap created'); await refreshAll(); }
   else toast(res.error || 'Failed');

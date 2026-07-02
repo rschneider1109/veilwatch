@@ -39,6 +39,27 @@ function vwHomeGetRecaps(st){
   return Array.isArray(box) ? box : (Array.isArray(box.items) ? box.items : []);
 }
 
+function vwHomeGetSessionLogs(st){
+  const box = st?.sessionClockLog || { items:[] };
+  return Array.isArray(box) ? box : (Array.isArray(box.items) ? box.items : []);
+}
+
+function vwHomeGetRecapForSession(st, logId){
+  const lid = Number(logId || 0);
+  if(!lid) return null;
+  return vwHomeGetRecaps(st)
+    .slice()
+    .sort((a,b)=>Number(b.updatedAt || b.createdAt || 0) - Number(a.updatedAt || a.createdAt || 0))
+    .find(r=>Number(r.sessionLogId || 0) === lid) || null;
+}
+
+function vwHomeSessionRecapDue(st){
+  return vwHomeGetSessionLogs(st)
+    .filter(l=>Number(l.id || 0) > 0)
+    .filter(l=>!vwHomeGetRecapForSession(st, l.id))
+    .sort((a,b)=>Number(b.endedAt || 0) - Number(a.endedAt || 0));
+}
+
 function vwHomeGetThreads(st){
   return Array.isArray(st?.chat?.threads) ? st.chat.threads : [];
 }
@@ -147,7 +168,18 @@ function vwHomeBuildAttention(st){
     });
   }
 
-  return vwHomeSortedByTime(out).slice(0,6);
+  vwHomeSessionRecapDue(st).slice(0,3).forEach(log=>{
+    out.push({
+      severity:"warn",
+      title:"Session recap due",
+      meta:"#" + log.id + " • " + (log.title || "Session"),
+      detail:"Session record is archived, but no linked recap exists yet.",
+      ts:Number(log.endedAt || log.updatedAt || log.createdAt || Date.now()),
+      action:"session-recap:" + Number(log.id || 0)
+    });
+  });
+
+  return vwHomeSortedByTime(out).slice(0,7);
 }
 
 function vwHomeBuildLastBroadcast(st){
@@ -274,6 +306,11 @@ async function vwHomeRunAction(action){
   if(action === "chat") return renderTabs("chat");
   if(action === "clock") return document.getElementById("sessionClockStartBtn")?.click();
   if(action === "clock-log") return renderTabs("home");
+  if(String(action || "").startsWith("session-recap:")){
+    const id = Number(String(action).split(":")[1] || 0);
+    if(id && typeof vwOpenSessionRecapForge === "function") return vwOpenSessionRecapForge(id);
+    return renderTabs("home");
+  }
   if(action === "new-alert") return document.getElementById("dmNewNotifBtn")?.click();
   if(action === "new-recap"){
     await renderTabs("intel");
@@ -310,6 +347,7 @@ function renderDMHomeIntelligenceRail(){
   const revealed = clues.filter(c=>String(c.visibility || "hidden") === "revealed");
   const hidden = clues.filter(c=>String(c.visibility || "hidden") !== "revealed");
   const recaps = vwHomeGetRecaps(st);
+  const recapDue = vwHomeSessionRecapDue(st);
   const health = document.getElementById("dmHomeHealthGrid");
   const status = document.getElementById("dmHomeRailStatus");
   const sc = st.sessionClock || {};
@@ -330,7 +368,7 @@ function renderDMHomeIntelligenceRail(){
       { n:openRequests.length + openAlerts.length, label:"Needs DM" },
       { n:revealed.length + "/" + hidden.length, label:"Intel R/H" },
       { n:chars.length, label:"Roster" },
-      { n:recaps.length, label:"Recaps" },
+      { n:recapDue.length, label:"Recap Due" },
       { n:sessionTxt, label:"Session" }
     ].map(x=>'<div class="dm-rail-chip"><b>'+esc(x.n)+'</b><span>'+esc(x.label)+'</span></div>').join("");
   }
@@ -382,6 +420,7 @@ function renderDMHomeIntelligenceRail(){
       { label:"Shop", value:shops.enabled ? "LIVE" : "OFF", good:!!shops.enabled, action:"shop" },
       { label:"Intel", value:feat.intel === false ? "OFF" : "ON", good:feat.intel !== false, action:"clues" },
       { label:"Chat", value:vwHomeGetThreads(st).length ? "ON" : "IDLE", good:vwHomeGetThreads(st).length > 0, action:"chat" },
+      { label:"Recaps", value:recapDue.length ? (recapDue.length + " DUE") : "OK", good:!recapDue.length, action:recapDue.length ? ("session-recap:" + Number(recapDue[0].id || 0)) : "recaps" },
       { label:"Supply", value:activeShop ? activeShop.name : "NONE", good:!!activeShop, action:"shop" }
     ];
     health.innerHTML = h.map(x=>'<button class="dm-health-pill '+(x.good?'good':'warn')+'" type="button" data-dm-home-action="'+esc(x.action||'')+'"><span>'+esc(x.label)+'</span><b>'+esc(x.value)+'</b></button>').join("");

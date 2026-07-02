@@ -556,21 +556,27 @@ async function vwEndSessionClock(){
   const elapsedMs = vwGetSessionClockElapsedMs();
   if(elapsedMs < 1000){ toast("Session clock is still at 00:00:00"); return; }
 
+  const nextId = ((window.__STATE?.sessionClockLog?.nextId) || 1);
   const form = await vwModalForm({
-    title:"End Session?",
+    title:"End Session / Official Record",
     okText:"Continue",
     cancelText:"Cancel",
     fields:[
-      { key:"title", label:"Log Title", value:"Session " + (((window.__STATE?.sessionClockLog?.nextId) || 1)), placeholder:"Session name or number" },
+      { key:"title", label:"Session Record Title", value:"Session " + nextId, placeholder:"Session name or number" },
       { key:"duration", label:"Duration", type:"static", value:vwFormatDuration(elapsedMs) },
-      { key:"notes", label:"Notes", type:"textarea", value:"", placeholder:"Optional notes for this session log" }
+      { key:"notes", label:"Official Session Notes", type:"textarea", value:"", placeholder:"This is the official DM session record: rulings, outcomes, unfinished threads, loot, NPC moves, and anything that must survive the night." },
+      { key:"createRecap", label:"Create Session Recap Now?", value:"yes", type:"select", options:[{value:"yes", label:"Yes - open the recap forge after logging"}, {value:"no", label:"No - mark recap due"}] },
+      { key:"playerRecap", label:"Player-Facing Recap Draft", type:"textarea", value:"", placeholder:"Optional. What the players should remember from this session." },
+      { key:"dmNotes", label:"DM-Only Continuity Notes", type:"textarea", value:"", placeholder:"Optional. Private campaign continuity, secrets, pending consequences, hidden clocks." },
+      { key:"visibility", label:"Recap Visibility", value:"players", type:"select", options:[{value:"players", label:"Visible to Players"}, {value:"dm", label:"DM Only"}] },
+      { key:"pinned", label:"Pin Recap", value:"yes", type:"select", options:[{value:"yes", label:"Yes"}, {value:"no", label:"No"}] }
     ]
   });
   if(!form) return;
 
   const really = await vwModalConfirm({
     title:"Confirm End Session",
-    message:"This will save the current clock time to the Session Clock Log and reset the active clock to 00:00:00. Are you sure?",
+    message:"This will save the current clock time to the Session Clock Log, reset the active clock to 00:00:00, and optionally create a linked recap record.",
     okText:"End Session",
     cancelText:"Keep Clock Open"
   });
@@ -581,11 +587,40 @@ async function vwEndSessionClock(){
     window.__STATE = window.__STATE || {};
     if(res.sessionClock) window.__STATE.sessionClock = res.sessionClock;
     if(res.sessionClockLog) window.__STATE.sessionClockLog = res.sessionClockLog;
+
+    const logItem = res.item || (res.sessionClockLog?.items || [])[0] || null;
+    const wantsRecap = String(form.createRecap || "yes") === "yes";
+    let recapCreated = false;
+    if(wantsRecap && logItem){
+      const recapTitle = String(form.title || logItem.title || "Session Recap").trim();
+      const summary = String(form.playerRecap || "").trim();
+      const dmNotes = String(form.dmNotes || "").trim();
+      const hasDraft = !!(summary || dmNotes);
+      if(hasDraft){
+        const createRes = await api("/api/recaps/create", { method:"POST", body: JSON.stringify({
+          title:recapTitle || "Session Recap",
+          summary,
+          dmNotes,
+          visibility:form.visibility || "players",
+          pinned:String(form.pinned || "yes") === "yes",
+          sessionLogId:logItem.id,
+          sessionTitle:logItem.title || recapTitle,
+          sessionEndedAt:logItem.endedAt || Date.now()
+        }) });
+        recapCreated = !!(createRes && createRes.ok);
+        if(!recapCreated) toast(createRes?.error || "Session logged, but recap was not created");
+      }
+    }
+
     vwTickClocks();
     vwRenderSessionClockControls();
     vwRenderSessionClockLog();
-    toast("Session ended and logged");
+    toast(recapCreated ? "Session ended, logged, and recap linked" : "Session ended and logged");
     await refreshAll();
+
+    if(String(form.createRecap || "yes") === "yes" && logItem && !recapCreated && typeof vwOpenSessionRecapForge === "function"){
+      await vwOpenSessionRecapForge(logItem.id);
+    }
   }else{
     toast(res?.error || "Could not end session");
   }
@@ -658,14 +693,19 @@ function vwRenderSessionClockLog(){
   }
   body.innerHTML = items.map(r=>{
     const notes = r.notes ? esc(r.notes).slice(0,220) : '<span class="mini">No notes</span>';
-    return '<tr>' +
+    const linkedRecap = (typeof vwGetSessionRecapForLog === "function") ? vwGetSessionRecapForLog(r.id) : null;
+    const recapLabel = linkedRecap ? "Update Recap" : "Create Recap";
+    const recapClass = linkedRecap ? "session-linked" : "session-due";
+    return '<tr class="session-log-row '+recapClass+'">' +
       '<td>#'+esc(r.id)+'</td>' +
-      '<td>'+esc(r.title || "Session")+'</td>' +
+      '<td>'+esc(r.title || "Session") + (linkedRecap ? '<div class="mini session-linked-note">Recap linked: '+esc(linkedRecap.title || ('#'+linkedRecap.id))+'</div>' : '<div class="mini session-due-note">Recap due</div>') + '</td>' +
       '<td>'+vwFormatDuration(r.durationMs || 0)+'</td>' +
       '<td>'+esc(vwFormatDateTime(r.endedAt))+'</td>' +
       '<td>'+notes+'</td>' +
-      '<td><div class="row" style="gap:8px;flex-wrap:wrap;">' +
-        '<button class="btn smallbtn" type="button" onclick="vwEditSessionClockLog('+Number(r.id)+')">Edit</button>' +
+      '<td><div class="row session-log-actions" style="gap:8px;flex-wrap:wrap;">' +
+        '<button class="btn smallbtn" type="button" onclick="vwOpenSessionRecord('+Number(r.id)+')">View Record</button>' +
+        '<button class="btn smallbtn" type="button" onclick="vwEditSessionClockLog('+Number(r.id)+')">Edit Notes</button>' +
+        '<button class="btn smallbtn '+recapClass+'" type="button" onclick="vwOpenSessionRecapForge('+Number(r.id)+')">'+recapLabel+'</button>' +
         '<button class="btn smallbtn dangerbtn" type="button" onclick="vwDeleteSessionClockLog('+Number(r.id)+')">Delete</button>' +
       '</div></td>' +
     '</tr>';
@@ -976,6 +1016,7 @@ async function refreshAll(){
   if(typeof renderDMActiveParty === "function") renderDMActiveParty();
   if(typeof renderDMHomeIntelligenceRail === "function") renderDMHomeIntelligenceRail();
   if(typeof renderIntelDM === "function") renderIntelDM();
+  if(typeof renderDMRecaps === "function") renderDMRecaps();
   if(typeof renderIntelPlayer === "function") renderIntelPlayer();
   if(typeof renderCharacter === "function") renderCharacter();
   if(typeof renderSheet === "function") renderSheet();
