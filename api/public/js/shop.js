@@ -16,6 +16,44 @@
     return (shops.list || []).find(s => s.id === shops.activeShopId) || (shops.list || [])[0] || null;
   }
 
+
+  function updateShopPill(featureEnabled=true){
+    const pill = document.getElementById('shopPill');
+    if(!pill) return;
+    const shops = getShopState();
+    const currentShop = getActiveShop();
+    const featureOn = featureEnabled !== false;
+    const enabled = !!shops.enabled;
+
+    pill.classList.remove('shop-pill-live','shop-pill-offline','shop-pill-disabled','shop-pill-empty');
+
+    if(!featureOn){
+      pill.textContent = 'Disabled';
+      pill.title = 'Supply shop feature is disabled in Settings.';
+      pill.classList.add('shop-pill-disabled');
+      return;
+    }
+
+    if(!enabled){
+      pill.textContent = currentShop ? ('Offline: ' + (currentShop.name || 'Unnamed Shop')) : 'Offline';
+      pill.title = currentShop ? ('Shop offline: ' + (currentShop.name || 'Unnamed Shop')) : 'Shop offline. No active shop selected.';
+      pill.classList.add('shop-pill-offline');
+      return;
+    }
+
+    if(currentShop){
+      pill.textContent = 'Live: ' + (currentShop.name || 'Unnamed Shop');
+      pill.title = 'Shop live: ' + (currentShop.name || 'Unnamed Shop');
+      pill.classList.add('shop-pill-live');
+      return;
+    }
+
+    pill.textContent = 'Live: --';
+    pill.title = 'Shop is enabled, but no shop is selected yet.';
+    pill.classList.add('shop-pill-empty');
+  }
+  window.vwUpdateShopPill = updateShopPill;
+
   function parseMoney(raw){
     const n = Number(String(raw ?? "").replace(/[^0-9.\-]/g, ""));
     return Number.isFinite(n) ? n : 0;
@@ -650,6 +688,7 @@
     if(!enabledPill || !body || !sel) return;
 
     if(!feat.shop){
+      updateShopPill(false);
       enabledPill.textContent = 'Shop: Disabled';
       body.innerHTML = '<div class="mini">Shop feature is disabled.</div>';
       renderShopCart();
@@ -658,6 +697,7 @@
 
     const enabled = !!shops.enabled;
     const currentShop = getActiveShop();
+    updateShopPill(true);
     enabledPill.textContent = enabled ? 'Shop: Enabled' : 'Shop: Disabled';
 
     sel.innerHTML = '';
