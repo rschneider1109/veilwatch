@@ -825,6 +825,7 @@ function vwSetCharacterSubTab(tabName){
 
   const sections = {
     actions: document.getElementById("ctab-actions"),
+    projection: document.getElementById("ctab-projection"),
     inventory: document.getElementById("ctab-inventory"),
     abilities: document.getElementById("ctab-abilities"),
     spells: document.getElementById("ctab-spells"),
@@ -839,6 +840,7 @@ function vwSetCharacterSubTab(tabName){
   const sf = document.getElementById("sheetOnlyFooter");
   if(sf) sf.classList.toggle("hidden", target !== "sheet");
   try{ window.SESSION = window.SESSION || {}; SESSION.activeCtab = target; }catch(e){}
+  if(target === "projection"){ try{ if(typeof renderProjectionBay === "function") renderProjectionBay(); }catch(e){} }
 }
 window.vwSetCharacterSubTab = vwSetCharacterSubTab;
 
@@ -853,6 +855,7 @@ async function vwSetActiveCharacter(charId, opts={}){
   if(opts.refresh !== false){
     try{ if(typeof renderCharacter === "function") renderCharacter(); }catch(e){}
     try{ if(typeof renderSheet === "function") renderSheet(); }catch(e){}
+    try{ if(typeof renderProjectionBay === "function") renderProjectionBay(); }catch(e){}
     try{ if(typeof vwUpdateCharSummaryRow === "function") vwUpdateCharSummaryRow(); }catch(e){}
   }
 }
@@ -1020,6 +1023,7 @@ async function refreshAll(){
   if(typeof renderIntelPlayer === "function") renderIntelPlayer();
   if(typeof renderCharacter === "function") renderCharacter();
   if(typeof renderSheet === "function") renderSheet();
+  if(typeof renderProjectionBay === "function") renderProjectionBay();
   if(typeof renderSettings === "function") renderSettings();
 }
 window.refreshAll = refreshAll;
