@@ -79,6 +79,49 @@
       </table>
     </div>
 
+    <aside class="panel hidden dm-home-intel-rail" id="dmHomeIntelRail" style="grid-column:span 12;">
+      <div class="dm-rail-head">
+        <div>
+          <h3 style="margin:0;color:var(--accent);">DM Intelligence Rail</h3>
+          <div class="mini">Live operational readout from party, intel, chat, recaps, and session state.</div>
+        </div>
+        <div class="dm-rail-status" id="dmHomeRailStatus">SYNCING</div>
+      </div>
+
+      <div class="dm-rail-overview" id="dmHomeOverviewChips">
+        <div class="dm-rail-chip"><b>--</b><span>Active</span></div>
+        <div class="dm-rail-chip"><b>--</b><span>Needs DM</span></div>
+        <div class="dm-rail-chip"><b>--</b><span>Intel</span></div>
+      </div>
+
+      <div class="dm-rail-block dm-rail-attention">
+        <div class="dm-rail-title">Attention Queue</div>
+        <div class="dm-rail-list" id="dmHomeNeedsList"></div>
+      </div>
+
+      <div class="dm-rail-block">
+        <div class="dm-rail-title">Last Player Broadcast</div>
+        <div class="dm-last-broadcast" id="dmHomeLastBroadcast">No player-facing broadcast yet.</div>
+      </div>
+
+      <div class="dm-rail-block">
+        <div class="dm-rail-title">Recent Activity</div>
+        <div class="dm-rail-list compact" id="dmHomeActivityList"></div>
+      </div>
+
+      <div class="dm-rail-block">
+        <div class="dm-rail-title">System Health</div>
+        <div class="dm-health-grid" id="dmHomeHealthGrid"></div>
+      </div>
+
+      <div class="dm-rail-actions">
+        <button class="btn smallbtn" type="button" data-dm-home-action="requests">Requests</button>
+        <button class="btn smallbtn" type="button" data-dm-home-action="new-alert">New Alert</button>
+        <button class="btn smallbtn" type="button" data-dm-home-action="new-recap">New Recap</button>
+        <button class="btn smallbtn" type="button" data-dm-home-action="chat">Open Chat</button>
+      </div>
+    </aside>
+
     <div class="panel hidden" id="dmActivePartyPanel" style="grid-column:span 12;">
       <h3 style="margin:0 0 8px 0;color:var(--accent);">Active Characters</h3>
       <div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
@@ -526,5 +569,6 @@
 <script src="/js/intel.js" defer></script>
 <script src="/js/recaps.js" defer></script>
 <script src="/js/chat.js" defer></script>
+<script src="/js/dm_home.js" defer></script>
 </body>
 </html>

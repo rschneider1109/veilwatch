@@ -2209,3 +2209,318 @@ body.vw-dm-console #sessionClockLogPanel{
 @media (max-width:760px){
   #shopPill{max-width:100%;}
 }
+
+/* v6.1 DM Home Intelligence Rail — existing state surfaced into one DM command rail. */
+#dmHomeIntelRail{
+  position:relative;
+  overflow:hidden;
+  min-height:286px;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(255,177,59,.070), transparent 22%),
+    radial-gradient(circle at 14% 82%, rgba(0,229,255,.080), transparent 28%),
+    linear-gradient(180deg, rgba(139,248,255,.018), rgba(0,0,0,.042)),
+    rgba(0,13,20,.12);
+  border-color:rgba(255,177,59,.24);
+}
+#dmHomeIntelRail::before{
+  background:
+    repeating-linear-gradient(90deg, rgba(255,177,59,.035) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(0deg, rgba(0,229,255,.035) 0 1px, transparent 1px 24px),
+    radial-gradient(circle at 76% 24%, rgba(0,229,255,.16), transparent 34%);
+  opacity:.32;
+}
+#dmHomeIntelRail::after{
+  content:"";
+  position:absolute;
+  right:-70px;
+  bottom:-80px;
+  width:250px;
+  height:250px;
+  border:1px solid rgba(255,177,59,.18);
+  border-radius:50%;
+  background:
+    radial-gradient(circle, rgba(255,177,59,.22) 0 2px, transparent 3px),
+    repeating-conic-gradient(from 12deg, rgba(255,177,59,.24) 0deg 3deg, transparent 4deg 18deg),
+    radial-gradient(circle, transparent 0 36%, rgba(0,229,255,.12) 37% 38%, transparent 39% 100%);
+  mask:radial-gradient(circle, #000 0 100%);
+  opacity:.30;
+  pointer-events:none;
+  z-index:-1;
+  filter:drop-shadow(0 0 16px rgba(255,177,59,.12));
+}
+.dm-rail-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.dm-rail-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:74px;
+  min-height:30px;
+  padding:4px 10px;
+  border:1px solid rgba(0,229,255,.28);
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.055), transparent 55%),
+    rgba(0,8,13,.22);
+  color:#aefaff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  text-shadow:0 0 12px rgba(0,229,255,.32);
+}
+.dm-rail-status.hot{
+  color:#ffd99a;
+  border-color:rgba(255,177,59,.55);
+  box-shadow:0 0 22px rgba(255,177,59,.13), inset 0 0 18px rgba(255,177,59,.055);
+}
+.dm-rail-status.live{
+  color:#49ffad;
+  border-color:rgba(0,255,122,.48);
+  box-shadow:0 0 20px rgba(0,255,122,.12), inset 0 0 18px rgba(0,255,122,.045);
+}
+.dm-rail-overview{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:12px;
+}
+.dm-rail-chip{
+  position:relative;
+  min-height:54px;
+  padding:9px 10px 8px;
+  border:1px solid rgba(0,229,255,.16);
+  background:
+    linear-gradient(180deg, rgba(139,248,255,.025), rgba(0,229,255,.006)),
+    rgba(0,9,15,.14);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.dm-rail-chip b{
+  display:block;
+  color:#f4feff;
+  font-size:17px;
+  line-height:1;
+  letter-spacing:.06em;
+  text-shadow:0 0 14px rgba(0,229,255,.34);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.dm-rail-chip span{
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.dm-rail-block{
+  position:relative;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(0,229,255,.14);
+}
+.dm-rail-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  color:#73f6ff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  text-shadow:0 0 12px rgba(0,229,255,.28);
+}
+.dm-rail-title::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  border:1px solid rgba(255,177,59,.70);
+  box-shadow:0 0 12px rgba(255,177,59,.32), inset 0 0 6px rgba(255,177,59,.18);
+}
+.dm-rail-list{
+  display:grid;
+  gap:8px;
+}
+.dm-rail-item,
+.dm-broadcast-card,
+.dm-health-pill{
+  font:inherit;
+  text-align:left;
+  color:inherit;
+  cursor:pointer;
+}
+.dm-rail-item{
+  display:grid;
+  grid-template-columns:26px 1fr;
+  gap:9px;
+  width:100%;
+  padding:9px 10px;
+  border:1px solid rgba(0,229,255,.15);
+  background:
+    linear-gradient(90deg, rgba(0,229,255,.028), transparent 72%),
+    rgba(0,8,13,.14);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.dm-rail-item.hot{
+  border-color:rgba(255,177,59,.34);
+  background:
+    linear-gradient(90deg, rgba(255,177,59,.085), transparent 65%),
+    rgba(0,8,13,.15);
+}
+.dm-rail-item.warn{
+  border-color:rgba(255,177,59,.22);
+}
+.dm-rail-item:hover,
+.dm-broadcast-card:hover,
+.dm-health-pill:hover{
+  border-color:rgba(255,177,59,.48);
+  box-shadow:0 0 22px rgba(255,177,59,.08), inset 0 0 18px rgba(0,229,255,.045);
+}
+.dm-rail-sev,
+.dm-rail-tag{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:24px;
+  height:24px;
+  border:1px solid rgba(0,229,255,.25);
+  color:var(--amber);
+  background:rgba(0,229,255,.035);
+  font-size:11px;
+  font-weight:900;
+  text-shadow:0 0 10px rgba(255,177,59,.35);
+}
+.dm-rail-tag{
+  color:#8bf8ff;
+  font-size:9px;
+  letter-spacing:.08em;
+}
+.dm-rail-item b,
+.dm-broadcast-card b{
+  display:block;
+  color:#f6feff;
+  font-size:12px;
+  letter-spacing:.04em;
+}
+.dm-rail-item em,
+.dm-broadcast-card em{
+  display:block;
+  color:#8dbdcc;
+  font-size:10px;
+  font-style:normal;
+  margin-top:2px;
+}
+.dm-rail-item small,
+.dm-broadcast-card small{
+  display:block;
+  margin-top:4px;
+  color:#9bd8e8;
+  font-size:11px;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.dm-rail-item.compact{
+  grid-template-columns:30px 1fr;
+  padding:8px 9px;
+}
+.dm-rail-list.compact .dm-rail-item small{
+  -webkit-line-clamp:1;
+}
+.dm-rail-empty{
+  padding:12px;
+  border:1px dashed rgba(0,229,255,.18);
+  color:var(--muted);
+  background:rgba(0,229,255,.025);
+  font-size:12px;
+  line-height:1.45;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.dm-broadcast-card{
+  display:block;
+  width:100%;
+  padding:11px 12px;
+  border:1px solid rgba(0,229,255,.17);
+  background:
+    radial-gradient(circle at 92% 22%, rgba(0,229,255,.10), transparent 28%),
+    linear-gradient(90deg, rgba(0,229,255,.035), rgba(255,177,59,.035)),
+    rgba(0,8,13,.15);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+}
+.dm-broadcast-card span{
+  display:block;
+  color:#8bf8ff;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+.dm-health-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.dm-health-pill{
+  min-height:44px;
+  padding:8px 9px;
+  border:1px solid rgba(0,229,255,.16);
+  background:rgba(0,9,14,.16);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+.dm-health-pill span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.dm-health-pill b{
+  display:block;
+  margin-top:4px;
+  color:#f3feff;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dm-health-pill.good b{color:#49ffad;text-shadow:0 0 10px rgba(0,255,122,.24);}
+.dm-health-pill.warn b{color:#ffd99a;text-shadow:0 0 10px rgba(255,177,59,.24);}
+.dm-rail-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.dm-rail-actions .btn{
+  min-width:0;
+  width:100%;
+  justify-content:center;
+}
+@media (min-width:1101px){
+  #sessionClockLogPanel{grid-column:span 11!important;}
+  #dmHomeIntelRail{grid-column:span 5!important;}
+  #dmActivePartyPanel{grid-column:span 11!important;}
+  #tab-home > .panel:last-child{grid-column:span 5!important;}
+}
+@media (max-width:1100px){
+  #dmHomeIntelRail{grid-column:span 12!important;}
+  .dm-rail-overview{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .dm-health-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media (max-width:700px){
+  .dm-rail-overview,
+  .dm-health-grid,
+  .dm-rail-actions{grid-template-columns:1fr 1fr;}
+  .dm-rail-head{align-items:stretch;flex-direction:column;}
+}
