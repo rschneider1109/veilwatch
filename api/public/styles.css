@@ -2152,3 +2152,60 @@ body.vw-dm-console #sessionClockLogPanel{
   .chat-float-panel{bottom:46px;max-height:calc(100vh - 100px);}
   .chat-msg-actions .smallbtn{font-size:9px;}
 }
+
+
+/* v6.0 shop pill sync fix: top-bar supply status now reflects live/offline shop state */
+#shopPill{
+  position:relative;
+  max-width:min(360px, 32vw);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#shopPill.shop-pill-live{
+  color:#eafff7;
+  border-color:rgba(37,255,150,.52)!important;
+  background:
+    radial-gradient(circle at 16% 50%, rgba(37,255,150,.18), transparent 28%),
+    linear-gradient(180deg, rgba(37,255,150,.075), rgba(0,229,255,.018)),
+    rgba(0,18,16,.34)!important;
+  box-shadow:
+    inset 0 0 22px rgba(37,255,150,.055),
+    0 0 22px rgba(37,255,150,.10)!important;
+  text-shadow:0 0 12px rgba(37,255,150,.42);
+}
+#shopPill.shop-pill-live::before{
+  content:"SUPPLY LIVE";
+  color:#25ff96;
+  text-shadow:0 0 12px rgba(37,255,150,.62);
+}
+#shopPill.shop-pill-live::after{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  margin-left:2px;
+  background:#25ff96;
+  box-shadow:0 0 12px rgba(37,255,150,.9), 0 0 22px rgba(37,255,150,.42);
+  animation:vwShopLivePulse 1.8s ease-in-out infinite;
+  flex:0 0 auto;
+}
+#shopPill.shop-pill-offline{
+  color:rgba(214,252,255,.66);
+  border-color:rgba(255,177,59,.24)!important;
+}
+#shopPill.shop-pill-offline::before{content:"SUPPLY";color:var(--amber);}
+#shopPill.shop-pill-disabled{
+  color:rgba(214,252,255,.48);
+  border-color:rgba(139,248,255,.16)!important;
+  opacity:.86;
+}
+#shopPill.shop-pill-disabled::before{content:"SUPPLY";color:rgba(139,248,255,.55);}
+#shopPill.shop-pill-empty::before{content:"SUPPLY LIVE";color:var(--amber);}
+@keyframes vwShopLivePulse{
+  0%,100%{opacity:.48;transform:scale(.84);}
+  50%{opacity:1;transform:scale(1.12);}
+}
+@media (max-width:760px){
+  #shopPill{max-width:100%;}
+}
