@@ -181,6 +181,7 @@
       </div>
 <div class="row" id="sheetCtabBar" style="margin-top:10px;">
   <button class="btn active" data-ctab="sheet">Sheet</button>
+  <button class="btn" data-ctab="projection">Projection</button>
   <button class="btn" data-ctab="actions">Actions</button>
   <button class="btn" data-ctab="inventory">Inventory</button>
   <button class="btn" data-ctab="abilities">Abilities</button>
@@ -188,6 +189,84 @@
   <button class="btn" data-ctab="background">Background</button>
   <button class="btn" data-ctab="traits">Features &amp; Traits</button>
   <button class="btn" data-ctab="notes">Notes</button>
+</div>
+
+<div id="ctab-projection" class="hidden" style="margin-top:12px;">
+  <div class="projection-bay-shell">
+    <section class="projection-stage-panel">
+      <div class="projection-stage-head">
+        <div>
+          <div class="mini">VEILWATCH PROJECTION BAY</div>
+          <h3 id="projectionBayTitle">No Character Selected</h3>
+        </div>
+        <div class="projection-status-pill" id="projectionBayStatus">NO SIGNAL</div>
+      </div>
+      <div class="projection-stage" id="projectionStage">
+        <div class="projection-grid-floor"></div>
+        <div class="projection-ring projection-ring-a"></div>
+        <div class="projection-ring projection-ring-b"></div>
+        <div class="projection-avatar" id="projectionAvatar" data-body="average" data-scale="average" data-state="stable" data-posture="neutral">
+          <div class="projection-avatar-head"></div>
+          <div class="projection-avatar-core"></div>
+          <div class="projection-avatar-arm left"></div>
+          <div class="projection-avatar-arm right"></div>
+          <div class="projection-avatar-leg left"></div>
+          <div class="projection-avatar-leg right"></div>
+        </div>
+        <div class="projection-scanline"></div>
+      </div>
+      <div class="projection-readout-grid" id="projectionReadoutGrid">
+        <div><b>TYPE</b><span>—</span></div>
+        <div><b>SCALE</b><span>—</span></div>
+        <div><b>POSTURE</b><span>—</span></div>
+        <div><b>MODEL</b><span>—</span></div>
+      </div>
+      <div class="mini projection-note">This pass adds the Projection Bay foundation: stored model profile, holographic preview, and future GLB/model-link slot. A real 3D renderer can plug into this chamber later without rebuilding the character tab.</div>
+    </section>
+
+    <section class="projection-control-panel">
+      <div class="projection-control-title">Model Profile</div>
+      <div class="projection-form-grid">
+        <label>Model Codename<input class="input" id="projectionName" placeholder="e.g., Agent Vale"/></label>
+        <label>Silhouette<select id="projectionSilhouette">
+          <option value="agent">Field Agent</option>
+          <option value="bruiser">Bruiser</option>
+          <option value="scout">Scout</option>
+          <option value="mystic">Mystic</option>
+          <option value="medic">Medic</option>
+          <option value="construct">Construct</option>
+          <option value="aberration">Aberration</option>
+          <option value="beast">Beast</option>
+        </select></label>
+        <label>Scale<select id="projectionScale">
+          <option value="compact">Compact</option>
+          <option value="average">Average</option>
+          <option value="tall">Tall</option>
+          <option value="huge">Huge</option>
+        </select></label>
+        <label>Posture<select id="projectionPosture">
+          <option value="neutral">Neutral</option>
+          <option value="alert">Alert</option>
+          <option value="combat">Combat</option>
+          <option value="injured">Injured</option>
+        </select></label>
+        <label>Signal State<select id="projectionSignal">
+          <option value="stable">Stable</option>
+          <option value="flicker">Flicker</option>
+          <option value="corrupt">Corrupted</option>
+        </select></label>
+        <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="future: /models/character.glb or asset URL"/></label>
+      </div>
+      <label class="projection-notes-label">Projection Notes<textarea class="input" id="projectionNotes" placeholder="Visual markers, scars, gear silhouette, supernatural tells..." rows="4"></textarea></label>
+      <div class="projection-actions">
+        <button class="btn smallbtn" id="projectionSyncAppearanceBtn" type="button">Sync From Appearance</button>
+        <button class="btn smallbtn" id="projectionSaveBtn" type="button">Save Projection</button>
+        <button class="btn smallbtn dangerbtn" id="projectionClearBtn" type="button">Clear Model Link</button>
+      </div>
+      <div class="projection-control-title secondary">Appearance Echo</div>
+      <div class="projection-echo" id="projectionAppearanceEcho">No appearance telemetry yet.</div>
+    </section>
+  </div>
 </div>
 
       <div id="ctab-actions" style="margin-top:12px;">
@@ -564,6 +643,7 @@
 <script src="/js/veilwatch_catalog_helpers_v1.js" defer></script>
 <script src="/js/stream.js" defer></script>
 <script src="/js/characters.js" defer></script>
+<script src="/js/projection_bay.js" defer></script>
 <script src="/js/shop.js" defer></script>
 <script src="/js/notifications.js" defer></script>
 <script src="/js/intel.js" defer></script>
