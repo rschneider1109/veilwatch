@@ -1448,3 +1448,273 @@ body.vw-dm-console #dmPanels > .row:first-of-type{
   body.vw-dm-console .shop-card:hover{transform:none;}
   body.vw-dm-console #dmActivePartyPanel::after{display:none;}
 }
+
+/* v5.7 projection-depth pass: CSS-only, no hook or backend changes
+   Goal: make the interface read more like floating holographic light, while fixing card overflow pressure. */
+body.vw-dm-console{
+  --projection-line:rgba(214,252,255,.40);
+  --projection-glow:rgba(0,229,255,.16);
+  --projection-fill:rgba(0,229,255,.018);
+}
+body.vw-dm-console header,
+body.vw-dm-console main,
+body.vw-dm-console .nav,
+body.vw-dm-console .card,
+body.vw-dm-console .panel,
+body.vw-dm-console .shop-cart-panel,
+body.vw-dm-console .shop-aisle,
+body.vw-dm-console .shop-card{
+  -webkit-font-smoothing:antialiased;
+}
+body.vw-dm-console header::after{
+  height:2px;
+  opacity:.84;
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgba(214,252,255,.78) 8%, rgba(0,229,255,.38) 18%, transparent 34%, transparent 64%, rgba(255,177,59,.70) 78%, transparent 94%),
+    linear-gradient(90deg, transparent, rgba(0,229,255,.22), transparent);
+  box-shadow:0 0 18px rgba(0,229,255,.20);
+}
+body.vw-dm-console main{
+  isolation:isolate;
+}
+body.vw-dm-console main::selection{background:rgba(0,229,255,.28);color:#fff;}
+body.vw-dm-console main > .nav,
+body.vw-dm-console main > section:not(.hidden){
+  position:relative;
+}
+body.vw-dm-console main > section:not(.hidden)::before{
+  content:"";
+  position:absolute;
+  inset:-8px -6px;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgba(0,229,255,.050) 7.25%, transparent 7.7% 92.3%, rgba(0,229,255,.050) 92.75%, transparent 93.2%),
+    linear-gradient(180deg, transparent 0 12%, rgba(214,252,255,.032) 12.25%, transparent 12.65% 87.35%, rgba(214,252,255,.030) 87.75%, transparent 88.2%);
+  opacity:.74;
+  mix-blend-mode:screen;
+}
+body.vw-dm-console .nav{
+  padding:16px 18px 14px;
+  background:
+    linear-gradient(180deg, rgba(214,252,255,.036), rgba(0,229,255,.012)),
+    linear-gradient(90deg, rgba(0,229,255,.056), transparent 52%, rgba(255,177,59,.035)),
+    rgba(0,10,16,.12);
+  box-shadow:
+    inset 0 0 40px rgba(0,229,255,.030),
+    0 0 28px rgba(0,229,255,.052),
+    0 20px 56px rgba(0,0,0,.18);
+}
+body.vw-dm-console .nav::after{
+  content:"";
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:8px;
+  height:1px;
+  pointer-events:none;
+  background:linear-gradient(90deg, transparent, rgba(214,252,255,.45), rgba(0,229,255,.18), transparent 76%);
+  box-shadow:0 0 14px rgba(0,229,255,.24);
+}
+body.vw-dm-console .nav .btn{
+  min-height:60px;
+  background:
+    linear-gradient(115deg, rgba(214,252,255,.075), rgba(0,229,255,.030) 34%, transparent 54%),
+    rgba(0,15,22,.16);
+  border-color:rgba(0,229,255,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(214,252,255,.018),
+    inset 0 0 24px rgba(0,229,255,.020),
+    0 0 20px rgba(0,229,255,.018);
+}
+body.vw-dm-console .nav .btn::before{
+  border-color:rgba(214,252,255,.58);
+  background:
+    radial-gradient(circle, rgba(214,252,255,.23) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(0,229,255,.10), transparent 62%);
+}
+body.vw-dm-console .nav .btn::after{
+  background:linear-gradient(90deg, rgba(214,252,255,.48), rgba(0,229,255,.18), transparent 80%);
+}
+body.vw-dm-console .nav .btn.active{
+  border-color:rgba(214,252,255,.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(214,252,255,.040),
+    inset 0 0 34px rgba(0,229,255,.070),
+    0 0 30px rgba(0,229,255,.155),
+    0 0 72px rgba(0,229,255,.050);
+}
+body.vw-dm-console .nav .btn.active::before{
+  background:
+    radial-gradient(circle, rgba(255,255,255,.92) 0 2px, rgba(214,252,255,.35) 3px, transparent 5px),
+    radial-gradient(circle, rgba(0,229,255,.20), transparent 66%);
+}
+body.vw-dm-console .card,
+body.vw-dm-console .panel,
+body.vw-dm-console .shop-cart-panel,
+body.vw-dm-console .shop-aisle,
+body.vw-dm-console .shop-card{
+  background:
+    linear-gradient(180deg, rgba(214,252,255,.026), rgba(0,229,255,.008) 58%, rgba(0,0,0,.030)),
+    radial-gradient(circle at 0 0, rgba(0,229,255,.085), transparent 32%),
+    radial-gradient(circle at 100% 100%, rgba(40,154,255,.035), transparent 33%),
+    rgba(0,15,23,.18);
+  border-color:rgba(0,229,255,.23);
+  border-left-color:rgba(214,252,255,.46);
+  border-top-color:rgba(214,252,255,.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(214,252,255,.018),
+    inset 0 0 64px rgba(0,229,255,.025),
+    0 0 24px rgba(0,229,255,.035),
+    0 14px 32px rgba(0,0,0,.24);
+}
+body.vw-dm-console .card::after,
+body.vw-dm-console .panel::after,
+body.vw-dm-console .shop-cart-panel::after,
+body.vw-dm-console .shop-aisle::after,
+body.vw-dm-console .shop-card::after{
+  opacity:.82;
+  filter:drop-shadow(0 0 8px rgba(0,229,255,.42));
+}
+body.vw-dm-console .card::before,
+body.vw-dm-console .panel::before,
+body.vw-dm-console .shop-cart-panel::before,
+body.vw-dm-console .shop-aisle::before,
+body.vw-dm-console .shop-card::before{
+  opacity:.15;
+}
+body.vw-dm-console .card h3,
+body.vw-dm-console .panel h3,
+body.vw-dm-console .shop-cart-title,
+body.vw-dm-console .shop-aisle-title{
+  margin-bottom:13px;
+  color:#8bf8ff;
+  text-shadow:
+    0 0 7px rgba(255,255,255,.18),
+    0 0 18px rgba(0,229,255,.42),
+    0 0 36px rgba(0,229,255,.15);
+}
+body.vw-dm-console .mini,
+body.vw-dm-console label,
+body.vw-dm-console .badge,
+body.vw-dm-console td,
+body.vw-dm-console th{
+  text-shadow:0 0 9px rgba(0,229,255,.08);
+}
+body.vw-dm-console .input,
+body.vw-dm-console select,
+body.vw-dm-console textarea{
+  background:
+    linear-gradient(180deg, rgba(214,252,255,.030), rgba(0,229,255,.006)),
+    rgba(0,10,16,.30);
+  border-color:rgba(0,229,255,.26);
+  box-shadow:
+    inset 0 0 24px rgba(0,229,255,.026),
+    0 0 16px rgba(0,229,255,.018);
+}
+body.vw-dm-console .input:hover,
+body.vw-dm-console select:hover,
+body.vw-dm-console textarea:hover{
+  border-color:rgba(214,252,255,.42);
+}
+body.vw-dm-console #tab-home > .card:nth-child(1),
+body.vw-dm-console #tab-home > .card:nth-child(2),
+body.vw-dm-console #tab-home > .card:nth-child(3){
+  min-height:116px;
+}
+body.vw-dm-console #tab-home > .card:nth-child(1)::after{
+  opacity:.60;
+  filter:drop-shadow(0 0 12px rgba(0,229,255,.26));
+}
+body.vw-dm-console #tab-home > .card:nth-child(3)::before{
+  opacity:.22;
+}
+body.vw-dm-console #sessionClockMini{
+  letter-spacing:.075em;
+  transform:translateZ(0);
+}
+body.vw-dm-console #sessionClockMini::before{
+  content:"";
+  position:absolute;
+}
+body.vw-dm-console #dmActivePartyPanel{
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 71% 45%, rgba(0,229,255,.105), transparent 23%),
+    radial-gradient(circle at 92% 58%, rgba(40,154,255,.070), transparent 29%),
+    linear-gradient(180deg, rgba(214,252,255,.018), rgba(0,0,0,.045)),
+    rgba(0,13,21,.16);
+}
+body.vw-dm-console #dmActivePartyPanel::before{
+  opacity:.70;
+}
+body.vw-dm-console #dmActivePartyPanel::after{
+  width:270px;
+  height:270px;
+  right:84px;
+  bottom:28px;
+  opacity:.36;
+}
+body.vw-dm-console #dmActivePartyPanel > .row:first-of-type{
+  background:
+    linear-gradient(90deg, rgba(214,252,255,.030), rgba(0,0,0,.065) 64%, rgba(0,229,255,.025)),
+    rgba(0,10,16,.20);
+  border-color:rgba(0,229,255,.17);
+}
+body.vw-dm-console #dmActivePartyCards{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:flex-start;
+  min-height:116px;
+}
+body.vw-dm-console #dmActivePartyCards .card{
+  flex:0 1 470px;
+  max-width:min(100%,470px);
+  min-width:min(100%,320px);
+}
+body.vw-dm-console #dmActivePartyCards .row{
+  gap:7px;
+}
+body.vw-dm-console #dmActivePartyCards .pill{
+  min-width:70px;
+  justify-content:center;
+  padding:6px 9px;
+}
+body.vw-dm-console #tab-home > .panel:last-child{
+  border-color:rgba(255,177,59,.24);
+  border-left-color:rgba(255,205,128,.34);
+  background:
+    radial-gradient(circle at 84% 20%, rgba(255,177,59,.095), transparent 23%),
+    radial-gradient(circle at 46% 78%, rgba(0,229,255,.090), transparent 23%),
+    linear-gradient(180deg, rgba(214,252,255,.018), rgba(0,0,0,.052)),
+    rgba(0,13,20,.18);
+}
+body.vw-dm-console #tab-home > .panel:last-child .row .btn{
+  border-color:rgba(255,177,59,.24);
+  background:
+    linear-gradient(100deg, rgba(255,177,59,.070), transparent 38%),
+    linear-gradient(180deg, rgba(214,252,255,.026), rgba(0,229,255,.006)),
+    rgba(0,11,17,.22);
+}
+body.vw-dm-console .vwTapEdit:hover,
+body.vw-dm-console .pill:hover{
+  border-color:rgba(214,252,255,.50);
+  box-shadow:
+    0 0 20px rgba(0,229,255,.115),
+    inset 0 0 18px rgba(0,229,255,.045);
+}
+body.vw-dm-console .toast{
+  background:rgba(0,13,20,.76);
+  backdrop-filter:blur(5px);
+}
+@media (max-width:1320px) and (min-width:1101px){
+  body.vw-dm-console #dmActivePartyCards .card{
+    flex-basis:420px;
+  }
+}
+@media (max-width:680px){
+  body.vw-dm-console .nav::after{display:none;}
+  body.vw-dm-console #dmActivePartyCards{display:grid;grid-template-columns:1fr;}
+  body.vw-dm-console #dmActivePartyCards .card{min-width:0;max-width:100%;}
+}
