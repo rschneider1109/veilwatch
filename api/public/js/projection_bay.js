@@ -42,15 +42,17 @@
     return projectionRenderer;
   }
 
-  function syncProjection3d(profile, forceModelReload=false){
+  function syncProjection3d(profile, forceModelReload=false, appearanceOverride=null){
     const renderer = ensureProjectionRenderer();
     if(!renderer) return;
     const p = profile || {};
+    const appearance = appearanceOverride || currentCharacter()?.sheet?.appearance || null;
     renderer.applyProfile({
       scale: p.scale || "average",
       posture: p.posture || "neutral",
       signal: p.signal || "stable",
-      silhouette: p.silhouette || "agent"
+      silhouette: p.silhouette || "agent",
+      appearance
     });
     const modelUrl = String(p.modelUrl || "").trim();
     if(forceModelReload || modelUrl !== last3dModelUrl){
@@ -157,7 +159,7 @@
       if(echo) echo.textContent = "Select or create a character to initialize projection data.";
       const renderer = ensureProjectionRenderer();
       if(renderer){
-        renderer.applyProfile({scale:"average", posture:"neutral", signal:"stable", silhouette:"agent"});
+        renderer.applyProfile({scale:"average", posture:"neutral", signal:"stable", silhouette:"agent", appearance:null});
       }
       if(status){
         status.textContent = "NO SIGNAL";
@@ -170,8 +172,9 @@
     if(title) title.textContent = p.name || `${c.name} Projection`;
     if(status){
       const hasModel = !!String(p.modelUrl || "").trim();
-      status.textContent = hasModel ? "MODEL LINKED" : "HOLO PREVIEW";
-      status.classList.toggle("linked", hasModel);
+      const isStandardBody = !hasModel;
+      status.textContent = hasModel ? "MODEL LINKED" : "STANDARD BODY";
+      status.classList.toggle("linked", hasModel || isStandardBody);
     }
 
     setField("projectionName", p.name || "");
@@ -190,7 +193,7 @@
     }
 
     if(readout){
-      const modelText = String(p.modelUrl || "").trim() ? "LINKED" : "PREVIEW";
+      const modelText = String(p.modelUrl || "").trim() ? "LINKED" : "STANDARD";
       readout.innerHTML = `
         <div><b>TYPE</b><span>${safe(titleCase(p.silhouette || "agent"))}</span></div>
         <div><b>SCALE</b><span>${safe(titleCase(p.scale || "average"))}</span></div>
@@ -199,7 +202,7 @@
       `;
     }
     if(echo) echo.innerHTML = echoAppearance(c);
-    syncProjection3d(p);
+    syncProjection3d(p, false, c?.sheet?.appearance || null);
   }
 
   async function saveProjection(patchOnly){
@@ -259,7 +262,7 @@
       signal: getField("projectionSignal") || "stable",
       modelUrl: getField("projectionModelUrl").trim()
     };
-    syncProjection3d(liveProfile);
+    syncProjection3d(liveProfile, false, currentCharacter()?.sheet?.appearance || null);
   }
 
   function wireProjectionBay(){
@@ -281,7 +284,7 @@
         signal: getField("projectionSignal") || "stable",
         modelUrl: getField("projectionModelUrl").trim()
       };
-      syncProjection3d(profile, true);
+      syncProjection3d(profile, true, currentCharacter()?.sheet?.appearance || null);
     });
   }
 
