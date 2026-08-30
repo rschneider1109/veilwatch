@@ -979,6 +979,10 @@ function servePublic(req, res, pathname){
             ext === ".png" ? "image/png" :
             ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
             ext === ".svg" ? "image/svg+xml; charset=utf-8" :
+            ext === ".glb" ? "model/gltf-binary" :
+            ext === ".gltf" ? "model/gltf+json" :
+            ext === ".vrm" ? "model/gltf-binary" :
+            ext === ".bin" ? "application/octet-stream" :
             ext === ".ico" ? "image/x-icon" :
             "application/octet-stream";
           const buf = fs.readFileSync(filePath);

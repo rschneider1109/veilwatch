@@ -16,6 +16,49 @@
     "projectionNotes"
   ];
 
+  let projectionRenderer = null;
+  let last3dModelUrl = null;
+
+  function update3dStatus(message, kind){
+    const status = $("projectionBayStatus");
+    if(!status) return;
+    status.textContent = message || "3D CORE ONLINE";
+    status.classList.toggle("linked", kind === "linked");
+  }
+
+  function ensureProjectionRenderer(){
+    const host = $("projectionAvatar");
+    if(!host || !window.VeilwatchProjection3D?.create) return null;
+    if(!projectionRenderer){
+      projectionRenderer = window.VeilwatchProjection3D.create(host);
+      if(!host.dataset.statusWired){
+        host.dataset.statusWired = "1";
+        host.addEventListener("veilwatch:projection-status", (event)=>{
+          const detail = event.detail || {};
+          update3dStatus(detail.message, detail.kind);
+        });
+      }
+    }
+    return projectionRenderer;
+  }
+
+  function syncProjection3d(profile, forceModelReload=false){
+    const renderer = ensureProjectionRenderer();
+    if(!renderer) return;
+    const p = profile || {};
+    renderer.applyProfile({
+      scale: p.scale || "average",
+      posture: p.posture || "neutral",
+      signal: p.signal || "stable",
+      silhouette: p.silhouette || "agent"
+    });
+    const modelUrl = String(p.modelUrl || "").trim();
+    if(forceModelReload || modelUrl !== last3dModelUrl){
+      last3dModelUrl = modelUrl;
+      renderer.load(modelUrl);
+    }
+  }
+
   function currentCharacter(){
     try{
       const st = window.__STATE || {};
@@ -112,6 +155,14 @@
       }
       if(readout) readout.innerHTML = ["TYPE","SCALE","POSTURE","MODEL"].map(k=>`<div><b>${k}</b><span>—</span></div>`).join("");
       if(echo) echo.textContent = "Select or create a character to initialize projection data.";
+      const renderer = ensureProjectionRenderer();
+      if(renderer){
+        renderer.applyProfile({scale:"average", posture:"neutral", signal:"stable", silhouette:"agent"});
+      }
+      if(status){
+        status.textContent = "NO SIGNAL";
+        status.classList.remove("linked");
+      }
       return;
     }
 
@@ -148,6 +199,7 @@
       `;
     }
     if(echo) echo.innerHTML = echoAppearance(c);
+    syncProjection3d(p);
   }
 
   async function saveProjection(patchOnly){
@@ -200,12 +252,14 @@
     avatar.dataset.scale = getField("projectionScale") || "average";
     avatar.dataset.state = getField("projectionSignal") || "stable";
     avatar.dataset.posture = getField("projectionPosture") || "neutral";
-    const status = $("projectionBayStatus");
-    if(status){
-      const hasModel = !!getField("projectionModelUrl").trim();
-      status.textContent = hasModel ? "MODEL LINKED" : "HOLO PREVIEW";
-      status.classList.toggle("linked", hasModel);
-    }
+    const liveProfile = {
+      silhouette: getField("projectionSilhouette") || "agent",
+      scale: getField("projectionScale") || "average",
+      posture: getField("projectionPosture") || "neutral",
+      signal: getField("projectionSignal") || "stable",
+      modelUrl: getField("projectionModelUrl").trim()
+    };
+    syncProjection3d(liveProfile);
   }
 
   function wireProjectionBay(){
@@ -215,11 +269,27 @@
       setField("projectionModelUrl", "");
       await saveProjection({ modelUrl:"" });
     });
-    ["projectionSilhouette","projectionScale","projectionPosture","projectionSignal","projectionModelUrl"].forEach(id=>{
+    ["projectionSilhouette","projectionScale","projectionPosture","projectionSignal"].forEach(id=>{
       $(id)?.addEventListener("input", renderLivePreviewFromFields);
       $(id)?.addEventListener("change", renderLivePreviewFromFields);
     });
+    $("projectionModelUrl")?.addEventListener("change", ()=>{
+      const profile = {
+        silhouette: getField("projectionSilhouette") || "agent",
+        scale: getField("projectionScale") || "average",
+        posture: getField("projectionPosture") || "neutral",
+        signal: getField("projectionSignal") || "stable",
+        modelUrl: getField("projectionModelUrl").trim()
+      };
+      syncProjection3d(profile, true);
+    });
   }
+
+  window.addEventListener("veilwatch:projection3d-ready", ()=>{
+    projectionRenderer = null;
+    last3dModelUrl = null;
+    renderProjectionBay();
+  });
 
   window.renderProjectionBay = renderProjectionBay;
   window.vwSaveProjectionBay = saveProjection;

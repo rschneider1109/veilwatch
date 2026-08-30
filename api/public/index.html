@@ -205,14 +205,10 @@
         <div class="projection-grid-floor"></div>
         <div class="projection-ring projection-ring-a"></div>
         <div class="projection-ring projection-ring-b"></div>
-        <div class="projection-avatar" id="projectionAvatar" data-body="average" data-scale="average" data-state="stable" data-posture="neutral">
-          <div class="projection-avatar-head"></div>
-          <div class="projection-avatar-core"></div>
-          <div class="projection-avatar-arm left"></div>
-          <div class="projection-avatar-arm right"></div>
-          <div class="projection-avatar-leg left"></div>
-          <div class="projection-avatar-leg right"></div>
+        <div class="projection-viewport" id="projectionAvatar" data-body="average" data-scale="average" data-state="stable" data-posture="neutral">
+          <div class="projection-three-loading" id="projection3dStatus">INITIALIZING 3D CORE</div>
         </div>
+        <div class="projection-three-hint">DRAG TO ROTATE · WHEEL TO ZOOM</div>
         <div class="projection-scanline"></div>
       </div>
       <div class="projection-readout-grid" id="projectionReadoutGrid">
@@ -221,7 +217,7 @@
         <div><b>POSTURE</b><span>—</span></div>
         <div><b>MODEL</b><span>—</span></div>
       </div>
-      <div class="mini projection-note">This pass adds the Projection Bay foundation: stored model profile, holographic preview, and future GLB/model-link slot. A real 3D renderer can plug into this chamber later without rebuilding the character tab.</div>
+      <div class="mini projection-note">3D Projection Core v0.1: the chamber now renders a live WebGL humanoid and can load GLB, glTF, or VRM assets from the Model Link field. Empty model links use the built-in Veilwatch prototype humanoid.</div>
     </section>
 
     <section class="projection-control-panel">
@@ -255,7 +251,7 @@
           <option value="flicker">Flicker</option>
           <option value="corrupt">Corrupted</option>
         </select></label>
-        <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="future: /models/character.glb or asset URL"/></label>
+        <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="/assets/characters/bases/character.glb"/></label>
       </div>
       <label class="projection-notes-label">Projection Notes<textarea class="input" id="projectionNotes" placeholder="Visual markers, scars, gear silhouette, supernatural tells..." rows="4"></textarea></label>
       <div class="projection-actions">
@@ -643,6 +639,7 @@
 <script src="/js/veilwatch_catalog_helpers_v1.js" defer></script>
 <script src="/js/stream.js" defer></script>
 <script src="/js/characters.js" defer></script>
+<script src="/js/projection_renderer.bundle.js" defer></script>
 <script src="/js/projection_bay.js" defer></script>
 <script src="/js/shop.js" defer></script>
 <script src="/js/notifications.js" defer></script>

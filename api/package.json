@@ -4,6 +4,12 @@
   "private": true,
   "type": "commonjs",
   "dependencies": {
-    "mysql2": "^3.15.2"
+    "mysql2": "^3.15.2",
+    "three": "0.185.1",
+    "@pixiv/three-vrm": "3.5.5",
+    "esbuild": "0.28.2"
+  },
+  "scripts": {
+    "build:3d": "node build-3d.js"
   }
 }
