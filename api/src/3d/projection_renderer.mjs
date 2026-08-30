@@ -5,6 +5,63 @@ import { VRMLoaderPlugin, VRMUtils } from "@pixiv/three-vrm";
 
 const CYAN = 0x00e5ff;
 const AMBER = 0xffb13b;
+const STANDARD_VITRUVIAN_BODY = "/assets/characters/bases/vitruvian_body.glb";
+const STANDARD_VITRUVIAN_HEAD = "/assets/characters/bases/vitruvian_head.glb";
+const STANDARD_VITRUVIAN_HAIR = "/assets/characters/hair/vitruvian_hair_rigged.glb";
+const STANDARD_SENTINELS = new Set(["", "@vitruvian", "bundle:vitruvian", "standard:vitruvian"]);
+
+const SKIN_TONES = {
+  fair: 0xf4ddcf,
+  light: 0xe0bfa8,
+  warm: 0xcf9f7d,
+  tan: 0xb77f5f,
+  olive: 0x9a7a58,
+  brown: 0x7a5036,
+  deep: 0x523521
+};
+
+const HAIR_COLORS = {
+  black: 0x171411,
+  dark_brown: 0x34261c,
+  brown: 0x5b3b26,
+  blonde: 0xcfaf63,
+  auburn: 0x7c3d28,
+  red: 0x9d4021,
+  gray: 0x808188,
+  white: 0xe7e7e7
+};
+
+const EYE_COLORS = {
+  brown: 0x5c3924,
+  hazel: 0x7a6432,
+  blue: 0x4e86b4,
+  green: 0x4e7c56,
+  gray: 0x8f97a0,
+  amber: 0xaa7b30
+};
+
+const SHIRT_COLORS = {
+  t_shirt: 0x2f343a,
+  long_sleeve: 0x4c5864,
+  button_up: 0xb8c7d9,
+  hoodie: 0x26444e,
+  polo: 0x465156
+};
+
+const BOTTOM_COLORS = {
+  jeans: 0x2f4f74,
+  cargo_pants: 0x5a5d44,
+  dress_pants: 0x2d3035,
+  joggers: 0x3e4148,
+  leggings: 0x1f2023
+};
+
+const SHOE_COLORS = {
+  sneakers: 0xd6d7da,
+  boots: 0x2e241f,
+  dress_shoes: 0x161616,
+  work_boots: 0x59422b
+};
 
 function disposeObject(root){
   root?.traverse?.((obj)=>{
@@ -35,6 +92,20 @@ function createHoloMaterial(opacity=.62){
   });
 }
 
+function clamp01(n){
+  return Math.max(0, Math.min(1, Number(n) || 0));
+}
+
+function colorFor(map, key, fallback){
+  return map[String(key || "").trim().toLowerCase()] || fallback;
+}
+
+function blendHex(baseHex, overlayHex, amount=.18){
+  const base = new THREE.Color(baseHex);
+  const over = new THREE.Color(overlayHex);
+  return base.lerp(over, clamp01(amount));
+}
+
 function createProceduralHumanoid(){
   const group = new THREE.Group();
   group.name = "VeilwatchPrototypeHumanoid";
@@ -60,11 +131,9 @@ function createProceduralHumanoid(){
     return mesh;
   };
 
-  // Feet-to-head height is roughly 1.85 scene units.
   addMesh(new THREE.SphereGeometry(.145, 28, 20), jointMat, [0, 1.78, 0], [0,0,0], [1, 1.08, .94]);
   addMesh(new THREE.CylinderGeometry(.19, .27, .55, 20), bodyMat, [0, 1.37, 0], [0,0,0], [1.13,1,.72]);
   addMesh(new THREE.CylinderGeometry(.225, .20, .32, 20), bodyMat, [0, 1.00, 0], [0,0,0], [1.08,1,.78]);
-
   addMesh(new THREE.SphereGeometry(.065, 18, 12), accentMat, [0, 1.43, .205], [0,0,0], [1.5,.6,.35]);
 
   const upperArm = new THREE.CylinderGeometry(.07, .065, .46, 16);
@@ -94,7 +163,6 @@ class ProjectionRenderer {
     if(!host) throw new Error("ProjectionRenderer requires a host element");
     this.host = host;
     this.options = options;
-    this.clock = new THREE.Clock();
     this.scene = new THREE.Scene();
     this.scene.background = null;
     this.camera = new THREE.PerspectiveCamera(35, 1, .01, 100);
@@ -123,7 +191,7 @@ class ProjectionRenderer {
 
     const hemi = new THREE.HemisphereLight(0xbcefff, 0x051019, 1.8);
     this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 2.4);
+    const key = new THREE.DirectionalLight(0xffffff, 2.6);
     key.position.set(2.7, 3.8, 3.2);
     this.scene.add(key);
     const rim = new THREE.PointLight(CYAN, 16, 7, 2);
@@ -141,6 +209,7 @@ class ProjectionRenderer {
     this.lastUrl = null;
     this.profile = {};
     this._loadToken = 0;
+    this._lastFrameTime = performance.now();
 
     this.resizeObserver = new ResizeObserver(()=>this.resize());
     this.resizeObserver.observe(this.host);
@@ -184,48 +253,121 @@ class ProjectionRenderer {
     this.setStatus("PROTOTYPE HUMANOID", "prototype");
   }
 
-  async load(url){
-    const cleanUrl = String(url || "").trim();
-    this.lastUrl = cleanUrl;
-    const token = ++this._loadToken;
-    if(!cleanUrl){
-      this.showPrototype();
-      return;
+  stripSceneHelpers(root){
+    const toRemove = [];
+    root?.traverse?.((obj)=>{
+      if(/^Plane(?:\.|$)/i.test(obj.name || "")) toRemove.push(obj);
+    });
+    toRemove.forEach((obj)=>obj.parent?.remove(obj));
+  }
+
+  tuneMaterials(root){
+    root?.traverse?.((obj)=>{
+      if(!obj.isMesh) return;
+      obj.castShadow = false;
+      obj.receiveShadow = false;
+      obj.frustumCulled = false;
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach((mat)=>{
+        if(!mat) return;
+        if(!mat.userData.veilwatchBaseColor){
+          mat.userData.veilwatchBaseColor = mat.color?.clone?.() || new THREE.Color(0.8,0.8,0.8);
+        }
+        mat.side = THREE.DoubleSide;
+        mat.needsUpdate = true;
+      });
+    });
+  }
+
+  applyAppearance(){
+    const appearance = this.profile.appearance || {};
+    if(!this.currentObject || this.currentObject.userData.isVeilwatchFallback) return;
+
+    const skinColor = blendHex(colorFor(SKIN_TONES, appearance.skinTone, SKIN_TONES.warm), CYAN, .06);
+    const hairColor = blendHex(colorFor(HAIR_COLORS, appearance.hairColor, HAIR_COLORS.dark_brown), CYAN, .04);
+    const eyeColor = colorFor(EYE_COLORS, appearance.eyeColor, EYE_COLORS.blue);
+    const shirtColor = blendHex(colorFor(SHIRT_COLORS, appearance.top, SHIRT_COLORS.t_shirt), CYAN, .05);
+    const pantsColor = blendHex(colorFor(BOTTOM_COLORS, appearance.bottoms, BOTTOM_COLORS.jeans), CYAN, .04);
+    const shoesColor = blendHex(colorFor(SHOE_COLORS, appearance.shoes, SHOE_COLORS.sneakers), CYAN, .03);
+    const outerwear = String(appearance.outerwear || "none").toLowerCase();
+
+    this.currentObject.traverse((obj)=>{
+      if(!obj.isMesh || !obj.material) return;
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach((mat)=>{
+        const name = String(mat.name || "");
+        if(!mat.color) return;
+
+        if(name === "VitSkin" || name === "VitBody"){
+          mat.color.copy(skinColor);
+          mat.roughness = .86;
+          mat.metalness = .03;
+        }else if(name === "VitMouth"){
+          mat.color.setHex(0x7a453d);
+          mat.roughness = .88;
+        }else if(name === "VitCaruncle"){
+          mat.color.setHex(0xcf7b75);
+        }else if(name === "VitTearline"){
+          mat.color.setHex(0xc49d99);
+          mat.transparent = true;
+          mat.opacity = .92;
+        }else if(name.startsWith("VitSclera")){
+          mat.color.setHex(0xf1f3f4);
+          mat.roughness = .38;
+        }else if(name.startsWith("VitIris")){
+          mat.color.setHex(eyeColor);
+          mat.roughness = .42;
+        }else if(name.startsWith("VitEyeBack")){
+          mat.color.setHex(0x0d1018);
+        }else if(name.startsWith("VitCornea")){
+          mat.color.setHex(0xffffff);
+          mat.transparent = true;
+          mat.opacity = .12;
+          mat.roughness = .02;
+          mat.metalness = 0;
+        }else if(name === "VitHair"){
+          mat.color.copy(hairColor);
+          mat.roughness = .9;
+          mat.metalness = .02;
+        }else if(name === "VitShirt"){
+          const jacketFactor = outerwear === "none" ? 0 : outerwear.includes("heavy") ? .35 : .2;
+          mat.color.copy(shirtColor.clone().lerp(new THREE.Color(0x1e252d), jacketFactor));
+          mat.roughness = .92;
+        }else if(name === "VitPants"){
+          mat.color.copy(pantsColor);
+          mat.roughness = .95;
+        }else if(name === "VitShoes"){
+          mat.color.copy(shoesColor);
+          mat.roughness = .82;
+        }
+      });
+    });
+
+    const hairRoot = this.currentObject.getObjectByName("VeilwatchVitruvianHair");
+    if(hairRoot){
+      const style = String(appearance.hairStyle || "").toLowerCase();
+      hairRoot.visible = style !== "bald";
+      const scaleAdjust = style === "buzz" ? .93 : 1;
+      hairRoot.scale.setScalar(scaleAdjust);
     }
+  }
 
-    this.setStatus("LOADING 3D MODEL", "loading");
-    try{
-      const gltf = await this.loader.loadAsync(cleanUrl);
-      if(token !== this._loadToken) return;
-      this.clearCurrent();
+  applyProfile(profile={}){
+    this.profile = {...this.profile, ...profile};
+    if(!this.currentObject) return;
 
-      const vrm = gltf.userData?.vrm || null;
-      if(vrm){
-        VRMUtils.rotateVRM0(vrm);
-        this.currentVrm = vrm;
-        this.currentObject = vrm.scene;
-      }else{
-        this.currentObject = gltf.scene;
-      }
+    const scaleMap = { compact:.88, average:1, tall:1.10, huge:1.22 };
+    const scalar = scaleMap[this.profile.scale] || 1;
+    this.currentObject.scale.setScalar(scalar);
 
-      if(!this.currentObject) throw new Error("Model contained no renderable scene");
-      this.world.add(this.currentObject);
+    const posture = String(this.profile.posture || "neutral");
+    this.world.rotation.set(0, 0, 0);
+    if(posture === "alert") this.world.rotation.y = THREE.MathUtils.degToRad(5);
+    if(posture === "combat") this.world.rotation.y = THREE.MathUtils.degToRad(-12);
+    if(posture === "injured") this.world.rotation.z = THREE.MathUtils.degToRad(4);
 
-      if(gltf.animations?.length){
-        this.mixer = new THREE.AnimationMixer(this.currentObject);
-        const clip = gltf.animations.find(a=>/idle/i.test(a.name)) || gltf.animations[0];
-        this.mixer.clipAction(clip).reset().fadeIn(.15).play();
-      }
-
-      this.frameObject(this.currentObject);
-      this.applyProfile(this.profile);
-      this.setStatus(vrm ? "VRM MODEL ONLINE" : "GLB MODEL ONLINE", "linked");
-    }catch(err){
-      console.error("Veilwatch Projection model load failed:", err);
-      if(token !== this._loadToken) return;
-      this.showPrototype();
-      this.setStatus("MODEL FAILED · PROTOTYPE ACTIVE", "error");
-    }
+    this.host.dataset.state = this.profile.signal || "stable";
+    this.applyAppearance();
   }
 
   frameObject(object){
@@ -254,21 +396,103 @@ class ProjectionRenderer {
     this.controls.update();
   }
 
-  applyProfile(profile={}){
-    this.profile = {...this.profile, ...profile};
-    if(!this.currentObject) return;
+  async loadVitruvianBundle(token){
+    this.setStatus("LOADING STANDARD BODY", "loading");
+    const [bodyGltf, headGltf, hairGltf] = await Promise.all([
+      this.loader.loadAsync(STANDARD_VITRUVIAN_BODY),
+      this.loader.loadAsync(STANDARD_VITRUVIAN_HEAD),
+      this.loader.loadAsync(STANDARD_VITRUVIAN_HAIR)
+    ]);
+    if(token !== this._loadToken) return;
 
-    const scaleMap = { compact:.88, average:1, tall:1.10, huge:1.22 };
-    const scalar = scaleMap[this.profile.scale] || 1;
-    this.currentObject.scale.setScalar(scalar);
+    this.clearCurrent();
 
-    const posture = String(this.profile.posture || "neutral");
-    this.world.rotation.set(0, 0, 0);
-    if(posture === "alert") this.world.rotation.y = THREE.MathUtils.degToRad(5);
-    if(posture === "combat") this.world.rotation.y = THREE.MathUtils.degToRad(-12);
-    if(posture === "injured") this.world.rotation.z = THREE.MathUtils.degToRad(4);
+    const bodyRoot = bodyGltf.scene;
+    if(!bodyRoot) throw new Error("Vitruvian body had no scene");
+    bodyRoot.name = "VeilwatchVitruvianBody";
+    this.stripSceneHelpers(bodyRoot);
+    this.tuneMaterials(bodyRoot);
 
-    this.host.dataset.state = this.profile.signal || "stable";
+    const anchor = bodyRoot.getObjectByName("mixamorig:Head")
+      || bodyRoot.getObjectByName("Head")
+      || bodyRoot.getObjectByName("mixamorig:Neck")
+      || bodyRoot;
+
+    const headRoot = headGltf.scene || headGltf.scenes?.[0];
+    if(headRoot){
+      headRoot.name = "VeilwatchVitruvianHead";
+      this.tuneMaterials(headRoot);
+      anchor.attach(headRoot);
+    }
+
+    const hairRoot = hairGltf.scene || hairGltf.scenes?.[0];
+    if(hairRoot){
+      hairRoot.name = "VeilwatchVitruvianHair";
+      this.tuneMaterials(hairRoot);
+      anchor.attach(hairRoot);
+    }
+
+    this.currentObject = bodyRoot;
+    this.world.add(this.currentObject);
+
+    if(bodyGltf.animations?.length){
+      this.mixer = new THREE.AnimationMixer(this.currentObject);
+      const clip = bodyGltf.animations.find(a=>/idle/i.test(a.name)) || bodyGltf.animations[0];
+      if(clip) this.mixer.clipAction(clip).reset().fadeIn(.15).play();
+    }
+
+    this.frameObject(this.currentObject);
+    this.applyProfile(this.profile);
+    this.setStatus("STANDARD BODY ONLINE", "linked");
+  }
+
+  async loadSingleModel(cleanUrl, token){
+    this.setStatus("LOADING 3D MODEL", "loading");
+    const gltf = await this.loader.loadAsync(cleanUrl);
+    if(token !== this._loadToken) return;
+    this.clearCurrent();
+
+    const vrm = gltf.userData?.vrm || null;
+    if(vrm){
+      VRMUtils.rotateVRM0(vrm);
+      this.currentVrm = vrm;
+      this.currentObject = vrm.scene;
+    }else{
+      this.currentObject = gltf.scene;
+    }
+
+    if(!this.currentObject) throw new Error("Model contained no renderable scene");
+    this.tuneMaterials(this.currentObject);
+    this.world.add(this.currentObject);
+
+    if(gltf.animations?.length){
+      this.mixer = new THREE.AnimationMixer(this.currentObject);
+      const clip = gltf.animations.find(a=>/idle/i.test(a.name)) || gltf.animations[0];
+      if(clip) this.mixer.clipAction(clip).reset().fadeIn(.15).play();
+    }
+
+    this.frameObject(this.currentObject);
+    this.applyProfile(this.profile);
+    this.setStatus(vrm ? "VRM MODEL ONLINE" : "GLB MODEL ONLINE", "linked");
+  }
+
+  async load(url){
+    const cleanUrl = String(url || "").trim();
+    this.lastUrl = cleanUrl;
+    const token = ++this._loadToken;
+
+    try{
+      if(STANDARD_SENTINELS.has(cleanUrl.toLowerCase())){
+        await this.loadVitruvianBundle(token);
+      }else{
+        await this.loadSingleModel(cleanUrl, token);
+      }
+    }catch(err){
+      console.error("Veilwatch Projection model load failed:", err);
+      if(token !== this._loadToken) return;
+      this.showPrototype();
+      this.setStatus("MODEL FAILED · PROTOTYPE ACTIVE", "error");
+    }
   }
 
   resetCamera(){
@@ -277,7 +501,9 @@ class ProjectionRenderer {
 
   animate(){
     this._raf = requestAnimationFrame(()=>this.animate());
-    const dt = Math.min(this.clock.getDelta(), .05);
+    const now = performance.now();
+    const dt = Math.min((now - this._lastFrameTime) / 1000, .05);
+    this._lastFrameTime = now;
     this.controls.update();
     this.mixer?.update(dt);
     this.currentVrm?.update?.(dt);
@@ -313,6 +539,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "0.1.0"
+  version: "0.2.0"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));
