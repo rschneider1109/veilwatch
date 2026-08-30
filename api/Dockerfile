@@ -1,17 +1,20 @@
-FROM node:20-alpine
-WORKDIR /app
+FROM node:20-alpine AS builder
+WORKDIR /build
 
-# Install runtime + 3D build dependencies
 COPY package.json ./
 RUN npm install --omit=dev
 
-# Build the browser-side Three.js/VRM renderer into public/js
 COPY build-3d.js ./
 COPY src ./src
 COPY public ./public
 RUN npm run build:3d
 
-# App code
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package.json ./
+COPY --from=builder /build/node_modules ./node_modules
+COPY --from=builder /build/public ./public
 COPY app.js ./
 
 ENV PORT=8080
