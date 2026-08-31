@@ -233,6 +233,7 @@ class ProjectionRenderer {
     this.faceMeshes = [];
     this.lastUrl = null;
     this.profile = {};
+    this.viewName = "body";
     this._loadToken = 0;
     this._lastFrameTime = performance.now();
 
@@ -545,8 +546,9 @@ class ProjectionRenderer {
     const targetY = height * .48;
     this.controls.target.set(0, targetY, 0);
     const fov = THREE.MathUtils.degToRad(this.camera.fov);
-    const distance = Math.max(1.7, (height / 2) / Math.tan(fov / 2) * 1.22);
-    this.camera.position.set(0, targetY + height * .05, distance);
+    const distance = Math.max(1.7, (height / 2) / Math.tan(fov / 2) * 1.12);
+    this._frameState = { height, targetY, distance };
+    this.camera.position.set(0, targetY + height * .04, distance);
     this.controls.minDistance = Math.max(.8, distance * .42);
     this.controls.maxDistance = Math.max(5, distance * 2.4);
     this.camera.near = Math.max(.01, distance / 100);
@@ -671,6 +673,7 @@ class ProjectionRenderer {
 
     this.frameObject(this.currentObject);
     this.applyProfile(this.profile);
+    this.setView(this.viewName || "body");
     this.setStatus("STANDARD BODY ONLINE", "linked");
   }
 
@@ -701,6 +704,7 @@ class ProjectionRenderer {
 
     this.frameObject(this.currentObject);
     this.applyProfile(this.profile);
+    this.setView(this.viewName || "body");
     this.setStatus(vrm ? "VRM MODEL ONLINE" : "GLB MODEL ONLINE", "linked");
   }
 
@@ -723,8 +727,52 @@ class ProjectionRenderer {
     }
   }
 
+  setView(viewName){
+    if(!this.currentObject) return;
+    if(!this._frameState) this.frameObject(this.currentObject);
+    const frame = this._frameState;
+    if(!frame) return;
+
+    const view = String(viewName || "body").toLowerCase();
+    this.viewName = view;
+    let targetRatio = .48;
+    let distanceScale = 1;
+    let cameraLift = .04;
+
+    if(view === "face"){
+      targetRatio = .82;
+      distanceScale = .50;
+      cameraLift = .015;
+    }else if(view === "hair"){
+      targetRatio = .79;
+      distanceScale = .56;
+      cameraLift = .02;
+    }else if(view === "clothing"){
+      targetRatio = .52;
+      distanceScale = .82;
+      cameraLift = .03;
+    }else if(view === "animation"){
+      targetRatio = .48;
+      distanceScale = 1.03;
+      cameraLift = .04;
+    }else if(view === "advanced"){
+      targetRatio = .48;
+      distanceScale = 1;
+      cameraLift = .04;
+    }
+
+    const targetY = frame.height * targetRatio;
+    const distance = Math.max(this.controls.minDistance * 1.05, frame.distance * distanceScale);
+    this.controls.target.set(0, targetY, 0);
+    this.camera.position.set(0, targetY + frame.height * cameraLift, distance);
+    this.camera.lookAt(this.controls.target);
+    this.controls.update();
+  }
+
   resetCamera(){
-    if(this.currentObject) this.frameObject(this.currentObject);
+    if(!this.currentObject) return;
+    this.frameObject(this.currentObject);
+    this.setView(this.viewName || "body");
   }
 
   animate(){
@@ -768,6 +816,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "0.2.3"
+  version: "0.3.0"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));

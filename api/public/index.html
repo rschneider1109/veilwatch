@@ -192,16 +192,17 @@
 </div>
 
 <div id="ctab-projection" class="hidden" style="margin-top:12px;">
-  <div class="projection-bay-shell">
-    <section class="projection-stage-panel">
+  <div class="projection-bay-shell projection-forge-shell">
+    <section class="projection-stage-panel projection-forge-stage-panel">
       <div class="projection-stage-head">
         <div>
-          <div class="mini">VEILWATCH PROJECTION BAY</div>
+          <div class="mini">VEILWATCH CHARACTER FORGE</div>
           <h3 id="projectionBayTitle">No Character Selected</h3>
         </div>
         <div class="projection-status-pill" id="projectionBayStatus">NO SIGNAL</div>
       </div>
-      <div class="projection-stage" id="projectionStage">
+
+      <div class="projection-stage projection-forge-stage" id="projectionStage">
         <div class="projection-grid-floor"></div>
         <div class="projection-ring projection-ring-a"></div>
         <div class="projection-ring projection-ring-b"></div>
@@ -211,56 +212,147 @@
         <div class="projection-three-hint">DRAG TO ROTATE · WHEEL TO ZOOM</div>
         <div class="projection-scanline"></div>
       </div>
-      <div class="projection-readout-grid" id="projectionReadoutGrid">
-        <div><b>TYPE</b><span>—</span></div>
-        <div><b>SCALE</b><span>—</span></div>
-        <div><b>POSTURE</b><span>—</span></div>
-        <div><b>MODEL</b><span>—</span></div>
+
+      <div class="projection-forge-footer">
+        <div class="projection-readout-grid" id="projectionReadoutGrid">
+          <div><b>BODY</b><span>—</span></div>
+          <div><b>OUTFIT</b><span>—</span></div>
+          <div><b>POSE</b><span>—</span></div>
+          <div><b>MODEL</b><span>—</span></div>
+        </div>
+        <button class="btn smallbtn projection-reset-camera" id="projectionResetCameraBtn" type="button">Reset Camera</button>
       </div>
-      <div class="mini projection-note">3D Projection Core v0.1: the chamber now renders a live WebGL humanoid and can load GLB, glTF, or VRM assets from the Model Link field. Empty model links use the built-in Veilwatch prototype humanoid.</div>
     </section>
 
-    <section class="projection-control-panel">
-      <div class="projection-control-title">Model Profile</div>
-      <div class="projection-form-grid">
-        <label>Model Codename<input class="input" id="projectionName" placeholder="e.g., Agent Vale"/></label>
-        <label>Silhouette<select id="projectionSilhouette">
-          <option value="agent">Field Agent</option>
-          <option value="bruiser">Bruiser</option>
-          <option value="scout">Scout</option>
-          <option value="mystic">Mystic</option>
-          <option value="medic">Medic</option>
-          <option value="construct">Construct</option>
-          <option value="aberration">Aberration</option>
-          <option value="beast">Beast</option>
-        </select></label>
-        <label>Scale<select id="projectionScale">
-          <option value="compact">Compact</option>
-          <option value="average">Average</option>
-          <option value="tall">Tall</option>
-          <option value="huge">Huge</option>
-        </select></label>
-        <label>Posture<select id="projectionPosture">
-          <option value="neutral">Neutral</option>
-          <option value="alert">Alert</option>
-          <option value="combat">Combat</option>
-          <option value="injured">Injured</option>
-        </select></label>
-        <label>Signal State<select id="projectionSignal">
-          <option value="stable">Stable</option>
-          <option value="flicker">Flicker</option>
-          <option value="corrupt">Corrupted</option>
-        </select></label>
-        <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="/assets/characters/bases/character.glb"/></label>
+    <section class="projection-control-panel projection-forge-control-panel">
+      <div class="projection-forge-control-head">
+        <div>
+          <div class="mini">CUSTOMIZATION MATRIX</div>
+          <div class="projection-control-title">Character Forge</div>
+        </div>
+        <div class="projection-forge-head-actions">
+          <button class="btn smallbtn" id="projectionSyncAppearanceBtn" type="button">Sync Appearance</button>
+          <button class="btn smallbtn" id="projectionSaveBtn" type="button">Save</button>
+        </div>
       </div>
-      <label class="projection-notes-label">Projection Notes<textarea class="input" id="projectionNotes" placeholder="Visual markers, scars, gear silhouette, supernatural tells..." rows="4"></textarea></label>
-      <div class="projection-actions">
-        <button class="btn smallbtn" id="projectionSyncAppearanceBtn" type="button">Sync From Appearance</button>
-        <button class="btn smallbtn" id="projectionSaveBtn" type="button">Save Projection</button>
-        <button class="btn smallbtn dangerbtn" id="projectionClearBtn" type="button">Clear Model Link</button>
+
+      <div class="projection-forge-tabs" id="projectionForgeTabs" role="tablist" aria-label="Character Forge sections">
+        <button type="button" class="projection-forge-tab active" data-forge-tab="body">Body</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="face">Face</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="hair">Hair</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="clothing">Clothing</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="animation">Animation</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="advanced">Advanced</button>
       </div>
-      <div class="projection-control-title secondary">Appearance Echo</div>
-      <div class="projection-echo" id="projectionAppearanceEcho">No appearance telemetry yet.</div>
+
+      <div class="projection-forge-panels">
+        <div class="projection-forge-panel active" data-forge-panel="body">
+          <div class="projection-forge-section-head">
+            <span>Body Profile</span>
+            <small>Live foundation controls</small>
+          </div>
+          <div class="projection-form-grid projection-forge-two-col">
+            <label>Silhouette<select id="projectionSilhouette">
+              <option value="agent">Field Agent</option>
+              <option value="bruiser">Bruiser</option>
+              <option value="scout">Scout</option>
+              <option value="mystic">Mystic</option>
+              <option value="medic">Medic</option>
+              <option value="construct">Construct</option>
+              <option value="aberration">Aberration</option>
+              <option value="beast">Beast</option>
+            </select></label>
+            <label>Scale<select id="projectionScale">
+              <option value="compact">Compact</option>
+              <option value="average">Average</option>
+              <option value="tall">Tall</option>
+              <option value="huge">Huge</option>
+            </select></label>
+          </div>
+          <div class="projection-forge-telemetry-title">Current Appearance</div>
+          <div class="projection-echo projection-forge-echo" id="projectionAppearanceEcho">No appearance telemetry yet.</div>
+          <div class="projection-forge-next">
+            <b>Morph controls next</b>
+            <span>Height · weight · muscle · shoulders · chest · waist · hips · glutes</span>
+          </div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="face" hidden>
+          <div class="projection-forge-section-head">
+            <span>Face</span>
+            <small>Head / expression telemetry</small>
+          </div>
+          <div class="projection-echo projection-forge-echo" id="projectionFaceEcho">No face telemetry yet.</div>
+          <div class="projection-forge-next">
+            <b>Facial morph pass</b>
+            <span>Jaw · cheeks · nose · lips · eyes · brows · expressions</span>
+          </div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="hair" hidden>
+          <div class="projection-forge-section-head">
+            <span>Hair</span>
+            <small>Style / facial hair telemetry</small>
+          </div>
+          <div class="projection-echo projection-forge-echo" id="projectionHairEcho">No hair telemetry yet.</div>
+          <div class="projection-forge-next">
+            <b>Modular hair library</b>
+            <span>Styles and colors will become live selectable assets here.</span>
+          </div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="clothing" hidden>
+          <div class="projection-forge-section-head">
+            <span>Clothing</span>
+            <small>Equipped appearance telemetry</small>
+          </div>
+          <div class="projection-echo projection-forge-echo" id="projectionClothingEcho">No clothing telemetry yet.</div>
+          <div class="projection-forge-next">
+            <b>Modular wardrobe</b>
+            <span>Shirts · jackets · pants · footwear · tactical · futuristic gear</span>
+          </div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="animation" hidden>
+          <div class="projection-forge-section-head">
+            <span>Animation &amp; Pose</span>
+            <small>Projection state</small>
+          </div>
+          <div class="projection-form-grid projection-forge-two-col">
+            <label>Posture<select id="projectionPosture">
+              <option value="neutral">Neutral</option>
+              <option value="alert">Alert</option>
+              <option value="combat">Combat</option>
+              <option value="injured">Injured</option>
+            </select></label>
+            <label>Signal State<select id="projectionSignal">
+              <option value="stable">Stable</option>
+              <option value="flicker">Flicker</option>
+              <option value="corrupt">Corrupted</option>
+            </select></label>
+          </div>
+          <div class="projection-forge-next">
+            <b>Animation library next</b>
+            <span>Idle · social · combat · weapon · interaction · futuristic actions</span>
+          </div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="advanced" hidden>
+          <div class="projection-forge-section-head">
+            <span>Advanced</span>
+            <small>Developer / projection metadata</small>
+          </div>
+          <div class="projection-form-grid">
+            <label>Model Codename<input class="input" id="projectionName" placeholder="e.g., Agent Vale"/></label>
+            <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="/assets/characters/bases/character.glb"/></label>
+          </div>
+          <label class="projection-notes-label">Projection Notes<textarea class="input" id="projectionNotes" placeholder="Visual markers, scars, gear silhouette, supernatural tells..." rows="5"></textarea></label>
+          <div class="projection-actions">
+            <button class="btn smallbtn dangerbtn" id="projectionClearBtn" type="button">Clear Custom Model</button>
+          </div>
+          <div class="projection-forge-advanced-note">Blank model path uses the bundled Veilwatch Vitruvian standard body. Custom GLB, glTF, and VRM assets remain supported.</div>
+        </div>
+      </div>
     </section>
   </div>
 </div>

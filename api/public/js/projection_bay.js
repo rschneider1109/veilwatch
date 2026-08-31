@@ -18,6 +18,7 @@
 
   let projectionRenderer = null;
   let last3dModelUrl = null;
+  let activeForgeTab = "body";
 
   function update3dStatus(message, kind){
     const status = $("projectionBayStatus");
@@ -119,22 +120,74 @@
     el.value = values.includes(String(value || "")) ? String(value || "") : fallback;
   }
 
+  function echoPairs(pairs, emptyText){
+    const filtered = (pairs || []).filter(([,v])=>String(v ?? "").trim());
+    if(!filtered.length) return emptyText || "No telemetry yet.";
+    return filtered.map(([k,v])=>`<span><b>${safe(k)}</b>${safe(titleCase(v))}</span>`).join("");
+  }
+
   function echoAppearance(c){
     const ap = c?.sheet?.appearance || null;
     if(!ap) return "No appearance telemetry yet.";
-    const parts = [
+    return echoPairs([
       ["Type", ap.characterType],
       ["Body", ap.bodyType],
       ["Height", ap.height],
       ["Build", ap.build],
-      ["Hair", [ap.hairStyle, ap.hairColor].filter(Boolean).join(" / ")],
+      ["Bust", ap.bust]
+    ], "Appearance telemetry exists but has no filled values.");
+  }
+
+  function renderForgeTelemetry(c){
+    const ap = c?.sheet?.appearance || null;
+    const face = $("projectionFaceEcho");
+    const hair = $("projectionHairEcho");
+    const clothing = $("projectionClothingEcho");
+    if(!ap){
+      if(face) face.textContent = "No face telemetry yet.";
+      if(hair) hair.textContent = "No hair telemetry yet.";
+      if(clothing) clothing.textContent = "No clothing telemetry yet.";
+      return;
+    }
+    if(face) face.innerHTML = echoPairs([
+      ["Skin", ap.skinTone],
+      ["Eyes", ap.eyeColor],
+      ["Face", ap.faceDetail],
+      ["Scars", ap.scars]
+    ], "No face telemetry yet.");
+    if(hair) hair.innerHTML = echoPairs([
+      ["Style", ap.hairStyle],
+      ["Color", ap.hairColor],
+      ["Beard", ap.beardStyle]
+    ], "No hair telemetry yet.");
+    if(clothing) clothing.innerHTML = echoPairs([
       ["Top", ap.top],
       ["Outerwear", ap.outerwear],
       ["Bottoms", ap.bottoms],
+      ["Shoes", ap.shoes],
+      ["Gloves", ap.gloves],
       ["Uniform", ap.uniformPreset]
-    ].filter(([,v])=>String(v||"").trim());
-    if(!parts.length) return "Appearance telemetry exists but has no filled values.";
-    return parts.map(([k,v])=>`<span><b>${safe(k)}</b>${safe(titleCase(v))}</span>`).join("");
+    ], "No clothing telemetry yet.");
+  }
+
+  function setForgeTab(tabName, options={}){
+    const requested = String(tabName || "body").toLowerCase();
+    const valid = new Set(["body","face","hair","clothing","animation","advanced"]);
+    const next = valid.has(requested) ? requested : "body";
+    activeForgeTab = next;
+    document.querySelectorAll("[data-forge-tab]").forEach((btn)=>{
+      const active = btn.dataset.forgeTab === next;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    document.querySelectorAll("[data-forge-panel]").forEach((panel)=>{
+      const active = panel.dataset.forgePanel === next;
+      panel.classList.toggle("active", active);
+      panel.hidden = !active;
+    });
+    if(options.camera !== false){
+      ensureProjectionRenderer()?.setView?.(next);
+    }
   }
 
   function renderProjectionBay(){
@@ -155,8 +208,9 @@
         avatar.dataset.state = "stable";
         avatar.dataset.posture = "neutral";
       }
-      if(readout) readout.innerHTML = ["TYPE","SCALE","POSTURE","MODEL"].map(k=>`<div><b>${k}</b><span>—</span></div>`).join("");
+      if(readout) readout.innerHTML = ["BODY","OUTFIT","POSE","MODEL"].map(k=>`<div><b>${k}</b><span>—</span></div>`).join("");
       if(echo) echo.textContent = "Select or create a character to initialize projection data.";
+      renderForgeTelemetry(null);
       const renderer = ensureProjectionRenderer();
       if(renderer){
         renderer.applyProfile({scale:"average", posture:"neutral", signal:"stable", silhouette:"agent", appearance:null});
@@ -193,16 +247,21 @@
     }
 
     if(readout){
-      const modelText = String(p.modelUrl || "").trim() ? "LINKED" : "STANDARD";
+      const ap = c?.sheet?.appearance || {};
+      const modelText = String(p.modelUrl || "").trim() ? "CUSTOM" : "VITRUVIAN";
+      const bodyText = [ap.bodyType, ap.build].filter(Boolean).join(" / ") || p.silhouette || "agent";
+      const outfitText = [ap.top, ap.bottoms].filter(Boolean).join(" / ") || "unspecified";
       readout.innerHTML = `
-        <div><b>TYPE</b><span>${safe(titleCase(p.silhouette || "agent"))}</span></div>
-        <div><b>SCALE</b><span>${safe(titleCase(p.scale || "average"))}</span></div>
-        <div><b>POSTURE</b><span>${safe(titleCase(p.posture || "neutral"))}</span></div>
+        <div><b>BODY</b><span>${safe(titleCase(bodyText))}</span></div>
+        <div><b>OUTFIT</b><span>${safe(titleCase(outfitText))}</span></div>
+        <div><b>POSE</b><span>${safe(titleCase(p.posture || "neutral"))}</span></div>
         <div><b>MODEL</b><span>${safe(modelText)}</span></div>
       `;
     }
     if(echo) echo.innerHTML = echoAppearance(c);
+    renderForgeTelemetry(c);
     syncProjection3d(p, false, c?.sheet?.appearance || null);
+    setForgeTab(activeForgeTab, {camera:false});
   }
 
   async function saveProjection(patchOnly){
@@ -267,6 +326,10 @@
 
   function wireProjectionBay(){
     $("projectionSaveBtn")?.addEventListener("click", ()=>saveProjection());
+    $("projectionResetCameraBtn")?.addEventListener("click", ()=>ensureProjectionRenderer()?.resetCamera?.());
+    document.querySelectorAll("[data-forge-tab]").forEach((btn)=>{
+      btn.addEventListener("click", ()=>setForgeTab(btn.dataset.forgeTab));
+    });
     $("projectionSyncAppearanceBtn")?.addEventListener("click", syncFromAppearance);
     $("projectionClearBtn")?.addEventListener("click", async ()=>{
       setField("projectionModelUrl", "");
@@ -299,5 +362,6 @@
   window.addEventListener("DOMContentLoaded", ()=>{
     wireProjectionBay();
     renderProjectionBay();
+    setForgeTab(activeForgeTab, {camera:false});
   });
 })();
