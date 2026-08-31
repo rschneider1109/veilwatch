@@ -573,38 +573,64 @@ class ProjectionRenderer {
     this.stripSceneHelpers(bodyRoot);
     this.tuneMaterials(bodyRoot);
 
-    const anchor = bodyRoot.getObjectByName("mixamorig:Head")
+    // The separate head + hair GLBs were exported in the SAME bind-pose world
+    // coordinates as the body, but they are not skinned to the body's Mixamo rig.
+    // To animate them correctly, rigid-bind each asset to the Mixamo Head bone.
+    // The inverse bind matrix cancels the bone's bind-pose transform, so the asset
+    // remains exactly where it was authored at rest. When the Head bone animates,
+    // the asset follows that delta instead of receiving a second positional offset.
+    bodyRoot.updateMatrixWorld(true);
+    const headBone = bodyRoot.getObjectByName("mixamorig:Head")
       || bodyRoot.getObjectByName("Head")
-      || bodyRoot.getObjectByName("mixamorig:Neck")
-      || bodyRoot;
+      || bodyRoot.getObjectByName("mixamorig:Neck");
+    if(!headBone) throw new Error("Vitruvian body rig has no head/neck bone");
+    headBone.updateWorldMatrix(true, false);
+    const headBindInverse = new THREE.Matrix4().copy(headBone.matrixWorld).invert();
 
-    const headRoot = headGltf.scene || headGltf.scenes?.[0];
+    const bindWorldAuthoredAssetToHead = (assetRoot, name)=>{
+      if(!assetRoot) return null;
+      assetRoot.name = name;
+      assetRoot.updateMatrixWorld(true);
+      // The GLBs' root transforms are authored relative to character/world origin.
+      // Pre-multiply by inverse head bind transform before parenting to the bone.
+      assetRoot.applyMatrix4(headBindInverse);
+      headBone.add(assetRoot);
+      assetRoot.updateMatrixWorld(true);
+      return assetRoot;
+    };
+
+    const headRoot = bindWorldAuthoredAssetToHead(
+      headGltf.scene || headGltf.scenes?.[0],
+      "VeilwatchVitruvianHead"
+    );
     if(headRoot){
-      headRoot.name = "VeilwatchVitruvianHead";
       this.tuneMaterials(headRoot);
       headRoot.traverse((obj)=>{
         if(obj.isMesh && obj.morphTargetDictionary && obj.morphTargetInfluences){
           this.faceMeshes.push(obj);
         }
       });
-      anchor.attach(headRoot);
     }
 
-    const hairRoot = hairGltf.scene || hairGltf.scenes?.[0];
-    if(hairRoot){
-      hairRoot.name = "VeilwatchVitruvianHair";
-      this.tuneMaterials(hairRoot);
-      anchor.attach(hairRoot);
-    }
+    const hairRoot = bindWorldAuthoredAssetToHead(
+      hairGltf.scene || hairGltf.scenes?.[0],
+      "VeilwatchVitruvianHair"
+    );
+    if(hairRoot) this.tuneMaterials(hairRoot);
 
     this.currentObject = bodyRoot;
     this.world.add(this.currentObject);
     this.applyVitruvianMaterialMaps();
 
+    // Animation is safe again: body is skinned normally, while the separate head
+    // and hair follow the animated Head bone from their corrected bind-pose offset.
+    this.mixer = null;
     if(bodyGltf.animations?.length){
       this.mixer = new THREE.AnimationMixer(this.currentObject);
-      const clip = bodyGltf.animations.find(a=>/idle/i.test(a.name)) || bodyGltf.animations[0];
-      if(clip) this.mixer.clipAction(clip).reset().fadeIn(.15).play();
+      const clip = bodyGltf.animations.find(a=>/^idle$/i.test(a.name))
+        || bodyGltf.animations.find(a=>/idle/i.test(a.name))
+        || bodyGltf.animations[0];
+      if(clip) this.mixer.clipAction(clip).reset().fadeIn(.2).play();
     }
 
     this.frameObject(this.currentObject);
@@ -706,6 +732,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "0.2.1"
+  version: "0.2.3"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));
