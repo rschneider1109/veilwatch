@@ -580,10 +580,46 @@ class ProjectionRenderer {
     // remains exactly where it was authored at rest. When the Head bone animates,
     // the asset follows that delta instead of receiving a second positional offset.
     bodyRoot.updateMatrixWorld(true);
-    const headBone = bodyRoot.getObjectByName("mixamorig:Head")
-      || bodyRoot.getObjectByName("Head")
-      || bodyRoot.getObjectByName("mixamorig:Neck");
-    if(!headBone) throw new Error("Vitruvian body rig has no head/neck bone");
+
+    // GLTFLoader may sanitize punctuation in imported node names (for example
+    // `mixamorig:Head` can become `mixamorigHead`). Search both the scene tree
+    // and every SkinnedMesh skeleton using punctuation-insensitive names.
+    const normalizeBoneName = (value)=>String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+    const wantedHeadNames = new Set([
+      "mixamorighead",
+      "head"
+    ]);
+    const wantedNeckNames = new Set([
+      "mixamorigneck",
+      "neck"
+    ]);
+    const discoveredBones = [];
+    const seenBones = new Set();
+    const rememberBone = (bone)=>{
+      if(!bone || seenBones.has(bone)) return;
+      seenBones.add(bone);
+      discoveredBones.push(bone);
+    };
+
+    bodyRoot.traverse((obj)=>{
+      if(obj.isBone) rememberBone(obj);
+      if(obj.isSkinnedMesh && obj.skeleton?.bones){
+        obj.skeleton.bones.forEach(rememberBone);
+      }
+    });
+
+    const headBone = discoveredBones.find((bone)=>wantedHeadNames.has(normalizeBoneName(bone.name)))
+      || discoveredBones.find((bone)=>normalizeBoneName(bone.name).endsWith("head"))
+      || discoveredBones.find((bone)=>wantedNeckNames.has(normalizeBoneName(bone.name)))
+      || discoveredBones.find((bone)=>normalizeBoneName(bone.name).endsWith("neck"));
+
+    if(!headBone){
+      const sample = discoveredBones.slice(0, 12).map((bone)=>bone.name).join(", ");
+      throw new Error(`Vitruvian body rig has no head/neck bone. Bones seen: ${sample || "none"}`);
+    }
+    console.info("Veilwatch Vitruvian head anchor:", headBone.name);
     headBone.updateWorldMatrix(true, false);
     const headBindInverse = new THREE.Matrix4().copy(headBone.matrixWorld).invert();
 
