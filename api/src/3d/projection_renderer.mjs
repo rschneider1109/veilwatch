@@ -9,15 +9,31 @@ const STANDARD_VITRUVIAN_BODY = "/assets/characters/bases/vitruvian_body.glb";
 const STANDARD_VITRUVIAN_HEAD = "/assets/characters/bases/vitruvian_head.glb";
 const STANDARD_VITRUVIAN_HAIR = "/assets/characters/hair/vitruvian_hair_rigged.glb";
 const STANDARD_SENTINELS = new Set(["", "@vitruvian", "bundle:vitruvian", "standard:vitruvian"]);
+const VITRUVIAN_TEXTURE_ROOT = "/assets/characters/textures/vitruvian";
+const VITRUVIAN_TEXTURES = {
+  bodyBase: `${VITRUVIAN_TEXTURE_ROOT}/vit_body_bc.png`,
+  bodyNormal: `${VITRUVIAN_TEXTURE_ROOT}/vit_body_n.png`,
+  bodyRough: `${VITRUVIAN_TEXTURE_ROOT}/vit_body_rough.png`,
+  fabricNormal: `${VITRUVIAN_TEXTURE_ROOT}/vit_fabric_n.png`,
+  faceBase: `${VITRUVIAN_TEXTURE_ROOT}/vit_face_bc.png`,
+  faceNormal: `${VITRUVIAN_TEXTURE_ROOT}/vit_face_n.png`,
+  faceRough: `${VITRUVIAN_TEXTURE_ROOT}/vit_face_rough.png`,
+  hairBase: `${VITRUVIAN_TEXTURE_ROOT}/vit_hair_diffuse.png`,
+  hairNormal: `${VITRUVIAN_TEXTURE_ROOT}/vit_hair_normal.png`,
+  hairOpacity: `${VITRUVIAN_TEXTURE_ROOT}/vit_hair_opacity.png`,
+  iris: `${VITRUVIAN_TEXTURE_ROOT}/vit_iris.png`,
+  mouth: `${VITRUVIAN_TEXTURE_ROOT}/vit_mouth.png`,
+  sclera: `${VITRUVIAN_TEXTURE_ROOT}/vit_sclera.png`
+};
 
 const SKIN_TONES = {
-  fair: 0xf4ddcf,
-  light: 0xe0bfa8,
-  warm: 0xcf9f7d,
-  tan: 0xb77f5f,
-  olive: 0x9a7a58,
-  brown: 0x7a5036,
-  deep: 0x523521
+  fair: 0xfff2e8,
+  light: 0xffe7d8,
+  warm: 0xffd5bd,
+  tan: 0xe1ad88,
+  olive: 0xc7a477,
+  brown: 0x9a6b4c,
+  deep: 0x704934
 };
 
 const HAIR_COLORS = {
@@ -71,7 +87,7 @@ function disposeObject(root){
       mats.forEach((mat)=>{
         if(!mat) return;
         Object.values(mat).forEach((value)=>{
-          if(value?.isTexture && value.dispose) value.dispose();
+          if(value?.isTexture && value.dispose && !value.userData?.veilwatchShared) value.dispose();
         });
         mat.dispose?.();
       });
@@ -171,6 +187,8 @@ class ProjectionRenderer {
     this.renderer = new THREE.WebGLRenderer({alpha:true, antialias:true, powerPreference:"high-performance"});
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.domElement.className = "projection-three-canvas";
     this.renderer.domElement.setAttribute("aria-label", "Interactive 3D character projection");
@@ -189,23 +207,30 @@ class ProjectionRenderer {
     this.world = new THREE.Group();
     this.scene.add(this.world);
 
-    const hemi = new THREE.HemisphereLight(0xbcefff, 0x051019, 1.8);
+    const hemi = new THREE.HemisphereLight(0xf2f6ff, 0x101722, 1.15);
     this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 2.6);
+    const key = new THREE.DirectionalLight(0xffead6, 3.0);
     key.position.set(2.7, 3.8, 3.2);
     this.scene.add(key);
-    const rim = new THREE.PointLight(CYAN, 16, 7, 2);
-    rim.position.set(-2.2, 1.7, -1.6);
+    const fill = new THREE.DirectionalLight(0xbfd6ff, .85);
+    fill.position.set(-2.4, 2.1, 2.4);
+    this.scene.add(fill);
+    const rim = new THREE.PointLight(0x78c9ff, 9, 7, 2);
+    rim.position.set(-2.2, 1.9, -1.6);
     this.scene.add(rim);
-    const warm = new THREE.PointLight(AMBER, 7, 5, 2);
+    const warm = new THREE.PointLight(0xffc18a, 4.5, 5, 2);
     warm.position.set(2.1, .5, 1.4);
     this.scene.add(warm);
 
     this.loader = new GLTFLoader();
     this.loader.register((parser)=>new VRMLoaderPlugin(parser));
+    this.textureLoader = new THREE.TextureLoader();
+    this.vitruvianTextures = null;
+    this._vitruvianTexturePromise = null;
     this.currentObject = null;
     this.currentVrm = null;
     this.mixer = null;
+    this.faceMeshes = [];
     this.lastUrl = null;
     this.profile = {};
     this._loadToken = 0;
@@ -242,6 +267,7 @@ class ProjectionRenderer {
     this.currentObject = null;
     this.currentVrm = null;
     this.mixer = null;
+    this.faceMeshes = [];
   }
 
   showPrototype(){
@@ -279,16 +305,117 @@ class ProjectionRenderer {
     });
   }
 
+  async ensureVitruvianTextures(){
+    if(this.vitruvianTextures) return this.vitruvianTextures;
+    if(this._vitruvianTexturePromise) return this._vitruvianTexturePromise;
+
+    const load = async (url, srgb=false)=>{
+      const tex = await this.textureLoader.loadAsync(url);
+      tex.flipY = false;
+      tex.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+      tex.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy?.() || 1);
+      tex.userData.veilwatchShared = true;
+      tex.needsUpdate = true;
+      return tex;
+    };
+
+    this._vitruvianTexturePromise = Promise.all([
+      load(VITRUVIAN_TEXTURES.bodyBase, true),
+      load(VITRUVIAN_TEXTURES.bodyNormal),
+      load(VITRUVIAN_TEXTURES.bodyRough),
+      load(VITRUVIAN_TEXTURES.fabricNormal),
+      load(VITRUVIAN_TEXTURES.faceBase, true),
+      load(VITRUVIAN_TEXTURES.faceNormal),
+      load(VITRUVIAN_TEXTURES.faceRough),
+      load(VITRUVIAN_TEXTURES.hairBase, true),
+      load(VITRUVIAN_TEXTURES.hairNormal),
+      load(VITRUVIAN_TEXTURES.hairOpacity),
+      load(VITRUVIAN_TEXTURES.iris, true),
+      load(VITRUVIAN_TEXTURES.mouth, true),
+      load(VITRUVIAN_TEXTURES.sclera, true)
+    ]).then(([bodyBase, bodyNormal, bodyRough, fabricNormal, faceBase, faceNormal, faceRough, hairBase, hairNormal, hairOpacity, iris, mouth, sclera])=>{
+      this.vitruvianTextures = { bodyBase, bodyNormal, bodyRough, fabricNormal, faceBase, faceNormal, faceRough, hairBase, hairNormal, hairOpacity, iris, mouth, sclera };
+      return this.vitruvianTextures;
+    }).finally(()=>{
+      this._vitruvianTexturePromise = null;
+    });
+
+    return this._vitruvianTexturePromise;
+  }
+
+  applyVitruvianMaterialMaps(){
+    const tx = this.vitruvianTextures;
+    if(!tx || !this.currentObject) return;
+
+    this.currentObject.traverse((obj)=>{
+      if(!obj.isMesh || !obj.material) return;
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach((mat)=>{
+        if(!mat) return;
+        const name = String(mat.name || "");
+
+        if(name === "VitSkin"){
+          mat.map = tx.faceBase;
+          mat.normalMap = tx.faceNormal;
+          mat.roughnessMap = tx.faceRough;
+          mat.normalScale?.set?.(.8, .8);
+          mat.metalness = 0;
+          mat.roughness = .9;
+        }else if(name === "VitBody"){
+          mat.map = tx.bodyBase;
+          mat.normalMap = tx.bodyNormal;
+          mat.roughnessMap = tx.bodyRough;
+          mat.normalScale?.set?.(.75, .75);
+          mat.metalness = 0;
+          mat.roughness = .92;
+        }else if(name === "VitMouth"){
+          mat.map = tx.mouth;
+          mat.color.setHex(0xffffff);
+          mat.metalness = 0;
+          mat.roughness = .85;
+        }else if(name.startsWith("VitSclera")){
+          mat.map = tx.sclera;
+          mat.color.setHex(0xf7f0ea);
+          mat.metalness = 0;
+          mat.roughness = .28;
+        }else if(name.startsWith("VitIris")){
+          mat.map = tx.iris;
+          mat.color.setHex(0xffffff);
+          mat.metalness = 0;
+          mat.roughness = .25;
+        }else if(name === "VitHair"){
+          mat.map = tx.hairBase;
+          mat.normalMap = tx.hairNormal;
+          mat.alphaMap = tx.hairOpacity;
+          mat.color.setHex(0xffffff);
+          mat.normalScale?.set?.(.6, .6);
+          mat.transparent = false;
+          mat.alphaTest = .28;
+          mat.depthWrite = true;
+          mat.metalness = 0;
+          mat.roughness = .72;
+          mat.side = THREE.DoubleSide;
+        }else if(name === "VitShirt" || name === "VitPants"){
+          mat.normalMap = tx.fabricNormal;
+          mat.normalScale?.set?.(.18, .18);
+          mat.metalness = 0;
+          mat.roughness = .94;
+        }
+        mat.needsUpdate = true;
+      });
+    });
+  }
+
   applyAppearance(){
     const appearance = this.profile.appearance || {};
     if(!this.currentObject || this.currentObject.userData.isVeilwatchFallback) return;
 
-    const skinColor = blendHex(colorFor(SKIN_TONES, appearance.skinTone, SKIN_TONES.warm), CYAN, .06);
-    const hairColor = blendHex(colorFor(HAIR_COLORS, appearance.hairColor, HAIR_COLORS.dark_brown), CYAN, .04);
-    const eyeColor = colorFor(EYE_COLORS, appearance.eyeColor, EYE_COLORS.blue);
-    const shirtColor = blendHex(colorFor(SHIRT_COLORS, appearance.top, SHIRT_COLORS.t_shirt), CYAN, .05);
-    const pantsColor = blendHex(colorFor(BOTTOM_COLORS, appearance.bottoms, BOTTOM_COLORS.jeans), CYAN, .04);
-    const shoesColor = blendHex(colorFor(SHOE_COLORS, appearance.shoes, SHOE_COLORS.sneakers), CYAN, .03);
+    const skinColor = new THREE.Color(colorFor(SKIN_TONES, appearance.skinTone, SKIN_TONES.warm));
+    const eyeColor = new THREE.Color(colorFor(EYE_COLORS, appearance.eyeColor, EYE_COLORS.brown));
+    const shirtColor = new THREE.Color(colorFor(SHIRT_COLORS, appearance.top, SHIRT_COLORS.t_shirt));
+    const pantsColor = new THREE.Color(colorFor(BOTTOM_COLORS, appearance.bottoms, BOTTOM_COLORS.jeans));
+    const shoesColor = new THREE.Color(colorFor(SHOE_COLORS, appearance.shoes, SHOE_COLORS.sneakers));
+    const hairKey = String(appearance.hairColor || "dark_brown").toLowerCase();
     const outerwear = String(appearance.outerwear || "none").toLowerCase();
 
     this.currentObject.traverse((obj)=>{
@@ -300,46 +427,50 @@ class ProjectionRenderer {
 
         if(name === "VitSkin" || name === "VitBody"){
           mat.color.copy(skinColor);
-          mat.roughness = .86;
-          mat.metalness = .03;
         }else if(name === "VitMouth"){
-          mat.color.setHex(0x7a453d);
-          mat.roughness = .88;
+          mat.color.setHex(0xffffff);
         }else if(name === "VitCaruncle"){
-          mat.color.setHex(0xcf7b75);
+          mat.color.setHex(0xd18c86);
+          mat.roughness = .5;
         }else if(name === "VitTearline"){
-          mat.color.setHex(0xc49d99);
+          mat.color.setHex(0xf0c7c1);
           mat.transparent = true;
-          mat.opacity = .92;
+          mat.opacity = .5;
+          mat.roughness = .08;
         }else if(name.startsWith("VitSclera")){
-          mat.color.setHex(0xf1f3f4);
-          mat.roughness = .38;
+          mat.color.setHex(0xf7f0ea);
         }else if(name.startsWith("VitIris")){
-          mat.color.setHex(eyeColor);
-          mat.roughness = .42;
+          // Keep the photographic iris detail. A subtle tint gives the UI choice
+          // some influence without destroying the fibre texture.
+          mat.color.copy(new THREE.Color(0xffffff).lerp(eyeColor, .22));
         }else if(name.startsWith("VitEyeBack")){
-          mat.color.setHex(0x0d1018);
+          mat.color.setHex(0x090b10);
         }else if(name.startsWith("VitCornea")){
           mat.color.setHex(0xffffff);
           mat.transparent = true;
-          mat.opacity = .12;
-          mat.roughness = .02;
+          mat.opacity = .06;
+          mat.roughness = .025;
           mat.metalness = 0;
+          mat.depthWrite = false;
         }else if(name === "VitHair"){
-          mat.color.copy(hairColor);
-          mat.roughness = .9;
-          mat.metalness = .02;
+          if(hairKey === "black") mat.color.setRGB(.42,.38,.34);
+          else if(hairKey === "brown") mat.color.setRGB(1.12,.95,.82);
+          else if(hairKey === "auburn" || hairKey === "red") mat.color.setRGB(1.3,.70,.48);
+          else if(hairKey === "gray") mat.color.setRGB(1.9,1.85,1.8);
+          else if(hairKey === "white") mat.color.setRGB(2.8,2.7,2.55);
+          else if(hairKey === "blonde") mat.color.setRGB(2.15,1.65,.92);
+          else mat.color.setRGB(.82,.72,.64);
         }else if(name === "VitShirt"){
           const jacketFactor = outerwear === "none" ? 0 : outerwear.includes("heavy") ? .35 : .2;
           mat.color.copy(shirtColor.clone().lerp(new THREE.Color(0x1e252d), jacketFactor));
-          mat.roughness = .92;
         }else if(name === "VitPants"){
           mat.color.copy(pantsColor);
-          mat.roughness = .95;
         }else if(name === "VitShoes"){
           mat.color.copy(shoesColor);
-          mat.roughness = .82;
+          mat.metalness = 0;
+          mat.roughness = .78;
         }
+        mat.needsUpdate = true;
       });
     });
 
@@ -350,6 +481,34 @@ class ProjectionRenderer {
       const scaleAdjust = style === "buzz" ? .93 : 1;
       hairRoot.scale.setScalar(scaleAdjust);
     }
+  }
+
+  setFaceMorph(name, value){
+    for(const mesh of this.faceMeshes){
+      const idx = mesh.morphTargetDictionary?.[name];
+      if(idx === undefined || !mesh.morphTargetInfluences) continue;
+      mesh.morphTargetInfluences[idx] = value;
+    }
+  }
+
+  updateFaceLiveness(timeSeconds){
+    if(!this.faceMeshes.length) return;
+
+    // Soft resting expression. Tiny asymmetry keeps the face from reading as a mannequin.
+    this.setFaceMorph("Smile_Lips_Closed", .22);
+    this.setFaceMorph("Happy", .045);
+    this.setFaceMorph("Lips_Up_Corner_Wide_Left", .025);
+    this.setFaceMorph("Eyebrows_Raised_Left", .015);
+
+    // Fast natural blink every ~3.2 seconds.
+    const bt = (timeSeconds + .6) % 3.2;
+    const blink = bt < .16 ? Math.sin((bt / .16) * Math.PI) : 0;
+    this.setFaceMorph("Eyes_Closed_Max", Math.max(0, blink));
+
+    // Very occasional micro-squint to break perfect stillness.
+    const ft = (timeSeconds + 5.0) % 17.0;
+    const squint = ft < 1.1 ? .08 * Math.sin((ft / 1.1) * Math.PI) : 0;
+    this.setFaceMorph("Eyes_Squint", Math.max(0, squint));
   }
 
   applyProfile(profile={}){
@@ -401,7 +560,8 @@ class ProjectionRenderer {
     const [bodyGltf, headGltf, hairGltf] = await Promise.all([
       this.loader.loadAsync(STANDARD_VITRUVIAN_BODY),
       this.loader.loadAsync(STANDARD_VITRUVIAN_HEAD),
-      this.loader.loadAsync(STANDARD_VITRUVIAN_HAIR)
+      this.loader.loadAsync(STANDARD_VITRUVIAN_HAIR),
+      this.ensureVitruvianTextures()
     ]);
     if(token !== this._loadToken) return;
 
@@ -422,6 +582,11 @@ class ProjectionRenderer {
     if(headRoot){
       headRoot.name = "VeilwatchVitruvianHead";
       this.tuneMaterials(headRoot);
+      headRoot.traverse((obj)=>{
+        if(obj.isMesh && obj.morphTargetDictionary && obj.morphTargetInfluences){
+          this.faceMeshes.push(obj);
+        }
+      });
       anchor.attach(headRoot);
     }
 
@@ -434,6 +599,7 @@ class ProjectionRenderer {
 
     this.currentObject = bodyRoot;
     this.world.add(this.currentObject);
+    this.applyVitruvianMaterialMaps();
 
     if(bodyGltf.animations?.length){
       this.mixer = new THREE.AnimationMixer(this.currentObject);
@@ -507,6 +673,7 @@ class ProjectionRenderer {
     this.controls.update();
     this.mixer?.update(dt);
     this.currentVrm?.update?.(dt);
+    this.updateFaceLiveness(now * .001);
 
     if(this.currentObject?.userData?.isVeilwatchFallback){
       const t = performance.now() * .001;
@@ -539,6 +706,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "0.2.0"
+  version: "0.2.1"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));
