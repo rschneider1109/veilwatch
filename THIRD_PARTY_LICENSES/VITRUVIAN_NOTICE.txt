@@ -1,0 +1,11 @@
+Vitruvian Character / CharMorph-Vitruvian
+License: CC0 1.0 (public domain dedication)
+Source: https://github.com/Upliner/CharMorph-Vitruvian
+
+VitruvianGodot runtime preparation
+Code license: MIT
+Vitruvian character assets/textures: CC0
+Source: https://github.com/ibrews/VitruvianGodot
+
+Veilwatch uses adapted runtime GLB assets and texture files from these projects as the
+foundation of its Character Forge. See the source projects for complete upstream notices.

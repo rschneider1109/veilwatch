@@ -231,7 +231,7 @@
           <div class="projection-control-title">Character Forge</div>
         </div>
         <div class="projection-forge-head-actions">
-          <button class="btn smallbtn" id="projectionSyncAppearanceBtn" type="button">Sync Appearance</button>
+          <button class="btn smallbtn" id="projectionSyncAppearanceBtn" type="button">Reset Changes</button>
           <button class="btn smallbtn" id="projectionSaveBtn" type="button">Save</button>
         </div>
       </div>
@@ -248,56 +248,60 @@
       <div class="projection-forge-panels">
         <div class="projection-forge-panel active" data-forge-panel="body">
           <div class="projection-forge-section-head">
-            <span>Body Profile</span>
-            <small>Live foundation controls</small>
+            <span>Human Appearance</span>
+            <small>Skin / scale foundation</small>
           </div>
           <div class="projection-form-grid projection-forge-two-col">
-            <label>Silhouette<select id="projectionSilhouette">
-              <option value="agent">Field Agent</option>
-              <option value="bruiser">Bruiser</option>
-              <option value="scout">Scout</option>
-              <option value="mystic">Mystic</option>
-              <option value="medic">Medic</option>
-              <option value="construct">Construct</option>
-              <option value="aberration">Aberration</option>
-              <option value="beast">Beast</option>
-            </select></label>
             <label>Scale<select id="projectionScale">
               <option value="compact">Compact</option>
               <option value="average">Average</option>
               <option value="tall">Tall</option>
               <option value="huge">Huge</option>
             </select></label>
+            <label>Body Profile<input class="input" id="projectionBodyProfile" value="Human" readonly/></label>
           </div>
-          <div class="projection-forge-telemetry-title">Current Appearance</div>
+          <div class="projection-option-heading">Skin Tone</div>
+          <div class="projection-swatch-grid skin" id="projectionSkinToneOptions" aria-label="Skin tone"></div>
+          <div class="projection-forge-telemetry-title">Saved Body Appearance</div>
           <div class="projection-echo projection-forge-echo" id="projectionAppearanceEcho">No appearance telemetry yet.</div>
           <div class="projection-forge-next">
-            <b>Morph controls next</b>
-            <span>Height · weight · muscle · shoulders · chest · waist · hips · glutes</span>
+            <b>Body morphing comes later</b>
+            <span>This pass keeps the base human stable while the appearance library is built out.</span>
           </div>
         </div>
 
         <div class="projection-forge-panel" data-forge-panel="face" hidden>
           <div class="projection-forge-section-head">
             <span>Face</span>
-            <small>Head / expression telemetry</small>
+            <small>Resting face / eyes</small>
           </div>
+          <div class="projection-option-heading">Resting Face</div>
+          <div class="projection-choice-grid" id="projectionFacePresetOptions" aria-label="Face presets"></div>
+          <div class="projection-option-heading">Eye Color</div>
+          <div class="projection-swatch-grid" id="projectionEyeColorOptions" aria-label="Eye color"></div>
           <div class="projection-echo projection-forge-echo" id="projectionFaceEcho">No face telemetry yet.</div>
           <div class="projection-forge-next">
-            <b>Facial morph pass</b>
-            <span>Jaw · cheeks · nose · lips · eyes · brows · expressions</span>
+            <b>Expression-ready foundation</b>
+            <span>These use Vitruvian FACS blendshapes. Structural jaw/nose/cheek morphs come with the later morph pass.</span>
           </div>
         </div>
 
         <div class="projection-forge-panel" data-forge-panel="hair" hidden>
           <div class="projection-forge-section-head">
             <span>Hair</span>
-            <small>Style / facial hair telemetry</small>
+            <small>Style / color / facial hair</small>
+          </div>
+          <div class="projection-option-heading">Hair Style</div>
+          <div class="projection-choice-grid hair" id="projectionHairStyleOptions" aria-label="Hair style"></div>
+          <div class="projection-option-heading">Hair Color</div>
+          <div class="projection-swatch-grid" id="projectionHairColorOptions" aria-label="Hair color"></div>
+          <div class="projection-form-grid" style="margin-top:14px;">
+            <label>Facial Hair<select id="projectionBeardStyle"></select></label>
           </div>
           <div class="projection-echo projection-forge-echo" id="projectionHairEcho">No hair telemetry yet.</div>
           <div class="projection-forge-next">
-            <b>Modular hair library</b>
-            <span>Styles and colors will become live selectable assets here.</span>
+            <b>Modular hair library online</b>
+            <span>Bald, close-cut procedural styles, and Vitruvian card-hair variants are all driven from the asset manifest.</span>
           </div>
         </div>
 
@@ -342,8 +346,15 @@
             <span>Advanced</span>
             <small>Developer / projection metadata</small>
           </div>
-          <div class="projection-form-grid">
+          <div class="projection-form-grid projection-forge-two-col">
+            <label>Projection Profile<select id="projectionSilhouette">
+              <option value="agent">Standard</option>
+              <option value="bruiser">Broad</option>
+              <option value="scout">Lean</option>
+            </select></label>
             <label>Model Codename<input class="input" id="projectionName" placeholder="e.g., Agent Vale"/></label>
+          </div>
+          <div class="projection-form-grid">
             <label>Model Link / Asset Path<input class="input" id="projectionModelUrl" placeholder="/assets/characters/bases/character.glb"/></label>
           </div>
           <label class="projection-notes-label">Projection Notes<textarea class="input" id="projectionNotes" placeholder="Visual markers, scars, gear silhouette, supernatural tells..." rows="5"></textarea></label>

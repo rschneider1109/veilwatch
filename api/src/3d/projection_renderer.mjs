@@ -231,6 +231,15 @@ class ProjectionRenderer {
     this.currentVrm = null;
     this.mixer = null;
     this.faceMeshes = [];
+    this.headBone = null;
+    this.headBindInverse = null;
+    this.hairAssetRoot = null;
+    this.hairBaseTransform = null;
+    this.proceduralHairRoot = null;
+    this.facialHairRoot = null;
+    this._activeFaceWeights = {};
+    this._activeHairStyleKey = null;
+    this._activeBeardStyleKey = null;
     this.lastUrl = null;
     this.profile = {};
     this.viewName = "body";
@@ -269,6 +278,15 @@ class ProjectionRenderer {
     this.currentVrm = null;
     this.mixer = null;
     this.faceMeshes = [];
+    this.headBone = null;
+    this.headBindInverse = null;
+    this.hairAssetRoot = null;
+    this.hairBaseTransform = null;
+    this.proceduralHairRoot = null;
+    this.facialHairRoot = null;
+    this._activeFaceWeights = {};
+    this._activeHairStyleKey = null;
+    this._activeBeardStyleKey = null;
   }
 
   showPrototype(){
@@ -407,16 +425,245 @@ class ProjectionRenderer {
     });
   }
 
+  colorFromHint(value, fallback){
+    try{
+      if(value) return new THREE.Color(value);
+    }catch(e){}
+    return new THREE.Color(fallback);
+  }
+
+  disposeDetached(root){
+    if(!root) return;
+    root.parent?.remove(root);
+    disposeObject(root);
+  }
+
+  bindWorldAuthoredRootToHead(root){
+    if(!root || !this.headBone || !this.headBindInverse) return null;
+    root.updateMatrixWorld(true);
+    root.applyMatrix4(this.headBindInverse);
+    this.headBone.add(root);
+    root.updateMatrixWorld(true);
+    return root;
+  }
+
+  createHairMaterial(color){
+    return new THREE.MeshStandardMaterial({
+      color,
+      roughness:.82,
+      metalness:0,
+      side:THREE.DoubleSide
+    });
+  }
+
+  createProceduralHair(styleId, color){
+    const group = new THREE.Group();
+    group.name = "VeilwatchProceduralHair";
+    const mat = this.createHairMaterial(color);
+
+    const add = (geom, pos, scale=[1,1,1], rot=[0,0,0])=>{
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set(...pos);
+      mesh.scale.set(...scale);
+      mesh.rotation.set(...rot);
+      group.add(mesh);
+      return mesh;
+    };
+
+    if(styleId === "buzz"){
+      add(new THREE.SphereGeometry(.116, 40, 24, 0, Math.PI*2, 0, Math.PI*.61), [0,1.656,-.018], [1.01,.96,1.02]);
+    }else{
+      // Close crop: low scalp cap plus a row of subtle top tufts.
+      add(new THREE.SphereGeometry(.119, 40, 24, 0, Math.PI*2, 0, Math.PI*.64), [0,1.658,-.018], [1.02,1.00,1.03]);
+      const tuftGeo = new THREE.ConeGeometry(.009,.038,8);
+      const xs = [-.055,-.028,0,.028,.055];
+      xs.forEach((x,i)=>{
+        add(tuftGeo.clone(), [x,1.755,-.012 + Math.abs(x)*.18], [1,1 + (i===2?.15:0),1], [0,0,(x/0.055)*-.16]);
+      });
+    }
+
+    group.userData.veilwatchHairColor = color.getHex();
+    return this.bindWorldAuthoredRootToHead(group);
+  }
+
+  resetAssetHairTransform(){
+    const root = this.hairAssetRoot;
+    const base = this.hairBaseTransform;
+    if(!root || !base) return;
+    root.position.copy(base.position);
+    root.quaternion.copy(base.quaternion);
+    root.scale.copy(base.scale);
+  }
+
+  applyHairStyle(styleDef={}, hairColor){
+    if(!this.currentObject || !this.headBone) return;
+    const styleId = String(styleDef?.id || "classic_bob");
+    const kind = String(styleDef?.kind || "asset");
+    const variant = String(styleDef?.variant || "classic");
+    const cacheKey = `${styleId}:${hairColor.getHexString()}`;
+
+    if(this.hairAssetRoot){
+      this.resetAssetHairTransform();
+      this.hairAssetRoot.visible = false;
+    }
+
+    if(this.proceduralHairRoot){
+      this.disposeDetached(this.proceduralHairRoot);
+      this.proceduralHairRoot = null;
+    }
+
+    if(kind === "none"){
+      this._activeHairStyleKey = cacheKey;
+      return;
+    }
+
+    if(kind === "procedural"){
+      this.proceduralHairRoot = this.createProceduralHair(variant === "buzz" ? "buzz" : "crop", hairColor);
+      this._activeHairStyleKey = cacheKey;
+      return;
+    }
+
+    const root = this.hairAssetRoot;
+    if(!root) return;
+    root.visible = true;
+    const assetTint = hairColor.clone().lerp(new THREE.Color(0xffffff), .20);
+    root.traverse((obj)=>{
+      if(!obj.isMesh || !obj.material) return;
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach((mat)=>{ if(mat?.color) mat.color.copy(assetTint); });
+    });
+
+    // These are deliberate variants of the CC0 Vitruvian card groom. They give
+    // us real modular switching now while preserving the realistic hair cards.
+    if(variant === "short"){
+      root.scale.multiply(new THREE.Vector3(1.00,.84,1.00));
+      root.position.y += .035;
+    }else if(variant === "long"){
+      root.scale.multiply(new THREE.Vector3(1.02,1.15,1.02));
+      root.position.y -= .035;
+    }else if(variant === "slicked"){
+      root.scale.multiply(new THREE.Vector3(.91,.72,.88));
+      root.position.y += .047;
+      root.position.z -= .020;
+      root.rotation.x -= .055;
+    }
+    this._activeHairStyleKey = cacheKey;
+  }
+
+  seededRandom(seed){
+    let x = seed >>> 0;
+    return ()=>{
+      x = (1664525 * x + 1013904223) >>> 0;
+      return x / 4294967296;
+    };
+  }
+
+  createFacialHair(styleDef={}, color){
+    const id = String(styleDef?.id || "none");
+    if(id === "none") return null;
+
+    const group = new THREE.Group();
+    group.name = "VeilwatchFacialHair";
+    const rand = this.seededRandom([...id].reduce((a,c)=>a+c.charCodeAt(0), 9117));
+    const density = Math.max(.2, Number(styleDef?.density || .5));
+    const pts = [];
+    const segments = [];
+
+    const addPoint = (x,y,z,len=.006)=>{
+      pts.push(x,y,z);
+      // Fine hair segment extends slightly outward/downward.
+      segments.push(x,y,z, x + (rand()-.5)*.002, y-len*(.65+rand()*.35), z+len*(.25+rand()*.35));
+    };
+
+    const beardCount = Math.round(620 * density);
+    const moustacheCount = Math.round(230 * density);
+
+    if(id === "stubble" || id === "trimmed" || id === "full"){
+      for(let i=0;i<beardCount;i++){
+        const x=(rand()-.5)*.155;
+        const side=Math.min(1,Math.abs(x)/.078);
+        const y=1.505 + rand()*.092;
+        const chinBias=Math.max(0,1-Math.abs(y-1.54)/.06);
+        const z=.088 - side*.020 + chinBias*.010;
+        if(id === "stubble") addPoint(x,y,z,.0035);
+        else if(id === "trimmed") addPoint(x,y,z,.009);
+        else addPoint(x,y,z,.015 + rand()*.012);
+      }
+    }
+
+    if(id === "mustache" || id === "goatee" || id === "full"){
+      for(let i=0;i<moustacheCount;i++){
+        const x=(rand()-.5)*.092;
+        const y=1.592 + (rand()-.5)*.022;
+        const z=.101 - Math.abs(x)*.08;
+        addPoint(x,y,z,id === "mustache"?.009:.010);
+      }
+    }
+
+    if(id === "goatee"){
+      for(let i=0;i<Math.round(330*density);i++){
+        const x=(rand()-.5)*.062;
+        const y=1.503 + rand()*.075;
+        const z=.097 - Math.abs(x)*.08;
+        addPoint(x,y,z,.010 + rand()*.008);
+      }
+    }
+
+    if(!pts.length) return null;
+
+    const pointGeo = new THREE.BufferGeometry();
+    pointGeo.setAttribute("position", new THREE.Float32BufferAttribute(pts,3));
+    const pointMat = new THREE.PointsMaterial({
+      color,
+      size:id === "stubble" ? .0021 : .0027,
+      transparent:true,
+      opacity:id === "stubble" ? .58 : .76,
+      sizeAttenuation:true,
+      depthWrite:true
+    });
+    group.add(new THREE.Points(pointGeo,pointMat));
+
+    if(id !== "stubble"){
+      const lineGeo = new THREE.BufferGeometry();
+      lineGeo.setAttribute("position", new THREE.Float32BufferAttribute(segments,3));
+      const lineMat = new THREE.LineBasicMaterial({color,transparent:true,opacity:id === "full"?.72:.62});
+      group.add(new THREE.LineSegments(lineGeo,lineMat));
+    }
+
+    return this.bindWorldAuthoredRootToHead(group);
+  }
+
+  applyFacialHair(styleDef={}, hairColor){
+    if(this.facialHairRoot){
+      this.disposeDetached(this.facialHairRoot);
+      this.facialHairRoot = null;
+    }
+    if(String(styleDef?.id || "none") === "none") return;
+    this.facialHairRoot = this.createFacialHair(styleDef, hairColor);
+  }
+
+  applyFacePreset(weights={}){
+    const prev = this._activeFaceWeights || {};
+    const next = weights && typeof weights === "object" ? weights : {};
+    const names = new Set([...Object.keys(prev), ...Object.keys(next)]);
+    names.forEach((name)=>this.setFaceMorph(name, Number(next[name] || 0)));
+    this._activeFaceWeights = {...next};
+  }
+
   applyAppearance(){
     const appearance = this.profile.appearance || {};
+    const hints = this.profile.appearanceRender || {};
     if(!this.currentObject || this.currentObject.userData.isVeilwatchFallback) return;
 
-    const skinColor = new THREE.Color(colorFor(SKIN_TONES, appearance.skinTone, SKIN_TONES.warm));
-    const eyeColor = new THREE.Color(colorFor(EYE_COLORS, appearance.eyeColor, EYE_COLORS.brown));
+    const skinTarget = this.colorFromHint(hints.skinHex, colorFor(SKIN_TONES, appearance.skinTone, SKIN_TONES.warm));
+    // The photographed Vitruvian albedo already carries skin coloration. Use the
+    // selected tone as a controlled tint rather than multiplying by the raw target.
+    const skinColor = skinTarget.clone().lerp(new THREE.Color(0xffffff), .22);
+    const eyeColor = this.colorFromHint(hints.eyeHex, colorFor(EYE_COLORS, appearance.eyeColor, EYE_COLORS.brown));
+    const hairColor = this.colorFromHint(hints.hairHex, colorFor(HAIR_COLORS, appearance.hairColor, HAIR_COLORS.dark_brown));
     const shirtColor = new THREE.Color(colorFor(SHIRT_COLORS, appearance.top, SHIRT_COLORS.t_shirt));
     const pantsColor = new THREE.Color(colorFor(BOTTOM_COLORS, appearance.bottoms, BOTTOM_COLORS.jeans));
     const shoesColor = new THREE.Color(colorFor(SHOE_COLORS, appearance.shoes, SHOE_COLORS.sneakers));
-    const hairKey = String(appearance.hairColor || "dark_brown").toLowerCase();
     const outerwear = String(appearance.outerwear || "none").toLowerCase();
 
     this.currentObject.traverse((obj)=>{
@@ -441,9 +688,7 @@ class ProjectionRenderer {
         }else if(name.startsWith("VitSclera")){
           mat.color.setHex(0xf7f0ea);
         }else if(name.startsWith("VitIris")){
-          // Keep the photographic iris detail. A subtle tint gives the UI choice
-          // some influence without destroying the fibre texture.
-          mat.color.copy(new THREE.Color(0xffffff).lerp(eyeColor, .22));
+          mat.color.copy(new THREE.Color(0xffffff).lerp(eyeColor, .38));
         }else if(name.startsWith("VitEyeBack")){
           mat.color.setHex(0x090b10);
         }else if(name.startsWith("VitCornea")){
@@ -454,13 +699,8 @@ class ProjectionRenderer {
           mat.metalness = 0;
           mat.depthWrite = false;
         }else if(name === "VitHair"){
-          if(hairKey === "black") mat.color.setRGB(.42,.38,.34);
-          else if(hairKey === "brown") mat.color.setRGB(1.12,.95,.82);
-          else if(hairKey === "auburn" || hairKey === "red") mat.color.setRGB(1.3,.70,.48);
-          else if(hairKey === "gray") mat.color.setRGB(1.9,1.85,1.8);
-          else if(hairKey === "white") mat.color.setRGB(2.8,2.7,2.55);
-          else if(hairKey === "blonde") mat.color.setRGB(2.15,1.65,.92);
-          else mat.color.setRGB(.82,.72,.64);
+          // Asset hair color is applied again in applyHairStyle after variant transforms.
+          mat.color.copy(hairColor);
         }else if(name === "VitShirt"){
           const jacketFactor = outerwear === "none" ? 0 : outerwear.includes("heavy") ? .35 : .2;
           mat.color.copy(shirtColor.clone().lerp(new THREE.Color(0x1e252d), jacketFactor));
@@ -475,13 +715,9 @@ class ProjectionRenderer {
       });
     });
 
-    const hairRoot = this.currentObject.getObjectByName("VeilwatchVitruvianHair");
-    if(hairRoot){
-      const style = String(appearance.hairStyle || "").toLowerCase();
-      hairRoot.visible = style !== "bald";
-      const scaleAdjust = style === "buzz" ? .93 : 1;
-      hairRoot.scale.setScalar(scaleAdjust);
-    }
+    this.applyFacePreset(hints.faceWeights || {});
+    this.applyHairStyle(hints.hairStyle || {id:appearance.hairStyle || "classic_bob",kind:"asset",variant:"classic"}, hairColor);
+    this.applyFacialHair(hints.facialHairStyle || {id:appearance.beardStyle || "none"}, hairColor);
   }
 
   setFaceMorph(name, value){
@@ -495,21 +731,19 @@ class ProjectionRenderer {
   updateFaceLiveness(timeSeconds){
     if(!this.faceMeshes.length) return;
 
-    // Soft resting expression. Tiny asymmetry keeps the face from reading as a mannequin.
-    this.setFaceMorph("Smile_Lips_Closed", .22);
-    this.setFaceMorph("Happy", .045);
-    this.setFaceMorph("Lips_Up_Corner_Wide_Left", .025);
-    this.setFaceMorph("Eyebrows_Raised_Left", .015);
+    // Re-apply the selected resting-face baseline before transient motion.
+    const base = this._activeFaceWeights || {};
+    Object.entries(base).forEach(([name,value])=>this.setFaceMorph(name, Number(value || 0)));
 
     // Fast natural blink every ~3.2 seconds.
     const bt = (timeSeconds + .6) % 3.2;
     const blink = bt < .16 ? Math.sin((bt / .16) * Math.PI) : 0;
-    this.setFaceMorph("Eyes_Closed_Max", Math.max(0, blink));
+    this.setFaceMorph("Eyes_Closed_Max", Math.max(Number(base.Eyes_Closed_Max || 0), blink));
 
-    // Very occasional micro-squint to break perfect stillness.
+    // Occasional micro-squint layered on top of the chosen face preset.
     const ft = (timeSeconds + 5.0) % 17.0;
-    const squint = ft < 1.1 ? .08 * Math.sin((ft / 1.1) * Math.PI) : 0;
-    this.setFaceMorph("Eyes_Squint", Math.max(0, squint));
+    const squint = ft < 1.1 ? .06 * Math.sin((ft / 1.1) * Math.PI) : 0;
+    this.setFaceMorph("Eyes_Squint", Math.max(Number(base.Eyes_Squint || 0), squint));
   }
 
   applyProfile(profile={}){
@@ -624,6 +858,8 @@ class ProjectionRenderer {
     console.info("Veilwatch Vitruvian head anchor:", headBone.name);
     headBone.updateWorldMatrix(true, false);
     const headBindInverse = new THREE.Matrix4().copy(headBone.matrixWorld).invert();
+    this.headBone = headBone;
+    this.headBindInverse = headBindInverse.clone();
 
     const bindWorldAuthoredAssetToHead = (assetRoot, name)=>{
       if(!assetRoot) return null;
@@ -654,7 +890,15 @@ class ProjectionRenderer {
       hairGltf.scene || hairGltf.scenes?.[0],
       "VeilwatchVitruvianHair"
     );
-    if(hairRoot) this.tuneMaterials(hairRoot);
+    if(hairRoot){
+      this.tuneMaterials(hairRoot);
+      this.hairAssetRoot = hairRoot;
+      this.hairBaseTransform = {
+        position: hairRoot.position.clone(),
+        quaternion: hairRoot.quaternion.clone(),
+        scale: hairRoot.scale.clone()
+      };
+    }
 
     this.currentObject = bodyRoot;
     this.world.add(this.currentObject);
@@ -816,6 +1060,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "0.3.0"
+  version: "0.4.0"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));

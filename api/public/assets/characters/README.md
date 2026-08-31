@@ -1,15 +1,14 @@
 # Veilwatch Character Assets
 
-Phase 1 asset folders for the Veilwatch Character Forge.
+The Character Forge reads `character_assets.json` as its appearance catalog.
 
-- `bases/` - humanoid GLB/GLTF/VRM base characters
-- `animations/` - idle and later action animation assets
-- `clothing/` - modular clothing
-- `hair/` - modular hair meshes
-- `equipment/` - weapons, armor, cybernetics, props
+Folders:
+- `bases/` — body/head GLB data (stored as GitHub-browser-safe chunks in `chunks/`)
+- `hair/` — hair GLB data and future modular hairstyles
+- `clothing/` — reserved for Change #5 wardrobe assets
+- `animations/` — reserved for the animation-library pass
+- `equipment/` — reserved for weapons/gear/cybernetics
+- `textures/` — generated/fetched during Docker build where appropriate
 
-The Projection Bay currently renders a built-in procedural humanoid when no model path is configured. Set a character's **Model Link / Asset Path** to a file served from this directory, for example:
-
-`/assets/characters/bases/example.glb`
-
-Only commit assets whose licenses allow redistribution in the repository.
+The current standard character is the CC0 Vitruvian human. See
+`/THIRD_PARTY_LICENSES/VITRUVIAN_NOTICE.txt`.

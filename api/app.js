@@ -975,6 +975,7 @@ function servePublic(req, res, pathname){
           const mime =
             ext === ".css" ? "text/css; charset=utf-8" :
             ext === ".js"  ? "application/javascript; charset=utf-8" :
+            ext === ".json" ? "application/json; charset=utf-8" :
             ext === ".html"? "text/html; charset=utf-8" :
             ext === ".png" ? "image/png" :
             ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :

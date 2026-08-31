@@ -1578,12 +1578,13 @@ const result = await new Promise((resolve)=>{
       height: "5'10\"",
       build: "average",
       ageLook: "adult",
-      skinTone: "light",
+      skinTone: "warm",
       eyeColor: "brown",
-      hairStyle: "short",
-      hairColor: "black",
+      hairStyle: "classic_bob",
+      hairColor: "dark_brown",
       beardStyle: "none",
-      faceDetail: "clean",
+      faceDetail: "neutral",
+      facePreset: "neutral",
       scars: "",
       top: "t_shirt",
       outerwear: "none",
@@ -1684,10 +1685,10 @@ const result = await new Promise((resolve)=>{
           <div id="vwCreateBustWrap"><div class="mini" style="margin-bottom:6px;opacity:.9">Bust Size</div><select id="vwCreateBust" class="input" style="width:100%"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><select id="vwCreateSkinTone" class="input" style="width:100%"><option value="light">Light</option><option value="fair">Fair</option><option value="warm">Warm</option><option value="tan">Tan</option><option value="olive">Olive</option><option value="brown">Brown</option><option value="deep">Deep</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><select id="vwCreateSkinTone" class="input" style="width:100%"><option value="very_fair">Very Fair</option><option value="fair">Fair</option><option value="light">Light</option><option value="warm" selected>Warm</option><option value="tan">Tan</option><option value="olive">Olive</option><option value="medium_brown">Medium Brown</option><option value="brown">Brown</option><option value="dark_brown">Dark Brown</option><option value="deep">Deep</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Eye Color</div><select id="vwCreateEyeColor" class="input" style="width:100%"><option value="brown">Brown</option><option value="hazel">Hazel</option><option value="blue">Blue</option><option value="green">Green</option><option value="gray">Gray</option><option value="amber">Amber</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Face Detail</div><select id="vwCreateFaceDetail" class="input" style="width:100%"><option value="clean">Clean</option><option value="sharp">Sharp</option><option value="tired">Tired</option><option value="scarred">Scarred</option><option value="weathered">Weathered</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><select id="vwCreateHairStyle" class="input" style="width:100%"><option value="short">Short</option><option value="buzz">Buzz Cut</option><option value="fade">Fade</option><option value="long_straight">Long Straight</option><option value="wavy">Wavy</option><option value="curly">Curly</option><option value="bun">Bun</option><option value="ponytail">Ponytail</option><option value="bald">Bald</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Resting Face</div><select id="vwCreateFaceDetail" class="input" style="width:100%"><option value="neutral">Neutral</option><option value="friendly">Friendly</option><option value="serious">Serious</option><option value="focused">Focused</option><option value="concerned">Concerned</option><option value="confident">Confident</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><select id="vwCreateHairStyle" class="input" style="width:100%"><option value="bald">Bald</option><option value="buzz">Buzz Cut</option><option value="close_crop">Close Crop</option><option value="classic_bob" selected>Classic Bob</option><option value="short_bob">Short Bob</option><option value="long_bob">Long Bob</option><option value="slicked_back">Slicked Back</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Color</div><select id="vwCreateHairColor" class="input" style="width:100%"><option value="black">Black</option><option value="dark_brown">Dark Brown</option><option value="brown">Brown</option><option value="blonde">Blonde</option><option value="auburn">Auburn</option><option value="red">Red</option><option value="gray">Gray</option><option value="white">White</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Beard / Facial Hair</div><select id="vwCreateBeardStyle" class="input" style="width:100%"><option value="none">None</option><option value="stubble">Stubble</option><option value="trimmed">Trimmed</option><option value="full">Full Beard</option><option value="mustache">Mustache</option><option value="goatee">Goatee</option></select></div>
         </div>
@@ -2587,8 +2588,9 @@ const result = await new Promise((resolve)=>{
         bust: String(qs("vwCreateBust")?.value||"medium"),
         skinTone: String(qs("vwCreateSkinTone")?.value||"").trim(),
         eyeColor: String(qs("vwCreateEyeColor")?.value||"").trim(),
-        faceDetail: String(qs("vwCreateFaceDetail")?.value||"").trim(),
-        hairStyle: String(qs("vwCreateHairStyle")?.value||"").trim(),
+        faceDetail: String(qs("vwCreateFaceDetail")?.value||"neutral").trim(),
+        facePreset: String(qs("vwCreateFaceDetail")?.value||"neutral").trim(),
+        hairStyle: String(qs("vwCreateHairStyle")?.value||"classic_bob").trim(),
         hairColor: String(qs("vwCreateHairColor")?.value||"").trim(),
         beardStyle: String(qs("vwCreateBeardStyle")?.value||"").trim(),
         scars: String(qs("vwCreateScars")?.value||"").trim(),
