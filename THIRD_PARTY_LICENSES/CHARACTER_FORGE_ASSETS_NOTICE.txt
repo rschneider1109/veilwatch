@@ -1,0 +1,27 @@
+Veilwatch Character Forge - Third-Party Asset Sources
+=====================================================
+
+Quaternius Universal Animation Library 1 / 2
+License: CC0 1.0 Universal (public domain dedication)
+Original source: https://quaternius.com/packs/universalanimationlibrary.html
+Runtime mirror used by Docker build: https://github.com/richardanaya/metaverse-avatar
+Use in Veilwatch: optional runtime animation libraries, retargeted in-browser to the
+Vitruvian Mixamo-style skeleton. Native Vitruvian clips remain the fallback.
+
+FPS Asset Kit / Flat Guns
+Author/source repository: https://github.com/petroulacl/fps-asset-kit
+License: CC0 / public domain dedication as stated by the source project
+Use in Veilwatch: conventional firearm visuals downloaded during Docker build.
+
+Veilwatch original project assets
+---------------------------------
+The following assets were authored specifically for this Veilwatch project and do not
+incorporate third-party model geometry:
+- assets/characters/equipment/veilwatch_projection_cuff_v1.glb
+- assets/characters/anatomy/penis_testes_v1.glb
+- assets/characters/anatomy/vulva_v1.glb
+- assets/characters/weapons/veilwatch_local/*.glb
+
+The Veilwatch Projection Cuff is an original model based on the campaign's approved
+functional/design direction: a quarterback-style forearm play-call cuff adapted into a
+near-future projection device. It is not a copy of a donor 3D model.
