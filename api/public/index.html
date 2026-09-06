@@ -241,6 +241,8 @@
         <button type="button" class="projection-forge-tab" data-forge-tab="face">Face</button>
         <button type="button" class="projection-forge-tab" data-forge-tab="hair">Hair</button>
         <button type="button" class="projection-forge-tab" data-forge-tab="clothing">Clothing</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="equipment">Equipment</button>
+        <button type="button" class="projection-forge-tab" data-forge-tab="cybernetics">Cybernetics</button>
         <button type="button" class="projection-forge-tab" data-forge-tab="animation">Animation</button>
         <button type="button" class="projection-forge-tab" data-forge-tab="advanced">Advanced</button>
       </div>
@@ -262,11 +264,12 @@
           </div>
           <div class="projection-option-heading">Skin Tone</div>
           <div class="projection-swatch-grid skin" id="projectionSkinToneOptions" aria-label="Skin tone"></div>
+          <div id="projectionFullForgeBody"></div>
           <div class="projection-forge-telemetry-title">Saved Body Appearance</div>
           <div class="projection-echo projection-forge-echo" id="projectionAppearanceEcho">No appearance telemetry yet.</div>
           <div class="projection-forge-next">
-            <b>Body morphing comes later</b>
-            <span>This pass keeps the base human stable while the appearance library is built out.</span>
+            <b>Full body morph system online</b>
+            <span>Frame, proportions, adult anatomy, body details, and age controls feed the live projection model.</span>
           </div>
         </div>
 
@@ -279,10 +282,11 @@
           <div class="projection-choice-grid" id="projectionFacePresetOptions" aria-label="Face presets"></div>
           <div class="projection-option-heading">Eye Color</div>
           <div class="projection-swatch-grid" id="projectionEyeColorOptions" aria-label="Eye color"></div>
+          <div id="projectionFullForgeFace"></div>
           <div class="projection-echo projection-forge-echo" id="projectionFaceEcho">No face telemetry yet.</div>
           <div class="projection-forge-next">
-            <b>Expression-ready foundation</b>
-            <span>These use Vitruvian FACS blendshapes. Structural jaw/nose/cheek morphs come with the later morph pass.</span>
+            <b>Face morph system online</b>
+            <span>Resting FACS expressions layer over structural jaw, chin, cheek, nose, eye, brow, lip, and ear controls.</span>
           </div>
         </div>
 
@@ -298,10 +302,11 @@
           <div class="projection-form-grid" style="margin-top:14px;">
             <label>Facial Hair<select id="projectionBeardStyle"></select></label>
           </div>
+          <div id="projectionFullForgeHair"></div>
           <div class="projection-echo projection-forge-echo" id="projectionHairEcho">No hair telemetry yet.</div>
           <div class="projection-forge-next">
             <b>Modular hair library online</b>
-            <span>Bald, close-cut procedural styles, and Vitruvian card-hair variants are all driven from the asset manifest.</span>
+            <span>Hair options are backed by separate fitted meshes. Classic Bob uses the original Vitruvian groom; the additional styles use Veilwatch-authored fitted meshes.</span>
           </div>
         </div>
 
@@ -310,6 +315,7 @@
             <span>Clothing</span>
             <small>Equipped appearance telemetry</small>
           </div>
+          <div id="projectionFullForgeClothing"></div>
           <div class="projection-echo projection-forge-echo" id="projectionClothingEcho">No clothing telemetry yet.</div>
           <div class="projection-forge-next">
             <b>Modular wardrobe</b>
@@ -317,11 +323,22 @@
           </div>
         </div>
 
+        <div class="projection-forge-panel" data-forge-panel="equipment" hidden>
+          <div class="projection-forge-section-head"><span>Equipment</span><small>Weapons / Veilwatch cuff / carried gear</small></div>
+          <div id="projectionFullForgeEquipment"></div>
+        </div>
+
+        <div class="projection-forge-panel" data-forge-panel="cybernetics" hidden>
+          <div class="projection-forge-section-head"><span>Cybernetics</span><small>Near-future modular augmentation</small></div>
+          <div id="projectionFullForgeCybernetics"></div>
+        </div>
+
         <div class="projection-forge-panel" data-forge-panel="animation" hidden>
           <div class="projection-forge-section-head">
             <span>Animation &amp; Pose</span>
             <small>Projection state</small>
           </div>
+          <div id="projectionFullForgeAnimation"></div>
           <div class="projection-form-grid projection-forge-two-col">
             <label>Posture<select id="projectionPosture">
               <option value="neutral">Neutral</option>
@@ -744,6 +761,7 @@
 <script src="/js/characters.js" defer></script>
 <script src="/js/projection_renderer.bundle.js" defer></script>
 <script src="/js/projection_bay.js" defer></script>
+<script src="/js/character_forge_full.js" defer></script>
 <script src="/js/shop.js" defer></script>
 <script src="/js/notifications.js" defer></script>
 <script src="/js/intel.js" defer></script>

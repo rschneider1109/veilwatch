@@ -3401,3 +3401,6 @@ tr.session-due td:first-child{
   .projection-swatch-grid,.projection-swatch-grid.skin{grid-template-columns:repeat(5,minmax(38px,1fr));}
   .projection-choice-grid,.projection-choice-grid.hair{grid-template-columns:1fr;}
 }
+
+/* Veilwatch Full Character Forge v1 */
+.ff-section{margin:14px 0;padding-top:2px}.ff-range-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px}.ff-range{display:flex;flex-direction:column;gap:5px;padding:8px 9px;border:1px solid rgba(126,171,196,.16);border-radius:10px;background:rgba(8,18,27,.35)}.ff-range span{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted)}.ff-range b{color:var(--text);font-variant-numeric:tabular-nums}.ff-range input{width:100%;accent-color:#58d7ef}.ff-check{display:flex!important;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--muted)}.ff-check input{accent-color:#58d7ef}.ff-required{margin-top:8px;padding:8px 10px;border:1px solid rgba(255,193,67,.35);background:rgba(255,177,59,.08);border-radius:9px;color:#ffd083;font-size:10px;letter-spacing:.08em;font-weight:800}.projection-forge-tabs{flex-wrap:wrap}.projection-forge-panel select{max-width:100%}@media(max-width:780px){.ff-range-grid{grid-template-columns:1fr}}

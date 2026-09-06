@@ -47,7 +47,18 @@
     ],
     hairStyles:[
       {id:"bald",label:"Bald",kind:"none",description:"No scalp hair"},
-      {id:"classic_bob",label:"Classic Bob",kind:"asset",variant:"classic",description:"Vitruvian jaw-length bob"}
+      {id:"classic_bob",label:"Classic Bob",kind:"asset",variant:"classic",description:"Original Vitruvian jaw-length card groom"},
+      {id:"buzz",label:"Buzz Cut",kind:"asset",path:"/assets/characters/hair/veilwatch_original/buzz.glb"},
+      {id:"close_crop",label:"Close Crop",kind:"asset",path:"/assets/characters/hair/veilwatch_original/close_crop.glb"},
+      {id:"short_messy",label:"Short Messy",kind:"asset",path:"/assets/characters/hair/veilwatch_original/short_messy.glb"},
+      {id:"side_part",label:"Side Part",kind:"asset",path:"/assets/characters/hair/veilwatch_original/side_part.glb"},
+      {id:"slicked_back",label:"Slicked Back",kind:"asset",path:"/assets/characters/hair/veilwatch_original/slicked_back.glb"},
+      {id:"classic_ponytail",label:"Ponytail",kind:"asset",path:"/assets/characters/hair/veilwatch_original/classic_ponytail.glb"},
+      {id:"high_bun",label:"High Bun",kind:"asset",path:"/assets/characters/hair/veilwatch_original/high_bun.glb"},
+      {id:"long_straight",label:"Long Straight",kind:"asset",path:"/assets/characters/hair/veilwatch_original/long_straight.glb"},
+      {id:"shoulder_waves",label:"Shoulder Waves",kind:"asset",path:"/assets/characters/hair/veilwatch_original/shoulder_waves.glb"},
+      {id:"locs",label:"Locs",kind:"asset",path:"/assets/characters/hair/veilwatch_original/locs.glb"},
+      {id:"braids",label:"Braids",kind:"asset",path:"/assets/characters/hair/veilwatch_original/braids.glb"}
     ],
     facialHairStyles:[
       {id:"none",label:"None",kind:"none"},{id:"stubble",label:"Stubble",kind:"procedural",density:.35},
@@ -56,7 +67,7 @@
     ],
     aliases:{
       facePresets:{clean:"neutral",sharp:"serious",tired:"concerned",scarred:"serious",weathered:"focused"},
-      hairStyles:{short:"classic_bob",buzz:"classic_bob",fade:"classic_bob",long_straight:"classic_bob",wavy:"classic_bob",curly:"classic_bob",bun:"classic_bob",ponytail:"classic_bob",close_crop:"classic_bob",short_bob:"classic_bob",long_bob:"classic_bob",slicked_back:"classic_bob",bald:"bald"}
+      hairStyles:{short:"close_crop",buzz:"buzz",fade:"close_crop",long_straight:"long_straight",wavy:"shoulder_waves",curly:"shoulder_waves",bun:"high_bun",ponytail:"classic_ponytail",close_crop:"close_crop",short_bob:"classic_bob",long_bob:"long_straight",slicked_back:"slicked_back",side_part:"side_part",braids:"braids",locs:"locs",bald:"bald"}
     }
   };
 
@@ -132,6 +143,8 @@
     ap.hairStyle = hair?.id || "classic_bob";
     ap.hairColor = hairColor?.id || "dark_brown";
     ap.beardStyle = beard?.id || "none";
+    ap.forge ||= { cuffArm:"left" };
+    ap.forge.cuffArm ||= "left";
     return ap;
   }
 
@@ -143,11 +156,14 @@
     const face = entry("facePresets", appearance.facePreset, "neutral");
     const hair = entry("hairStyles", appearance.hairStyle, "classic_bob");
     const beard = entry("facialHairStyles", appearance.beardStyle, "none");
+    const intensity = Math.max(0, Math.min(1, Number(appearance?.forge?.expressionIntensity ?? 100) / 100));
+    const faceWeights = clone(face?.weights || {});
+    Object.keys(faceWeights).forEach((key)=>{ faceWeights[key] = Number(faceWeights[key] || 0) * intensity; });
     return {
       skinHex: skin?.hex,
       eyeHex: eyes?.hex,
       hairHex: hairColor?.hex,
-      faceWeights: clone(face?.weights || {}),
+      faceWeights,
       facePreset: face?.id || "neutral",
       hairStyle: clone(hair || {}),
       facialHairStyle: clone(beard || {})
@@ -363,7 +379,7 @@
 
   function setForgeTab(tabName, options={}){
     const requested = String(tabName || "body").toLowerCase();
-    const valid = new Set(["body","face","hair","clothing","animation","advanced"]);
+    const valid = new Set(["body","face","hair","clothing","equipment","cybernetics","animation","advanced"]);
     const next = valid.has(requested) ? requested : "body";
     activeForgeTab = next;
     document.querySelectorAll("[data-forge-tab]").forEach((btn)=>{
@@ -575,6 +591,30 @@
 
   window.renderProjectionBay = renderProjectionBay;
   window.vwSaveProjectionBay = saveProjection;
+  window.VeilwatchForgeBridge = {
+    getDraft(){ return clone(ensureDraft(currentCharacter()) || {}); },
+    patchAppearance(patch={}){
+      const c = currentCharacter();
+      const ap = ensureDraft(c);
+      if(!ap) return null;
+      const next = clone(ap);
+      Object.entries(patch || {}).forEach(([key,value])=>{
+        if(value && typeof value === "object" && !Array.isArray(value) && next[key] && typeof next[key] === "object" && !Array.isArray(next[key])) next[key] = Object.assign({}, next[key], value);
+        else next[key] = value;
+      });
+      appearanceDraft = normalizeAppearance(next);
+      setDirty(true);
+      selectManifestUI(appearanceDraft);
+      renderForgeTelemetry(appearanceDraft);
+      if($("projectionAppearanceEcho")) $("projectionAppearanceEcho").innerHTML = echoAppearance(appearanceDraft);
+      renderLivePreviewFromFields();
+      return clone(appearanceDraft);
+    },
+    renderer(){ return ensureProjectionRenderer(); },
+    currentCharacter,
+    save(){ return saveProjection(); },
+    render(){ return renderProjectionBay(); }
+  };
 
   window.addEventListener("DOMContentLoaded", async ()=>{
     wireProjectionBay();

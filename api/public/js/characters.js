@@ -1594,7 +1594,15 @@ const result = await new Promise((resolve)=>{
       gloves: "none",
       uniformCategory: "none",
       uniformPreset: "none",
-      bust: "medium"
+      bust: "medium",
+      forge: {
+        frame: "masculine",
+        chest: "pectoral",
+        anatomy: "penis_testes",
+        age: "25_35",
+        cuffArm: "left",
+        showAnatomy: false
+      }
     },
     // gear
     starterPackSel: "recommended",
@@ -1678,17 +1686,19 @@ const result = await new Promise((resolve)=>{
         <div class="mini" style="opacity:.85;margin-bottom:10px;">Body and base clothing live here. Armor, weapons, and operational gear still come from the character sheet.</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Character Type</div><select id="vwCreateCharacterType" class="input" style="width:100%"><option value="pc">Player Character</option><option value="npc">NPC</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Body Type</div><select id="vwCreateBodyType" class="input" style="width:100%"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Body Frame</div><select id="vwCreateBodyType" class="input" style="width:100%"><option value="masculine">Masculine</option><option value="feminine">Feminine</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Height</div><select id="vwCreateHeight" class="input" style="width:100%"><option value="4-10">4'10</option><option value="5-0">5'0</option><option value="5-2">5'2</option><option value="5-4">5'4</option><option value="5-6">5'6</option><option value="5-8">5'8</option><option value="5-10" selected>5'10</option><option value="6-0">6'0</option><option value="6-2">6'2</option><option value="6-4">6'4</option><option value="6-6">6'6</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Build</div><select id="vwCreateBuild" class="input" style="width:100%"><option value="slim">Slim</option><option value="average">Average</option><option value="athletic">Athletic</option><option value="broad">Broad</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Age Look</div><select id="vwCreateAgeLook" class="input" style="width:100%"><option value="young_adult">Young Adult</option><option value="adult">Adult</option><option value="middle_aged">Middle Aged</option><option value="older">Older</option></select></div>
-          <div id="vwCreateBustWrap"><div class="mini" style="margin-bottom:6px;opacity:.9">Bust Size</div><select id="vwCreateBust" class="input" style="width:100%"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Chest</div><select id="vwCreateChest" class="input" style="width:100%"><option value="pectoral" selected>Pectoral</option><option value="flat">Flat</option><option value="breasts">Breasts</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Anatomy</div><select id="vwCreateAnatomy" class="input" style="width:100%"><option value="penis_testes" selected>Penis / Testes</option><option value="vulva">Vulva</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Veilwatch Cuff</div><select id="vwCreateCuffArm" class="input" style="width:100%"><option value="left" selected>Left Arm</option><option value="right">Right Arm</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Skin Tone</div><select id="vwCreateSkinTone" class="input" style="width:100%"><option value="very_fair">Very Fair</option><option value="fair">Fair</option><option value="light">Light</option><option value="warm" selected>Warm</option><option value="tan">Tan</option><option value="olive">Olive</option><option value="medium_brown">Medium Brown</option><option value="brown">Brown</option><option value="dark_brown">Dark Brown</option><option value="deep">Deep</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Eye Color</div><select id="vwCreateEyeColor" class="input" style="width:100%"><option value="brown">Brown</option><option value="hazel">Hazel</option><option value="blue">Blue</option><option value="green">Green</option><option value="gray">Gray</option><option value="amber">Amber</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Resting Face</div><select id="vwCreateFaceDetail" class="input" style="width:100%"><option value="neutral">Neutral</option><option value="friendly">Friendly</option><option value="serious">Serious</option><option value="focused">Focused</option><option value="concerned">Concerned</option><option value="confident">Confident</option></select></div>
-          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><select id="vwCreateHairStyle" class="input" style="width:100%"><option value="bald">Bald</option><option value="classic_bob" selected>Classic Bob</option></select></div>
+          <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Style</div><select id="vwCreateHairStyle" class="input" style="width:100%"><option value="bald">Bald</option><option value="classic_bob" selected>Classic Bob</option><option value="buzz">Buzz Cut</option><option value="close_crop">Close Crop</option><option value="short_messy">Short Messy</option><option value="side_part">Side Part</option><option value="slicked_back">Slicked Back</option><option value="classic_ponytail">Ponytail</option><option value="high_bun">High Bun</option><option value="long_straight">Long Straight</option><option value="shoulder_waves">Shoulder Waves</option><option value="locs">Locs</option><option value="braids">Braids</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Hair Color</div><select id="vwCreateHairColor" class="input" style="width:100%"><option value="black">Black</option><option value="dark_brown">Dark Brown</option><option value="brown">Brown</option><option value="blonde">Blonde</option><option value="auburn">Auburn</option><option value="red">Red</option><option value="gray">Gray</option><option value="white">White</option></select></div>
           <div><div class="mini" style="margin-bottom:6px;opacity:.9">Beard / Facial Hair</div><select id="vwCreateBeardStyle" class="input" style="width:100%"><option value="none">None</option><option value="stubble">Stubble</option><option value="trimmed">Trimmed</option><option value="full">Full Beard</option><option value="mustache">Mustache</option><option value="goatee">Goatee</option></select></div>
         </div>
@@ -1718,7 +1728,7 @@ const result = await new Promise((resolve)=>{
       <div class="vwStep" data-step="4" style="display:none;">
         <div style="margin-bottom:10px;">
           <div class="mini" style="margin-bottom:6px;opacity:.9">Species</div>
-          <select id="vwCreateSpecies" class="input" style="width:100%"><option value="Human">Human</option><option value="Elf">Elf</option><option value="Dwarf">Dwarf</option><option value="Orc">Orc</option><option value="Halfling">Halfling</option><option value="Tiefling">Tiefling</option><option value="Synth">Synth</option></select>
+          <select id="vwCreateSpecies" class="input" style="width:100%" disabled><option value="Human" selected>Human</option></select><div class="mini" style="opacity:.72;margin-top:6px;">Veilwatch Character Forge currently supports realistic adult human characters only.</div>
         </div>
 
         <div style="padding-top:12px;border-top:1px solid #2b3a4d;">
@@ -2537,11 +2547,8 @@ const result = await new Promise((resolve)=>{
 
   function updateAppearanceModeUI(){
     const type = String(qs("vwCreateCharacterType")?.value || state.appearance.characterType || "pc");
-    const bodyType = String(qs("vwCreateBodyType")?.value || state.appearance.bodyType || "male");
     const npcBlock = qs("vwCreateNpcUniformBlock");
-    const bustWrap = qs("vwCreateBustWrap");
     if(npcBlock) npcBlock.style.display = type === "npc" ? "block" : "none";
-    if(bustWrap) bustWrap.style.display = bodyType === "female" ? "block" : "none";
   }
 
   // ---------- Validation + persistence per step ----------
@@ -2579,13 +2586,14 @@ const result = await new Promise((resolve)=>{
     }
 
     if(n === 3){
+      const frame = String(qs("vwCreateBodyType")?.value||"masculine");
       const appearance = {
         characterType: String(qs("vwCreateCharacterType")?.value||"pc"),
-        bodyType: String(qs("vwCreateBodyType")?.value||"male"),
+        bodyType: frame === "feminine" ? "female" : "male",
         height: String(qs("vwCreateHeight")?.value||"").trim(),
         build: String(qs("vwCreateBuild")?.value||"average"),
         ageLook: String(qs("vwCreateAgeLook")?.value||"adult"),
-        bust: String(qs("vwCreateBust")?.value||"medium"),
+        bust: String(qs("vwCreateChest")?.value||"pectoral") === "breasts" ? "medium" : "none",
         skinTone: String(qs("vwCreateSkinTone")?.value||"").trim(),
         eyeColor: String(qs("vwCreateEyeColor")?.value||"").trim(),
         faceDetail: String(qs("vwCreateFaceDetail")?.value||"neutral").trim(),
@@ -2601,7 +2609,15 @@ const result = await new Promise((resolve)=>{
         shoes: String(qs("vwCreateShoes")?.value||"sneakers"),
         gloves: String(qs("vwCreateGloves")?.value||"none"),
         uniformCategory: String(qs("vwCreateUniformCategory")?.value||"none"),
-        uniformPreset: String(qs("vwCreateUniformPreset")?.value||"none")
+        uniformPreset: String(qs("vwCreateUniformPreset")?.value||"none"),
+        forge: {
+          frame,
+          chest: String(qs("vwCreateChest")?.value||"pectoral"),
+          anatomy: String(qs("vwCreateAnatomy")?.value||"penis_testes"),
+          age: "25_35",
+          cuffArm: String(qs("vwCreateCuffArm")?.value||"left"),
+          showAnatomy: false
+        }
       };
       if(!appearance.height){ toast("Height is required"); return false; }
       state.appearance = appearance;
@@ -2609,9 +2625,7 @@ const result = await new Promise((resolve)=>{
     }
 
     if(n === 4){
-      const species = String(qs("vwCreateSpecies")?.value||"").trim();
-      if(!species){ toast("Species is required"); return false; }
-      state.species = species;
+      state.species = "Human";
 
       // ensure spell block rules
       toggleSpellsBlock();
@@ -2767,7 +2781,7 @@ const result = await new Promise((resolve)=>{
       stats: state.stats,
       conditions: [],
       background: bgName,
-      species: state.species,
+      species: "Human",
       traits: state.traits,
       notes: state.notes,
       appearance: state.appearance
