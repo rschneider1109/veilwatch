@@ -1,5 +1,5 @@
 {
-  "version": "4.0.0",
+  "version": "6.0.0",
   "characterStandard": "veilwatch_human_v1",
   "species": [
     "human"
@@ -209,6 +209,7 @@
       "id": "bald",
       "label": "Bald",
       "kind": "none",
+      "variant": "none",
       "description": "No scalp hair"
     },
     {
@@ -216,7 +217,84 @@
       "label": "Classic Bob",
       "kind": "asset",
       "variant": "classic",
-      "description": "Vitruvian jaw-length bob"
+      "description": "Original Vitruvian jaw-length card groom"
+    },
+    {
+      "id": "buzz",
+      "label": "Buzz Cut",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/buzz.glb",
+      "description": "Very short fitted fiber cut"
+    },
+    {
+      "id": "close_crop",
+      "label": "Close Crop",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/close_crop.glb",
+      "description": "Short cropped fitted hair"
+    },
+    {
+      "id": "short_messy",
+      "label": "Short Messy",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/short_messy.glb",
+      "description": "Short textured messy cut"
+    },
+    {
+      "id": "side_part",
+      "label": "Side Part",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/side_part.glb",
+      "description": "Short side-parted style"
+    },
+    {
+      "id": "slicked_back",
+      "label": "Slicked Back",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/slicked_back.glb",
+      "description": "Swept-back short style"
+    },
+    {
+      "id": "classic_ponytail",
+      "label": "Ponytail",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/classic_ponytail.glb",
+      "description": "Tied-back ponytail"
+    },
+    {
+      "id": "high_bun",
+      "label": "High Bun",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/high_bun.glb",
+      "description": "Tied high bun"
+    },
+    {
+      "id": "long_straight",
+      "label": "Long Straight",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/long_straight.glb",
+      "description": "Long straight shoulder-length hair"
+    },
+    {
+      "id": "shoulder_waves",
+      "label": "Shoulder Waves",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/shoulder_waves.glb",
+      "description": "Medium-long wavy hair"
+    },
+    {
+      "id": "locs",
+      "label": "Locs",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/locs.glb",
+      "description": "Individual loc strands"
+    },
+    {
+      "id": "braids",
+      "label": "Braids",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/braids.glb",
+      "description": "Braided rows and lengths"
     }
   ],
   "facialHairStyles": [
@@ -228,32 +306,56 @@
     {
       "id": "stubble",
       "label": "Stubble",
-      "kind": "procedural",
-      "density": 0.35
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/stubble.glb"
     },
     {
-      "id": "trimmed",
+      "id": "short_beard",
+      "label": "Short Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/short_beard.glb"
+    },
+    {
+      "id": "trimmed_beard",
       "label": "Trimmed Beard",
-      "kind": "procedural",
-      "density": 0.65
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/trimmed_beard.glb"
     },
     {
-      "id": "full",
+      "id": "boxed_beard",
+      "label": "Boxed Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/boxed_beard.glb"
+    },
+    {
+      "id": "full_beard",
       "label": "Full Beard",
-      "kind": "procedural",
-      "density": 1.0
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/full_beard.glb"
     },
     {
       "id": "mustache",
       "label": "Mustache",
-      "kind": "procedural",
-      "density": 0.65
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/mustache.glb"
     },
     {
       "id": "goatee",
       "label": "Goatee",
-      "kind": "procedural",
-      "density": 0.75
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/goatee.glb"
+    },
+    {
+      "id": "circle_beard",
+      "label": "Circle Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/circle_beard.glb"
+    },
+    {
+      "id": "soul_patch",
+      "label": "Soul Patch",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/soul_patch.glb"
     }
   ],
   "aliases": {
@@ -274,19 +376,27 @@
       "weathered": "focused"
     },
     "hairStyles": {
-      "short": "classic_bob",
-      "buzz": "classic_bob",
-      "fade": "classic_bob",
-      "long_straight": "classic_bob",
-      "wavy": "classic_bob",
-      "curly": "classic_bob",
-      "bun": "classic_bob",
-      "ponytail": "classic_bob",
+      "short": "close_crop",
+      "buzz": "buzz",
+      "fade": "close_crop",
+      "long_straight": "long_straight",
+      "wavy": "shoulder_waves",
+      "curly": "shoulder_waves",
+      "bun": "high_bun",
+      "ponytail": "classic_ponytail",
       "bald": "bald",
-      "close_crop": "classic_bob",
+      "close_crop": "close_crop",
       "short_bob": "classic_bob",
-      "long_bob": "classic_bob",
-      "slicked_back": "classic_bob"
+      "long_bob": "long_straight",
+      "slicked_back": "slicked_back",
+      "side_part": "side_part",
+      "short_curls": "classic_bob",
+      "braids": "braids",
+      "locs": "locs"
+    },
+    "facialHairStyles": {
+      "trimmed": "trimmed_beard",
+      "full": "full_beard"
     }
   },
   "futureSlots": [

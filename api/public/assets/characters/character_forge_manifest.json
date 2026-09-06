@@ -1,0 +1,582 @@
+{
+  "version": "1.5.0",
+  "standard": "veilwatch_character_forge_v1",
+  "body": {
+    "frames": [
+      "masculine",
+      "feminine"
+    ],
+    "chest": [
+      "flat",
+      "pectoral",
+      "breasts"
+    ],
+    "anatomy": [
+      "vulva",
+      "penis_testes"
+    ],
+    "age": [
+      "18_25",
+      "25_35",
+      "35_45",
+      "45_60",
+      "60_plus"
+    ],
+    "morphs": [
+      "height",
+      "mass",
+      "bodyFat",
+      "muscle",
+      "shoulders",
+      "chestVolume",
+      "waist",
+      "hips",
+      "glutes",
+      "armSize",
+      "legSize",
+      "breastSize",
+      "breastProjection",
+      "penisLength",
+      "penisGirth",
+      "testesSize",
+      "vulvaProminence",
+      "neckSize",
+      "torsoLength",
+      "armLength",
+      "legLength",
+      "handSize",
+      "footSize"
+    ],
+    "anatomyAssets": {
+      "penis_testes": "/assets/characters/anatomy/penis_testes_v1.glb",
+      "vulva": "/assets/characters/anatomy/vulva_v1.glb"
+    },
+    "bodyHair": [
+      "none",
+      "light",
+      "moderate",
+      "heavy"
+    ],
+    "details": {
+      "bodyScars": [
+        "none",
+        "chest_scar",
+        "abdomen_scar",
+        "left_arm_scar",
+        "right_arm_scar",
+        "surgical_torso"
+      ],
+      "tattoos": [
+        "none",
+        "left_sleeve",
+        "right_sleeve",
+        "both_sleeves",
+        "chest_piece",
+        "back_piece",
+        "neck_band",
+        "left_calf",
+        "right_calf"
+      ],
+      "bodyHairColor": [
+        "inherit",
+        "black",
+        "dark_brown",
+        "brown",
+        "blonde",
+        "auburn",
+        "red",
+        "gray"
+      ]
+    }
+  },
+  "clothing": {
+    "colors": [
+      "black",
+      "charcoal",
+      "slate",
+      "white",
+      "cream",
+      "navy",
+      "blue",
+      "olive",
+      "sage",
+      "tan",
+      "khaki",
+      "brown",
+      "burgundy",
+      "red",
+      "mustard",
+      "teal"
+    ],
+    "baseLayer": [
+      "none",
+      "briefs",
+      "boxer_briefs",
+      "bra",
+      "sports_bra",
+      "tank",
+      "undershirt",
+      "compression_top",
+      "compression_shorts",
+      "thermal_base"
+    ],
+    "top": [
+      "none",
+      "plain_tshirt",
+      "fitted_tshirt",
+      "vneck_tshirt",
+      "long_sleeve",
+      "henley",
+      "polo",
+      "button_down",
+      "flannel",
+      "hoodie",
+      "crew_sweater",
+      "turtleneck",
+      "tank_top",
+      "camisole",
+      "blouse",
+      "tactical_shirt",
+      "combat_shirt",
+      "scrub_top",
+      "jersey",
+      "work_shirt",
+      "graphic_tshirt",
+      "oversized_tshirt",
+      "raglan_shirt",
+      "mock_neck",
+      "cardigan",
+      "vest_top",
+      "crop_top",
+      "athletic_top",
+      "cycling_jersey",
+      "utility_shirt"
+    ],
+    "outerwear": [
+      "none",
+      "zip_hoodie",
+      "bomber_jacket",
+      "denim_jacket",
+      "leather_jacket",
+      "field_jacket",
+      "rain_shell",
+      "winter_coat",
+      "blazer",
+      "tactical_jacket",
+      "softshell",
+      "lab_coat",
+      "high_vis_jacket",
+      "utility_vest",
+      "long_coat",
+      "parka",
+      "trench_coat",
+      "peacoat",
+      "varsity_jacket",
+      "motorcycle_jacket",
+      "puffer_jacket",
+      "fleece_jacket",
+      "windbreaker",
+      "suit_jacket",
+      "fire_resistant_jacket"
+    ],
+    "bottoms": [
+      "none",
+      "jeans_straight",
+      "jeans_slim",
+      "jeans_relaxed",
+      "chinos",
+      "cargo_pants",
+      "joggers",
+      "sweatpants",
+      "tactical_pants",
+      "dress_pants",
+      "work_pants",
+      "leggings",
+      "athletic_shorts",
+      "cargo_shorts",
+      "denim_shorts",
+      "running_shorts",
+      "pencil_skirt",
+      "casual_skirt",
+      "scrub_pants",
+      "slim_chinos",
+      "wide_leg_pants",
+      "track_pants",
+      "parachute_pants",
+      "bike_shorts",
+      "basketball_shorts",
+      "board_shorts",
+      "pleated_skirt",
+      "maxi_skirt",
+      "utility_skirt"
+    ],
+    "shoes": [
+      "none",
+      "sneakers",
+      "running_shoes",
+      "high_tops",
+      "casual_boots",
+      "work_boots",
+      "tactical_boots",
+      "hiking_boots",
+      "dress_shoes",
+      "loafers",
+      "sandals",
+      "heels",
+      "canvas_shoes",
+      "basketball_shoes",
+      "combat_boots",
+      "chelsea_boots",
+      "motorcycle_boots",
+      "steel_toe_boots",
+      "trail_shoes",
+      "slip_ons",
+      "flats",
+      "ankle_boots"
+    ],
+    "gloves": [
+      "none",
+      "work_gloves",
+      "tactical_gloves",
+      "fingerless_gloves",
+      "winter_gloves",
+      "medical_gloves",
+      "mechanic_gloves",
+      "armored_gloves"
+    ],
+    "headwear": [
+      "none",
+      "baseball_cap",
+      "backwards_cap",
+      "beanie",
+      "tactical_cap",
+      "boonie_hat",
+      "watch_cap",
+      "bike_helmet",
+      "tactical_helmet",
+      "ballistic_helmet",
+      "hard_hat",
+      "medical_cap",
+      "trucker_cap",
+      "flat_cap",
+      "bucket_hat",
+      "cowboy_hat",
+      "motorcycle_helmet",
+      "fire_helmet",
+      "respirator_hood"
+    ],
+    "eyewear": [
+      "none",
+      "glasses_round",
+      "glasses_rectangular",
+      "sunglasses_aviator",
+      "sunglasses_wayfarer",
+      "ballistic_glasses",
+      "clear_safety_glasses",
+      "goggles",
+      "sport_sunglasses",
+      "visor_glasses",
+      "reading_glasses",
+      "welding_goggles",
+      "respirator_goggles"
+    ],
+    "neck": [
+      "none",
+      "chain",
+      "dog_tags",
+      "lanyard",
+      "scarf",
+      "shemagh",
+      "neck_gaiter",
+      "medical_id"
+    ],
+    "belt": [
+      "none",
+      "civilian_belt",
+      "duty_belt",
+      "tactical_belt",
+      "utility_belt",
+      "dress_belt"
+    ],
+    "vest": [
+      "none",
+      "soft_armor",
+      "plate_carrier",
+      "chest_rig",
+      "medical_harness",
+      "load_bearing_vest",
+      "high_vis_vest",
+      "concealable_armor",
+      "tactical_chest_rig",
+      "heavy_plate_carrier",
+      "light_plate_carrier",
+      "rescue_harness",
+      "tool_harness"
+    ],
+    "back": [
+      "none",
+      "daypack",
+      "tactical_pack",
+      "sling_bag",
+      "messenger_bag",
+      "hydration_pack",
+      "medical_pack",
+      "rifle_pack",
+      "civilian_backpack",
+      "duffel_sling",
+      "hard_case_pack",
+      "tech_pack",
+      "oxygen_pack"
+    ],
+    "onePiece": [
+      "none",
+      "casual_dress",
+      "formal_dress",
+      "sundress",
+      "shirt_dress",
+      "jumpsuit",
+      "work_coveralls",
+      "mechanic_coveralls",
+      "tactical_coveralls",
+      "medical_gown",
+      "hazmat_suit",
+      "business_suit_set"
+    ],
+    "socks": [
+      "none",
+      "ankle_socks",
+      "crew_socks",
+      "boot_socks",
+      "dress_socks",
+      "compression_socks",
+      "thigh_highs"
+    ],
+    "colorSlots": [
+      "baseLayer",
+      "top",
+      "outerwear",
+      "bottoms",
+      "onePiece",
+      "shoes",
+      "gear"
+    ]
+  },
+  "cybernetics": {
+    "eye": [
+      "none",
+      "subtle_iris_ring",
+      "synthetic_eye",
+      "camera_eye"
+    ],
+    "temple": [
+      "none",
+      "neural_port",
+      "sensor_plate"
+    ],
+    "ear": [
+      "none",
+      "comms_implant",
+      "enhanced_hearing"
+    ],
+    "jaw": [
+      "none",
+      "reinforcement_plate"
+    ],
+    "neck": [
+      "none",
+      "data_port",
+      "spinal_interface"
+    ],
+    "leftArm": [
+      "none",
+      "cyber_hand",
+      "cyber_forearm",
+      "full_cyber_arm"
+    ],
+    "rightArm": [
+      "none",
+      "cyber_hand",
+      "cyber_forearm",
+      "full_cyber_arm"
+    ],
+    "leftLeg": [
+      "none",
+      "cyber_foot",
+      "cyber_lower_leg",
+      "full_cyber_leg"
+    ],
+    "rightLeg": [
+      "none",
+      "cyber_foot",
+      "cyber_lower_leg",
+      "full_cyber_leg"
+    ],
+    "torso": [
+      "none",
+      "chest_interface",
+      "rib_reinforcement",
+      "spine_interface"
+    ]
+  },
+  "equipment": {
+    "cuff": {
+      "required": true,
+      "arms": [
+        "left",
+        "right"
+      ],
+      "style": "veilwatch_projection_cuff_v1",
+      "asset": "/assets/characters/equipment/veilwatch_projection_cuff_v1.glb",
+      "design": "original_veilwatch_qb_style_v1"
+    },
+    "carry": [
+      "right_hand",
+      "left_hand",
+      "right_hip",
+      "left_hip",
+      "back",
+      "chest"
+    ]
+  },
+  "animations": [
+    "Idle",
+    "HappyIdle",
+    "Sway",
+    "Turn",
+    "Walk",
+    "Wave",
+    "Idle_Loop",
+    "Idle_Talking_Loop",
+    "Walk_Loop",
+    "Walk_Formal_Loop",
+    "Jog_Fwd_Loop",
+    "Sprint_Loop",
+    "Crouch_Idle_Loop",
+    "Crouch_Fwd_Loop",
+    "Jump_Start",
+    "Jump_Loop",
+    "Jump_Land",
+    "Roll",
+    "Sitting_Enter",
+    "Sitting_Idle_Loop",
+    "Sitting_Talking_Loop",
+    "Sitting_Exit",
+    "Interact",
+    "PickUp_Table",
+    "Fixing_Kneeling",
+    "Driving_Loop",
+    "Push_Loop",
+    "Pistol_Idle_Loop",
+    "Pistol_Aim_Neutral",
+    "Pistol_Aim_Up",
+    "Pistol_Aim_Down",
+    "Pistol_Shoot",
+    "Pistol_Reload",
+    "Punch_Jab",
+    "Punch_Cross",
+    "Sword_Idle",
+    "Sword_Attack",
+    "Hit_Chest",
+    "Hit_Head",
+    "Swim_Idle_Loop",
+    "Swim_Fwd_Loop",
+    "Dance_Loop",
+    "Spell_Simple_Idle_Loop",
+    "Spell_Simple_Shoot",
+    "Death01"
+  ],
+  "cyberneticsSides": {
+    "eye": [
+      "left",
+      "right",
+      "both"
+    ],
+    "temple": [
+      "left",
+      "right",
+      "both"
+    ],
+    "ear": [
+      "left",
+      "right",
+      "both"
+    ],
+    "jaw": [
+      "left",
+      "right",
+      "both"
+    ]
+  },
+  "brows": {
+    "natural": "/assets/characters/brows/veilwatch_original/natural.glb",
+    "straight": "/assets/characters/brows/veilwatch_original/straight.glb",
+    "arched": "/assets/characters/brows/veilwatch_original/arched.glb",
+    "soft_arch": "/assets/characters/brows/veilwatch_original/soft_arch.glb",
+    "thick": "/assets/characters/brows/veilwatch_original/thick.glb",
+    "thin": "/assets/characters/brows/veilwatch_original/thin.glb"
+  },
+  "cyberneticAssets": {
+    "cyber_hand": "/assets/characters/cybernetics/veilwatch_original/cyber_hand.glb",
+    "cyber_forearm": "/assets/characters/cybernetics/veilwatch_original/cyber_forearm.glb",
+    "full_cyber_arm": "/assets/characters/cybernetics/veilwatch_original/full_cyber_arm.glb",
+    "cyber_foot": "/assets/characters/cybernetics/veilwatch_original/cyber_foot.glb",
+    "cyber_lower_leg": "/assets/characters/cybernetics/veilwatch_original/cyber_lower_leg.glb",
+    "full_cyber_leg": "/assets/characters/cybernetics/veilwatch_original/full_cyber_leg.glb",
+    "synthetic_eye": "/assets/characters/cybernetics/veilwatch_original/synthetic_eye.glb",
+    "camera_eye": "/assets/characters/cybernetics/veilwatch_original/camera_eye.glb",
+    "neural_port": "/assets/characters/cybernetics/veilwatch_original/temple_port.glb",
+    "sensor_plate": "/assets/characters/cybernetics/veilwatch_original/temple_port.glb",
+    "comms_implant": "/assets/characters/cybernetics/veilwatch_original/ear_comms.glb",
+    "enhanced_hearing": "/assets/characters/cybernetics/veilwatch_original/ear_comms.glb",
+    "reinforcement_plate": "/assets/characters/cybernetics/veilwatch_original/jaw_plate.glb",
+    "data_port": "/assets/characters/cybernetics/veilwatch_original/neck_port.glb",
+    "spinal_interface": "/assets/characters/cybernetics/veilwatch_original/neck_port.glb",
+    "chest_interface": "/assets/characters/cybernetics/veilwatch_original/chest_interface.glb",
+    "rib_reinforcement": "/assets/characters/cybernetics/veilwatch_original/chest_interface.glb",
+    "spine_interface": "/assets/characters/cybernetics/veilwatch_original/spine_interface.glb"
+  },
+  "face": {
+    "morphs": [
+      "faceWidth",
+      "jawWidth",
+      "jawAngle",
+      "chinWidth",
+      "chinProjection",
+      "cheekboneHeight",
+      "cheekboneWidth",
+      "noseWidth",
+      "noseLength",
+      "noseProjection",
+      "eyeSpacing",
+      "eyeSize",
+      "browHeight",
+      "lipFullness",
+      "mouthWidth",
+      "earSize"
+    ],
+    "piercings": [
+      "none",
+      "left_ear_stud",
+      "right_ear_stud",
+      "both_ear_studs",
+      "left_ear_ring",
+      "right_ear_ring",
+      "septum_ring",
+      "nose_stud",
+      "eyebrow_bar"
+    ],
+    "faceScars": [
+      "none",
+      "left_brow_scar",
+      "right_brow_scar",
+      "left_cheek_scar",
+      "right_cheek_scar",
+      "nose_bridge_scar",
+      "lip_scar"
+    ],
+    "expressionIntensity": [
+      0,
+      100
+    ]
+  }
+}
