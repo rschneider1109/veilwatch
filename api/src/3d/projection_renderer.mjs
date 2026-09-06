@@ -237,6 +237,7 @@ class ProjectionRenderer {
     this.hairBaseTransform = null;
     this.irisTexture = null;
     this._irisColorKey = null;
+    this.scleraMaskTexture = null;
     this.proceduralHairRoot = null;
     this.facialHairRoot = null;
     this._activeFaceWeights = {};
@@ -398,7 +399,13 @@ class ProjectionRenderer {
           mat.roughness = .85;
         }else if(name.startsWith("VitSclera")){
           mat.map = tx.sclera;
+          mat.alphaMap = this.createScleraMaskTexture();
           mat.color.setHex(0xf7f0ea);
+          mat.transparent = true;
+          mat.alphaTest = .08;
+          mat.opacity = 1;
+          mat.depthWrite = true;
+          mat.depthTest = true;
           mat.metalness = 0;
           mat.roughness = .28;
         }else if(name.startsWith("VitIris")){
@@ -430,6 +437,46 @@ class ProjectionRenderer {
         mat.needsUpdate = true;
       });
     });
+  }
+
+  createScleraMaskTexture(){
+    if(this.scleraMaskTexture) return this.scleraMaskTexture;
+
+    // The Vitruvian GLB exports the iris slightly behind the front of the
+    // sclera sphere. The source look-dev relies on an eye shader to reveal
+    // that inner iris. In a plain Three.js PBR material the opaque sclera
+    // wins the depth test and produces the all-white eyes we were seeing.
+    //
+    // The sclera UV directly facing the camera is centered at ~(.504,.502).
+    // Cut a soft circular aperture there so the authored iris/cornea layers
+    // remain visible without moving or deforming the eye geometry.
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    const cx = 129;
+    const cy = 128;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,256,256);
+
+    const hole = ctx.createRadialGradient(cx,cy,31,cx,cy,40);
+    hole.addColorStop(0.00, "rgba(0,0,0,1)");
+    hole.addColorStop(0.72, "rgba(0,0,0,1)");
+    hole.addColorStop(1.00, "rgba(255,255,255,1)");
+    ctx.fillStyle = hole;
+    ctx.beginPath();
+    ctx.arc(cx,cy,41,0,Math.PI*2);
+    ctx.fill();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.flipY = false;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.needsUpdate = true;
+    texture.userData.veilwatchShared = true;
+    this.scleraMaskTexture = texture;
+    return texture;
   }
 
   createIrisTexture(color){
@@ -783,6 +830,10 @@ class ProjectionRenderer {
           mat.roughness = .08;
         }else if(name.startsWith("VitSclera")){
           mat.color.setHex(0xf7f0ea);
+          mat.alphaMap = this.createScleraMaskTexture();
+          mat.transparent = true;
+          mat.alphaTest = .08;
+          mat.opacity = 1;
         }else if(name.startsWith("VitIris")){
           mat.color.setHex(0xffffff);
         }else if(name.startsWith("VitEyeBack")){
@@ -1140,6 +1191,8 @@ class ProjectionRenderer {
     this.resizeObserver?.disconnect();
     this.clearCurrent();
     this.controls?.dispose();
+    this.irisTexture?.dispose?.();
+    this.scleraMaskTexture?.dispose?.();
     this.renderer?.dispose();
     this.host.replaceChildren();
   }
