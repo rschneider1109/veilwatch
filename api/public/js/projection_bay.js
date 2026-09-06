@@ -47,12 +47,7 @@
     ],
     hairStyles:[
       {id:"bald",label:"Bald",kind:"none",description:"No scalp hair"},
-      {id:"buzz",label:"Buzz Cut",kind:"procedural",variant:"buzz",description:"Very close cut"},
-      {id:"close_crop",label:"Close Crop",kind:"procedural",variant:"crop",description:"Short textured crop"},
-      {id:"classic_bob",label:"Classic Bob",kind:"asset",variant:"classic",description:"Jaw-length bob"},
-      {id:"short_bob",label:"Short Bob",kind:"asset",variant:"short",description:"Shortened bob profile"},
-      {id:"long_bob",label:"Long Bob",kind:"asset",variant:"long",description:"Longer bob profile"},
-      {id:"slicked_back",label:"Slicked Back",kind:"asset",variant:"slicked",description:"Swept-back profile"}
+      {id:"classic_bob",label:"Classic Bob",kind:"asset",variant:"classic",description:"Vitruvian jaw-length bob"}
     ],
     facialHairStyles:[
       {id:"none",label:"None",kind:"none"},{id:"stubble",label:"Stubble",kind:"procedural",density:.35},
@@ -61,7 +56,7 @@
     ],
     aliases:{
       facePresets:{clean:"neutral",sharp:"serious",tired:"concerned",scarred:"serious",weathered:"focused"},
-      hairStyles:{short:"close_crop",buzz:"buzz",fade:"close_crop",long_straight:"long_bob",wavy:"classic_bob",curly:"classic_bob",bun:"slicked_back",ponytail:"long_bob",bald:"bald"}
+      hairStyles:{short:"classic_bob",buzz:"classic_bob",fade:"classic_bob",long_straight:"classic_bob",wavy:"classic_bob",curly:"classic_bob",bun:"classic_bob",ponytail:"classic_bob",close_crop:"classic_bob",short_bob:"classic_bob",long_bob:"classic_bob",slicked_back:"classic_bob",bald:"bald"}
     }
   };
 

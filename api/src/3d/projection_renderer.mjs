@@ -235,6 +235,8 @@ class ProjectionRenderer {
     this.headBindInverse = null;
     this.hairAssetRoot = null;
     this.hairBaseTransform = null;
+    this.irisTexture = null;
+    this._irisColorKey = null;
     this.proceduralHairRoot = null;
     this.facialHairRoot = null;
     this._activeFaceWeights = {};
@@ -282,6 +284,8 @@ class ProjectionRenderer {
     this.headBindInverse = null;
     this.hairAssetRoot = null;
     this.hairBaseTransform = null;
+    if(this.irisTexture){ this.irisTexture.dispose?.(); this.irisTexture = null; }
+    this._irisColorKey = null;
     this.proceduralHairRoot = null;
     this.facialHairRoot = null;
     this._activeFaceWeights = {};
@@ -398,10 +402,13 @@ class ProjectionRenderer {
           mat.metalness = 0;
           mat.roughness = .28;
         }else if(name.startsWith("VitIris")){
-          mat.map = tx.iris;
+          // Veilwatch builds a procedural iris/pupil texture in applyAppearance.
+          // The source Vitruvian eye look-dev uses a procedural shader as well;
+          // a plain texture+tint leaves the iris/pupil effectively unreadable.
+          mat.map = null;
           mat.color.setHex(0xffffff);
           mat.metalness = 0;
-          mat.roughness = .25;
+          mat.roughness = .32;
         }else if(name === "VitHair"){
           mat.map = tx.hairBase;
           mat.normalMap = tx.hairNormal;
@@ -420,6 +427,95 @@ class ProjectionRenderer {
           mat.metalness = 0;
           mat.roughness = .94;
         }
+        mat.needsUpdate = true;
+      });
+    });
+  }
+
+  createIrisTexture(color){
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    const cx = 128;
+    const cy = 128;
+    const base = new THREE.Color(color);
+    const dark = base.clone().multiplyScalar(.34);
+    const mid = base.clone().multiplyScalar(.78);
+    const bright = base.clone().lerp(new THREE.Color(0xffffff), .25);
+    const css = (c)=>`rgb(${Math.round(c.r*255)},${Math.round(c.g*255)},${Math.round(c.b*255)})`;
+
+    ctx.clearRect(0,0,256,256);
+    const iris = ctx.createRadialGradient(cx,cy,16,cx,cy,124);
+    iris.addColorStop(0.00, "#08070a");
+    iris.addColorStop(0.17, "#09080b");
+    iris.addColorStop(0.19, css(dark));
+    iris.addColorStop(0.48, css(mid));
+    iris.addColorStop(0.76, css(bright));
+    iris.addColorStop(0.92, css(base));
+    iris.addColorStop(1.00, css(dark.multiplyScalar(.55)));
+    ctx.fillStyle = iris;
+    ctx.fillRect(0,0,256,256);
+
+    // Deterministic radial fibres so eye colours still retain iris structure.
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.globalCompositeOperation = "screen";
+    for(let i=0;i<96;i++){
+      const a = (i / 96) * Math.PI * 2;
+      const wobble = ((i * 37) % 11) / 11;
+      const r0 = 29 + wobble * 11;
+      const r1 = 101 + ((i * 17) % 19);
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*r0, Math.sin(a)*r0);
+      ctx.lineTo(Math.cos(a)*r1, Math.sin(a)*r1);
+      ctx.strokeStyle = `rgba(255,255,255,${0.025 + (i%5)*0.009})`;
+      ctx.lineWidth = .65 + (i%3)*.18;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Hard pupil and a dark limbal ring keep the eyes readable at full-body distance.
+    ctx.beginPath();
+    ctx.arc(cx,cy,24,0,Math.PI*2);
+    ctx.fillStyle = "#07070a";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx,cy,120,0,Math.PI*2);
+    ctx.strokeStyle = "rgba(12,10,13,.72)";
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy?.() || 1);
+    texture.needsUpdate = true;
+    texture.userData.veilwatchShared = true;
+    return texture;
+  }
+
+  applyIrisColor(eyeColor){
+    if(!this.currentObject) return;
+    const key = eyeColor.getHexString();
+    if(!this.irisTexture || this._irisColorKey !== key){
+      if(this.irisTexture) this.irisTexture.dispose?.();
+      this.irisTexture = this.createIrisTexture(eyeColor);
+      this._irisColorKey = key;
+    }
+    this.currentObject.traverse((obj)=>{
+      if(!obj.isMesh || !obj.material) return;
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach((mat)=>{
+        const name = String(mat?.name || "");
+        if(!name.startsWith("VitIris")) return;
+        mat.map = this.irisTexture;
+        mat.color?.setHex?.(0xffffff);
+        mat.metalness = 0;
+        mat.roughness = .32;
+        mat.transparent = false;
+        mat.opacity = 1;
+        mat.depthWrite = true;
+        mat.depthTest = true;
         mat.needsUpdate = true;
       });
     });
@@ -688,7 +784,7 @@ class ProjectionRenderer {
         }else if(name.startsWith("VitSclera")){
           mat.color.setHex(0xf7f0ea);
         }else if(name.startsWith("VitIris")){
-          mat.color.copy(new THREE.Color(0xffffff).lerp(eyeColor, .38));
+          mat.color.setHex(0xffffff);
         }else if(name.startsWith("VitEyeBack")){
           mat.color.setHex(0x090b10);
         }else if(name.startsWith("VitCornea")){
@@ -715,6 +811,7 @@ class ProjectionRenderer {
       });
     });
 
+    this.applyIrisColor(eyeColor);
     this.applyFacePreset(hints.faceWeights || {});
     this.applyHairStyle(hints.hairStyle || {id:appearance.hairStyle || "classic_bob",kind:"asset",variant:"classic"}, hairColor);
     this.applyFacialHair(hints.facialHairStyle || {id:appearance.beardStyle || "none"}, hairColor);
