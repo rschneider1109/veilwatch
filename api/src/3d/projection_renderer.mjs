@@ -1153,6 +1153,12 @@ class ProjectionRenderer {
         geo.morphTargetsRelative=true;
         geo.morphAttributes ||= {};
         geo.morphAttributes.position ||= [];
+        // The Vitruvian head already ships with FACS POSITION + NORMAL morphs.
+        // Runtime structural morphs must extend BOTH arrays. Leaving the normal
+        // array shorter than position corrupts Three.js morph packing and can
+        // make the head disappear while the separate eye meshes keep rendering.
+        const hasNormalMorphs=Array.isArray(geo.morphAttributes.normal) && geo.morphAttributes.normal.length>0;
+        if(hasNormalMorphs) geo.morphAttributes.normal=[...geo.morphAttributes.normal];
         for(const [name,fn] of defs){
           const values=new Float32Array(pos.count*3);
           for(let i=0;i<pos.count;i++){
@@ -1160,6 +1166,11 @@ class ProjectionRenderer {
             values[i*3]=dx; values[i*3+1]=dy; values[i*3+2]=dz;
           }
           const attr=new THREE.Float32BufferAttribute(values,3); attr.name=name; geo.morphAttributes.position.push(attr);
+          if(hasNormalMorphs){
+            const normalAttr=new THREE.Float32BufferAttribute(new Float32Array(pos.count*3),3);
+            normalAttr.name=name;
+            geo.morphAttributes.normal.push(normalAttr);
+          }
         }
         geo.userData.veilwatchRuntimeFaceMorphs=defs.map(([name])=>name);
       }
@@ -1561,15 +1572,17 @@ class ProjectionRenderer {
     return null;
   }
 
-  bodySurfaceMesh(){
+  meshByMaterial(materialName){
     let found=null;
     this.currentObject?.traverse?.((obj)=>{
       if(found || !obj.isSkinnedMesh || !obj.geometry?.attributes?.position) return;
       const mats=Array.isArray(obj.material)?obj.material:[obj.material];
-      if(mats.some(mat=>String(mat?.name||"")==="VitBody")) found=obj;
+      if(mats.some(mat=>String(mat?.name||"")===materialName)) found=obj;
     });
     return found;
   }
+
+  bodySurfaceMesh(){ return this.meshByMaterial("VitBody"); }
 
   garmentMaterial(color,style="cloth"){
     const c=new THREE.Color(color);
@@ -1584,20 +1597,20 @@ class ProjectionRenderer {
     return mat;
   }
 
-  createGarmentShell(name,predicate,offset,color,style="cloth"){
-    const source=this.bodySurfaceMesh();
+  createGarmentShell(name,predicate,offset,color,style="cloth",sourceMaterial="VitBody"){
+    const source=this.meshByMaterial(sourceMaterial) || this.bodySurfaceMesh();
     if(!source) return null;
     const src=source.geometry, pos=src.attributes.position, normal=src.attributes.normal;
     if(!pos || !normal) return null;
     const sourceIndex=src.index?.array || null;
     const triCount=sourceIndex ? sourceIndex.length/3 : pos.count/3;
     const mats=Array.isArray(source.material)?source.material:[source.material];
-    const bodyMaterialIndices=new Set(mats.map((m,i)=>String(m?.name||"")==="VitBody"?i:-1).filter(i=>i>=0));
+    const allowedMaterialIndices=new Set(mats.map((m,i)=>String(m?.name||"")===sourceMaterial?i:-1).filter(i=>i>=0));
     const groups=src.groups||[];
     const allowed=(indexOffset)=>{
       if(!groups.length || mats.length===1) return true;
       const g=groups.find(x=>indexOffset>=x.start && indexOffset<x.start+x.count);
-      return !g || bodyMaterialIndices.has(g.materialIndex);
+      return !g || allowedMaterialIndices.has(g.materialIndex);
     };
     const keep=[];
     for(let t=0;t<triCount;t++){
@@ -1621,8 +1634,9 @@ class ProjectionRenderer {
     }
     geo.setIndex(keep);
     geo.morphTargetsRelative=src.morphTargetsRelative;
-    if(src.morphAttributes?.position?.length){
-      geo.morphAttributes.position=src.morphAttributes.position.map(a=>{const c=a.clone();c.name=a.name;return c;});
+    geo.morphAttributes={};
+    for(const [kind,attrs] of Object.entries(src.morphAttributes||{})){
+      geo.morphAttributes[kind]=(attrs||[]).map(a=>{const c=a.clone();c.name=a.name;return c;});
     }
     geo.computeBoundingSphere();
     const mesh=new THREE.SkinnedMesh(geo,this.garmentMaterial(color,style));
@@ -1643,40 +1657,48 @@ class ProjectionRenderer {
   }
 
   createParametricClothing(cl={}){
-    const source=this.bodySurfaceMesh(); if(!source) return false;
+    // Important: the compact Vitruvian runtime export is a clothed character.
+    // VitBody only contains the skin that was exposed by that outfit, so deriving
+    // shirts/pants from VitBody creates disconnected fragments. Build each garment
+    // from its matching authored skinned surface instead: VitShirt, VitPants,
+    // VitShoes, and use VitBody only for exposed hands/forearms.
+    const body=this.bodySurfaceMesh(), shirt=this.meshByMaterial('VitShirt'), pants=this.meshByMaterial('VitPants'), shoeMesh=this.meshByMaterial('VitShoes');
+    if(!body && !shirt && !pants) return false;
+    let created=0;
+    const add=(...args)=>{ const m=this.createGarmentShell(...args); if(m) created++; return m; };
     const slotColor=(slot,fallback=cl.color)=>this.clothingColor(cl.colors?.[slot] || fallback || 'charcoal');
-    const color=slotColor('top'), baseColor=slotColor('baseLayer'), outerColor=slotColor('outerwear'), bottomsColor=slotColor('bottoms'), onePieceColor=slotColor('onePiece'), shoesColor=slotColor('shoes'), gearColor=slotColor('gear','black'), dark=0x22262b;
-    const torso=(minY=.95,maxX=.275)=>(x,y,z)=>y>=minY&&y<=1.49&&Math.abs(x)<=maxX;
-    const tee=(minY=.95,sleeve=.41)=>(x,y,z)=>y>=minY&&y<=1.49&&(Math.abs(x)<=.275 || (Math.abs(x)<=sleeve&&y>=1.12));
-    const longSleeve=(minY=.94)=>(x,y,z)=>y>=minY&&y<=1.49&&Math.abs(x)<=.525;
-    const lower=(minY=.08,maxY=.91)=>(x,y,z)=>y>=minY&&y<=maxY&&Math.abs(x)<=.275;
-    const hands=(x,y,z)=>Math.abs(x)>=.50&&Math.abs(x)<=.615&&y>=1.02&&y<=1.34;
-    const feet=(x,y,z)=>y>=-.015&&y<=.15&&Math.abs(x)<=.24;
-    const pelvis=(minY=.60,maxY=.90)=>(x,y,z)=>y>=minY&&y<=maxY&&Math.abs(x)<=.25;
+    const color=slotColor('top'), baseColor=slotColor('baseLayer'), outerColor=slotColor('outerwear'), bottomsColor=slotColor('bottoms'), onePieceColor=slotColor('onePiece'), shoesColor=slotColor('shoes'), gearColor=slotColor('gear','black');
+    const all=()=>true;
+    const torso=(minY=.98,maxX=.31)=>(x,y,z)=>y>=minY&&y<=1.53&&Math.abs(x)<=maxX;
+    const upperTorso=(x,y,z)=>y>=1.14&&y<=1.47&&Math.abs(x)<=.29;
+    const forearms=(x,y,z)=>Math.abs(x)>=.24&&y>=.96&&y<=1.28;
+    const pantsRange=(minY=.12,maxY=1.03)=>(x,y,z)=>y>=minY&&y<=maxY;
+    const hands=(x,y,z)=>Math.abs(x)>=.50&&Math.abs(x)<=.615&&y>=.95&&y<=1.34;
 
     const base=String(cl.baseLayer||'none');
     if(base!=='none'){
-      if(/briefs/.test(base)) this.createGarmentShell(base,pelvis(base==='boxer_briefs'?.56:.66,.86),.005,baseColor,base);
-      else if(/bra/.test(base)) this.createGarmentShell(base,(x,y,z)=>y>=1.14&&y<=1.37&&Math.abs(x)<=.245,.006,baseColor,base);
-      else if(/compression_shorts/.test(base)) this.createGarmentShell(base,pelvis(.52,.88),.005,baseColor,base);
-      else this.createGarmentShell(base,tee(base==='tank'?1.00:.94,base==='tank'?.29:.50),.005,baseColor,base);
+      if(/briefs|compression_shorts/.test(base)) add(base,pantsRange(.56,.93),.006,baseColor,base,'VitPants');
+      else if(/bra/.test(base)) add(base,upperTorso,.007,baseColor,base,'VitShirt');
+      else if(/tank|undershirt|compression_shirt/.test(base)) add(base,torso(.98,.285),.006,baseColor,base,'VitShirt');
     }
 
     const top=String(cl.top||'none');
     if(top!=='none'){
-      let pred=tee(), off=.010;
-      if(/tank|camisole/.test(top)) pred=torso(.96,.27);
-      else if(/long_sleeve|henley|button_down|flannel|hoodie|sweater|turtleneck|tactical|combat|scrub|work_shirt/.test(top)) pred=longSleeve(.94);
-      if(/jersey|hoodie|sweater/.test(top)) off=.016;
-      if(/fitted|compression/.test(top)) off=.006;
-      this.createGarmentShell(top,pred,off,color,top);
+      let pred=all, off=.012;
+      if(/tank|camisole/.test(top)) pred=torso(.98,.27);
+      if(/jersey|hoodie|sweater/.test(top)) off=.020;
+      if(/fitted|compression/.test(top)) off=.007;
+      add(top,pred,off,color,top,'VitShirt');
+      if(/long_sleeve|henley|button_down|flannel|hoodie|sweater|turtleneck|tactical|combat|scrub|work_shirt/.test(top)){
+        add(`${top}_sleeves`,forearms,off*.75,color,top,'VitBody');
+      }
     }
 
     const outer=String(cl.outerwear||'none');
     if(outer!=='none'){
-      const long=/long_coat|lab_coat|winter_coat/.test(outer);
-      const pred=long ? (x,y,z)=>y>=.72&&y<=1.49&&Math.abs(x)<=.53 : longSleeve(.86);
-      this.createGarmentShell(outer,pred,/winter|long_coat/.test(outer)?.040:.027,outerColor,outer);
+      const off=/winter|long_coat/.test(outer)?.042:.030;
+      add(outer,all,off,outerColor,outer,'VitShirt');
+      add(`${outer}_sleeves`,forearms,off*.78,outerColor,outer,'VitBody');
     }
 
     const bottoms=String(cl.bottoms||'none');
@@ -1684,46 +1706,48 @@ class ProjectionRenderer {
       if(/skirt/.test(bottoms)){
         const g=new THREE.Group(),mat=this.garmentMaterial(bottomsColor,bottoms);
         const geo=new THREE.CylinderGeometry(.20,.245,bottoms==='pencil_skirt'?.36:.42,36,1,true);
-        const m=new THREE.Mesh(geo,mat); m.position.y=-.13; g.add(m); this.attachToBone(g,'Hips',[0,0,0]);
+        const m=new THREE.Mesh(geo,mat); m.position.y=-.13; g.add(m); this.attachToBone(g,'Hips',[0,0,0]); created++;
       }else{
-        let min=.08,max=.91,off=.012;
-        if(/shorts/.test(bottoms)){min=.53;off=.010;}
-        if(/leggings/.test(bottoms)) off=.006;
-        if(/relaxed|cargo|sweat|work/.test(bottoms)) off=.020;
-        this.createGarmentShell(bottoms,lower(min,max),off,bottomsColor,bottoms);
+        let min=.12,max=1.03,off=.014;
+        if(/shorts/.test(bottoms)){min=.56;off=.011;}
+        if(/leggings/.test(bottoms)) off=.007;
+        if(/relaxed|cargo|sweat|work/.test(bottoms)) off=.022;
+        add(bottoms,pantsRange(min,max),off,bottomsColor,bottoms,'VitPants');
       }
     }
 
     const onePiece=String(cl.onePiece||'none');
     if(onePiece!=='none'){
       if(/dress/.test(onePiece)){
-        this.createGarmentShell(onePiece,torso(.86,.31),.018,onePieceColor,onePiece);
+        add(onePiece,all,.021,onePieceColor,onePiece,'VitShirt');
         const g=new THREE.Group(),mat=this.garmentMaterial(onePieceColor,onePiece);
         const long=/formal|shirt_dress/.test(onePiece), geo=new THREE.CylinderGeometry(.20,long?.31:.27,long?.58:.43,40,1,true);
-        const m=new THREE.Mesh(geo,mat);m.position.y=-.22;g.add(m);this.attachToBone(g,'Hips');
+        const m=new THREE.Mesh(geo,mat);m.position.y=-.22;g.add(m);this.attachToBone(g,'Hips'); created++;
       }else{
-        this.createGarmentShell(onePiece,(x,y,z)=>y>=.10&&y<=1.49&&Math.abs(x)<=.53,.020,onePieceColor,onePiece);
+        add(`${onePiece}_top`,all,.022,onePieceColor,onePiece,'VitShirt');
+        add(`${onePiece}_bottom`,all,.022,onePieceColor,onePiece,'VitPants');
       }
     }
 
     const socks=String(cl.socks||'none');
     if(socks!=='none'){
       const high=/compression|thigh_high/.test(socks), boot=/boot_socks/.test(socks);
-      const maxY=high?.72:boot?.38:.25;
-      this.createGarmentShell(socks,(x,y,z)=>y>=.04&&y<=maxY&&Math.abs(x)<=.22,.004,slotColor('baseLayer','charcoal'),socks);
+      const maxY=high?.72:boot?.40:.28;
+      add(socks,pantsRange(.12,maxY),.006,baseColor,socks,'VitPants');
     }
 
     const shoes=String(cl.shoes||'none');
-    if(shoes!=='none'){
-      const high=/boot|high_top|hiking|tactical/.test(shoes);
-      this.createGarmentShell(shoes,(x,y,z)=>feet(x,y,z)||(high&&y>.10&&y<.29&&Math.abs(x)<.22),high?.018:.012,/dress/.test(shoes)?0x171717:shoesColor,shoes);
+    if(shoes!=='none' && shoeMesh){
+      add(shoes,all,/boot|high_top|hiking|tactical/.test(shoes)?.020:.014,/dress/.test(shoes)?0x171717:shoesColor,shoes,'VitShoes');
+      if(/boot|high_top|hiking|tactical/.test(shoes)) add(`${shoes}_shaft`,pantsRange(.12,.34),.018,shoesColor,shoes,'VitPants');
     }
+
     const gloves=String(cl.gloves||'none');
-    if(gloves!=='none') this.createGarmentShell(gloves,hands,/armored/.test(gloves)?.018:.008,/medical/.test(gloves)?0xe8eef0:gearColor,gloves);
+    if(gloves!=='none') add(gloves,hands,/armored/.test(gloves)?.018:.009,/medical/.test(gloves)?0xe8eef0:gearColor,gloves,'VitBody');
 
     const vest=String(cl.vest||'none');
-    if(vest!=='none') this.createGarmentShell(vest,torso(1.00,.29),/plate|armor|rig/.test(vest)?.038:.022,gearColor,vest);
-    return true;
+    if(vest!=='none') add(vest,torso(1.02,.29),/plate|armor|rig/.test(vest)?.040:.024,gearColor,vest,'VitShirt');
+    return created>0;
   }
 
   clothingColor(name){
@@ -1962,13 +1986,48 @@ class ProjectionRenderer {
     const parametricClothes=this.createParametricClothing(cl);
     this.createClothingExtras(cl);
     this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
+    // The compact Vitruvian body is a clothed export. Shirt and pants are
+    // structural surfaces, not optional overlays over a complete nude mesh.
+    // Keep those surfaces rendered so removing/replacing a garment never turns
+    // the character into disconnected hands/feet/skin islands.
+    const skinFill=this.colorFromHint(this.profile.appearanceRender?.skinHex,0xcc9874).clone().lerp(new THREE.Color(0xffffff),.22);
+    const topId=String(cl.top||'none'), baseId=String(cl.baseLayer||'none'), outerId=String(cl.outerwear||'none'), oneId=String(cl.onePiece||'none'), bottomsId=String(cl.bottoms||'none');
+    const topColor=this.clothingColor(cl.colors?.top||cl.color||'charcoal');
+    const baseColor=this.clothingColor(cl.colors?.baseLayer||cl.color||'charcoal');
+    const outerColor=this.clothingColor(cl.colors?.outerwear||cl.color||'black');
+    const bottomsColor=this.clothingColor(cl.colors?.bottoms||cl.color||'navy');
+    const oneColor=this.clothingColor(cl.colors?.onePiece||cl.color||'charcoal');
+    const shoesColor=this.clothingColor(cl.colors?.shoes||cl.color||'black');
+    const baseCoversTorso=/tank|undershirt|compression_shirt|bra/.test(baseId);
+    const baseCoversPelvis=/briefs|compression_shorts/.test(baseId);
     this.currentObject.traverse(obj=>{
       if(!obj.isMesh||!obj.material)return;
       const mats=Array.isArray(obj.material)?obj.material:[obj.material];
       mats.forEach(mat=>{
-        if(mat.name==='VitShirt'){mat.visible=!parametricClothes && cl.top!=='none'; mat.color?.setHex?.(this.clothingColor(cl.color));}
-        if(mat.name==='VitPants'){mat.visible=!parametricClothes && cl.bottoms!=='none'; mat.color?.setHex?.(this.clothingColor(cl.color));}
-        if(mat.name==='VitShoes'){mat.visible=!parametricClothes && cl.shoes!=='none';}
+        if(mat.name==='VitShirt'){
+          mat.visible=true;
+          if(topId!=='none') mat.color?.setHex?.(topColor);
+          else if(oneId!=='none') mat.color?.setHex?.(oneColor);
+          else if(baseCoversTorso) mat.color?.setHex?.(baseColor);
+          else if(outerId!=='none') mat.color?.setHex?.(outerColor);
+          else mat.color?.copy?.(skinFill);
+          if(topId==='none'&&oneId==='none'&&!baseCoversTorso&&outerId==='none'){
+            mat.normalMap=null; mat.roughness=.82;
+          }
+        }
+        if(mat.name==='VitPants'){
+          mat.visible=true;
+          if(bottomsId!=='none') mat.color?.setHex?.(bottomsColor);
+          else if(oneId!=='none') mat.color?.setHex?.(oneColor);
+          else if(baseCoversPelvis) mat.color?.setHex?.(baseColor);
+          else mat.color?.copy?.(skinFill);
+          if(bottomsId==='none'&&oneId==='none'&&!baseCoversPelvis){mat.normalMap=null;mat.roughness=.82;}
+        }
+        if(mat.name==='VitShoes'){
+          mat.visible=String(cl.shoes||'none')!=='none';
+          if(mat.visible) mat.color?.setHex?.(shoesColor);
+        }
+        if(mat) mat.needsUpdate=true;
       });
     });
     this.applyAnimation(f.animation||'Idle');
