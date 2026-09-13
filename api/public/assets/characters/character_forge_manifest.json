@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0-section3-core-clothing",
+  "version": "makehuman-section5",
   "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
@@ -1881,45 +1881,49 @@
     "Turn",
     "Walk",
     "Wave",
-    "Idle_Loop",
-    "Idle_Talking_Loop",
-    "Walk_Loop",
-    "Walk_Formal_Loop",
-    "Jog_Fwd_Loop",
-    "Sprint_Loop",
-    "Crouch_Idle_Loop",
+    "A_TPose",
     "Crouch_Fwd_Loop",
-    "Jump_Start",
-    "Jump_Loop",
-    "Jump_Land",
-    "Roll",
-    "Sitting_Enter",
-    "Sitting_Idle_Loop",
-    "Sitting_Talking_Loop",
-    "Sitting_Exit",
-    "Interact",
-    "PickUp_Table",
-    "Fixing_Kneeling",
+    "Crouch_Idle_Loop",
+    "Dance_Loop",
+    "Death01",
     "Driving_Loop",
-    "Push_Loop",
-    "Pistol_Idle_Loop",
-    "Pistol_Aim_Neutral",
-    "Pistol_Aim_Up",
-    "Pistol_Aim_Down",
-    "Pistol_Shoot",
-    "Pistol_Reload",
-    "Punch_Jab",
-    "Punch_Cross",
-    "Sword_Idle",
-    "Sword_Attack",
+    "Fixing_Kneeling",
     "Hit_Chest",
     "Hit_Head",
-    "Swim_Idle_Loop",
-    "Swim_Fwd_Loop",
-    "Dance_Loop",
+    "Idle_Loop",
+    "Idle_Talking_Loop",
+    "Idle_Torch_Loop",
+    "Interact",
+    "Jog_Fwd_Loop",
+    "Jump_Land",
+    "Jump_Loop",
+    "Jump_Start",
+    "PickUp_Table",
+    "Pistol_Aim_Down",
+    "Pistol_Aim_Neutral",
+    "Pistol_Aim_Up",
+    "Pistol_Idle_Loop",
+    "Pistol_Reload",
+    "Pistol_Shoot",
+    "Punch_Cross",
+    "Punch_Jab",
+    "Push_Loop",
+    "Roll",
+    "Sitting_Enter",
+    "Sitting_Exit",
+    "Sitting_Idle_Loop",
+    "Sitting_Talking_Loop",
+    "Spell_Simple_Enter",
+    "Spell_Simple_Exit",
     "Spell_Simple_Idle_Loop",
     "Spell_Simple_Shoot",
-    "Death01"
+    "Sprint_Loop",
+    "Swim_Fwd_Loop",
+    "Swim_Idle_Loop",
+    "Sword_Attack",
+    "Sword_Idle",
+    "Walk_Formal_Loop",
+    "Walk_Loop"
   ],
   "cyberneticsSides": {
     "eye": [
@@ -2013,6 +2017,374 @@
     "expressionIntensity": [
       0,
       100
+    ],
+    "expressionUnits": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "faceunit:browDownLeft",
+        "label": "Face Unit: Brow Down Left"
+      },
+      {
+        "id": "faceunit:browDownRight",
+        "label": "Face Unit: Brow Down Right"
+      },
+      {
+        "id": "faceunit:browInnerUp",
+        "label": "Face Unit: Brow Inner Up"
+      },
+      {
+        "id": "faceunit:browOuterUpLeft",
+        "label": "Face Unit: Brow Outer Up Left"
+      },
+      {
+        "id": "faceunit:browOuterUpRight",
+        "label": "Face Unit: Brow Outer Up Right"
+      },
+      {
+        "id": "faceunit:cheekPuff",
+        "label": "Face Unit: Cheek Puff"
+      },
+      {
+        "id": "faceunit:cheekSquintLeft",
+        "label": "Face Unit: Cheek Squint Left"
+      },
+      {
+        "id": "faceunit:cheekSquintRight",
+        "label": "Face Unit: Cheek Squint Right"
+      },
+      {
+        "id": "faceunit:eyeBlinkLeft",
+        "label": "Face Unit: Eye Blink Left"
+      },
+      {
+        "id": "faceunit:eyeBlinkRight",
+        "label": "Face Unit: Eye Blink Right"
+      },
+      {
+        "id": "faceunit:eyeLookDownLeft",
+        "label": "Face Unit: Eye Look Down Left"
+      },
+      {
+        "id": "faceunit:eyeLookDownRight",
+        "label": "Face Unit: Eye Look Down Right"
+      },
+      {
+        "id": "faceunit:eyeLookInLeft",
+        "label": "Face Unit: Eye Look In Left"
+      },
+      {
+        "id": "faceunit:eyeLookInRight",
+        "label": "Face Unit: Eye Look In Right"
+      },
+      {
+        "id": "faceunit:eyeLookOutLeft",
+        "label": "Face Unit: Eye Look Out Left"
+      },
+      {
+        "id": "faceunit:eyeLookOutRight",
+        "label": "Face Unit: Eye Look Out Right"
+      },
+      {
+        "id": "faceunit:eyeLookUpLeft",
+        "label": "Face Unit: Eye Look Up Left"
+      },
+      {
+        "id": "faceunit:eyeLookUpRight",
+        "label": "Face Unit: Eye Look Up Right"
+      },
+      {
+        "id": "faceunit:eyeSquintLeft",
+        "label": "Face Unit: Eye Squint Left"
+      },
+      {
+        "id": "faceunit:eyeSquintRight",
+        "label": "Face Unit: Eye Squint Right"
+      },
+      {
+        "id": "faceunit:eyeWideLeft",
+        "label": "Face Unit: Eye Wide Left"
+      },
+      {
+        "id": "faceunit:eyeWideRight",
+        "label": "Face Unit: Eye Wide Right"
+      },
+      {
+        "id": "faceunit:jawForward",
+        "label": "Face Unit: Jaw Forward"
+      },
+      {
+        "id": "faceunit:jawLeft",
+        "label": "Face Unit: Jaw Left"
+      },
+      {
+        "id": "faceunit:jawOpen",
+        "label": "Face Unit: Jaw Open"
+      },
+      {
+        "id": "faceunit:jawRight",
+        "label": "Face Unit: Jaw Right"
+      },
+      {
+        "id": "faceunit:mouthClose",
+        "label": "Face Unit: Mouth Close"
+      },
+      {
+        "id": "faceunit:mouthDimpleLeft",
+        "label": "Face Unit: Mouth Dimple Left"
+      },
+      {
+        "id": "faceunit:mouthDimpleRight",
+        "label": "Face Unit: Mouth Dimple Right"
+      },
+      {
+        "id": "faceunit:mouthFrownLeft",
+        "label": "Face Unit: Mouth Frown Left"
+      },
+      {
+        "id": "faceunit:mouthFrownRight",
+        "label": "Face Unit: Mouth Frown Right"
+      },
+      {
+        "id": "faceunit:mouthFunnel",
+        "label": "Face Unit: Mouth Funnel"
+      },
+      {
+        "id": "faceunit:mouthLeft",
+        "label": "Face Unit: Mouth Left"
+      },
+      {
+        "id": "faceunit:mouthLowerDownLeft",
+        "label": "Face Unit: Mouth Lower Down Left"
+      },
+      {
+        "id": "faceunit:mouthLowerDownRight",
+        "label": "Face Unit: Mouth Lower Down Right"
+      },
+      {
+        "id": "faceunit:mouthPressLeft",
+        "label": "Face Unit: Mouth Press Left"
+      },
+      {
+        "id": "faceunit:mouthPressRight",
+        "label": "Face Unit: Mouth Press Right"
+      },
+      {
+        "id": "faceunit:mouthPucker",
+        "label": "Face Unit: Mouth Pucker"
+      },
+      {
+        "id": "faceunit:mouthRight",
+        "label": "Face Unit: Mouth Right"
+      },
+      {
+        "id": "faceunit:mouthRollLower",
+        "label": "Face Unit: Mouth Roll Lower"
+      },
+      {
+        "id": "faceunit:mouthRollUpper",
+        "label": "Face Unit: Mouth Roll Upper"
+      },
+      {
+        "id": "faceunit:mouthShrugLower",
+        "label": "Face Unit: Mouth Shrug Lower"
+      },
+      {
+        "id": "faceunit:mouthShrugUpper",
+        "label": "Face Unit: Mouth Shrug Upper"
+      },
+      {
+        "id": "faceunit:mouthSmileLeft",
+        "label": "Face Unit: Mouth Smile Left"
+      },
+      {
+        "id": "faceunit:mouthSmileRight",
+        "label": "Face Unit: Mouth Smile Right"
+      },
+      {
+        "id": "faceunit:mouthStretchLeft",
+        "label": "Face Unit: Mouth Stretch Left"
+      },
+      {
+        "id": "faceunit:mouthStretchRight",
+        "label": "Face Unit: Mouth Stretch Right"
+      },
+      {
+        "id": "faceunit:mouthUpperUpLeft",
+        "label": "Face Unit: Mouth Upper Up Left"
+      },
+      {
+        "id": "faceunit:mouthUpperUpRight",
+        "label": "Face Unit: Mouth Upper Up Right"
+      },
+      {
+        "id": "faceunit:noseSneerLeft",
+        "label": "Face Unit: Nose Sneer Left"
+      },
+      {
+        "id": "faceunit:noseSneerRight",
+        "label": "Face Unit: Nose Sneer Right"
+      },
+      {
+        "id": "faceunit:tongueOut",
+        "label": "Face Unit: Tongue Out"
+      }
+    ],
+    "visemes": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "viseme2:viseme_aa",
+        "label": "Meta/Oculus Viseme: Viseme Aa"
+      },
+      {
+        "id": "viseme2:viseme_CH",
+        "label": "Meta/Oculus Viseme: Viseme Ch"
+      },
+      {
+        "id": "viseme2:viseme_DD",
+        "label": "Meta/Oculus Viseme: Viseme Dd"
+      },
+      {
+        "id": "viseme2:viseme_E",
+        "label": "Meta/Oculus Viseme: Viseme E"
+      },
+      {
+        "id": "viseme2:viseme_FF",
+        "label": "Meta/Oculus Viseme: Viseme Ff"
+      },
+      {
+        "id": "viseme2:viseme_I",
+        "label": "Meta/Oculus Viseme: Viseme I"
+      },
+      {
+        "id": "viseme2:viseme_kk",
+        "label": "Meta/Oculus Viseme: Viseme Kk"
+      },
+      {
+        "id": "viseme2:viseme_nn",
+        "label": "Meta/Oculus Viseme: Viseme Nn"
+      },
+      {
+        "id": "viseme2:viseme_O",
+        "label": "Meta/Oculus Viseme: Viseme O"
+      },
+      {
+        "id": "viseme2:viseme_PP",
+        "label": "Meta/Oculus Viseme: Viseme Pp"
+      },
+      {
+        "id": "viseme2:viseme_RR",
+        "label": "Meta/Oculus Viseme: Viseme Rr"
+      },
+      {
+        "id": "viseme2:viseme_sil",
+        "label": "Meta/Oculus Viseme: Viseme Sil"
+      },
+      {
+        "id": "viseme2:viseme_SS",
+        "label": "Meta/Oculus Viseme: Viseme Ss"
+      },
+      {
+        "id": "viseme2:viseme_TH",
+        "label": "Meta/Oculus Viseme: Viseme Th"
+      },
+      {
+        "id": "viseme2:viseme_U",
+        "label": "Meta/Oculus Viseme: Viseme U"
+      },
+      {
+        "id": "viseme1:aa_02",
+        "label": "Microsoft Viseme: Aa 02"
+      },
+      {
+        "id": "viseme1:aa_ah_ax_01",
+        "label": "Microsoft Viseme: Aa Ah Ax 01"
+      },
+      {
+        "id": "viseme1:ao_03",
+        "label": "Microsoft Viseme: Ao 03"
+      },
+      {
+        "id": "viseme1:aw_09",
+        "label": "Microsoft Viseme: Aw 09"
+      },
+      {
+        "id": "viseme1:ay_11",
+        "label": "Microsoft Viseme: Ay 11"
+      },
+      {
+        "id": "viseme1:d_t_n_19",
+        "label": "Microsoft Viseme: D T N 19"
+      },
+      {
+        "id": "viseme1:er_05",
+        "label": "Microsoft Viseme: Er 05"
+      },
+      {
+        "id": "viseme1:ey_eh_uh_04",
+        "label": "Microsoft Viseme: Ey Eh Uh 04"
+      },
+      {
+        "id": "viseme1:f_v_18",
+        "label": "Microsoft Viseme: F V 18"
+      },
+      {
+        "id": "viseme1:h_12",
+        "label": "Microsoft Viseme: H 12"
+      },
+      {
+        "id": "viseme1:k_g_ng_20",
+        "label": "Microsoft Viseme: K G Ng 20"
+      },
+      {
+        "id": "viseme1:l_14",
+        "label": "Microsoft Viseme: L 14"
+      },
+      {
+        "id": "viseme1:ow_08",
+        "label": "Microsoft Viseme: Ow 08"
+      },
+      {
+        "id": "viseme1:oy_10",
+        "label": "Microsoft Viseme: Oy 10"
+      },
+      {
+        "id": "viseme1:p_b_m_21",
+        "label": "Microsoft Viseme: P B M 21"
+      },
+      {
+        "id": "viseme1:r_13",
+        "label": "Microsoft Viseme: R 13"
+      },
+      {
+        "id": "viseme1:s_z_15",
+        "label": "Microsoft Viseme: S Z 15"
+      },
+      {
+        "id": "viseme1:sh_ch_jh_zh_16",
+        "label": "Microsoft Viseme: Sh Ch Jh Zh 16"
+      },
+      {
+        "id": "viseme1:sil_00",
+        "label": "Microsoft Viseme: Sil 00"
+      },
+      {
+        "id": "viseme1:th_dh_17",
+        "label": "Microsoft Viseme: Th Dh 17"
+      },
+      {
+        "id": "viseme1:w_uw_07",
+        "label": "Microsoft Viseme: W Uw 07"
+      },
+      {
+        "id": "viseme1:y_iy_ih_ix_06",
+        "label": "Microsoft Viseme: Y Iy Ih Ix 06"
+      }
     ]
   },
   "foundation": {
@@ -2044,7 +2416,17 @@
       "shoes"
     ],
     "nativeClothingPackCacheLimit": 1,
-    "makeHumanExtendedWardrobe": true
+    "makeHumanExtendedWardrobe": true,
+    "quaterniusLocalAnimationLibrary": true,
+    "quaterniusAnimationClips": 43,
+    "makeHumanPoseLibrary": true,
+    "makeHumanPoseCount": 81,
+    "makeHumanFaceUnits": true,
+    "makeHumanFaceUnitCount": 52,
+    "makeHumanVisemes": true,
+    "makeHumanVisemeCount": 37,
+    "quaterniusWeaponLibrary": true,
+    "quaterniusWeaponCount": 46
   },
   "nativeAppearance": {
     "skinMaterials": [
@@ -4483,5 +4865,525 @@
       ],
       "materialOnlyPack": "system_clothes_materials01_cc0.zip retained for later variant pass"
     }
-  }
+  },
+  "poses": [
+    {
+      "id": "none",
+      "label": "None"
+    },
+    {
+      "id": "poses05:callharvey3d_archer_leap",
+      "label": "Fighting: Callharvey3D Archer Leap"
+    },
+    {
+      "id": "poses05:culturalibre_cl_fight_01",
+      "label": "Fighting: Culturalibre Cl Fight 01"
+    },
+    {
+      "id": "poses05:culturalibre_gun",
+      "label": "Fighting: Culturalibre Gun"
+    },
+    {
+      "id": "poses05:culturalibre_gun_2_female",
+      "label": "Fighting: Culturalibre Gun 2 Female"
+    },
+    {
+      "id": "poses05:culturalibre_gun_2_male",
+      "label": "Fighting: Culturalibre Gun 2 Male"
+    },
+    {
+      "id": "poses05:culturalibre_gun_3",
+      "label": "Fighting: Culturalibre Gun 3"
+    },
+    {
+      "id": "poses05:culturalibre_warhammer_01",
+      "label": "Fighting: Culturalibre Warhammer 01"
+    },
+    {
+      "id": "poses05:gpedroso_boxing",
+      "label": "Fighting: Gpedroso Boxing"
+    },
+    {
+      "id": "poses05:gpedroso_hadouken",
+      "label": "Fighting: Gpedroso Hadouken"
+    },
+    {
+      "id": "poses05:gpedroso_ninja_focus",
+      "label": "Fighting: Gpedroso Ninja Focus"
+    },
+    {
+      "id": "poses01:anrico_sitting02",
+      "label": "Sitting / Misc: Anrico Sitting02"
+    },
+    {
+      "id": "poses01:anrico_sitting03",
+      "label": "Sitting / Misc: Anrico Sitting03"
+    },
+    {
+      "id": "poses01:anrico_sitting04",
+      "label": "Sitting / Misc: Anrico Sitting04"
+    },
+    {
+      "id": "poses01:anrico_sitting07",
+      "label": "Sitting / Misc: Anrico Sitting07"
+    },
+    {
+      "id": "poses01:anrico_sitting10",
+      "label": "Sitting / Misc: Anrico Sitting10"
+    },
+    {
+      "id": "poses01:callharvey3d_lotus",
+      "label": "Sitting / Misc: Callharvey3D Lotus"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingdefault",
+      "label": "Sitting / Misc: Callharvey3D Sittingdefault"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingfloor2",
+      "label": "Sitting / Misc: Callharvey3D Sittingfloor2"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingfloorstretch2",
+      "label": "Sitting / Misc: Callharvey3D Sittingfloorstretch2"
+    },
+    {
+      "id": "poses01:callharvey3d_sittinglegscrossed",
+      "label": "Sitting / Misc: Callharvey3D Sittinglegscrossed"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingnatural",
+      "label": "Sitting / Misc: Callharvey3D Sittingnatural"
+    },
+    {
+      "id": "poses01:elvs_what_have_i_done",
+      "label": "Sitting / Misc: Elvs What Have I Done"
+    },
+    {
+      "id": "poses01:milkman_sit_01a",
+      "label": "Sitting / Misc: Milkman Sit 01A"
+    },
+    {
+      "id": "poses01:milkman_swinging_01",
+      "label": "Sitting / Misc: Milkman Swinging 01"
+    },
+    {
+      "id": "poses01:mindfront_sitting_in_armchair_holding_wine_glass",
+      "label": "Sitting / Misc: Mindfront Sitting In Armchair Holding Wine Glass"
+    },
+    {
+      "id": "poses01:sweetan008_sitting-pose",
+      "label": "Sitting / Misc: Sweetan008 Sitting Pose"
+    },
+    {
+      "id": "poses01:wolgade_sit_on_ground_01",
+      "label": "Sitting / Misc: Wolgade Sit On Ground 01"
+    },
+    {
+      "id": "poses01:xhado84_sitting_floor_3",
+      "label": "Sitting / Misc: Xhado84 Sitting Floor 3"
+    },
+    {
+      "id": "poses03:anrico_standing10",
+      "label": "Standing: Anrico Standing10"
+    },
+    {
+      "id": "poses03:anrico_standing11",
+      "label": "Standing: Anrico Standing11"
+    },
+    {
+      "id": "poses03:blindsaypatten_david",
+      "label": "Standing: Blindsaypatten David"
+    },
+    {
+      "id": "poses03:callharvey3d_curious",
+      "label": "Standing: Callharvey3D Curious"
+    },
+    {
+      "id": "poses03:callharvey3d_salute",
+      "label": "Standing: Callharvey3D Salute"
+    },
+    {
+      "id": "poses03:callharvey3d_standingatattention",
+      "label": "Standing: Callharvey3D Standingatattention"
+    },
+    {
+      "id": "poses03:callharvey3d_standingatease",
+      "label": "Standing: Callharvey3D Standingatease"
+    },
+    {
+      "id": "poses03:callharvey3d_standingdefault",
+      "label": "Standing: Callharvey3D Standingdefault"
+    },
+    {
+      "id": "poses03:callharvey3d_standingmodest",
+      "label": "Standing: Callharvey3D Standingmodest"
+    },
+    {
+      "id": "poses03:callharvey3d_standingmodestembarrassed",
+      "label": "Standing: Callharvey3D Standingmodestembarrassed"
+    },
+    {
+      "id": "poses03:callharvey3d_standingnatural",
+      "label": "Standing: Callharvey3D Standingnatural"
+    },
+    {
+      "id": "poses03:drednicolson_arms_akimbo",
+      "label": "Standing: Drednicolson Arms Akimbo"
+    },
+    {
+      "id": "poses03:elvs_epic_haute_couture_1",
+      "label": "Standing: Elvs Epic Haute Couture 1"
+    },
+    {
+      "id": "poses03:elvs_epic_haute_couture_2",
+      "label": "Standing: Elvs Epic Haute Couture 2"
+    },
+    {
+      "id": "poses03:elvs_super_him_standing_pose_1",
+      "label": "Standing: Elvs Super Him Standing Pose 1"
+    },
+    {
+      "id": "poses03:elvs_super_him_standing_pose_2",
+      "label": "Standing: Elvs Super Him Standing Pose 2"
+    },
+    {
+      "id": "poses03:gpedroso_peace_and_love",
+      "label": "Standing: Gpedroso Peace And Love"
+    },
+    {
+      "id": "poses03:gpedroso_standing_posing",
+      "label": "Standing: Gpedroso Standing Posing"
+    },
+    {
+      "id": "poses03:jjones_leaning_on_counter_hands_folded",
+      "label": "Standing: Jjones Leaning On Counter Hands Folded"
+    },
+    {
+      "id": "poses03:mindfront_standing_holding_wine_glass",
+      "label": "Standing: Mindfront Standing Holding Wine Glass"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_01",
+      "label": "Standing: Punkduck Hand On Shoulder 01"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_02",
+      "label": "Standing: Punkduck Hand On Shoulder 02"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_03",
+      "label": "Standing: Punkduck Hand On Shoulder 03"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion_handbag",
+      "label": "Standing: Punkduck Pd Fashion Handbag"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion01",
+      "label": "Standing: Punkduck Pd Fashion01"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion02",
+      "label": "Standing: Punkduck Pd Fashion02"
+    },
+    {
+      "id": "poses03:punkduck_train_departure",
+      "label": "Standing: Punkduck Train Departure"
+    },
+    {
+      "id": "poses03:sohh_posing1",
+      "label": "Standing: Sohh Posing1"
+    },
+    {
+      "id": "poses03:sohh_posing2",
+      "label": "Standing: Sohh Posing2"
+    },
+    {
+      "id": "poses03:sohh_posing3",
+      "label": "Standing: Sohh Posing3"
+    },
+    {
+      "id": "poses03:sohh_posing4",
+      "label": "Standing: Sohh Posing4"
+    },
+    {
+      "id": "poses03:sohh_posing5",
+      "label": "Standing: Sohh Posing5"
+    },
+    {
+      "id": "poses03:sohh_posing6",
+      "label": "Standing: Sohh Posing6"
+    },
+    {
+      "id": "poses03:sohh_sohh_embarrassed",
+      "label": "Standing: Sohh Sohh Embarrassed"
+    },
+    {
+      "id": "poses03:sohh_standing1",
+      "label": "Standing: Sohh Standing1"
+    },
+    {
+      "id": "poses03:sohh_standing2",
+      "label": "Standing: Sohh Standing2"
+    },
+    {
+      "id": "system:benchmark",
+      "label": "System Poses: Benchmark"
+    },
+    {
+      "id": "system:fight01",
+      "label": "System Poses: Fight01"
+    },
+    {
+      "id": "system:fight02",
+      "label": "System Poses: Fight02"
+    },
+    {
+      "id": "system:fight03",
+      "label": "System Poses: Fight03"
+    },
+    {
+      "id": "system:fight04",
+      "label": "System Poses: Fight04"
+    },
+    {
+      "id": "system:fly01",
+      "label": "System Poses: Fly01"
+    },
+    {
+      "id": "system:fly02",
+      "label": "System Poses: Fly02"
+    },
+    {
+      "id": "system:gym01",
+      "label": "System Poses: Gym01"
+    },
+    {
+      "id": "system:run01",
+      "label": "System Poses: Run01"
+    },
+    {
+      "id": "system:sit01",
+      "label": "System Poses: Sit01"
+    },
+    {
+      "id": "system:standing01",
+      "label": "System Poses: Standing01"
+    },
+    {
+      "id": "system:standing02",
+      "label": "System Poses: Standing02"
+    },
+    {
+      "id": "system:standing03",
+      "label": "System Poses: Standing03"
+    },
+    {
+      "id": "system:standing04",
+      "label": "System Poses: Standing04"
+    },
+    {
+      "id": "system:standing05",
+      "label": "System Poses: Standing05"
+    },
+    {
+      "id": "system:standing06",
+      "label": "System Poses: Standing06"
+    },
+    {
+      "id": "system:tpose",
+      "label": "System Poses: Tpose"
+    }
+  ],
+  "nativeWeapons": [
+    {
+      "id": "none",
+      "label": "None"
+    },
+    {
+      "id": "q_animated_p90",
+      "label": "P90 (Animated Guns)"
+    },
+    {
+      "id": "q_animated_pistol",
+      "label": "Pistol (Animated Guns)"
+    },
+    {
+      "id": "q_animated_revolver",
+      "label": "Revolver (Animated Guns)"
+    },
+    {
+      "id": "q_animated_rifle",
+      "label": "Rifle (Animated Guns)"
+    },
+    {
+      "id": "q_animated_shotgun",
+      "label": "Shotgun (Animated Guns)"
+    },
+    {
+      "id": "q_animated_sniperrifle",
+      "label": "Sniper Rifle (Animated Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_1",
+      "label": "Assault Rifle 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_2",
+      "label": "Assault Rifle 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_3",
+      "label": "Assault Rifle 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_4",
+      "label": "Assault Rifle 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_5",
+      "label": "Assault Rifle 5 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_1",
+      "label": "Assault Rifle2 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_2",
+      "label": "Assault Rifle2 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_3",
+      "label": "Assault Rifle2 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_4",
+      "label": "Assault Rifle2 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_bullpup_1",
+      "label": "Bullpup 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_bullpup_2",
+      "label": "Bullpup 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_bullpup_3",
+      "label": "Bullpup 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_1",
+      "label": "Pistol 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_2",
+      "label": "Pistol 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_3",
+      "label": "Pistol 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_4",
+      "label": "Pistol 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_5",
+      "label": "Pistol 5 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_pistol_6",
+      "label": "Pistol 6 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_revolver_1",
+      "label": "Revolver 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_revolver_2",
+      "label": "Revolver 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_revolver_3",
+      "label": "Revolver 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_revolver_4",
+      "label": "Revolver 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_revolver_5",
+      "label": "Revolver 5 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_1",
+      "label": "Shotgun 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_2",
+      "label": "Shotgun 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_3",
+      "label": "Shotgun 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_4",
+      "label": "Shotgun 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_sawedoff",
+      "label": "Shotgun Sawed Off (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_shotgun_shortstock",
+      "label": "Shotgun Short Stock (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_1",
+      "label": "Sniper Rifle 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_2",
+      "label": "Sniper Rifle 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_3",
+      "label": "Sniper Rifle 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_4",
+      "label": "Sniper Rifle 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_5",
+      "label": "Sniper Rifle 5 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_6",
+      "label": "Sniper Rifle 6 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_submachinegun_1",
+      "label": "Submachine Gun 1 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_submachinegun_2",
+      "label": "Submachine Gun 2 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_submachinegun_3",
+      "label": "Submachine Gun 3 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_submachinegun_4",
+      "label": "Submachine Gun 4 (Ultimate Guns)"
+    },
+    {
+      "id": "q_ultimate_submachinegun_5",
+      "label": "Submachine Gun 5 (Ultimate Guns)"
+    }
+  ]
 }
