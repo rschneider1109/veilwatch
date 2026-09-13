@@ -19,7 +19,7 @@
     },
     cuffArm:"left",weaponPreview:"none",weaponCarry:"back",
     cybernetics:{eye:"none",eyeSide:"right",temple:"none",templeSide:"right",ear:"none",earSide:"right",jaw:"none",jawSide:"right",neck:"none",leftArm:"none",rightArm:"none",leftLeg:"none",rightLeg:"none",torso:"none"},
-    animation:"Idle",posePreview:"none",showAnatomy:false
+    animation:"Idle_Loop",posePreview:"none",showAnatomy:false
   };
   const clone=o=>JSON.parse(JSON.stringify(o||{}));
   function bridge(){ return window.VeilwatchForgeBridge; }
@@ -38,6 +38,11 @@
       f.clothing[slot]=aliases[current]||manifest?.nativeClothing?.defaults?.[slot]||'none';
     }
     f.cybernetics=Object.assign({},DEFAULT.cybernetics,raw.cybernetics||{});
+    // Upgrade animation IDs saved by pre-Section-5 characters. The renderer
+    // keeps the same aliases too, but upgrading here makes the selector show
+    // the exact active UAL clip instead of an obsolete placeholder value.
+    const animationAliases={Idle:'Idle_Loop',HappyIdle:'Idle_Talking_Loop',Sway:'Idle_Torch_Loop',Turn:'Idle_Loop',Walk:'Walk_Loop',Wave:'Idle_Talking_Loop'};
+    f.animation=animationAliases[String(f.animation||'')]||String(f.animation||DEFAULT.animation);
     return f;
   }
   function merge(a,b){ const out=clone(a); for(const [k,v] of Object.entries(b||{})){ if(v&&typeof v==='object'&&!Array.isArray(v)&&out[k]&&typeof out[k]==='object'&&!Array.isArray(out[k])) out[k]=merge(out[k],v); else out[k]=v; } return out; }

@@ -1875,55 +1875,178 @@
     ]
   },
   "animations": [
-    "Idle",
-    "HappyIdle",
-    "Sway",
-    "Turn",
-    "Walk",
-    "Wave",
-    "A_TPose",
-    "Crouch_Fwd_Loop",
-    "Crouch_Idle_Loop",
-    "Dance_Loop",
-    "Death01",
-    "Driving_Loop",
-    "Fixing_Kneeling",
-    "Hit_Chest",
-    "Hit_Head",
-    "Idle_Loop",
-    "Idle_Talking_Loop",
-    "Idle_Torch_Loop",
-    "Interact",
-    "Jog_Fwd_Loop",
-    "Jump_Land",
-    "Jump_Loop",
-    "Jump_Start",
-    "PickUp_Table",
-    "Pistol_Aim_Down",
-    "Pistol_Aim_Neutral",
-    "Pistol_Aim_Up",
-    "Pistol_Idle_Loop",
-    "Pistol_Reload",
-    "Pistol_Shoot",
-    "Punch_Cross",
-    "Punch_Jab",
-    "Push_Loop",
-    "Roll",
-    "Sitting_Enter",
-    "Sitting_Exit",
-    "Sitting_Idle_Loop",
-    "Sitting_Talking_Loop",
-    "Spell_Simple_Enter",
-    "Spell_Simple_Exit",
-    "Spell_Simple_Idle_Loop",
-    "Spell_Simple_Shoot",
-    "Sprint_Loop",
-    "Swim_Fwd_Loop",
-    "Swim_Idle_Loop",
-    "Sword_Attack",
-    "Sword_Idle",
-    "Walk_Formal_Loop",
-    "Walk_Loop"
+    {
+      "id": "Idle_Loop",
+      "label": "Idle"
+    },
+    {
+      "id": "Idle_Talking_Loop",
+      "label": "Idle - Talking"
+    },
+    {
+      "id": "Idle_Torch_Loop",
+      "label": "Idle - Torch"
+    },
+    {
+      "id": "Walk_Loop",
+      "label": "Walk"
+    },
+    {
+      "id": "Walk_Formal_Loop",
+      "label": "Walk - Formal"
+    },
+    {
+      "id": "Jog_Fwd_Loop",
+      "label": "Jog Forward"
+    },
+    {
+      "id": "Sprint_Loop",
+      "label": "Sprint"
+    },
+    {
+      "id": "Crouch_Idle_Loop",
+      "label": "Crouch - Idle"
+    },
+    {
+      "id": "Crouch_Fwd_Loop",
+      "label": "Crouch - Move Forward"
+    },
+    {
+      "id": "Sitting_Enter",
+      "label": "Sit - Enter"
+    },
+    {
+      "id": "Sitting_Idle_Loop",
+      "label": "Sit - Idle"
+    },
+    {
+      "id": "Sitting_Talking_Loop",
+      "label": "Sit - Talking"
+    },
+    {
+      "id": "Sitting_Exit",
+      "label": "Sit - Exit"
+    },
+    {
+      "id": "Jump_Start",
+      "label": "Jump - Start"
+    },
+    {
+      "id": "Jump_Loop",
+      "label": "Jump - Air"
+    },
+    {
+      "id": "Jump_Land",
+      "label": "Jump - Land"
+    },
+    {
+      "id": "Roll",
+      "label": "Combat Roll"
+    },
+    {
+      "id": "Interact",
+      "label": "Interact"
+    },
+    {
+      "id": "PickUp_Table",
+      "label": "Pick Up From Table"
+    },
+    {
+      "id": "Fixing_Kneeling",
+      "label": "Kneeling - Work / Repair"
+    },
+    {
+      "id": "Dance_Loop",
+      "label": "Dance"
+    },
+    {
+      "id": "Punch_Jab",
+      "label": "Punch - Jab"
+    },
+    {
+      "id": "Punch_Cross",
+      "label": "Punch - Cross"
+    },
+    {
+      "id": "Push_Loop",
+      "label": "Push"
+    },
+    {
+      "id": "Hit_Chest",
+      "label": "Hit Reaction - Chest"
+    },
+    {
+      "id": "Hit_Head",
+      "label": "Hit Reaction - Head"
+    },
+    {
+      "id": "Pistol_Idle_Loop",
+      "label": "Pistol - Idle"
+    },
+    {
+      "id": "Pistol_Aim_Neutral",
+      "label": "Pistol - Aim"
+    },
+    {
+      "id": "Pistol_Aim_Up",
+      "label": "Pistol - Aim Up"
+    },
+    {
+      "id": "Pistol_Aim_Down",
+      "label": "Pistol - Aim Down"
+    },
+    {
+      "id": "Pistol_Reload",
+      "label": "Pistol - Reload"
+    },
+    {
+      "id": "Pistol_Shoot",
+      "label": "Pistol - Fire"
+    },
+    {
+      "id": "Sword_Idle",
+      "label": "Melee - Idle"
+    },
+    {
+      "id": "Sword_Attack",
+      "label": "Melee - Attack"
+    },
+    {
+      "id": "Spell_Simple_Enter",
+      "label": "Projection Gesture - Enter"
+    },
+    {
+      "id": "Spell_Simple_Idle_Loop",
+      "label": "Projection Gesture - Idle"
+    },
+    {
+      "id": "Spell_Simple_Shoot",
+      "label": "Projection Gesture - Activate"
+    },
+    {
+      "id": "Spell_Simple_Exit",
+      "label": "Projection Gesture - Exit"
+    },
+    {
+      "id": "Driving_Loop",
+      "label": "Driving"
+    },
+    {
+      "id": "Swim_Idle_Loop",
+      "label": "Swim - Idle"
+    },
+    {
+      "id": "Swim_Fwd_Loop",
+      "label": "Swim Forward"
+    },
+    {
+      "id": "Death01",
+      "label": "Death"
+    },
+    {
+      "id": "A_TPose",
+      "label": "T-Pose (Calibration)"
+    }
   ],
   "cyberneticsSides": {
     "eye": [

@@ -58,6 +58,14 @@ const FORGE_EXTERNAL_ANIMATION_NAMES = new Set([
   "Spell_Simple_Idle_Loop", "Spell_Simple_Shoot", "Sprint_Loop", "Swim_Fwd_Loop", "Swim_Idle_Loop",
   "Sword_Attack", "Sword_Idle", "Walk_Formal_Loop", "Walk_Loop"
 ]);
+const FORGE_ANIMATION_ALIASES = {
+  Idle:"Idle_Loop",
+  HappyIdle:"Idle_Talking_Loop",
+  Sway:"Idle_Torch_Loop",
+  Turn:"Idle_Loop",
+  Walk:"Walk_Loop",
+  Wave:"Idle_Talking_Loop"
+};
 const UAL_TO_VITRUVIAN_BONES = {
   pelvis:"Hips",
   spine01:"Spine", spine02:"Spine1", spine03:"Spine2",
@@ -1494,7 +1502,7 @@ class ProjectionRenderer {
         const forge=this.profile?.appearance?.forge||{};
         this._requestedAnimationName="";
         if(String(forge.posePreview||"none")!=="none") await this.applyMakeHumanPose(forge.posePreview,true);
-        else this.applyAnimation(forge.animation||"Idle",true);
+        else this.applyAnimation(forge.animation||"Idle_Loop",true);
         console.info(`Veilwatch animation library online: ${count} local CC0 clips retargeted.`);
       }catch(err){
         console.warn("Veilwatch external animation library unavailable; using native clips:",err?.message||err);
@@ -1544,7 +1552,7 @@ class ProjectionRenderer {
     if(id==="none"){
       this.activePoseId="none";
       this.restoreMakeHumanRestPose();
-      this.applyAnimation(this.profile?.appearance?.forge?.animation||"Idle",true);
+      this.applyAnimation(this.profile?.appearance?.forge?.animation||"Idle_Loop",true);
       return true;
     }
     if(!force && this.activePoseId===id) return true;
@@ -2268,13 +2276,16 @@ class ProjectionRenderer {
     return null;
   }
 
-  applyAnimation(name="Idle", force=false){
+  applyAnimation(name="Idle_Loop", force=false){
     if(!this.mixer || !this.availableAnimations?.length) return;
-    const requested=String(name||"Idle");
+    const rawRequested=String(name||"Idle_Loop");
+    const requested=FORGE_ANIMATION_ALIASES[rawRequested] || rawRequested;
     if(!force && this._requestedAnimationName===requested && this.activeAnimationName) return;
+    // Never use a fuzzy `idle` search here. The UAL library contains several
+    // unrelated idle clips (crouch, sitting, pistol, swim, spell). A fuzzy
+    // match made legacy "Idle" requests consistently select Crouch_Idle_Loop.
     const clip=this.availableAnimations.find(a=>a.name===requested)
-      || this.availableAnimations.find(a=>/^idle$/i.test(a.name))
-      || this.availableAnimations.find(a=>/idle/i.test(a.name))
+      || this.availableAnimations.find(a=>a.name==="Idle_Loop")
       || this.availableAnimations[0];
     if(!clip) return;
     this.restoreMakeHumanRestPose();
@@ -2422,7 +2433,7 @@ class ProjectionRenderer {
       this.mixer=new THREE.AnimationMixer(this.currentObject);
       this._requestedAnimationName="";
       if(String(f.posePreview||"none")!=="none") await this.applyMakeHumanPose(f.posePreview,true);
-      else this.applyAnimation(f.animation||"Idle",true);
+      else this.applyAnimation(f.animation||"Idle_Loop",true);
       this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
     }catch(err){
       console.error("Veilwatch MakeHuman morph update failed:",err);
@@ -2494,7 +2505,7 @@ class ProjectionRenderer {
         if(mat) mat.needsUpdate=true;
       });
     });
-    this.applyAnimation(f.animation||'Idle');
+    this.applyAnimation(f.animation||'Idle_Loop');
   }
 
   applyAppearance(){
