@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRMLoaderPlugin, VRMUtils } from "@pixiv/three-vrm";
+import { createMakeHumanRuntime } from "./makehuman_runtime.mjs";
 
 const CYAN = 0x00e5ff;
 const AMBER = 0xffb13b;
@@ -314,6 +315,8 @@ class ProjectionRenderer {
     this.textureLoader = new THREE.TextureLoader();
     this.vitruvianTextures = null;
     this._vitruvianTexturePromise = null;
+    this.makeHumanRuntime = null;
+    this._makeHumanForgeSerial = 0;
     this.currentObject = null;
     this.currentVrm = null;
     this.mixer = null;
@@ -373,6 +376,11 @@ class ProjectionRenderer {
   }
 
   clearCurrent(){
+    if(this.makeHumanRuntime){
+      this.makeHumanRuntime.dispose?.();
+      this.makeHumanRuntime = null;
+    }
+    this._makeHumanForgeSerial++;
     if(this.currentObject){
       this.world.remove(this.currentObject);
       disposeObject(this.currentObject);
@@ -1966,6 +1974,45 @@ class ProjectionRenderer {
     this._requestedAnimationName=requested;
   }
 
+  async applyMakeHumanForge(appearance,hairColor){
+    const runtime=this.makeHumanRuntime;
+    if(!runtime || !this.currentObject) return;
+    const f=appearance?.forge||{};
+    const serial=++this._makeHumanForgeSerial;
+    try{
+      const applied=await runtime.applyForge(f);
+      if(!applied || serial!==this._makeHumanForgeSerial || runtime!==this.makeHumanRuntime || !this.currentObject) return;
+
+      // Every proportion update rebuilds the HM08 rest skeleton so equipment,
+      // cuff placement, and retargeted animation all follow the real MakeHuman body.
+      this.headBone=runtime.getBone("Head") || runtime.getBone("Neck");
+      if(this.headBone){
+        this.headBone.updateWorldMatrix(true,false);
+        this.headBindInverse=new THREE.Matrix4().copy(this.headBone.matrixWorld).invert();
+      }
+
+      this._forgeGeneration=(this._forgeGeneration||0)+1;
+      this.clearForgeVisuals();
+      this.forgeRoot=new THREE.Group();
+      this.forgeRoot.name="VeilwatchMakeHumanForgeRoot";
+      this.currentObject.add(this.forgeRoot);
+
+      // These are bone-driven and already compatible with the MakeHuman Mixamo rig.
+      // MakeHuman-native hair/clothes/accessories are wired in the next asset pass,
+      // rather than forcing the old Vitruvian-fitted meshes onto the new body.
+      this.createCuff(f.cuffArm||"left");
+      this.createWeapon(f.weaponPreview||"none",f.weaponCarry||"back");
+
+      this.mixer=new THREE.AnimationMixer(this.currentObject);
+      this._requestedAnimationName="";
+      this.applyAnimation(f.animation||"Idle",true);
+      this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
+    }catch(err){
+      console.error("Veilwatch MakeHuman morph update failed:",err);
+      if(serial===this._makeHumanForgeSerial) this.setStatus("MAKEHUMAN MORPH UPDATE FAILED", "error");
+    }
+  }
+
   applyFullForge(appearance,hairColor){
     const f=appearance?.forge||{}; if(!this.currentObject || this.currentObject.userData?.isVeilwatchFallback) return;
     const scaleMap={compact:.88,average:1,tall:1.10,huge:1.22}; const base=scaleMap[this.profile.scale]||1;
@@ -2048,6 +2095,13 @@ class ProjectionRenderer {
     const pantsColor = new THREE.Color(colorFor(BOTTOM_COLORS, appearance.bottoms, BOTTOM_COLORS.jeans));
     const shoesColor = new THREE.Color(colorFor(SHOE_COLORS, appearance.shoes, SHOE_COLORS.sneakers));
     const outerwear = String(appearance.outerwear || "none").toLowerCase();
+
+    if(this.makeHumanRuntime && this.currentObject.userData?.makeHumanRuntime){
+      this.makeHumanRuntime.setSkinColor(skinTarget);
+      this.makeHumanRuntime.setEyeColor(eyeColor);
+      void this.applyMakeHumanForge(appearance,hairColor);
+      return;
+    }
 
     this.currentObject.traverse((obj)=>{
       if(!obj.isMesh || !obj.material) return;
@@ -2180,6 +2234,32 @@ class ProjectionRenderer {
     this.camera.far = Math.max(100, distance * 20);
     this.camera.updateProjectionMatrix();
     this.controls.update();
+  }
+
+  async loadMakeHumanBundle(token){
+    this.setStatus("LOADING MAKEHUMAN FOUNDATION", "loading");
+    const forge=this.profile?.appearance?.forge||{};
+    const runtime=await createMakeHumanRuntime(forge);
+    if(token!==this._loadToken){ runtime.dispose?.(); disposeObject(runtime.root); return; }
+
+    this.clearCurrent();
+    this.makeHumanRuntime=runtime;
+    this.currentObject=runtime.root;
+    this.currentObject.name="VeilwatchMakeHumanCharacter";
+    this.headBone=runtime.getBone("Head") || runtime.getBone("Neck");
+    if(this.headBone){
+      this.headBone.updateWorldMatrix(true,false);
+      this.headBindInverse=new THREE.Matrix4().copy(this.headBone.matrixWorld).invert();
+    }
+    this.world.add(this.currentObject);
+    this.availableAnimations=[];
+    this.mixer=new THREE.AnimationMixer(this.currentObject);
+
+    this.frameObject(this.currentObject);
+    this.applyProfile(this.profile);
+    this.setView(this.viewName||"body");
+    this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
+    void this.ensureForgeAnimationLibrary(token);
   }
 
   async loadVitruvianBundle(token){
@@ -2357,7 +2437,14 @@ class ProjectionRenderer {
 
     try{
       if(STANDARD_SENTINELS.has(cleanUrl.toLowerCase())){
-        await this.loadVitruvianBundle(token);
+        try{
+          await this.loadMakeHumanBundle(token);
+        }catch(makeHumanError){
+          console.error("Veilwatch MakeHuman foundation failed; loading legacy Vitruvian fallback:",makeHumanError);
+          if(token!==this._loadToken) return;
+          await this.loadVitruvianBundle(token);
+          this.setStatus("MAKEHUMAN FAILED · LEGACY BODY ONLINE", "warning");
+        }
       }else{
         await this.loadSingleModel(cleanUrl, token);
       }
@@ -2462,6 +2549,6 @@ function createProjectionRenderer(host, options={}){
 
 window.VeilwatchProjection3D = {
   create: createProjectionRenderer,
-  version: "1.0.0"
+  version: "2.0.0-alpha.1"
 };
 window.dispatchEvent(new CustomEvent("veilwatch:projection3d-ready"));
