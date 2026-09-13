@@ -1434,20 +1434,22 @@ class ProjectionRenderer {
   retargetExternalClip(clip,sourceRoot,boneMap){
     if(!clip || !sourceRoot) return null;
 
-    // Retarget in WORLD space from each source bone's authored rest frame to the
-    // MakeHuman bone's saved rest frame.  The previous implementation applied
-    // local quaternion deltas through the parent rest frames.  That works only
-    // when both rigs use nearly identical local bone axes.  UAL1 and MPFB do
-    // not: their arm/leg roll axes differ substantially, which folded limbs
-    // behind the body even though the correct animation clip was selected.
+    // Retarget each joint from its LOCAL rotation delta rather than copying an
+    // absolute world-space orientation. UAL1 and MakeHuman use different rest
+    // poses and very different bone rolls. Absolute world correction looked
+    // plausible at rest, but once a parent moved the child correction was being
+    // evaluated in the wrong frame, producing folded shoulders, detached-looking
+    // hands and twisted feet.
     //
-    // For a source bone S and target bone T:
-    //   correction = T_rest_world * inverse(S_rest_world)
-    //   T_anim_world = correction * S_anim_world
-    //   T_anim_local = inverse(T_parent_anim_world) * T_anim_world
+    // For each mapped joint:
+    //   Dsrc = S_anim_local * inverse(S_rest_local)
+    //   P    = T_parent_rest_world * inverse(S_parent_rest_world)
+    //   Dtgt = P * Dsrc * inverse(P)
+    //   T_anim_local = Dtgt * T_rest_local
     //
-    // This guarantees that a source rest/T-pose resolves exactly to the saved
-    // MakeHuman rest pose while preserving the authored world-space motion.
+    // Dsrc is the authored joint motion in the source parent frame. Conjugating
+    // it by P expresses exactly the same motion in the target parent frame. This
+    // keeps MakeHuman's own bind pose, bone lengths and roll axes intact.
     sourceRoot.updateMatrixWorld?.(true);
     this.currentObject?.updateMatrixWorld?.(true);
 
@@ -1464,97 +1466,62 @@ class ProjectionRenderer {
       if(key && !rotationTracks.has(key)) rotationTracks.set(key,track);
     }
 
-    const sourceInterpolants=new Map();
-    for(const [key,track] of rotationTracks){
-      sourceInterpolants.set(key,track.createInterpolant());
-    }
-
-    const sourceRestWorld=new Map();
-    for(const [key,node] of sourceNodes){
-      const q=new THREE.Quaternion();
-      node.getWorldQuaternion(q);
-      sourceRestWorld.set(key,q);
-    }
-
-    // Resolve all mapped target bones once.  The reverse map lets a child derive
-    // its local quaternion from the *animated* world orientation of its parent.
     const mapped=[];
-    const targetToSource=new Map();
     for(const [sourceKey,targetShort] of Object.entries(boneMap||{})){
       const sourceNode=sourceNodes.get(sourceKey);
       const targetBone=this.boneByName(targetShort);
       const track=rotationTracks.get(sourceKey);
       if(!sourceNode || !targetBone || !track) continue;
-      const targetRestArray=targetBone.userData?.makeHumanRestWorldQuaternion;
-      const targetRestWorld=Array.isArray(targetRestArray) && targetRestArray.length===4
-        ? new THREE.Quaternion().fromArray(targetRestArray)
-        : (()=>{ const q=new THREE.Quaternion(); targetBone.getWorldQuaternion(q); return q; })();
-      const sourceRest=sourceRestWorld.get(sourceKey);
-      if(!sourceRest) continue;
-      const correction=targetRestWorld.clone().multiply(sourceRest.clone().invert()).normalize();
-      const row={sourceKey,sourceNode,targetBone,track,targetRestWorld,correction};
-      mapped.push(row);
-      targetToSource.set(targetBone,row);
+
+      const sourceRestLocal=sourceNode.quaternion.clone().normalize();
+      const targetRestArray=targetBone.userData?.makeHumanRestQuaternion;
+      const targetRestLocal=Array.isArray(targetRestArray) && targetRestArray.length===4
+        ? new THREE.Quaternion().fromArray(targetRestArray).normalize()
+        : targetBone.quaternion.clone().normalize();
+
+      const sourceParentRestWorld=new THREE.Quaternion();
+      const sourceParent=sourceNode.parent;
+      if(sourceParent && sourceParent!==sourceRoot.parent) sourceParent.getWorldQuaternion(sourceParentRestWorld);
+
+      const targetParentRestWorld=new THREE.Quaternion();
+      const targetParent=targetBone.parent;
+      if(targetParent?.isBone){
+        const saved=targetParent.userData?.makeHumanRestWorldQuaternion;
+        if(Array.isArray(saved) && saved.length===4) targetParentRestWorld.fromArray(saved).normalize();
+        else targetParent.getWorldQuaternion(targetParentRestWorld);
+      }
+
+      const parentFrame=targetParentRestWorld.clone()
+        .multiply(sourceParentRestWorld.clone().invert())
+        .normalize();
+      const parentFrameInverse=parentFrame.clone().invert();
+
+      mapped.push({
+        sourceKey,sourceNode,targetBone,track,
+        sourceRestLocal,targetRestLocal,parentFrame,parentFrameInverse,
+        interpolant:track.createInterpolant()
+      });
     }
     if(!mapped.length) return null;
-
-    const localAt=(node,time)=>{
-      const key=this.normalizeRigName(node?.name);
-      const interpolant=sourceInterpolants.get(key);
-      if(!interpolant) return node?.quaternion?.clone?.() || new THREE.Quaternion();
-      const value=interpolant.evaluate(time);
-      return new THREE.Quaternion(value[0],value[1],value[2],value[3]).normalize();
-    };
-
-    const sourceWorldAt=(node,time,cache)=>{
-      if(cache.has(node)) return cache.get(node);
-      const local=localAt(node,time);
-      const parent=node?.parent;
-      const world=(parent && parent!==sourceRoot.parent)
-        ? sourceWorldAt(parent,time,cache).clone().multiply(local)
-        : local;
-      world.normalize();
-      cache.set(node,world);
-      return world;
-    };
-
-    const targetWorldAt=(row,time,sourceCache,targetCache)=>{
-      if(targetCache.has(row.targetBone)) return targetCache.get(row.targetBone);
-      const sourceWorld=sourceWorldAt(row.sourceNode,time,sourceCache);
-      const world=row.correction.clone().multiply(sourceWorld).normalize();
-      targetCache.set(row.targetBone,world);
-      return world;
-    };
-
-    const parentWorldAt=(targetBone,time,sourceCache,targetCache)=>{
-      const parent=targetBone?.parent;
-      if(!parent) return new THREE.Quaternion();
-      if(parent.isBone){
-        const mappedParent=targetToSource.get(parent);
-        if(mappedParent) return targetWorldAt(mappedParent,time,sourceCache,targetCache);
-        const saved=parent.userData?.makeHumanRestWorldQuaternion;
-        if(Array.isArray(saved) && saved.length===4) return new THREE.Quaternion().fromArray(saved);
-      }
-      // MakeHuman rest-world quaternions are stored in character-root space,
-      // so a non-bone parent is the identity frame here.  Using scene-world
-      // rotation (for example the Projection Bay posture turn) would bake UI
-      // orientation into the skeleton animation.
-      return new THREE.Quaternion();
-    };
 
     const tracks=[];
     for(const row of mapped){
       const times=row.track.times.slice();
       const values=new Float32Array(times.length*4);
+      const sourceRestInverse=row.sourceRestLocal.clone().invert();
+
       for(let frame=0;frame<times.length;frame++){
-        const time=times[frame];
-        const sourceCache=new Map();
-        const targetCache=new Map();
-        const targetWorld=targetWorldAt(row,time,sourceCache,targetCache);
-        const parentWorld=parentWorldAt(row.targetBone,time,sourceCache,targetCache);
-        const local=parentWorld.clone().invert().multiply(targetWorld).normalize();
-        local.toArray(values,frame*4);
+        const sample=row.interpolant.evaluate(times[frame]);
+        const sourceAnimLocal=new THREE.Quaternion(sample[0],sample[1],sample[2],sample[3]).normalize();
+        const deltaSourceParent=sourceAnimLocal.clone().multiply(sourceRestInverse).normalize();
+        const deltaTargetParent=row.parentFrame.clone()
+          .multiply(deltaSourceParent)
+          .multiply(row.parentFrameInverse)
+          .normalize();
+        const targetLocal=deltaTargetParent.multiply(row.targetRestLocal).normalize();
+        targetLocal.toArray(values,frame*4);
       }
+
       tracks.push(new THREE.QuaternionKeyframeTrack(`${row.targetBone.name}.quaternion`,times,values));
     }
 
