@@ -157,6 +157,15 @@ export class MakeHumanRuntime {
     this.weightData = null;
     this.targetManifest = null;
     this.targetCache = new Map();
+
+    // MakeHuman facial expression / lip-sync targets. The compressed source
+    // pack is loaded once and only a tiny LRU of parsed sparse targets is kept.
+    this.facialCatalog = null;
+    this._facialCatalogPromise = null;
+    this._facialPack = null;
+    this._facialPackPromise = null;
+    this._facialTargetCache = new Map();
+
     this.renderMeshes = [];
     this.boneMap = new Map();
     this.skeleton = null;
@@ -558,10 +567,16 @@ export class MakeHumanRuntime {
         ? new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().copy(worldMatrices.get(parentName)).invert(),world)
         : world.clone();
       local.decompose(bone.position,bone.quaternion,bone.scale);
+      bone.userData.makeHumanRestQuaternion = [bone.quaternion.x,bone.quaternion.y,bone.quaternion.z,bone.quaternion.w];
     }
 
     this.root.updateMatrixWorld(true);
     this.skeleton.calculateInverses();
+    for(const bone of this.boneMap.values()){
+      const q=new THREE.Quaternion();
+      bone.getWorldQuaternion(q);
+      bone.userData.makeHumanRestWorldQuaternion=[q.x,q.y,q.z,q.w];
+    }
 
     for(const mesh of this.renderMeshes){
       if(mesh.skeleton!==this.skeleton){
@@ -589,13 +604,65 @@ export class MakeHumanRuntime {
     return this.boneIndexByName.get(name);
   }
 
+  async loadFacialCatalog(){
+    if(this.facialCatalog) return this.facialCatalog;
+    if(this._facialCatalogPromise) return this._facialCatalogPromise;
+    this._facialCatalogPromise=fetch(`${RUNTIME_ROOT}/../facial/catalog.json`,{cache:"force-cache"})
+      .then(r=>{if(!r.ok)throw new Error(`Facial catalog ${r.status}`);return r.json();})
+      .then(data=>{this.facialCatalog=data;return data;})
+      .finally(()=>{this._facialCatalogPromise=null;});
+    return this._facialCatalogPromise;
+  }
+
+  async _loadFacialPack(){
+    if(this._facialPack) return this._facialPack;
+    if(this._facialPackPromise) return this._facialPackPromise;
+    this._facialPackPromise=this._fetchGzipJson(`${RUNTIME_ROOT}/../facial/facial_targets.vwpack.json.gz`)
+      .then(data=>{this._facialPack=data?.targets||{};return this._facialPack;})
+      .finally(()=>{this._facialPackPromise=null;});
+    return this._facialPackPromise;
+  }
+
+  async _loadFacialTarget(id){
+    id=String(id||"");
+    if(!id || id==="none") return null;
+    if(this._facialTargetCache.has(id)){
+      const cached=this._facialTargetCache.get(id);
+      this._facialTargetCache.delete(id); this._facialTargetCache.set(id,cached);
+      return cached;
+    }
+    const pack=await this._loadFacialPack();
+    const text=pack?.[id];
+    if(typeof text!=="string") throw new Error(`Unknown MakeHuman facial target: ${id}`);
+    const parsed=parseTarget(text);
+    this._facialTargetCache.set(id,parsed);
+    while(this._facialTargetCache.size>4){
+      const first=this._facialTargetCache.keys().next().value;
+      this._facialTargetCache.delete(first);
+    }
+    return parsed;
+  }
+
+  async _facialContributions(forge={}){
+    const rows=[];
+    const expression=String(forge.expressionUnit||"none");
+    const viseme=String(forge.visemePreview||"none");
+    const expressionWeight=THREE.MathUtils.clamp(Number(forge.expressionIntensity??100),0,100)/100;
+    const visemeWeight=THREE.MathUtils.clamp(Number(forge.visemeIntensity??100),0,100)/100;
+    if(expression!=="none" && expressionWeight>.0001) rows.push([expression,expressionWeight]);
+    if(viseme!=="none" && visemeWeight>.0001) rows.push([viseme,visemeWeight]);
+    return Promise.all(rows.map(async ([id,weight])=>[await this._loadFacialTarget(id),weight]));
+  }
+
   async applyForge(forge={}, options={}){
     const serial=++this._applySerial;
     this.deformedRaw.set(this.basePositions);
     const contributions=this._forgeContributions(forge);
     const loaded=await Promise.all(contributions.map(async ([rel,weight])=>[await this._loadTarget(rel),weight]));
+    const facialLoaded=await this._facialContributions(forge);
     if(serial !== this._applySerial) return false;
     for(const [target,weight] of loaded) this._applySparseTarget(target,weight);
+    for(const [target,weight] of facialLoaded){ if(target) this._applySparseTarget(target,weight); }
     this._transformPositions(forge);
     this._updateGeometries();
     this._rebuildSkeleton();
@@ -980,6 +1047,9 @@ export class MakeHumanRuntime {
     this.surfaceCatalog=null;
     this.skeleton?.dispose?.();
     this.targetCache.clear();
+    this._facialTargetCache.clear();
+    this._facialPack=null;
+    this.facialCatalog=null;
     this._nativePackCache.clear();
   }
 }

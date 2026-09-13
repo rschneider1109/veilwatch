@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { BVHLoader } from "three/examples/jsm/loaders/BVHLoader.js";
 import { VRMLoaderPlugin, VRMUtils } from "@pixiv/three-vrm";
 import { createMakeHumanRuntime } from "./makehuman_runtime.mjs";
 
@@ -44,15 +46,17 @@ const FPS_WEAPON_ROOT = "/assets/characters/weapons/fps_cc0";
 const LOCAL_WEAPON_ROOT = "/assets/characters/weapons/veilwatch_local";
 const QUATERNIUS_ANIMATION_ROOT = "/assets/characters/animations/quaternius";
 const QUATERNIUS_UAL1 = `${QUATERNIUS_ANIMATION_ROOT}/UAL1_Standard.glb`;
-const QUATERNIUS_UAL2 = `${QUATERNIUS_ANIMATION_ROOT}/UAL2_Standard.glb`;
+const QUATERNIUS_WEAPON_ROOT = "/assets/characters/weapons/quaternius_fbx";
+const MAKEHUMAN_POSE_ROOT = "/assets/characters/makehuman/poses";
 const FORGE_EXTERNAL_ANIMATION_NAMES = new Set([
-  "Idle_Loop", "Idle_Talking_Loop", "Walk_Loop", "Walk_Formal_Loop", "Jog_Fwd_Loop", "Sprint_Loop",
-  "Crouch_Idle_Loop", "Crouch_Fwd_Loop", "Jump_Start", "Jump_Loop", "Jump_Land", "Roll",
-  "Sitting_Enter", "Sitting_Idle_Loop", "Sitting_Talking_Loop", "Sitting_Exit",
-  "Interact", "PickUp_Table", "Fixing_Kneeling", "Driving_Loop", "Push_Loop",
-  "Pistol_Idle_Loop", "Pistol_Aim_Neutral", "Pistol_Aim_Up", "Pistol_Aim_Down", "Pistol_Shoot", "Pistol_Reload",
-  "Punch_Jab", "Punch_Cross", "Sword_Idle", "Sword_Attack", "Hit_Chest", "Hit_Head",
-  "Swim_Idle_Loop", "Swim_Fwd_Loop", "Dance_Loop", "Spell_Simple_Idle_Loop", "Spell_Simple_Shoot", "Death01"
+  "A_TPose", "Crouch_Fwd_Loop", "Crouch_Idle_Loop", "Dance_Loop", "Death01", "Driving_Loop",
+  "Fixing_Kneeling", "Hit_Chest", "Hit_Head", "Idle_Loop", "Idle_Talking_Loop", "Idle_Torch_Loop",
+  "Interact", "Jog_Fwd_Loop", "Jump_Land", "Jump_Loop", "Jump_Start", "PickUp_Table",
+  "Pistol_Aim_Down", "Pistol_Aim_Neutral", "Pistol_Aim_Up", "Pistol_Idle_Loop", "Pistol_Reload", "Pistol_Shoot",
+  "Punch_Cross", "Punch_Jab", "Push_Loop", "Roll", "Sitting_Enter", "Sitting_Exit",
+  "Sitting_Idle_Loop", "Sitting_Talking_Loop", "Spell_Simple_Enter", "Spell_Simple_Exit",
+  "Spell_Simple_Idle_Loop", "Spell_Simple_Shoot", "Sprint_Loop", "Swim_Fwd_Loop", "Swim_Idle_Loop",
+  "Sword_Attack", "Sword_Idle", "Walk_Formal_Loop", "Walk_Loop"
 ]);
 const UAL_TO_VITRUVIAN_BONES = {
   pelvis:"Hips",
@@ -73,6 +77,33 @@ const UAL_TO_VITRUVIAN_BONES = {
   ring01r:"RightHandRing1", ring02r:"RightHandRing2", ring03r:"RightHandRing3",
   pinky01r:"RightHandPinky1", pinky02r:"RightHandPinky2", pinky03r:"RightHandPinky3"
 };
+const MAKEHUMAN_BVH_TO_MIXAMO_BONES = {
+  spine05:"Hips", spine04:"Spine", spine03:"Spine1", spine02:"Spine2",
+  neck01:"Neck", head:"Head",
+  claviclel:"LeftShoulder", upperarm01l:"LeftArm", lowerarm01l:"LeftForeArm", wristl:"LeftHand",
+  clavicler:"RightShoulder", upperarm01r:"RightArm", lowerarm01r:"RightForeArm", wristr:"RightHand",
+  upperleg01l:"LeftUpLeg", lowerleg01l:"LeftLeg", footl:"LeftFoot", toe11l:"LeftToeBase",
+  upperleg01r:"RightUpLeg", lowerleg01r:"RightLeg", footr:"RightFoot", toe11r:"RightToeBase",
+  finger11l:"LeftHandThumb1", finger12l:"LeftHandThumb2", finger13l:"LeftHandThumb3",
+  finger21l:"LeftHandIndex1", finger22l:"LeftHandIndex2", finger23l:"LeftHandIndex3",
+  finger31l:"LeftHandMiddle1", finger32l:"LeftHandMiddle2", finger33l:"LeftHandMiddle3",
+  finger41l:"LeftHandRing1", finger42l:"LeftHandRing2", finger43l:"LeftHandRing3",
+  finger51l:"LeftHandPinky1", finger52l:"LeftHandPinky2", finger53l:"LeftHandPinky3",
+  finger11r:"RightHandThumb1", finger12r:"RightHandThumb2", finger13r:"RightHandThumb3",
+  finger21r:"RightHandIndex1", finger22r:"RightHandIndex2", finger23r:"RightHandIndex3",
+  finger31r:"RightHandMiddle1", finger32r:"RightHandMiddle2", finger33r:"RightHandMiddle3",
+  finger41r:"RightHandRing1", finger42r:"RightHandRing2", finger43r:"RightHandRing3",
+  finger51r:"RightHandPinky1", finger52r:"RightHandPinky2", finger53r:"RightHandPinky3"
+};
+
+async function fetchGzipJson(url){
+  const res=await fetch(url,{cache:"force-cache"});
+  if(!res.ok) throw new Error(`Veilwatch gzip fetch failed ${res.status}: ${url}`);
+  if(typeof DecompressionStream!=="function") throw new Error("Browser does not support gzip runtime packs.");
+  const stream=res.body.pipeThrough(new DecompressionStream("gzip"));
+  return new Response(stream).json();
+}
+
 const FPS_WEAPON_ASSETS = {
   compact_pistol: "Pistol_Compact_West.glb",
   service_pistol: "Pistol_Full_West.glb",
@@ -451,6 +482,8 @@ class ProjectionRenderer {
 
     this.loader = new GLTFLoader();
     this.loader.register((parser)=>new VRMLoaderPlugin(parser));
+    this.fbxLoader = new FBXLoader();
+    this.bvhLoader = new BVHLoader();
     this.textureLoader = new THREE.TextureLoader();
     this.vitruvianTextures = null;
     this._vitruvianTexturePromise = null;
@@ -463,6 +496,8 @@ class ProjectionRenderer {
     this.faceMeshes = [];
     this.bodyMorphMeshes = [];
     this.faceMorphMeshes = [];
+    this._poseLoadSerial++;
+    this.activePoseId = "none";
     this.headAssetRoot = null;
     this.headBone = null;
     this.headBindInverse = null;
@@ -486,6 +521,11 @@ class ProjectionRenderer {
     this.activeAnimationName = "";
     this._requestedAnimationName = "";
     this._forgeAnimationPromise = null;
+    this._poseCatalog = null;
+    this._poseCatalogPromise = null;
+    this._posePackCache = new Map();
+    this._poseLoadSerial = 0;
+    this.activePoseId = "none";
     this.lastUrl = null;
     this.profile = {};
     this.viewName = "body";
@@ -1383,12 +1423,12 @@ class ProjectionRenderer {
     return node.replace(/^Armature[:_]?/i,"");
   }
 
-  retargetQuaterniusClip(clip,sourceRoot){
+  retargetExternalClip(clip,sourceRoot,boneMap){
     if(!clip || !sourceRoot) return null;
-    sourceRoot.updateMatrixWorld(true);
+    sourceRoot.updateMatrixWorld?.(true);
     this.currentObject?.updateMatrixWorld?.(true);
     const sourceNodes=new Map();
-    sourceRoot.traverse(obj=>{
+    sourceRoot.traverse?.(obj=>{
       const key=this.normalizeRigName(obj.name);
       if(key && !sourceNodes.has(key)) sourceNodes.set(key,obj);
     });
@@ -1398,7 +1438,7 @@ class ProjectionRenderer {
       if(!/\.quaternion$/i.test(track.name)) continue;
       const sourceName=this.animationTrackNodeName(track.name);
       const sourceKey=this.normalizeRigName(sourceName);
-      const targetShort=UAL_TO_VITRUVIAN_BONES[sourceKey];
+      const targetShort=boneMap?.[sourceKey];
       if(!targetShort) continue;
       const sourceNode=sourceNodes.get(sourceKey);
       const targetBone=this.boneByName(targetShort);
@@ -1406,11 +1446,16 @@ class ProjectionRenderer {
 
       const sourceRest=sourceNode.quaternion.clone();
       const sourceRestInv=sourceRest.clone().invert();
-      const targetRest=targetBone.quaternion.clone();
+      const savedRest=targetBone.userData?.makeHumanRestQuaternion;
+      const targetRest=Array.isArray(savedRest) && savedRest.length===4
+        ? new THREE.Quaternion().fromArray(savedRest)
+        : targetBone.quaternion.clone();
       const sourceParentWorld=new THREE.Quaternion();
       const targetParentWorld=new THREE.Quaternion();
       sourceNode.parent?.getWorldQuaternion?.(sourceParentWorld);
-      targetBone.parent?.getWorldQuaternion?.(targetParentWorld);
+      const savedParentRest=targetBone.parent?.userData?.makeHumanRestWorldQuaternion;
+      if(Array.isArray(savedParentRest) && savedParentRest.length===4) targetParentWorld.fromArray(savedParentRest);
+      else targetBone.parent?.getWorldQuaternion?.(targetParentWorld);
       const frameMap=targetParentWorld.clone().invert().multiply(sourceParentWorld);
       const frameMapInv=frameMap.clone().invert();
 
@@ -1429,30 +1474,106 @@ class ProjectionRenderer {
     return new THREE.AnimationClip(clip.name,clip.duration,tracks);
   }
 
+  retargetQuaterniusClip(clip,sourceRoot){
+    return this.retargetExternalClip(clip,sourceRoot,UAL_TO_VITRUVIAN_BONES);
+  }
+
   async ensureForgeAnimationLibrary(token=this._loadToken){
     if(this._forgeAnimationPromise) return this._forgeAnimationPromise;
     this._forgeAnimationPromise=(async()=>{
       try{
-        const results=await Promise.allSettled([this.loader.loadAsync(QUATERNIUS_UAL1),this.loader.loadAsync(QUATERNIUS_UAL2)]);
-        if(token!==this._loadToken || !this.currentObject) return;
+        const gltf=await this.loader.loadAsync(QUATERNIUS_UAL1);
+        if(token!==this._loadToken || !this.currentObject){ disposeObject(gltf.scene||gltf.scenes?.[0]); return; }
         const byName=new Map((this.availableAnimations||[]).map(c=>[c.name,c]));
         let count=0;
-        for(const result of results){
-          if(result.status!=="fulfilled") continue;
-          const gltf=result.value, sourceRoot=gltf.scene||gltf.scenes?.[0];
-          const wanted=(gltf.animations||[]).filter(c=>FORGE_EXTERNAL_ANIMATION_NAMES.has(c.name));
-          for(const clip of wanted){ const retargeted=this.retargetQuaterniusClip(clip,sourceRoot); if(retargeted){byName.set(retargeted.name,retargeted);count++;} }
-          disposeObject(sourceRoot);
-        }
+        const sourceRoot=gltf.scene||gltf.scenes?.[0];
+        const wanted=(gltf.animations||[]).filter(c=>FORGE_EXTERNAL_ANIMATION_NAMES.has(c.name));
+        for(const clip of wanted){ const retargeted=this.retargetQuaterniusClip(clip,sourceRoot); if(retargeted){byName.set(retargeted.name,retargeted);count++;} }
+        disposeObject(sourceRoot);
         this.availableAnimations=[...byName.values()];
-        const requested=this.profile?.appearance?.forge?.animation||"Idle";
-        this._requestedAnimationName=""; this.applyAnimation(requested,true);
-        console.info(`Veilwatch animation library online: ${count} CC0 clips retargeted.`);
+        const forge=this.profile?.appearance?.forge||{};
+        this._requestedAnimationName="";
+        if(String(forge.posePreview||"none")!=="none") await this.applyMakeHumanPose(forge.posePreview,true);
+        else this.applyAnimation(forge.animation||"Idle",true);
+        console.info(`Veilwatch animation library online: ${count} local CC0 clips retargeted.`);
       }catch(err){
         console.warn("Veilwatch external animation library unavailable; using native clips:",err?.message||err);
       }finally{ this._forgeAnimationPromise=null; }
     })();
     return this._forgeAnimationPromise;
+  }
+
+  restoreMakeHumanRestPose(){
+    if(!this.currentObject) return;
+    this.currentObject.traverse?.(obj=>{
+      if(!obj.isBone) return;
+      const q=obj.userData?.makeHumanRestQuaternion;
+      if(Array.isArray(q) && q.length===4) obj.quaternion.fromArray(q);
+    });
+    this.currentObject.updateMatrixWorld?.(true);
+  }
+
+  async loadMakeHumanPoseCatalog(){
+    if(this._poseCatalog) return this._poseCatalog;
+    if(this._poseCatalogPromise) return this._poseCatalogPromise;
+    this._poseCatalogPromise=fetch(`${MAKEHUMAN_POSE_ROOT}/catalog.json`,{cache:"force-cache"})
+      .then(r=>{if(!r.ok)throw new Error(`MakeHuman pose catalog ${r.status}`);return r.json();})
+      .then(data=>{this._poseCatalog=data;return data;})
+      .finally(()=>{this._poseCatalogPromise=null;});
+    return this._poseCatalogPromise;
+  }
+
+  async _loadMakeHumanPoseData(id){
+    const catalog=await this.loadMakeHumanPoseCatalog();
+    const row=(catalog?.poses||[]).find(x=>x.id===id);
+    if(!row) throw new Error(`Unknown MakeHuman pose: ${id}`);
+    let pack=this._posePackCache.get(row.pack);
+    if(!pack){
+      const data=await fetchGzipJson(`${MAKEHUMAN_POSE_ROOT}/packs/${row.pack}`);
+      pack=new Map((data.poses||[]).map(x=>[x.id,x]));
+      this._posePackCache.clear();
+      this._posePackCache.set(row.pack,pack);
+    }
+    const pose=pack.get(id);
+    if(!pose) throw new Error(`Pose ${id} missing from ${row.pack}`);
+    return pose;
+  }
+
+  async applyMakeHumanPose(id="none",force=false){
+    id=String(id||"none");
+    if(id==="none"){
+      this.activePoseId="none";
+      this.restoreMakeHumanRestPose();
+      this.applyAnimation(this.profile?.appearance?.forge?.animation||"Idle",true);
+      return true;
+    }
+    if(!force && this.activePoseId===id) return true;
+    const serial=++this._poseLoadSerial;
+    try{
+      const pose=await this._loadMakeHumanPoseData(id);
+      if(serial!==this._poseLoadSerial || !this.currentObject) return false;
+      const parsed=this.bvhLoader.parse(pose.bvh);
+      const sourceRoot=parsed?.skeleton?.bones?.find(b=>!b.parent?.isBone) || parsed?.skeleton?.bones?.[0];
+      if(!sourceRoot || !parsed?.clip) throw new Error(`Invalid BVH pose: ${id}`);
+      this.restoreMakeHumanRestPose();
+      const clip=this.retargetExternalClip(parsed.clip,sourceRoot,MAKEHUMAN_BVH_TO_MIXAMO_BONES);
+      if(!clip) throw new Error(`Pose did not map to MakeHuman Mixamo rig: ${id}`);
+      this.mixer?.stopAllAction?.();
+      for(const track of clip.tracks||[]){
+        const nodeName=this.animationTrackNodeName(track.name);
+        const bone=this.currentObject?.getObjectByName?.(nodeName) || this.boneByName(nodeName);
+        if(!bone?.isBone || track.values.length<4) continue;
+        bone.quaternion.fromArray(track.values,0).normalize();
+      }
+      this.currentObject.updateMatrixWorld?.(true);
+      this.activePoseId=id;
+      this.activeAnimationName=`Pose:${id}`;
+      this._requestedAnimationName="";
+      return true;
+    }catch(err){
+      console.warn(`MakeHuman pose unavailable (${id}):`,err?.message||err);
+      return false;
+    }
   }
 
   clearForgeVisuals(){
@@ -1540,8 +1661,8 @@ class ProjectionRenderer {
 
   weaponTargetLength(id){
     if(/sniper|marksman|dmr|hunting/.test(id)) return .86;
-    if(/rifle|shotgun|carbine/.test(id)) return .72;
-    if(/smg|machine_pistol/.test(id)) return .42;
+    if(/rifle|shotgun|carbine|bullpup/.test(id)) return .72;
+    if(/smg|submachine|p90|machine_pistol/.test(id)) return .42;
     return .24;
   }
 
@@ -1586,6 +1707,20 @@ class ProjectionRenderer {
 
   createWeapon(id,carry){
     if(!id || id==='none') return null;
+    if(String(id).startsWith("q_")){
+      const generation=this._forgeGeneration||0;
+      const url=`${QUATERNIUS_WEAPON_ROOT}/${id}.fbx`;
+      this.fbxLoader.loadAsync(url).then(scene=>{
+        if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(scene); return; }
+        const g=this.prepareWeaponAsset(scene,id);
+        const [bone,pos,rot]=this.weaponCarryTransform(carry);
+        this.attachToBone(g,bone,pos,rot);
+      }).catch(err=>{
+        console.warn(`Quaternius weapon unavailable (${id}):`,err?.message||err);
+        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry);
+      });
+      return null;
+    }
     const asset=FPS_WEAPON_ASSETS[id] || LOCAL_WEAPON_ASSETS[id];
     if(!asset) return this.createWeaponFallback(id,carry);
     const generation=this._forgeGeneration||0;
@@ -2142,6 +2277,8 @@ class ProjectionRenderer {
       || this.availableAnimations.find(a=>/idle/i.test(a.name))
       || this.availableAnimations[0];
     if(!clip) return;
+    this.restoreMakeHumanRestPose();
+    this.activePoseId="none";
     this.mixer.stopAllAction();
     const action=this.mixer.clipAction(clip).reset().fadeIn(.18);
     if(/death|punch|roll|interact|jump/i.test(clip.name)){
@@ -2284,7 +2421,8 @@ class ProjectionRenderer {
       this.disposeMixer();
       this.mixer=new THREE.AnimationMixer(this.currentObject);
       this._requestedAnimationName="";
-      this.applyAnimation(f.animation||"Idle",true);
+      if(String(f.posePreview||"none")!=="none") await this.applyMakeHumanPose(f.posePreview,true);
+      else this.applyAnimation(f.animation||"Idle",true);
       this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
     }catch(err){
       console.error("Veilwatch MakeHuman morph update failed:",err);

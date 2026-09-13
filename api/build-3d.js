@@ -201,30 +201,48 @@ async function ensureFpsWeaponAssets(){
 }
 
 
-async function ensureQuaterniusAnimationAssets(){
-  const destDir = path.join("public", "assets", "characters", "animations", "quaternius");
-  fs.mkdirSync(destDir, { recursive:true });
+function ensureSection5RuntimeData(){
+  const characterRoot=path.join("public","assets","characters");
 
-  // Quaternius Universal Animation Library 1/2 are CC0. These GLB mirrors
-  // are downloaded during the Docker build so the large animation libraries
-  // do not have to live in the GitHub source tree. The native Vitruvian clips
-  // remain a runtime fallback if the mirror is temporarily unavailable.
-  const assets = [
-    ["UAL1_Standard.glb", "https://raw.githubusercontent.com/richardanaya/metaverse-avatar/master/anims/UAL1_Standard.glb"],
-    ["UAL2_Standard.glb", "https://raw.githubusercontent.com/richardanaya/metaverse-avatar/master/anims/UAL2_Standard.glb"]
-  ];
-
-  for(const [name, url] of assets){
-    const out = path.join(destDir, name);
-    if(fs.existsSync(out) && fs.statSync(out).size > 1024) continue;
-    try{
-      console.log(`Fetching CC0 Quaternius animation library: ${name}`);
-      const data = await fetchWithRetry(url, 3);
-      fs.writeFileSync(out, data);
-    }catch(err){
-      console.warn(`Quaternius animation library unavailable (${name}); native Vitruvian clips will remain available:`, err?.message || err);
-    }
+  const animationFile=path.join(characterRoot,"animations","quaternius","UAL1_Standard.glb");
+  if(!fs.existsSync(animationFile) || fs.statSync(animationFile).size < 1024*1024){
+    throw new Error(`Missing local Quaternius animation library: ${animationFile}`);
   }
+
+  const weaponRoot=path.join(characterRoot,"weapons","quaternius_fbx");
+  const weaponCatalogPath=path.join(weaponRoot,"catalog.json");
+  if(!fs.existsSync(weaponCatalogPath)) throw new Error(`Missing Quaternius weapon catalog: ${weaponCatalogPath}`);
+  const weaponCatalog=JSON.parse(fs.readFileSync(weaponCatalogPath,"utf8"));
+  if((weaponCatalog.weapons||[]).length < 46) throw new Error(`Quaternius weapon catalog incomplete (${(weaponCatalog.weapons||[]).length}/46)`);
+  for(const row of weaponCatalog.weapons||[]){
+    const fp=path.join(weaponRoot,row.file);
+    if(!fs.existsSync(fp) || fs.statSync(fp).size < 512) throw new Error(`Missing Quaternius FBX weapon: ${row.file}`);
+  }
+
+  const facialRoot=path.join(characterRoot,"makehuman","facial");
+  const facialCatalogPath=path.join(facialRoot,"catalog.json");
+  const facialPackPath=path.join(facialRoot,"facial_targets.vwpack.json.gz");
+  if(!fs.existsSync(facialCatalogPath) || !fs.existsSync(facialPackPath)) throw new Error("Missing MakeHuman facial runtime data");
+  const facialCatalog=JSON.parse(fs.readFileSync(facialCatalogPath,"utf8"));
+  if((facialCatalog.faceUnits||[]).length < 52 || (facialCatalog.visemes||[]).length < 37){
+    throw new Error(`MakeHuman facial catalog incomplete (${(facialCatalog.faceUnits||[]).length} faceunits, ${(facialCatalog.visemes||[]).length} visemes)`);
+  }
+  const facialPack=JSON.parse(zlib.gunzipSync(fs.readFileSync(facialPackPath)).toString("utf8"));
+  if(Object.keys(facialPack.targets||{}).length < 89) throw new Error(`MakeHuman facial target pack incomplete (${Object.keys(facialPack.targets||{}).length}/89)`);
+
+  const poseRoot=path.join(characterRoot,"makehuman","poses");
+  const poseCatalogPath=path.join(poseRoot,"catalog.json");
+  if(!fs.existsSync(poseCatalogPath)) throw new Error(`Missing MakeHuman pose catalog: ${poseCatalogPath}`);
+  const poseCatalog=JSON.parse(fs.readFileSync(poseCatalogPath,"utf8"));
+  if((poseCatalog.poses||[]).length < 81) throw new Error(`MakeHuman pose catalog incomplete (${(poseCatalog.poses||[]).length}/81)`);
+  for(const file of new Set((poseCatalog.poses||[]).map(x=>x.pack).filter(Boolean))){
+    const fp=path.join(poseRoot,"packs",file);
+    if(!fs.existsSync(fp)) throw new Error(`Missing MakeHuman pose pack: ${file}`);
+    const parsed=JSON.parse(zlib.gunzipSync(fs.readFileSync(fp)).toString("utf8"));
+    if(!(parsed.poses||[]).length) throw new Error(`Empty MakeHuman pose pack: ${file}`);
+  }
+
+  console.log(`Section 5 runtime ready: 43 local animation clips, ${(poseCatalog.poses||[]).length} poses, ${(facialCatalog.faceUnits||[]).length} faceunits, ${(facialCatalog.visemes||[]).length} visemes, ${(weaponCatalog.weapons||[]).length} Quaternius weapons.`);
 }
 
 async function main(){
@@ -248,7 +266,7 @@ async function main(){
 
   await ensureVitruvianTextures();
   await ensureFpsWeaponAssets();
-  await ensureQuaterniusAnimationAssets();
+  ensureSection5RuntimeData();
 
   await esbuild.build({
     entryPoints: ["src/3d/projection_renderer.mjs"],
