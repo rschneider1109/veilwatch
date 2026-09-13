@@ -1,27 +1,33 @@
 Veilwatch Character Forge - Third-Party Asset Sources
 =====================================================
 
-Quaternius Universal Animation Library 1 / 2
+Quaternius Universal Animation Library [Standard]
 License: CC0 1.0 Universal (public domain dedication)
 Original source: https://quaternius.com/packs/universalanimationlibrary.html
-Runtime mirror used by Docker build: https://github.com/richardanaya/metaverse-avatar
-Use in Veilwatch: optional runtime animation libraries, retargeted in-browser to the
-Vitruvian Mixamo-style skeleton. Native Vitruvian clips remain the fallback.
+Use in Veilwatch: the supplied UAL1_Standard.glb is stored locally in the repo and
+retargeted in-browser to the MakeHuman HM08 Mixamo-compatible skeleton. Keeping the
+library local removes the former runtime/build dependency on an external mirror.
+
+Quaternius Ultimate Guns / Animated Guns
+License: CC0 1.0 Universal (public domain dedication)
+Original source: https://quaternius.com/
+Use in Veilwatch: supplied FBX weapon models are stored locally and loaded on demand
+for Character Forge equipment previews. Only the selected weapon is instantiated.
 
 FPS Asset Kit / Flat Guns
 Author/source repository: https://github.com/petroulacl/fps-asset-kit
 License: CC0 / public domain dedication as stated by the source project
-Use in Veilwatch: conventional firearm visuals downloaded during Docker build.
+Use in Veilwatch: legacy conventional firearm visuals remain as compatibility/fallback
+assets for pre-existing Veilwatch weapon IDs.
 
 Veilwatch original project assets
 ---------------------------------
 The following assets were authored specifically for this Veilwatch project and do not
 incorporate third-party model geometry:
-- assets/characters/equipment/veilwatch_projection_cuff_v1.glb
 - assets/characters/anatomy/penis_testes_v1.glb
 - assets/characters/anatomy/vulva_v1.glb
 - assets/characters/weapons/veilwatch_local/*.glb
 
-The Veilwatch Projection Cuff is an original model based on the campaign's approved
-functional/design direction: a quarterback-style forearm play-call cuff adapted into a
-near-future projection device. It is not a copy of a donor 3D model.
+The current Projection Cuff v2 is generated procedurally by Veilwatch at runtime as a
+low-profile tapered forearm bracer. The older v1 GLB may remain in the repository only
+for backwards compatibility and is not the active design path.
