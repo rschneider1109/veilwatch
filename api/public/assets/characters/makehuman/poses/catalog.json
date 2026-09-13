@@ -1,0 +1,410 @@
+{
+  "version": 1,
+  "poses": [
+    {
+      "id": "poses05:callharvey3d_archer_leap",
+      "label": "Fighting: Callharvey3D Archer Leap",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_cl_fight_01",
+      "label": "Fighting: Culturalibre Cl Fight 01",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_gun",
+      "label": "Fighting: Culturalibre Gun",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_gun_2_female",
+      "label": "Fighting: Culturalibre Gun 2 Female",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_gun_2_male",
+      "label": "Fighting: Culturalibre Gun 2 Male",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_gun_3",
+      "label": "Fighting: Culturalibre Gun 3",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:culturalibre_warhammer_01",
+      "label": "Fighting: Culturalibre Warhammer 01",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:gpedroso_boxing",
+      "label": "Fighting: Gpedroso Boxing",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:gpedroso_hadouken",
+      "label": "Fighting: Gpedroso Hadouken",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses05:gpedroso_ninja_focus",
+      "label": "Fighting: Gpedroso Ninja Focus",
+      "pack": "poses05.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:anrico_sitting02",
+      "label": "Sitting / Misc: Anrico Sitting02",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:anrico_sitting03",
+      "label": "Sitting / Misc: Anrico Sitting03",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:anrico_sitting04",
+      "label": "Sitting / Misc: Anrico Sitting04",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:anrico_sitting07",
+      "label": "Sitting / Misc: Anrico Sitting07",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:anrico_sitting10",
+      "label": "Sitting / Misc: Anrico Sitting10",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_lotus",
+      "label": "Sitting / Misc: Callharvey3D Lotus",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingdefault",
+      "label": "Sitting / Misc: Callharvey3D Sittingdefault",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingfloor2",
+      "label": "Sitting / Misc: Callharvey3D Sittingfloor2",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingfloorstretch2",
+      "label": "Sitting / Misc: Callharvey3D Sittingfloorstretch2",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_sittinglegscrossed",
+      "label": "Sitting / Misc: Callharvey3D Sittinglegscrossed",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:callharvey3d_sittingnatural",
+      "label": "Sitting / Misc: Callharvey3D Sittingnatural",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:elvs_what_have_i_done",
+      "label": "Sitting / Misc: Elvs What Have I Done",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:milkman_sit_01a",
+      "label": "Sitting / Misc: Milkman Sit 01A",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:milkman_swinging_01",
+      "label": "Sitting / Misc: Milkman Swinging 01",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:mindfront_sitting_in_armchair_holding_wine_glass",
+      "label": "Sitting / Misc: Mindfront Sitting In Armchair Holding Wine Glass",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:sweetan008_sitting-pose",
+      "label": "Sitting / Misc: Sweetan008 Sitting Pose",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:wolgade_sit_on_ground_01",
+      "label": "Sitting / Misc: Wolgade Sit On Ground 01",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses01:xhado84_sitting_floor_3",
+      "label": "Sitting / Misc: Xhado84 Sitting Floor 3",
+      "pack": "poses01.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:anrico_standing10",
+      "label": "Standing: Anrico Standing10",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:anrico_standing11",
+      "label": "Standing: Anrico Standing11",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:blindsaypatten_david",
+      "label": "Standing: Blindsaypatten David",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_curious",
+      "label": "Standing: Callharvey3D Curious",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_salute",
+      "label": "Standing: Callharvey3D Salute",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingatattention",
+      "label": "Standing: Callharvey3D Standingatattention",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingatease",
+      "label": "Standing: Callharvey3D Standingatease",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingdefault",
+      "label": "Standing: Callharvey3D Standingdefault",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingmodest",
+      "label": "Standing: Callharvey3D Standingmodest",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingmodestembarrassed",
+      "label": "Standing: Callharvey3D Standingmodestembarrassed",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:callharvey3d_standingnatural",
+      "label": "Standing: Callharvey3D Standingnatural",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:drednicolson_arms_akimbo",
+      "label": "Standing: Drednicolson Arms Akimbo",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:elvs_epic_haute_couture_1",
+      "label": "Standing: Elvs Epic Haute Couture 1",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:elvs_epic_haute_couture_2",
+      "label": "Standing: Elvs Epic Haute Couture 2",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:elvs_super_him_standing_pose_1",
+      "label": "Standing: Elvs Super Him Standing Pose 1",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:elvs_super_him_standing_pose_2",
+      "label": "Standing: Elvs Super Him Standing Pose 2",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:gpedroso_peace_and_love",
+      "label": "Standing: Gpedroso Peace And Love",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:gpedroso_standing_posing",
+      "label": "Standing: Gpedroso Standing Posing",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:jjones_leaning_on_counter_hands_folded",
+      "label": "Standing: Jjones Leaning On Counter Hands Folded",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:mindfront_standing_holding_wine_glass",
+      "label": "Standing: Mindfront Standing Holding Wine Glass",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_01",
+      "label": "Standing: Punkduck Hand On Shoulder 01",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_02",
+      "label": "Standing: Punkduck Hand On Shoulder 02",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_hand_on_shoulder_03",
+      "label": "Standing: Punkduck Hand On Shoulder 03",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion_handbag",
+      "label": "Standing: Punkduck Pd Fashion Handbag",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion01",
+      "label": "Standing: Punkduck Pd Fashion01",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_pd_fashion02",
+      "label": "Standing: Punkduck Pd Fashion02",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:punkduck_train_departure",
+      "label": "Standing: Punkduck Train Departure",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing1",
+      "label": "Standing: Sohh Posing1",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing2",
+      "label": "Standing: Sohh Posing2",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing3",
+      "label": "Standing: Sohh Posing3",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing4",
+      "label": "Standing: Sohh Posing4",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing5",
+      "label": "Standing: Sohh Posing5",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_posing6",
+      "label": "Standing: Sohh Posing6",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_sohh_embarrassed",
+      "label": "Standing: Sohh Sohh Embarrassed",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_standing1",
+      "label": "Standing: Sohh Standing1",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "poses03:sohh_standing2",
+      "label": "Standing: Sohh Standing2",
+      "pack": "poses03.vwposes.json.gz"
+    },
+    {
+      "id": "system:benchmark",
+      "label": "System Poses: Benchmark",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fight01",
+      "label": "System Poses: Fight01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fight02",
+      "label": "System Poses: Fight02",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fight03",
+      "label": "System Poses: Fight03",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fight04",
+      "label": "System Poses: Fight04",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fly01",
+      "label": "System Poses: Fly01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:fly02",
+      "label": "System Poses: Fly02",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:gym01",
+      "label": "System Poses: Gym01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:run01",
+      "label": "System Poses: Run01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:sit01",
+      "label": "System Poses: Sit01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing01",
+      "label": "System Poses: Standing01",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing02",
+      "label": "System Poses: Standing02",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing03",
+      "label": "System Poses: Standing03",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing04",
+      "label": "System Poses: Standing04",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing05",
+      "label": "System Poses: Standing05",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:standing06",
+      "label": "System Poses: Standing06",
+      "pack": "system.vwposes.json.gz"
+    },
+    {
+      "id": "system:tpose",
+      "label": "System Poses: Tpose",
+      "pack": "system.vwposes.json.gz"
+    }
+  ]
+}

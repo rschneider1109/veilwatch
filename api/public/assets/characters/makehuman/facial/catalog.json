@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "faceUnits": [
+    {
+      "id": "faceunit:browDownLeft",
+      "label": "Face Unit: Brow Down Left"
+    },
+    {
+      "id": "faceunit:browDownRight",
+      "label": "Face Unit: Brow Down Right"
+    },
+    {
+      "id": "faceunit:browInnerUp",
+      "label": "Face Unit: Brow Inner Up"
+    },
+    {
+      "id": "faceunit:browOuterUpLeft",
+      "label": "Face Unit: Brow Outer Up Left"
+    },
+    {
+      "id": "faceunit:browOuterUpRight",
+      "label": "Face Unit: Brow Outer Up Right"
+    },
+    {
+      "id": "faceunit:cheekPuff",
+      "label": "Face Unit: Cheek Puff"
+    },
+    {
+      "id": "faceunit:cheekSquintLeft",
+      "label": "Face Unit: Cheek Squint Left"
+    },
+    {
+      "id": "faceunit:cheekSquintRight",
+      "label": "Face Unit: Cheek Squint Right"
+    },
+    {
+      "id": "faceunit:eyeBlinkLeft",
+      "label": "Face Unit: Eye Blink Left"
+    },
+    {
+      "id": "faceunit:eyeBlinkRight",
+      "label": "Face Unit: Eye Blink Right"
+    },
+    {
+      "id": "faceunit:eyeLookDownLeft",
+      "label": "Face Unit: Eye Look Down Left"
+    },
+    {
+      "id": "faceunit:eyeLookDownRight",
+      "label": "Face Unit: Eye Look Down Right"
+    },
+    {
+      "id": "faceunit:eyeLookInLeft",
+      "label": "Face Unit: Eye Look In Left"
+    },
+    {
+      "id": "faceunit:eyeLookInRight",
+      "label": "Face Unit: Eye Look In Right"
+    },
+    {
+      "id": "faceunit:eyeLookOutLeft",
+      "label": "Face Unit: Eye Look Out Left"
+    },
+    {
+      "id": "faceunit:eyeLookOutRight",
+      "label": "Face Unit: Eye Look Out Right"
+    },
+    {
+      "id": "faceunit:eyeLookUpLeft",
+      "label": "Face Unit: Eye Look Up Left"
+    },
+    {
+      "id": "faceunit:eyeLookUpRight",
+      "label": "Face Unit: Eye Look Up Right"
+    },
+    {
+      "id": "faceunit:eyeSquintLeft",
+      "label": "Face Unit: Eye Squint Left"
+    },
+    {
+      "id": "faceunit:eyeSquintRight",
+      "label": "Face Unit: Eye Squint Right"
+    },
+    {
+      "id": "faceunit:eyeWideLeft",
+      "label": "Face Unit: Eye Wide Left"
+    },
+    {
+      "id": "faceunit:eyeWideRight",
+      "label": "Face Unit: Eye Wide Right"
+    },
+    {
+      "id": "faceunit:jawForward",
+      "label": "Face Unit: Jaw Forward"
+    },
+    {
+      "id": "faceunit:jawLeft",
+      "label": "Face Unit: Jaw Left"
+    },
+    {
+      "id": "faceunit:jawOpen",
+      "label": "Face Unit: Jaw Open"
+    },
+    {
+      "id": "faceunit:jawRight",
+      "label": "Face Unit: Jaw Right"
+    },
+    {
+      "id": "faceunit:mouthClose",
+      "label": "Face Unit: Mouth Close"
+    },
+    {
+      "id": "faceunit:mouthDimpleLeft",
+      "label": "Face Unit: Mouth Dimple Left"
+    },
+    {
+      "id": "faceunit:mouthDimpleRight",
+      "label": "Face Unit: Mouth Dimple Right"
+    },
+    {
+      "id": "faceunit:mouthFrownLeft",
+      "label": "Face Unit: Mouth Frown Left"
+    },
+    {
+      "id": "faceunit:mouthFrownRight",
+      "label": "Face Unit: Mouth Frown Right"
+    },
+    {
+      "id": "faceunit:mouthFunnel",
+      "label": "Face Unit: Mouth Funnel"
+    },
+    {
+      "id": "faceunit:mouthLeft",
+      "label": "Face Unit: Mouth Left"
+    },
+    {
+      "id": "faceunit:mouthLowerDownLeft",
+      "label": "Face Unit: Mouth Lower Down Left"
+    },
+    {
+      "id": "faceunit:mouthLowerDownRight",
+      "label": "Face Unit: Mouth Lower Down Right"
+    },
+    {
+      "id": "faceunit:mouthPressLeft",
+      "label": "Face Unit: Mouth Press Left"
+    },
+    {
+      "id": "faceunit:mouthPressRight",
+      "label": "Face Unit: Mouth Press Right"
+    },
+    {
+      "id": "faceunit:mouthPucker",
+      "label": "Face Unit: Mouth Pucker"
+    },
+    {
+      "id": "faceunit:mouthRight",
+      "label": "Face Unit: Mouth Right"
+    },
+    {
+      "id": "faceunit:mouthRollLower",
+      "label": "Face Unit: Mouth Roll Lower"
+    },
+    {
+      "id": "faceunit:mouthRollUpper",
+      "label": "Face Unit: Mouth Roll Upper"
+    },
+    {
+      "id": "faceunit:mouthShrugLower",
+      "label": "Face Unit: Mouth Shrug Lower"
+    },
+    {
+      "id": "faceunit:mouthShrugUpper",
+      "label": "Face Unit: Mouth Shrug Upper"
+    },
+    {
+      "id": "faceunit:mouthSmileLeft",
+      "label": "Face Unit: Mouth Smile Left"
+    },
+    {
+      "id": "faceunit:mouthSmileRight",
+      "label": "Face Unit: Mouth Smile Right"
+    },
+    {
+      "id": "faceunit:mouthStretchLeft",
+      "label": "Face Unit: Mouth Stretch Left"
+    },
+    {
+      "id": "faceunit:mouthStretchRight",
+      "label": "Face Unit: Mouth Stretch Right"
+    },
+    {
+      "id": "faceunit:mouthUpperUpLeft",
+      "label": "Face Unit: Mouth Upper Up Left"
+    },
+    {
+      "id": "faceunit:mouthUpperUpRight",
+      "label": "Face Unit: Mouth Upper Up Right"
+    },
+    {
+      "id": "faceunit:noseSneerLeft",
+      "label": "Face Unit: Nose Sneer Left"
+    },
+    {
+      "id": "faceunit:noseSneerRight",
+      "label": "Face Unit: Nose Sneer Right"
+    },
+    {
+      "id": "faceunit:tongueOut",
+      "label": "Face Unit: Tongue Out"
+    }
+  ],
+  "visemes": [
+    {
+      "id": "viseme2:viseme_aa",
+      "label": "Meta/Oculus Viseme: Viseme Aa"
+    },
+    {
+      "id": "viseme2:viseme_CH",
+      "label": "Meta/Oculus Viseme: Viseme Ch"
+    },
+    {
+      "id": "viseme2:viseme_DD",
+      "label": "Meta/Oculus Viseme: Viseme Dd"
+    },
+    {
+      "id": "viseme2:viseme_E",
+      "label": "Meta/Oculus Viseme: Viseme E"
+    },
+    {
+      "id": "viseme2:viseme_FF",
+      "label": "Meta/Oculus Viseme: Viseme Ff"
+    },
+    {
+      "id": "viseme2:viseme_I",
+      "label": "Meta/Oculus Viseme: Viseme I"
+    },
+    {
+      "id": "viseme2:viseme_kk",
+      "label": "Meta/Oculus Viseme: Viseme Kk"
+    },
+    {
+      "id": "viseme2:viseme_nn",
+      "label": "Meta/Oculus Viseme: Viseme Nn"
+    },
+    {
+      "id": "viseme2:viseme_O",
+      "label": "Meta/Oculus Viseme: Viseme O"
+    },
+    {
+      "id": "viseme2:viseme_PP",
+      "label": "Meta/Oculus Viseme: Viseme Pp"
+    },
+    {
+      "id": "viseme2:viseme_RR",
+      "label": "Meta/Oculus Viseme: Viseme Rr"
+    },
+    {
+      "id": "viseme2:viseme_sil",
+      "label": "Meta/Oculus Viseme: Viseme Sil"
+    },
+    {
+      "id": "viseme2:viseme_SS",
+      "label": "Meta/Oculus Viseme: Viseme Ss"
+    },
+    {
+      "id": "viseme2:viseme_TH",
+      "label": "Meta/Oculus Viseme: Viseme Th"
+    },
+    {
+      "id": "viseme2:viseme_U",
+      "label": "Meta/Oculus Viseme: Viseme U"
+    },
+    {
+      "id": "viseme1:aa_02",
+      "label": "Microsoft Viseme: Aa 02"
+    },
+    {
+      "id": "viseme1:aa_ah_ax_01",
+      "label": "Microsoft Viseme: Aa Ah Ax 01"
+    },
+    {
+      "id": "viseme1:ao_03",
+      "label": "Microsoft Viseme: Ao 03"
+    },
+    {
+      "id": "viseme1:aw_09",
+      "label": "Microsoft Viseme: Aw 09"
+    },
+    {
+      "id": "viseme1:ay_11",
+      "label": "Microsoft Viseme: Ay 11"
+    },
+    {
+      "id": "viseme1:d_t_n_19",
+      "label": "Microsoft Viseme: D T N 19"
+    },
+    {
+      "id": "viseme1:er_05",
+      "label": "Microsoft Viseme: Er 05"
+    },
+    {
+      "id": "viseme1:ey_eh_uh_04",
+      "label": "Microsoft Viseme: Ey Eh Uh 04"
+    },
+    {
+      "id": "viseme1:f_v_18",
+      "label": "Microsoft Viseme: F V 18"
+    },
+    {
+      "id": "viseme1:h_12",
+      "label": "Microsoft Viseme: H 12"
+    },
+    {
+      "id": "viseme1:k_g_ng_20",
+      "label": "Microsoft Viseme: K G Ng 20"
+    },
+    {
+      "id": "viseme1:l_14",
+      "label": "Microsoft Viseme: L 14"
+    },
+    {
+      "id": "viseme1:ow_08",
+      "label": "Microsoft Viseme: Ow 08"
+    },
+    {
+      "id": "viseme1:oy_10",
+      "label": "Microsoft Viseme: Oy 10"
+    },
+    {
+      "id": "viseme1:p_b_m_21",
+      "label": "Microsoft Viseme: P B M 21"
+    },
+    {
+      "id": "viseme1:r_13",
+      "label": "Microsoft Viseme: R 13"
+    },
+    {
+      "id": "viseme1:s_z_15",
+      "label": "Microsoft Viseme: S Z 15"
+    },
+    {
+      "id": "viseme1:sh_ch_jh_zh_16",
+      "label": "Microsoft Viseme: Sh Ch Jh Zh 16"
+    },
+    {
+      "id": "viseme1:sil_00",
+      "label": "Microsoft Viseme: Sil 00"
+    },
+    {
+      "id": "viseme1:th_dh_17",
+      "label": "Microsoft Viseme: Th Dh 17"
+    },
+    {
+      "id": "viseme1:w_uw_07",
+      "label": "Microsoft Viseme: W Uw 07"
+    },
+    {
+      "id": "viseme1:y_iy_ih_ix_06",
+      "label": "Microsoft Viseme: Y Iy Ih Ix 06"
+    }
+  ]
+}
