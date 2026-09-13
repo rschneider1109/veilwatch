@@ -75,19 +75,23 @@
 
     const c=$('projectionFullForgeClothing');
     if(c){
-      const cl=f.clothing; const keys=['baseLayer','top','bottoms','socks','shoes'];
+      const cl=f.clothing;
+      const coreKeys=['baseLayer','top','bottoms','onePiece','socks','shoes'];
+      const accessoryKeys=['gloves','headwear','eyewear','neck'];
       const colors=cl.colors||{};
       const cc=manifest.nativeClothing?.counts||{};
-      const coreCount=Number(cc.baseLayer||0)+Number(cc.top||0)+Number(cc.bottoms||0)+Number(cc.socks||0)+Number(cc.shoes||0);
-      const colorKeys=['baseLayer','top','bottoms','shoes'];
-      c.innerHTML=`<div class="mini">MakeHuman core wardrobe online: ${coreCount} fitted garments across base layers, tops, bottoms, socks, and shoes. These use native .mhclo fitting and refit when body proportions change. Extended wardrobe and gear are intentionally held for Section 4.</div>`+
-        section('Core Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${keys.map(k=>sel(title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
-        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal')).join('')}</div>`);
+      const totalCount=[...coreKeys,...accessoryKeys,'vest','back'].reduce((n,k)=>n+Number(cc[k]||0),0);
+      const colorKeys=['baseLayer','top','bottoms','onePiece','shoes'];
+      c.innerHTML=`<div class="mini">MakeHuman wardrobe online: ${totalCount} fitted garments and accessories. Native .mhclo fitting keeps equipped assets attached while body proportions change, and inactive assets are disposed instead of accumulating in memory.</div>`+
+        section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${coreKeys.map(k=>sel(k==='onePiece'?'Dresses / Suits':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
+        section('Accessories',`<div class="projection-form-grid projection-forge-two-col">${accessoryKeys.map(k=>sel(k==='neck'?'Jewelry':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
+        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${k==='onePiece'?'Dresses / Suits':title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal')).join('')}</div>`);
     }
 
     const e=$('projectionFullForgeEquipment');
-    if(e){ const wp=weaponOptions(); e.innerHTML=
+    if(e){ const wp=weaponOptions(); const cl=f.clothing||{}; const colors=cl.colors||{}; e.innerHTML=
       section('Required Veilwatch Cuff',`<div class="projection-form-grid">${sel('Cuff Arm','cuffArm',manifest.equipment.cuff.arms,f.cuffArm)}</div><div class="ff-required">AUTO-EQUIPPED · REQUIRED · NON-REMOVABLE</div>`)+
+      section('MakeHuman Gear',`<div class="projection-form-grid projection-forge-two-col">${sel('Vest / Rig','clothing.vest',manifest.clothing.vest||[],cl.vest)}${sel('Carried Gear','clothing.back',manifest.clothing.back||[],cl.back)}${sel('Gear Color','clothing.colors.gear',manifest.clothing.colors||[],colors.gear||'black')}</div><div class="mini">Equipment 03 is fitted through the same bounded MakeHuman asset loader as clothing.</div>`)+
       section('Weapon Preview',`<div class="projection-form-grid projection-forge-two-col"><label>Weapon<select data-ff-key="weaponPreview">${wp.map(([id,n])=>`<option value="${id}" ${id===f.weaponPreview?'selected':''}>${n}</option>`).join('')}</select></label>${sel('Carry Position','weaponCarry',manifest.equipment.carry,f.weaponCarry)}</div><div class="mini">Every current Veilwatch weapon ID has a visual model or bundled fallback.</div>`);
     }
 
