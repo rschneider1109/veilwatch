@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "format": "veilwatch_makehuman_appearance_v2",
+  "version": 3,
+  "format": "veilwatch_makehuman_library_v3",
   "assets": {
     "mh_hair02_ccby__elvs_short_side_do": {
       "id": "mh_hair02_ccby__elvs_short_side_do",
@@ -3496,15 +3496,2871 @@
         "shirt/t-shirt/sweater"
       ],
       "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__frankyaye_mini_skirt_01": {
+      "id": "mh_skirts01_cc0__frankyaye_mini_skirt_01",
+      "label": "Mini_Skirt_01",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "frankyaye",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__frankyaye_mini_skirt_02": {
+      "id": "mh_skirts01_cc0__frankyaye_mini_skirt_02",
+      "label": "Mini_Skirt_02",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "frankyaye",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__toigo_long_full_skirt": {
+      "id": "mh_skirts01_cc0__toigo_long_full_skirt",
+      "label": "Skirt_Full_Long",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__toigo_skirt_with_lace_ruffle": {
+      "id": "mh_skirts01_cc0__toigo_skirt_with_lace_ruffle",
+      "label": "Skirt_Full_Lace_Ruffle",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__toigo_tiered_mini_skirt": {
+      "id": "mh_skirts01_cc0__toigo_tiered_mini_skirt",
+      "label": "Tier_Skirt_Mini",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts01_cc0__toigo_tiered_skirt": {
+      "id": "mh_skirts01_cc0__toigo_tiered_skirt",
+      "label": "Tier_Skirt",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "skirts01_cc0.zip",
+      "tags": [
+        "dress",
+        "skirt"
+      ],
+      "pack": "skirts01_cc0.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__callharvey3d_harvey_pskirt01": {
+      "id": "mh_skirts02_cc-by__callharvey3d_harvey_pskirt01",
+      "label": "Harvey_PSkirt01",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "callharvey3d",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__elvs_asymmetrical_skirt": {
+      "id": "mh_skirts02_cc-by__elvs_asymmetrical_skirt",
+      "label": "asym_skirt3",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__elvs_disco_mini_skirt": {
+      "id": "mh_skirts02_cc-by__elvs_disco_mini_skirt",
+      "label": "elvs_disco_mini1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "skirt",
+        "disco"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__elvs_gored_midi_skirt": {
+      "id": "mh_skirts02_cc-by__elvs_gored_midi_skirt",
+      "label": "elvs_gored_midiskirt1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "contemporary",
+        "skirt",
+        "gored"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__elvs_pencil_skirt": {
+      "id": "mh_skirts02_cc-by__elvs_pencil_skirt",
+      "label": "elvs_disco_pencilskirt1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "skirt",
+        "disco"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__elvs_pleated_plaid_mini_skirt": {
+      "id": "mh_skirts02_cc-by__elvs_pleated_plaid_mini_skirt",
+      "label": "pleated_skirtelv1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "skirt",
+        "ladies ware",
+        "pleated",
+        "short skirt",
+        "female"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__mtknife_low_mini_skirt": {
+      "id": "mh_skirts02_cc-by__mtknife_low_mini_skirt",
+      "label": "low_mini_skirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "MTKnife",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__mtknife_pleated_mini_skirt": {
+      "id": "mh_skirts02_cc-by__mtknife_pleated_mini_skirt",
+      "label": "Pleated_miniskirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "MTKnife",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt",
+        "miniskirt",
+        "pleated"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__punkduck_black_mini_skirt": {
+      "id": "mh_skirts02_cc-by__punkduck_black_mini_skirt",
+      "label": "miniskirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__punkduck_jeans_skirt": {
+      "id": "mh_skirts02_cc-by__punkduck_jeans_skirt",
+      "label": "JeansSkirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt",
+        "jeans"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__punkduck_retro_polka_dot_skirt": {
+      "id": "mh_skirts02_cc-by__punkduck_retro_polka_dot_skirt",
+      "label": "PolkadotSkirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt",
+        "vintage"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__punkduck_skirt_native_american_fashion": {
+      "id": "mh_skirts02_cc-by__punkduck_skirt_native_american_fashion",
+      "label": "NamFashionSkirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__scsouza_mini_denin_skirt": {
+      "id": "mh_skirts02_cc-by__scsouza_mini_denin_skirt",
+      "label": "skirt_mini",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "scsouza",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_skirts02_cc-by__sonicteam998_maria_skirt": {
+      "id": "mh_skirts02_cc-by__sonicteam998_maria_skirt",
+      "label": "mariaskirt",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "sonicteam998",
+      "sourcePack": "skirts02_cc-by.zip",
+      "tags": [
+        "female",
+        "skirt",
+        "sonic"
+      ],
+      "pack": "skirts02_cc-by.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_female_double-breasted_suit": {
+      "id": "mh_suits01_cc0__toigo_female_double-breasted_suit",
+      "label": "Fem_Suit_Double_Breasted",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_female_suit": {
+      "id": "mh_suits01_cc0__toigo_female_suit",
+      "label": "Fem_Suit",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "suit",
+        "female",
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_female_suit_2": {
+      "id": "mh_suits01_cc0__toigo_female_suit_2",
+      "label": "Fem_Suit2",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_male_double-breasted_suit": {
+      "id": "mh_suits01_cc0__toigo_male_double-breasted_suit",
+      "label": "Suit_Double_Breasted",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_male_suit_3": {
+      "id": "mh_suits01_cc0__toigo_male_suit_3",
+      "label": "Suit3",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_male_suit_tie_and_jacket": {
+      "id": "mh_suits01_cc0__toigo_male_suit_tie_and_jacket",
+      "label": "Jacket_Tie_Pants",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "pants",
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_suit_with_dinner_jacket": {
+      "id": "mh_suits01_cc0__toigo_suit_with_dinner_jacket",
+      "label": "Suit_Dinner_Jacket",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_suits01_cc0__toigo_suit_with_jacket_and_bowtie": {
+      "id": "mh_suits01_cc0__toigo_suit_with_jacket_and_bowtie",
+      "label": "Jacket_bowtie_Pants",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "suits01_cc0.zip",
+      "tags": [
+        "unsorted/other"
+      ],
+      "pack": "suits01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__aethelraed_flapper_dress": {
+      "id": "mh_dress01_cc0__aethelraed_flapper_dress",
+      "label": "Flapper_Dress_1",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "Aethelraed_Unraed",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "female",
+        "historical",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__mindfront_kimono": {
+      "id": "mh_dress01_cc0__mindfront_kimono",
+      "label": "F_Kimono",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "female",
+        "robe",
+        "casual",
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_bodice_dress_with_lace_ruffle_skirt": {
+      "id": "mh_dress01_cc0__toigo_bodice_dress_with_lace_ruffle_skirt",
+      "label": "Dress_Bodice_Ruffle_Skirt",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt": {
+      "id": "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+      "label": "Dress_Camisole_Full_Skirt",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_cut_out_dress": {
+      "id": "mh_dress01_cc0__toigo_cut_out_dress",
+      "label": "Dress_Cut_Outs",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_dress_with_tiered_skirt": {
+      "id": "mh_dress01_cc0__toigo_dress_with_tiered_skirt",
+      "label": "DressTierSkirt",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_halter_dress_knee_length": {
+      "id": "mh_dress01_cc0__toigo_halter_dress_knee_length",
+      "label": "Dress_Knee_Halter",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_halter_dress_midi": {
+      "id": "mh_dress01_cc0__toigo_halter_dress_midi",
+      "label": "Dress_Midi_Halter",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_halter_dress_with_fluted_skirt": {
+      "id": "mh_dress01_cc0__toigo_halter_dress_with_fluted_skirt",
+      "label": "Dress_Long_Fluted_Skirt",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_keyhole_neck_dress": {
+      "id": "mh_dress01_cc0__toigo_keyhole_neck_dress",
+      "label": "Dress_Keyhole_Neck",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_shift_dress": {
+      "id": "mh_dress01_cc0__toigo_shift_dress",
+      "label": "Dress_Shift",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__toigo_strapless_ruffle_top_dress": {
+      "id": "mh_dress01_cc0__toigo_strapless_ruffle_top_dress",
+      "label": "Dress_Strapless_Ruffle_Top",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress01_cc0__wdg_mycenaean_tunic": {
+      "id": "mh_dress01_cc0__wdg_mycenaean_tunic",
+      "label": "Mycenaean_Tunic",
+      "category": "onePiece",
+      "license": "CC0",
+      "author": "WDG",
+      "sourcePack": "dress01_cc0.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress01_cc0.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_crochet_baby_doll": {
+      "id": "mh_dress02_cc-by__elvs_crochet_baby_doll",
+      "label": "babydoll_elvruff1a",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "babydoll",
+        "ruffle",
+        "ladies ware",
+        "mini dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_double_handkerchief_halter_dress": {
+      "id": "mh_dress02_cc-by__elvs_double_handkerchief_halter_dress",
+      "label": "doublechiefhalterdress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladiesware",
+        "female",
+        "halter",
+        "halter dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_fashion_stylized_qipoa": {
+      "id": "mh_dress02_cc-by__elvs_fashion_stylized_qipoa",
+      "label": "westernized_quipoa",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "asian",
+        "ladies",
+        "fashion",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_frilled_party_dress": {
+      "id": "mh_dress02_cc-by__elvs_frilled_party_dress",
+      "label": "frill_partydress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "party dress",
+        "female",
+        "fashion",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_fringe_hippy_dress": {
+      "id": "mh_dress02_cc-by__elvs_fringe_hippy_dress",
+      "label": "elvs_fringe_dress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "dress",
+        "fringe club",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_fringe_leather_dress": {
+      "id": "mh_dress02_cc-by__elvs_fringe_leather_dress",
+      "label": "elvs_leather_fringedress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_fringe_off_shoulder_dress": {
+      "id": "mh_dress02_cc-by__elvs_fringe_off_shoulder_dress",
+      "label": "elvs_offshoulder_fringedress2_p",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "fantasy",
+        "festive",
+        "contemporary",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress1": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress1",
+      "label": "elvs_goddessdress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "play",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress2": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress2",
+      "label": "elvs_goddess_dress2",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "play",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress3": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress3",
+      "label": "elvs_goddess_dress3",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress4": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress4",
+      "label": "elvs_goddess_dress4",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress5": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress5",
+      "label": "elvs_goddess_dress5",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress6": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress6",
+      "label": "elvs_goddess_dress6",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress7": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress7",
+      "label": "elvs_goddessdress7",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_goddess_dress8": {
+      "id": "mh_dress02_cc-by__elvs_goddess_dress8",
+      "label": "elvs_goddessdress8",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "dress",
+        "goddess",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_halter_dress_knee_length": {
+      "id": "mh_dress02_cc-by__elvs_halter_dress_knee_length",
+      "label": "elvs_short_halterdress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladiesware",
+        "female",
+        "halter",
+        "halter dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_halter_dress_long": {
+      "id": "mh_dress02_cc-by__elvs_halter_dress_long",
+      "label": "elvs_long_halterdress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladiesware",
+        "female",
+        "halter",
+        "halter dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_halter_dress_mini": {
+      "id": "mh_dress02_cc-by__elvs_halter_dress_mini",
+      "label": "elvs_mini_halterdress",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladiesware",
+        "female",
+        "halter",
+        "halter dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_halter_dress_tiered": {
+      "id": "mh_dress02_cc-by__elvs_halter_dress_tiered",
+      "label": "tieredhalterdress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladiesware",
+        "female",
+        "halter",
+        "halter dress",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_ladies_apron": {
+      "id": "mh_dress02_cc-by__elvs_ladies_apron",
+      "label": "elvs_lady_apron1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_sarong_cover_up": {
+      "id": "mh_dress02_cc-by__elvs_sarong_cover_up",
+      "label": "sarong_coverup1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "sarong",
+        "wrap",
+        "ladies wear",
+        "summer",
+        "cover up",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_simple_60s_dress": {
+      "id": "mh_dress02_cc-by__elvs_simple_60s_dress",
+      "label": "elvs_hippydress1",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladies ware",
+        "fashion",
+        "hippy",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_simple_fashion_dress_1": {
+      "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_1",
+      "label": "elv_simple_fashiondress1a",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladies ware",
+        "fashion",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress02_cc-by__elvs_simple_fashion_dress_2": {
+      "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_2",
+      "label": "elv_simple_fashiondressd",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "dress02_cc-by.zip",
+      "tags": [
+        "dress",
+        "ladies ware",
+        "fashion",
+        "hippy",
+        "gown/robe"
+      ],
+      "pack": "dress02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_ballet_dress_the_swan": {
+      "id": "mh_dress03_cc-by__mindfront_ballet_dress_the_swan",
+      "label": "Ballet_dress_The_Swan",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "ballet",
+        "work",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_01": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_01",
+      "label": "F_Dress_01",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_02": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_02",
+      "label": "F_Dress_02",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "casual",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_03": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_03",
+      "label": "F_Dress_03",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_04": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_04",
+      "label": "F_Dress_04",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_05": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_05",
+      "label": "F_Dress_05",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_06": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_06",
+      "label": "F_Dress_06",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_07": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_07",
+      "label": "F_Dress_07",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_08": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_08",
+      "label": "F_Dress_08",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_09": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_09",
+      "label": "F_Dress_09",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_10": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_10",
+      "label": "F_Dress_10",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "elegant",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__mindfront_f_dress_11": {
+      "id": "mh_dress03_cc-by__mindfront_f_dress_11",
+      "label": "F_Dress_11",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "casual",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_black_cocktail_dress": {
+      "id": "mh_dress03_cc-by__punkduck_black_cocktail_dress",
+      "label": "Cocktaildress",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "dress",
+        "gown",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_evening_gown": {
+      "id": "mh_dress03_cc-by__punkduck_evening_gown",
+      "label": "EveningGown",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "gown",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_figure_skating_dress": {
+      "id": "mh_dress03_cc-by__punkduck_figure_skating_dress",
+      "label": "figure_skating_dress",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "sport",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_medieval_dress": {
+      "id": "mh_dress03_cc-by__punkduck_medieval_dress",
+      "label": "MedievalDress",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_middle_length_qipao": {
+      "id": "mh_dress03_cc-by__punkduck_middle_length_qipao",
+      "label": "Qipao",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "gown",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_tube_dress": {
+      "id": "mh_dress03_cc-by__punkduck_tube_dress",
+      "label": "TubeDress",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_dress03_cc-by__punkduck_winter_coat": {
+      "id": "mh_dress03_cc-by__punkduck_winter_coat",
+      "label": "Coat",
+      "category": "onePiece",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "dress03_cc-by.zip",
+      "tags": [
+        "female",
+        "coat",
+        "gown/robe"
+      ],
+      "pack": "dress03_cc-by.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_1": {
+      "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_1",
+      "label": "hero-heroine_gloves_1",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_2": {
+      "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_2",
+      "label": "hero-heroine_gloves_2",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "hero",
+        "superhero",
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3": {
+      "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+      "label": "hero-heroine_gloves_3",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "superhero",
+        "hero",
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_4": {
+      "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_4",
+      "label": "hero-heroine_gloves_4",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "hero",
+        "superhero",
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5": {
+      "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+      "label": "hero-heroine_gloves_5",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__learning_mma_fighting_gloves": {
+      "id": "mh_gloves01_cc0__learning_mma_fighting_gloves",
+      "label": "mma_gloves",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "learning",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__toigo_gloves_long": {
+      "id": "mh_gloves01_cc0__toigo_gloves_long",
+      "label": "Gloves_Long",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__toigo_gloves_medium": {
+      "id": "mh_gloves01_cc0__toigo_gloves_medium",
+      "label": "Gloves_Medium",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_gloves01_cc0__toigo_gloves_short": {
+      "id": "mh_gloves01_cc0__toigo_gloves_short",
+      "label": "Gloves_Hand",
+      "category": "gloves",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "gloves01_cc0.zip",
+      "tags": [
+        "gloves"
+      ],
+      "pack": "gloves01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__aethelraed_unraed_cloche_hat": {
+      "id": "mh_hats01_cc0__aethelraed_unraed_cloche_hat",
+      "label": "Cloche_Hat",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "Aethelraed_Unraed",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "female",
+        "hats",
+        "historical",
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__grinsegold_uncle_joshis_hat": {
+      "id": "mh_hats01_cc0__grinsegold_uncle_joshis_hat",
+      "label": "Uncle_Joshi's_hat",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "grinsegold",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__joepal_xmas_cap": {
+      "id": "mh_hats01_cc0__joepal_xmas_cap",
+      "label": "xmascap",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "Joel Palmius",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__jujube_bag_on_head": {
+      "id": "mh_hats01_cc0__jujube_bag_on_head",
+      "label": "pillow_man",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "jujube",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__jujube_newsboy_cap": {
+      "id": "mh_hats01_cc0__jujube_newsboy_cap",
+      "label": "newsboy_cap",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "jujube",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats01_cc0__toigo_maga_hat": {
+      "id": "mh_hats01_cc0__toigo_maga_hat",
+      "label": "MAGA-Hat",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "hats01_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats01_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__culturalibre_motorcycle_helmet": {
+      "id": "mh_hats02_cc0__culturalibre_motorcycle_helmet",
+      "label": "motorcyclehelmet",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__culturalibre_skull_helmet": {
+      "id": "mh_hats02_cc0__culturalibre_skull_helmet",
+      "label": "skull_helmet",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__culturalibre_warrior_helmet": {
+      "id": "mh_hats02_cc0__culturalibre_warrior_helmet",
+      "label": "warrior_helmet",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__grinsegold_corinthian_helmet": {
+      "id": "mh_hats02_cc0__grinsegold_corinthian_helmet",
+      "label": "Corinthian_helmet",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "grinsegold",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "male",
+        "hats",
+        "u r hacked!",
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__javherre_casco_caballero_templario_templar_knight_helmet": {
+      "id": "mh_hats02_cc0__javherre_casco_caballero_templario_templar_knight_helmet",
+      "label": "casco_templario",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "javherre",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats02_cc0__mrgreaterthan_m1_helmet": {
+      "id": "mh_hats02_cc0__mrgreaterthan_m1_helmet",
+      "label": "M1Helmet",
+      "category": "headwear",
+      "license": "CC0",
+      "author": "MrGreaterThan",
+      "sourcePack": "hats02_cc0.zip",
+      "tags": [
+        "unisex",
+        "profession",
+        "vintage",
+        "helmet",
+        "army",
+        "military",
+        "vietnam",
+        "wwii",
+        "hat/helmet"
+      ],
+      "pack": "hats02_cc0.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__culturalibre_cl_bowler_hat": {
+      "id": "mh_hats03_cc-by__culturalibre_cl_bowler_hat",
+      "label": "cl_bowler_hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__culturalibre_cl_don_quixote_hat": {
+      "id": "mh_hats03_cc-by__culturalibre_cl_don_quixote_hat",
+      "label": "cl_don_quixote_hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_basic_brave_feathers1": {
+      "id": "mh_hats03_cc-by__elvs_basic_brave_feathers1",
+      "label": "brave_feathers",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_charity_veil1": {
+      "id": "mh_hats03_cc-by__elvs_charity_veil1",
+      "label": "elvs_charity_veil_m1a_over",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "female",
+        "formal",
+        "traditional",
+        "hat",
+        "veil",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_dirty_lil_maid_bonnet": {
+      "id": "mh_hats03_cc-by__elvs_dirty_lil_maid_bonnet",
+      "label": "elv_maidonnet1",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_male_flat_cap1": {
+      "id": "mh_hats03_cc-by__elvs_male_flat_cap1",
+      "label": "elvs_male_flat_cap1",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "cap",
+        "hat",
+        "mensware",
+        "flat_cap",
+        "traditional",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_male_trilby_hat": {
+      "id": "mh_hats03_cc-by__elvs_male_trilby_hat",
+      "label": "m_trilby_hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_santa_hat": {
+      "id": "mh_hats03_cc-by__elvs_santa_hat",
+      "label": "elvs_santa_hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_slouchy_beanie1": {
+      "id": "mh_hats03_cc-by__elvs_slouchy_beanie1",
+      "label": "elvs_beanie_slouch",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "leisure",
+        "contemporary",
+        "hat",
+        "beanie",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_tophat1": {
+      "id": "mh_hats03_cc-by__elvs_tophat1",
+      "label": "tophat1",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_unisex_chef_hat_1": {
+      "id": "mh_hats03_cc-by__elvs_unisex_chef_hat_1",
+      "label": "elvs_unisex_chef_hat1",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "unisex",
+        "formal",
+        "profession",
+        "traditional",
+        "hat",
+        "toque",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__elvs_witchy_hallows_hat1": {
+      "id": "mh_hats03_cc-by__elvs_witchy_hallows_hat1",
+      "label": "witchy_hat1_elv",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__maciekg_wizard_hat": {
+      "id": "mh_hats03_cc-by__maciekg_wizard_hat",
+      "label": "wizard_hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "MaciekG",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__mindfront_fishing_hat_01": {
+      "id": "mh_hats03_cc-by__mindfront_fishing_hat_01",
+      "label": "Fishing_Hat_01",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__mindfront_knitted_hat_01": {
+      "id": "mh_hats03_cc-by__mindfront_knitted_hat_01",
+      "label": "Knitted_Hat_01",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__mindfront_patrol_cap": {
+      "id": "mh_hats03_cc-by__mindfront_patrol_cap",
+      "label": "Patrol_Cap",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hats",
+        "cap",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__mindfront_sherpa_hat": {
+      "id": "mh_hats03_cc-by__mindfront_sherpa_hat",
+      "label": "Sherpa_Hat",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__punkduck_sun_visor_sports_visor": {
+      "id": "mh_hats03_cc-by__punkduck_sun_visor_sports_visor",
+      "label": "SunVisor",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "sport",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats03_cc-by__punkduck_swim_cap": {
+      "id": "mh_hats03_cc-by__punkduck_swim_cap",
+      "label": "swim-cap",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hats03_cc-by.zip",
+      "tags": [
+        "sport",
+        "swimming",
+        "triathlon",
+        "hat/helmet"
+      ],
+      "pack": "hats03_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__culturalibre_warrior_helmet_02": {
+      "id": "mh_hats04_cc-by__culturalibre_warrior_helmet_02",
+      "label": "warrior_helmet_02",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__drednicolson_pith_helmet": {
+      "id": "mh_hats04_cc-by__drednicolson_pith_helmet",
+      "label": "pith_helmet",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "DredNicolson",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__jaldmic_m1951_72": {
+      "id": "mh_hats04_cc-by__jaldmic_m1951_72",
+      "label": "M1951-72",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "JALdMIC",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "hats",
+        "helmet",
+        "jaldmic",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__maciekg_horned_helmet": {
+      "id": "mh_hats04_cc-by__maciekg_horned_helmet",
+      "label": "helmet_horn",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "MaciekG",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "helmets",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__maciekg_leather_helmet": {
+      "id": "mh_hats04_cc-by__maciekg_leather_helmet",
+      "label": "Leather_Helmet",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "MaciekG",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__mindfront_helmet_kz45": {
+      "id": "mh_hats04_cc-by__mindfront_helmet_kz45",
+      "label": "Helmet_KZ45",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "hats",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__punkduck_bicycle_helmet_time_trial_aero_helmet": {
+      "id": "mh_hats04_cc-by__punkduck_bicycle_helmet_time_trial_aero_helmet",
+      "label": "BikeHelmet",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "sport",
+        "triathlon",
+        "helmet",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_hats04_cc-by__punkduck_riding_helmet": {
+      "id": "mh_hats04_cc-by__punkduck_riding_helmet",
+      "label": "riding_helmet",
+      "category": "headwear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hats04_cc-by.zip",
+      "tags": [
+        "riding",
+        "female",
+        "helmet",
+        "hat/helmet"
+      ],
+      "pack": "hats04_cc-by.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__culturalibre_doc_ock_glasses": {
+      "id": "mh_glasses01_cc0__culturalibre_doc_ock_glasses",
+      "label": "doc_ock_glasses",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__ews_3d_glasses": {
+      "id": "mh_glasses01_cc0__ews_3d_glasses",
+      "label": "3dglasses",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "EWS",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__frankyaye_glasses_library_male": {
+      "id": "mh_glasses01_cc0__frankyaye_glasses_library_male",
+      "label": "Glasses_Library_Male",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "frankyaye",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__kwnet_at_optical_glasses": {
+      "id": "mh_glasses01_cc0__kwnet_at_optical_glasses",
+      "label": "m_opticals01",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "kwnet_at",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "glasses",
+        "male",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_01": {
+      "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_01",
+      "label": "Sagerfrog's Glasses 01",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "spamrakuen",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "unisex",
+        "contemporary",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_02": {
+      "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_02",
+      "label": "Sagerfrog's Glasses 02",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "spamrakuen",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "unisex",
+        "contemporary",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_03": {
+      "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_03",
+      "label": "Sagerfrog's Glasses 03",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "spamrakuen",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "unisex",
+        "contemporary",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_04": {
+      "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_04",
+      "label": "Sagerfrog's Glasses 04",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "spamrakuen",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "unisex",
+        "contemporary",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__spamrakuen_tbm_glasses_frames_01": {
+      "id": "mh_glasses01_cc0__spamrakuen_tbm_glasses_frames_01",
+      "label": "TBM Glasses Frames 01",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "spamrakuen",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "unisex",
+        "formal",
+        "contemporary",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses01_cc0__toigo_round_glasses_leopard": {
+      "id": "mh_glasses01_cc0__toigo_round_glasses_leopard",
+      "label": "RoundGlasses_leopard",
+      "category": "eyewear",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "glasses01_cc0.zip",
+      "tags": [
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses01_cc0.vwpack.json.gz"
+    },
+    "mh_glasses02_ccby__elvs_covid_goggles1": {
+      "id": "mh_glasses02_ccby__elvs_covid_goggles1",
+      "label": "elvs_covid_goggles_uni1",
+      "category": "eyewear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "glasses02_ccby.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "profession",
+        "contemporary",
+        "extension",
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses02_ccby.vwpack.json.gz"
+    },
+    "mh_glasses02_ccby__elvs_ladies_sunglass1": {
+      "id": "mh_glasses02_ccby__elvs_ladies_sunglass1",
+      "label": "ladies_sunglass1",
+      "category": "eyewear",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "glasses02_ccby.zip",
+      "tags": [
+        "accessory"
+      ],
+      "pack": "glasses02_ccby.vwpack.json.gz"
+    },
+    "mh_glasses02_ccby__punkduck_glasses_modern_form": {
+      "id": "mh_glasses02_ccby__punkduck_glasses_modern_form",
+      "label": "glasses",
+      "category": "eyewear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "glasses02_ccby.zip",
+      "tags": [
+        "glasses",
+        "accessory"
+      ],
+      "pack": "glasses02_ccby.vwpack.json.gz"
+    },
+    "mh_glasses02_ccby__punkduck_goggles": {
+      "id": "mh_glasses02_ccby__punkduck_goggles",
+      "label": "goggles",
+      "category": "eyewear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "glasses02_ccby.zip",
+      "tags": [
+        "sport",
+        "swimming",
+        "triathlon",
+        "accessory"
+      ],
+      "pack": "glasses02_ccby.vwpack.json.gz"
+    },
+    "mh_glasses02_ccby__punkduck_sport-sunglasses": {
+      "id": "mh_glasses02_ccby__punkduck_sport-sunglasses",
+      "label": "Sport-Sunglasses",
+      "category": "eyewear",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "glasses02_ccby.zip",
+      "tags": [
+        "glasses",
+        "sport",
+        "accessory"
+      ],
+      "pack": "glasses02_ccby.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__culturalibre_hero_gem": {
+      "id": "mh_jewelry01_cc0__culturalibre_hero_gem",
+      "label": "hero_gem",
+      "category": "neck",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__culturalibre_heroine_lightning_earrings": {
+      "id": "mh_jewelry01_cc0__culturalibre_heroine_lightning_earrings",
+      "label": "heroine_lightning_earrings",
+      "category": "neck",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry",
+        "hero",
+        "superhero"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__ews_hoop_earrings": {
+      "id": "mh_jewelry01_cc0__ews_hoop_earrings",
+      "label": "Hoop_Earrings",
+      "category": "neck",
+      "license": "CC0",
+      "author": "EWS",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "earrings",
+        "accessory",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__ews_industrial_piercing_left_ear_": {
+      "id": "mh_jewelry01_cc0__ews_industrial_piercing_left_ear_",
+      "label": "Industrial_Left_Ear",
+      "category": "neck",
+      "license": "CC0",
+      "author": "EWS",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "industrial",
+        "piercing",
+        "ring",
+        "metal",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__ews_industrial_piercing_right_ear_": {
+      "id": "mh_jewelry01_cc0__ews_industrial_piercing_right_ear_",
+      "label": "Industrial_Right_Ear",
+      "category": "neck",
+      "license": "CC0",
+      "author": "EWS",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "industrial",
+        "piercing",
+        "ring",
+        "metal",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__ews_septum_ring": {
+      "id": "mh_jewelry01_cc0__ews_septum_ring",
+      "label": "Septum_Ring",
+      "category": "neck",
+      "license": "CC0",
+      "author": "EWS",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "septum",
+        "piercing",
+        "ring",
+        "nose",
+        "metal",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__joachip_ring_1": {
+      "id": "mh_jewelry01_cc0__joachip_ring_1",
+      "label": "Ring_1",
+      "category": "neck",
+      "license": "CC0",
+      "author": "joachip",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "unisex",
+        "formal",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__learning_slave_collar_chain": {
+      "id": "mh_jewelry01_cc0__learning_slave_collar_chain",
+      "label": "collar-chain",
+      "category": "neck",
+      "license": "CC0",
+      "author": "learning",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "accessory"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__punkduck_lace-choker": {
+      "id": "mh_jewelry01_cc0__punkduck_lace-choker",
+      "label": "LaceChoker",
+      "category": "neck",
+      "license": "CC0",
+      "author": "punkduck",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "female",
+        "choker",
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__toigo_diamond_ring_and_wedding_band": {
+      "id": "mh_jewelry01_cc0__toigo_diamond_ring_and_wedding_band",
+      "label": "Diamond_Ring+Wedding_Band",
+      "category": "neck",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__toigo_pearl_earrings": {
+      "id": "mh_jewelry01_cc0__toigo_pearl_earrings",
+      "label": "Pearl_Earrings",
+      "category": "neck",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__toigo_pearl_necklace": {
+      "id": "mh_jewelry01_cc0__toigo_pearl_necklace",
+      "label": "Pearl_Necklace",
+      "category": "neck",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__toigo_wedding_ring": {
+      "id": "mh_jewelry01_cc0__toigo_wedding_ring",
+      "label": "WeddingRing",
+      "category": "neck",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry01_cc0__wolgade_diamond_ring_01": {
+      "id": "mh_jewelry01_cc0__wolgade_diamond_ring_01",
+      "label": "diamond_ring_01",
+      "category": "neck",
+      "license": "CC0",
+      "author": "wolgade",
+      "sourcePack": "jewelry01_cc0.zip",
+      "tags": [
+        "jewelry",
+        "female"
+      ],
+      "pack": "jewelry01_cc0.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__culturalibre_cl_spiral_bracelets": {
+      "id": "mh_jewelry02_cc-by__culturalibre_cl_spiral_bracelets",
+      "label": "cl_spiral_bracelets",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "bracelet",
+        "female",
+        "fantasy",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__culturalibre_leather_bracelet": {
+      "id": "mh_jewelry02_cc-by__culturalibre_leather_bracelet",
+      "label": "leather_bracelet",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "accessory"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_bangle_bracelet1": {
+      "id": "mh_jewelry02_cc-by__elvs_bangle_bracelet1",
+      "label": "Simple_bangle1elv",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_bracelet_pearls-l1": {
+      "id": "mh_jewelry02_cc-by__elvs_bracelet_pearls-l1",
+      "label": "pearl_braceletL1elv",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_braided_anklet1": {
+      "id": "mh_jewelry02_cc-by__elvs_braided_anklet1",
+      "label": "elvs_braided_anklet1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "festive",
+        "contemporary",
+        "jewelry",
+        "anklet"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_candy_cane_necklace": {
+      "id": "mh_jewelry02_cc-by__elvs_candy_cane_necklace",
+      "label": "cc_necklace1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_chunky_chain_anklet": {
+      "id": "mh_jewelry02_cc-by__elvs_chunky_chain_anklet",
+      "label": "anklet1_quad",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "festive",
+        "contemporary",
+        "jewelry",
+        "ankle bracelet"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_chunky_chain_heart_necklace": {
+      "id": "mh_jewelry02_cc-by__elvs_chunky_chain_heart_necklace",
+      "label": "heartneck2",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_circle_chain_anklet1": {
+      "id": "mh_jewelry02_cc-by__elvs_circle_chain_anklet1",
+      "label": "elvs_circle_chain_anklet1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "festive",
+        "contemporary",
+        "jewelry",
+        "anklet"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_double_hoops": {
+      "id": "mh_jewelry02_cc-by__elvs_double_hoops",
+      "label": "doublehoops_elv1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry",
+        "earrings",
+        "hoops"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_f_earring_array1_l": {
+      "id": "mh_jewelry02_cc-by__elvs_f_earring_array1_l",
+      "label": "full_ears2",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "earrings",
+        "jewelry",
+        "ladies"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_goth_statement_necklace1": {
+      "id": "mh_jewelry02_cc-by__elvs_goth_statement_necklace1",
+      "label": "elvs_goth_neckdrape2",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "necklace",
+        "ladiesware",
+        "female",
+        "goth",
+        "statement necklace",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_heart_belly_jewel": {
+      "id": "mh_jewelry02_cc-by__elvs_heart_belly_jewel",
+      "label": "belly_jewel1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_interlocking_rings_anklet1": {
+      "id": "mh_jewelry02_cc-by__elvs_interlocking_rings_anklet1",
+      "label": "elvs_interlockrings_anklet1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "casual",
+        "festive",
+        "contemporary",
+        "jewelry",
+        "anklet"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_m_facial_jewel_array1": {
+      "id": "mh_jewelry02_cc-by__elvs_m_facial_jewel_array1",
+      "label": "malefacejewels1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "face jewelry",
+        "male jewelry",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part01.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_multi_bangle_bracelet1": {
+      "id": "mh_jewelry02_cc-by__elvs_multi_bangle_bracelet1",
+      "label": "multi_bangle1elv",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_navel_ring_heartfob": {
+      "id": "mh_jewelry02_cc-by__elvs_navel_ring_heartfob",
+      "label": "Naval_ring_heartfob",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_pearl_anklet_1": {
+      "id": "mh_jewelry02_cc-by__elvs_pearl_anklet_1",
+      "label": "elvs_anklet_pearls1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "formal",
+        "festive",
+        "contemporary",
+        "jewelry",
+        "anklet"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_pumpkin_hallows_earrings1": {
+      "id": "mh_jewelry02_cc-by__elvs_pumpkin_hallows_earrings1",
+      "label": "pumkin_earrings_mh",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_stars_belly_circlet": {
+      "id": "mh_jewelry02_cc-by__elvs_stars_belly_circlet",
+      "label": "round_belly_stars2",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__elvs_twisty_hoops1": {
+      "id": "mh_jewelry02_cc-by__elvs_twisty_hoops1",
+      "label": "twisty_hoops1",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__jaldmic_ankh_collar": {
+      "id": "mh_jewelry02_cc-by__jaldmic_ankh_collar",
+      "label": "Ank_Collar",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "JALdMIC",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jaldmic",
+        "collar",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__jaldmic_no_heart_enchanted_gemstone": {
+      "id": "mh_jewelry02_cc-by__jaldmic_no_heart_enchanted_gemstone",
+      "label": "care_bears_no_heart_enchanted_gemstone",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "JALdMIC",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_bracelet_infinity_love": {
+      "id": "mh_jewelry02_cc-by__punkduck_bracelet_infinity_love",
+      "label": "Infinity-Love-Bracelet",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_brass_circlet_crown": {
+      "id": "mh_jewelry02_cc-by__punkduck_brass_circlet_crown",
+      "label": "brass_circlet_crown",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry",
+        "female"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_makehuman_medal": {
+      "id": "mh_jewelry02_cc-by__punkduck_makehuman_medal",
+      "label": "MakeHuman-Medal",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "sport",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_necklace_native_american_fashion_": {
+      "id": "mh_jewelry02_cc-by__punkduck_necklace_native_american_fashion_",
+      "label": "NamFashionNecklace",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "female",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_pearl-chain_earrings": {
+      "id": "mh_jewelry02_cc-by__punkduck_pearl-chain_earrings",
+      "label": "pearl-chain-earrings",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_spike_collar": {
+      "id": "mh_jewelry02_cc-by__punkduck_spike_collar",
+      "label": "spike_collar",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__punkduck_twisted_pearl_necklace": {
+      "id": "mh_jewelry02_cc-by__punkduck_twisted_pearl_necklace",
+      "label": "twisted-pearl-necklace",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "jewelry",
+        "feamle"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_jewelry02_cc-by__wojackowl_belly_piercing": {
+      "id": "mh_jewelry02_cc-by__wojackowl_belly_piercing",
+      "label": "Belly Piercing",
+      "category": "neck",
+      "license": "CC-BY",
+      "author": "WojackOWL",
+      "sourcePack": "jewelry02_cc-by.zip",
+      "tags": [
+        "unisex",
+        "jewelry"
+      ],
+      "pack": "jewelry02_cc-by.part02.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__culturalibre_suitcase": {
+      "id": "mh_equipment03_cc-by__culturalibre_suitcase",
+      "label": "suitcase",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__elvs_sling_purse1": {
+      "id": "mh_equipment03_cc-by__elvs_sling_purse1",
+      "label": "slingpurse_elv1b",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "bag",
+        "purse",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__mindfront_tactical_vest_female": {
+      "id": "mh_equipment03_cc-by__mindfront_tactical_vest_female",
+      "label": "Tactical_Vest_female",
+      "category": "vest",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "work",
+        "sport",
+        "female",
+        "uniform/armor"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__mindfront_tactical_vest_male": {
+      "id": "mh_equipment03_cc-by__mindfront_tactical_vest_male",
+      "label": "Tactical_Vest_male",
+      "category": "vest",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "work",
+        "sport",
+        "male",
+        "uniform/armor"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_diver_scuba_rig": {
+      "id": "mh_equipment03_cc-by__punkduck_diver_scuba_rig",
+      "label": "Diver_Scuba_Rig",
+      "category": "vest",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "sport",
+        "unsorted",
+        "unsorted/other"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_electric_guitar": {
+      "id": "mh_equipment03_cc-by__punkduck_electric_guitar",
+      "label": "ElectricGuitar",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "carried",
+        "guitar",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_handbag01": {
+      "id": "mh_equipment03_cc-by__punkduck_handbag01",
+      "label": "Handbag",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "bag",
+        "carried",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_head_mirror": {
+      "id": "mh_equipment03_cc-by__punkduck_head_mirror",
+      "label": "headmirror",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "unisex",
+        "profession",
+        "contemporary",
+        "carried-item",
+        "accessory"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_microphone": {
+      "id": "mh_equipment03_cc-by__punkduck_microphone",
+      "label": "Microphone",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "carried",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_shopping_bag01": {
+      "id": "mh_equipment03_cc-by__punkduck_shopping_bag01",
+      "label": "ShoppingBag",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "bag",
+        "carried",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_stethoscope": {
+      "id": "mh_equipment03_cc-by__punkduck_stethoscope",
+      "label": "stethoscope",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "unisex",
+        "profession",
+        "contemporary",
+        "carried-item",
+        "accessory"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_tennis_racket": {
+      "id": "mh_equipment03_cc-by__punkduck_tennis_racket",
+      "label": "tennisracket",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "sport",
+        "carried",
+        "weapon/tool/carried"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
+    },
+    "mh_equipment03_cc-by__punkduck_wireless_headset": {
+      "id": "mh_equipment03_cc-by__punkduck_wireless_headset",
+      "label": "Headset",
+      "category": "back",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "equipment03_cc-by.zip",
+      "tags": [
+        "carried",
+        "accessory"
+      ],
+      "pack": "equipment03_cc-by.vwpack.json.gz"
     }
   },
   "categories": {
     "hair": [
+      "mh_hair02_ccby__elvs_braided_rows",
+      "mh_hair03_ccby__punkduck_alpha7_curly",
+      "mh_hair03_ccby__punkduck_alpha7_curly2",
       "mh_hair02_ccby__elvs_50s_updo",
       "mh_hair02_ccby__elvs_adrienne_hair",
       "mh_hair02_ccby__elvs_ashley_may_hair",
       "mh_hair02_ccby__elvs_braid_bun",
-      "mh_hair02_ccby__elvs_braided_rows",
       "mh_hair02_ccby__elvs_daisy_hair",
       "mh_hair02_ccby__elvs_grump_hair",
       "mh_hair02_ccby__elvs_hazel_hair",
@@ -3514,38 +6370,36 @@
       "mh_hair02_ccby__elvs_keylth_hair",
       "mh_hair02_ccby__elvs_lady_hippy_hair",
       "mh_hair02_ccby__elvs_lara_hair",
-      "mh_hair02_ccby__elvs_maxwell_hair",
       "mh_hair02_ccby__elvs_micky_afro",
       "mh_hair02_ccby__elvs_short_daisy_hair",
-      "mh_hair02_ccby__elvs_short_side_do",
       "mh_hair02_ccby__elvs_that_80s_babe_hair",
+      "mh_hair02_ccby__elvs_short_side_do",
       "mh_hair02_ccby__elvs_wavy_bob",
-      "mh_hair02_ccby__elvs_witchy_lil_bob",
       "mh_hair03_ccby__culturalibre_hair_11",
       "mh_hair03_ccby__culturalibre_hair_12",
       "mh_hair03_ccby__culturalibre_hair_13",
       "mh_hair03_ccby__culturalibre_hair_14",
       "mh_hair03_ccby__culturalibre_hair_17",
       "mh_hair03_ccby__culturalibre_hair_18",
-      "mh_hair03_ccby__grinsegold_wig_bow_tie",
-      "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "mh_hair03_ccby__punkduck_alpha7_long2",
+      "mh_hair03_ccby__punkduck_alpha7_long",
+      "mh_hair02_ccby__elvs_maxwell_hair",
       "mh_hair03_ccby__o4saken_chinesebob01",
       "mh_hair03_ccby__o4saken_curly01",
-      "mh_hair03_ccby__punkduck_alpha7_curly",
-      "mh_hair03_ccby__punkduck_alpha7_curly2",
-      "mh_hair03_ccby__punkduck_alpha7_long",
-      "mh_hair03_ccby__punkduck_alpha7_long2"
+      "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "mh_hair02_ccby__elvs_witchy_lil_bob"
     ],
     "facialHair": [
-      "mh_bodyparts05_cc0__culturalibre_faun_beard",
       "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
       "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
-      "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
-      "mh_bodyparts05_cc0__wdg_scruffy_beard",
       "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
       "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+      "mh_bodyparts05_cc0__culturalibre_faun_beard",
       "mh_bodyparts06_cc-by__grinsegold_full_beard",
-      "mh_bodyparts06_cc-by__grinsegold_moustache"
+      "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "mh_bodyparts05_cc0__wdg_scruffy_beard"
     ],
     "brows": [
       "mh_eyebrows01_cc0__mindfront_eyebrows_01",
@@ -3571,35 +6425,81 @@
       "mh_eyelashes01_cc0__mindfront_eyelashes_05"
     ],
     "bottoms": [
+      "mh_skirts02_cc-by__elvs_asymmetrical_skirt",
       "mh_pants01_cc0__cortu_cargo_pants",
-      "mh_pants01_cc0__cortu_jeans_shorts",
-      "mh_pants01_cc0__toigo_harem_pants",
-      "mh_pants01_cc0__toigo_wool_pants",
-      "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
-      "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
+      "mh_skirts02_cc-by__elvs_disco_mini_skirt",
       "mh_pants02_ccby__elvs_disco_pants_skinny",
+      "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
+      "mh_skirts02_cc-by__elvs_pencil_skirt",
+      "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
       "mh_pants02_ccby__elvs_gored_elephant_pants",
+      "mh_skirts02_cc-by__elvs_gored_midi_skirt",
+      "mh_pants03_ccby__elvs_male_swim_shorts1",
+      "mh_pants02_ccby__mindfront_female_trousers_1",
+      "mh_skirts02_cc-by__callharvey3d_harvey_pskirt01",
+      "mh_pants01_cc0__cortu_jeans_shorts",
+      "mh_skirts02_cc-by__punkduck_jeans_skirt",
+      "mh_skirts02_cc-by__mtknife_low_mini_skirt",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
+      "mh_pants02_ccby__mindfront_male_trousers_1",
+      "mh_pants02_ccby__mindfront_male_trousers_2",
+      "mh_pants02_ccby__punkduck_male_classic_jeans",
+      "mh_skirts02_cc-by__sonicteam998_maria_skirt",
       "mh_pants02_ccby__elvs_jeans_bootcut",
       "mh_pants02_ccby__elvs_jeans_straight_leg",
       "mh_pants02_ccby__elvs_male_trouser",
       "mh_pants02_ccby__elvs_male_trouser_with_chain",
-      "mh_pants02_ccby__mindfront_female_trousers_1",
-      "mh_pants02_ccby__mindfront_male_trousers_1",
-      "mh_pants02_ccby__mindfront_male_trousers_2",
-      "mh_pants02_ccby__punkduck_female_tight_jeans",
-      "mh_pants02_ccby__punkduck_male_classic_jeans",
-      "mh_pants03_ccby__elvs_male_swim_shorts1",
       "mh_pants03_ccby__elvs_male_trouser_short_1",
       "mh_pants03_ccby__elvs_male_trouser_short_2",
+      "mh_skirts01_cc0__frankyaye_mini_skirt_01",
+      "mh_skirts01_cc0__frankyaye_mini_skirt_02",
+      "mh_skirts02_cc-by__punkduck_black_mini_skirt",
+      "mh_skirts02_cc-by__punkduck_skirt_native_american_fashion",
+      "mh_pants01_cc0__toigo_harem_pants",
+      "mh_pants01_cc0__toigo_wool_pants",
+      "mh_skirts02_cc-by__mtknife_pleated_mini_skirt",
+      "mh_skirts02_cc-by__elvs_pleated_plaid_mini_skirt",
+      "mh_skirts02_cc-by__punkduck_retro_polka_dot_skirt",
       "mh_pants03_ccby__elvs_retro_girly_shorts1",
-      "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
-      "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
-      "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
-      "mh_pants03_ccby__punkduck_female_short_jeans"
+      "mh_pants03_ccby__punkduck_female_short_jeans",
+      "mh_skirts01_cc0__toigo_skirt_with_lace_ruffle",
+      "mh_skirts01_cc0__toigo_long_full_skirt",
+      "mh_skirts02_cc-by__scsouza_mini_denin_skirt",
+      "mh_skirts01_cc0__toigo_tiered_skirt",
+      "mh_skirts01_cc0__toigo_tiered_mini_skirt",
+      "mh_pants02_ccby__punkduck_female_tight_jeans"
     ],
     "shoes": [
+      "mh_shoes01_cc0__toigo_stiletto_booties",
+      "mh_shoes01_cc0__toigo_ankle_boots_female",
+      "mh_shoes01_cc0__toigo_ankle_boots_male",
+      "mh_shoes01_cc0__scailman_semitransparent_water_boots",
+      "mh_shoes03_ccby__scailman_low-heeled_boots",
+      "mh_shoes02_ccby__punkduck_cycling_shoes",
+      "mh_shoes02_ccby__dressupdoc_balletflat1",
+      "mh_shoes02_ccby__dressupdoc_domsjeans1",
+      "mh_shoes02_ccby__dressupdoc_maryjane1",
+      "mh_shoes02_ccby__dressupdoc_sandals1",
+      "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
+      "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+      "mh_shoes02_ccby__elvs_flatshoe_plain1",
+      "mh_shoes02_ccby__elvs_flatshoe_bow1",
+      "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
+      "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
+      "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
+      "mh_shoes02_ccby__elvs_caesar_sandals1",
+      "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+      "mh_shoes03_ccby__madmanny_tight_leather_boots",
+      "mh_shoes01_cc0__toigo_flats",
+      "mh_shoes01_cc0__toigo_ballet_flats",
+      "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
+      "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
       "mh_shoes01_cc0__cortu_floppy_overknee_shoes",
-      "mh_shoes01_cc0__cortu_t-bar",
+      "mh_shoes01_cc0__scailman_gogo_platform_boots",
+      "mh_shoes03_ccby__punkduck_female_half-boots",
+      "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
       "mh_shoes01_cc0__culturalibre_hero_boots_1",
       "mh_shoes01_cc0__culturalibre_hero_boots_2",
       "mh_shoes01_cc0__culturalibre_hero_boots_3",
@@ -3609,81 +6509,38 @@
       "mh_shoes01_cc0__culturalibre_heroine_boots_2",
       "mh_shoes01_cc0__culturalibre_heroine_boots_3",
       "mh_shoes01_cc0__culturalibre_heroine_boots_4",
-      "mh_shoes01_cc0__culturalibre_male_boots",
+      "mh_shoes03_ccby__punkduck_female_knee_boots",
+      "mh_shoes03_ccby__maciekg_leather_boots",
       "mh_shoes01_cc0__grinsegold_female_pirate_boots",
-      "mh_shoes01_cc0__scailman_gogo_platform_boots",
-      "mh_shoes01_cc0__scailman_semitransparent_water_boots",
-      "mh_shoes01_cc0__toigo_ankle_boots_female",
-      "mh_shoes01_cc0__toigo_ankle_boots_male",
-      "mh_shoes01_cc0__toigo_ballet_flats",
-      "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
-      "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
-      "mh_shoes01_cc0__toigo_flats",
-      "mh_shoes01_cc0__toigo_mj_cloth_shoes",
-      "mh_shoes01_cc0__toigo_stiletto_booties",
-      "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
-      "mh_shoes02_ccby__culturalibre_sneakers",
-      "mh_shoes02_ccby__dressupdoc_balletflat1",
-      "mh_shoes02_ccby__dressupdoc_domsjeans1",
-      "mh_shoes02_ccby__dressupdoc_maryjane1",
-      "mh_shoes02_ccby__dressupdoc_sandals1",
-      "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
-      "mh_shoes02_ccby__elvs_caesar_sandals1",
-      "mh_shoes02_ccby__elvs_flatshoe_bow1",
-      "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
-      "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
-      "mh_shoes02_ccby__elvs_flatshoe_plain1",
-      "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+      "mh_shoes01_cc0__culturalibre_male_boots",
       "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
-      "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+      "mh_shoes02_ccby__punkduck_kill_bill_shoes",
+      "mh_shoes03_ccby__punkduck_medieval_boots",
+      "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+      "mh_shoes03_ccby__punkduck_riding_boots",
+      "mh_shoes02_ccby__punkduck_running_shoes_01",
+      "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
+      "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
       "mh_shoes02_ccby__mindfront_shoes_monk_strap_female",
       "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
       "mh_shoes02_ccby__mindfront_shoes_oxford_female",
       "mh_shoes02_ccby__mindfront_shoes_oxford_male",
-      "mh_shoes02_ccby__punkduck_comfortable_sneakers",
-      "mh_shoes02_ccby__punkduck_cycling_shoes",
-      "mh_shoes02_ccby__punkduck_kill_bill_shoes",
-      "mh_shoes02_ccby__punkduck_running_shoes_01",
-      "mh_shoes02_ccby__punkduck_tennis_shoes",
-      "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
       "mh_shoes03_ccby__elvs_wedge_tall_boots1",
-      "mh_shoes03_ccby__maciekg_leather_boots",
-      "mh_shoes03_ccby__madmanny_tight_leather_boots",
-      "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
-      "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
-      "mh_shoes03_ccby__punkduck_female_half-boots",
-      "mh_shoes03_ccby__punkduck_female_knee_boots",
-      "mh_shoes03_ccby__punkduck_medieval_boots",
-      "mh_shoes03_ccby__punkduck_riding_boots",
-      "mh_shoes03_ccby__punkduck_winter_boots",
-      "mh_shoes03_ccby__scailman_low-heeled_boots"
+      "mh_shoes02_ccby__culturalibre_sneakers",
+      "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+      "mh_shoes01_cc0__cortu_t-bar",
+      "mh_shoes02_ccby__punkduck_tennis_shoes",
+      "mh_shoes03_ccby__punkduck_winter_boots"
     ],
     "baseLayer": [
-      "mh_underwear01_cc0__kwnet_at_pantyhose01",
+      "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
       "mh_underwear01_cc0__marco_105_armsleeve02",
-      "mh_underwear01_cc0__marco_105_stocking01",
-      "mh_underwear01_cc0__marco_105_stocking02",
-      "mh_underwear01_cc0__punkduck_strappy_lace_thong",
       "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
       "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium",
       "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small",
       "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large",
       "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium",
       "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
-      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
-      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
-      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
-      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
-      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
-      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
-      "mh_underwear01_cc0__wolgade_female_panties_01",
-      "mh_underwear01_cc0__wolgade_female_top_01",
-      "mh_underwear02_cc0__elvs_bow_bottom_panty",
-      "mh_underwear02_cc0__elvs_bow_front_bra",
-      "mh_underwear02_cc0__elvs_crude_bootyshorts",
-      "mh_underwear02_cc0__elvs_lace_panty",
-      "mh_underwear02_cc0__jaldmic_stockings",
-      "mh_underwear02_cc0__mindfront_bikini_01",
       "mh_underwear02_cc0__punkduck_babydoll",
       "mh_underwear02_cc0__punkduck_bandeau_bikini_bra",
       "mh_underwear02_cc0__punkduck_bandeau_bikini_slip",
@@ -3692,81 +6549,297 @@
       "mh_underwear02_cc0__punkduck_bikini02_slip",
       "mh_underwear02_cc0__punkduck_brazilian_bikini_bra",
       "mh_underwear02_cc0__punkduck_brazilian_bikini_slip",
-      "mh_underwear02_cc0__punkduck_french_lingerie_bra",
-      "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
+      "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
+      "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
+      "mh_underwear02_cc0__elvs_crude_bootyshorts",
+      "mh_underwear02_cc0__mindfront_bikini_01",
+      "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
+      "mh_underwear01_cc0__wolgade_female_panties_01",
+      "mh_underwear01_cc0__wolgade_female_top_01",
       "mh_underwear02_cc0__punkduck_french_lingerie_stockings",
-      "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
       "mh_underwear02_cc0__punkduck_french_lingerie_thong",
+      "mh_underwear02_cc0__punkduck_french_lingerie_bra",
       "mh_underwear02_cc0__punkduck_frill_bikini_bottom",
       "mh_underwear02_cc0__punkduck_frill_bikini_top",
+      "mh_underwear02_cc0__elvs_bow_bottom_panty",
+      "mh_underwear02_cc0__elvs_bow_front_bra",
+      "mh_underwear03_cc-by__elvs_camisole1",
+      "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
+      "mh_underwear01_cc0__kwnet_at_pantyhose01",
+      "mh_underwear03_cc-by__joepal_plain_bra",
+      "mh_underwear03_cc-by__punkduck_halterneck_romper",
+      "mh_underwear02_cc0__elvs_lace_panty",
+      "mh_underwear03_cc-by__punkduck_shapewear",
       "mh_underwear02_cc0__punkduck_sport_bra",
       "mh_underwear02_cc0__punkduck_sport_briefs",
+      "mh_underwear01_cc0__marco_105_stocking01",
+      "mh_underwear01_cc0__marco_105_stocking02",
+      "mh_underwear02_cc0__jaldmic_stockings",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
+      "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
+      "mh_underwear01_cc0__punkduck_strappy_lace_thong",
       "mh_underwear02_cc0__punkduck_string_2",
+      "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
       "mh_underwear02_cc0__punkduck_string_4",
       "mh_underwear02_cc0__punkduck_string_5",
+      "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
       "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie",
       "mh_underwear02_cc0__punkduck_transparent_bra",
-      "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
-      "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
-      "mh_underwear03_cc-by__elvs_camisole1",
-      "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
-      "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless",
-      "mh_underwear03_cc-by__joepal_plain_bra",
-      "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
-      "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
-      "mh_underwear03_cc-by__punkduck_halterneck_romper",
-      "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
-      "mh_underwear03_cc-by__punkduck_shapewear"
+      "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless"
     ],
     "socks": [
       "mh_underwear04_cc0__joepal_crude_high_socks",
       "mh_underwear04_cc0__joepal_crude_low_socks",
-      "mh_underwear04_cc0__toigo_lace_frill_socks",
-      "mh_underwear04_cc0__toigo_leg_warmer_socks"
+      "mh_underwear04_cc0__toigo_leg_warmer_socks",
+      "mh_underwear04_cc0__toigo_lace_frill_socks"
     ],
     "top": [
-      "mh_shirts01_cc0__elvs_crude_t-shirt_male",
-      "mh_shirts01_cc0__joepal_crude_t-shirt_female",
-      "mh_shirts01_cc0__namuhekam_male_polo_shirt",
-      "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
-      "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+      "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
       "mh_shirts01_cc0__toigo_bodice-style_top",
       "mh_shirts01_cc0__toigo_camisole_top",
-      "mh_shirts01_cc0__toigo_fisherman_sweater",
-      "mh_shirts01_cc0__toigo_keyhole_tank_top",
-      "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+      "mh_shirts01_cc0__elvs_crude_t-shirt_male",
+      "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+      "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+      "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
+      "mh_shirts03_ccby__elvs_disco_top2",
+      "mh_shirts03_ccby__elvs_lara_tank1",
+      "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "mh_shirts02_ccby__mindfront_lusekofta",
+      "mh_shirts03_ccby__punkduck_high_neck_crop_top",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+      "mh_shirts02_ccby__punkduck_lace_up_blouse",
       "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "mh_shirts03_ccby__elvs_ladies_tank1",
+      "mh_shirts03_ccby__elvs_male_athletic_tank1",
       "mh_shirts02_ccby__elvs_male_boho_top1",
       "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
       "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
-      "mh_shirts02_ccby__ews_striped_shirt",
-      "mh_shirts02_ccby__janexx_old_female_sweater",
-      "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "mh_shirts02_ccby__mindfront_knitted_sweater_01",
-      "mh_shirts02_ccby__mindfront_knitted_sweater_02",
-      "mh_shirts02_ccby__mindfront_lusekofta",
-      "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
-      "mh_shirts02_ccby__punkduck_lace_up_blouse",
-      "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
-      "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
-      "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
-      "mh_shirts03_ccby__elvs_disco_top2",
-      "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
-      "mh_shirts03_ccby__elvs_ladies_tank1",
-      "mh_shirts03_ccby__elvs_lara_tank1",
-      "mh_shirts03_ccby__elvs_male_athletic_tank1",
-      "mh_shirts03_ccby__elvs_male_logo_tshirt1",
-      "mh_shirts03_ccby__elvs_male_muscle_shirt1",
       "mh_shirts03_ccby__elvs_male_tankshirt1",
+      "mh_shirts03_ccby__elvs_male_muscle_shirt1",
+      "mh_shirts03_ccby__elvs_male_logo_tshirt1",
+      "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
+      "mh_shirts01_cc0__namuhekam_male_polo_shirt",
       "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1",
-      "mh_shirts03_ccby__mindfront_tank_top_01",
-      "mh_shirts03_ccby__punkduck_high_neck_crop_top",
-      "mh_shirts03_ccby__punkduck_retro_top",
-      "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+      "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
       "mh_shirts03_ccby__punkduck_sleeveless_shirt",
+      "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
       "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top",
+      "mh_shirts02_ccby__ews_striped_shirt",
+      "mh_shirts01_cc0__toigo_fisherman_sweater",
+      "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+      "mh_shirts01_cc0__toigo_keyhole_tank_top",
+      "mh_shirts03_ccby__mindfront_tank_top_01",
+      "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
       "mh_shirts03_ccby__punkduck_tube_top",
-      "mh_shirts03_ccby__punkduck_v_neck_top"
+      "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+      "mh_shirts03_ccby__punkduck_retro_top",
+      "mh_shirts03_ccby__punkduck_v_neck_top",
+      "mh_shirts02_ccby__janexx_old_female_sweater"
+    ],
+    "onePiece": [
+      "mh_dress02_cc-by__elvs_crochet_baby_doll",
+      "mh_dress03_cc-by__mindfront_ballet_dress_the_swan",
+      "mh_dress03_cc-by__punkduck_winter_coat",
+      "mh_dress03_cc-by__punkduck_black_cocktail_dress",
+      "mh_dress02_cc-by__elvs_double_handkerchief_halter_dress",
+      "mh_dress01_cc0__toigo_bodice_dress_with_lace_ruffle_skirt",
+      "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+      "mh_dress01_cc0__toigo_cut_out_dress",
+      "mh_dress01_cc0__toigo_keyhole_neck_dress",
+      "mh_dress01_cc0__toigo_halter_dress_knee_length",
+      "mh_dress01_cc0__toigo_halter_dress_with_fluted_skirt",
+      "mh_dress01_cc0__toigo_halter_dress_midi",
+      "mh_dress01_cc0__toigo_shift_dress",
+      "mh_dress01_cc0__toigo_strapless_ruffle_top_dress",
+      "mh_dress01_cc0__toigo_dress_with_tiered_skirt",
+      "mh_dress02_cc-by__elvs_simple_fashion_dress_1",
+      "mh_dress02_cc-by__elvs_simple_fashion_dress_2",
+      "mh_dress02_cc-by__elvs_fringe_hippy_dress",
+      "mh_dress02_cc-by__elvs_goddess_dress2",
+      "mh_dress02_cc-by__elvs_goddess_dress3",
+      "mh_dress02_cc-by__elvs_goddess_dress4",
+      "mh_dress02_cc-by__elvs_goddess_dress5",
+      "mh_dress02_cc-by__elvs_goddess_dress6",
+      "mh_dress02_cc-by__elvs_goddess_dress1",
+      "mh_dress02_cc-by__elvs_goddess_dress7",
+      "mh_dress02_cc-by__elvs_goddess_dress8",
+      "mh_dress02_cc-by__elvs_simple_60s_dress",
+      "mh_dress02_cc-by__elvs_ladies_apron",
+      "mh_dress02_cc-by__elvs_fringe_leather_dress",
+      "mh_dress02_cc-by__elvs_halter_dress_long",
+      "mh_dress02_cc-by__elvs_halter_dress_mini",
+      "mh_dress02_cc-by__elvs_fringe_off_shoulder_dress",
+      "mh_dress02_cc-by__elvs_halter_dress_knee_length",
+      "mh_dress03_cc-by__punkduck_evening_gown",
+      "mh_dress03_cc-by__mindfront_f_dress_01",
+      "mh_dress03_cc-by__mindfront_f_dress_02",
+      "mh_dress03_cc-by__mindfront_f_dress_03",
+      "mh_dress03_cc-by__mindfront_f_dress_04",
+      "mh_dress03_cc-by__mindfront_f_dress_05",
+      "mh_dress03_cc-by__mindfront_f_dress_06",
+      "mh_dress03_cc-by__mindfront_f_dress_07",
+      "mh_dress03_cc-by__mindfront_f_dress_08",
+      "mh_dress03_cc-by__mindfront_f_dress_09",
+      "mh_dress03_cc-by__mindfront_f_dress_10",
+      "mh_dress03_cc-by__mindfront_f_dress_11",
+      "mh_dress01_cc0__mindfront_kimono",
+      "mh_suits01_cc0__toigo_female_suit",
+      "mh_suits01_cc0__toigo_female_suit_2",
+      "mh_suits01_cc0__toigo_female_double-breasted_suit",
+      "mh_dress03_cc-by__punkduck_figure_skating_dress",
+      "mh_dress01_cc0__aethelraed_flapper_dress",
+      "mh_dress02_cc-by__elvs_frilled_party_dress",
+      "mh_suits01_cc0__toigo_suit_with_jacket_and_bowtie",
+      "mh_suits01_cc0__toigo_male_suit_tie_and_jacket",
+      "mh_dress03_cc-by__punkduck_medieval_dress",
+      "mh_dress01_cc0__wdg_mycenaean_tunic",
+      "mh_dress03_cc-by__punkduck_middle_length_qipao",
+      "mh_dress02_cc-by__elvs_sarong_cover_up",
+      "mh_suits01_cc0__toigo_male_suit_3",
+      "mh_suits01_cc0__toigo_suit_with_dinner_jacket",
+      "mh_suits01_cc0__toigo_male_double-breasted_suit",
+      "mh_dress02_cc-by__elvs_halter_dress_tiered",
+      "mh_dress03_cc-by__punkduck_tube_dress",
+      "mh_dress02_cc-by__elvs_fashion_stylized_qipoa"
+    ],
+    "gloves": [
+      "mh_gloves01_cc0__toigo_gloves_short",
+      "mh_gloves01_cc0__toigo_gloves_long",
+      "mh_gloves01_cc0__toigo_gloves_medium",
+      "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_1",
+      "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_2",
+      "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+      "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_4",
+      "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+      "mh_gloves01_cc0__learning_mma_fighting_gloves"
+    ],
+    "headwear": [
+      "mh_hats04_cc-by__punkduck_bicycle_helmet_time_trial_aero_helmet",
+      "mh_hats03_cc-by__elvs_basic_brave_feathers1",
+      "mh_hats02_cc0__javherre_casco_caballero_templario_templar_knight_helmet",
+      "mh_hats03_cc-by__culturalibre_cl_bowler_hat",
+      "mh_hats03_cc-by__culturalibre_cl_don_quixote_hat",
+      "mh_hats01_cc0__aethelraed_unraed_cloche_hat",
+      "mh_hats02_cc0__grinsegold_corinthian_helmet",
+      "mh_hats03_cc-by__elvs_dirty_lil_maid_bonnet",
+      "mh_hats03_cc-by__elvs_slouchy_beanie1",
+      "mh_hats03_cc-by__elvs_charity_veil1",
+      "mh_hats03_cc-by__elvs_male_flat_cap1",
+      "mh_hats03_cc-by__elvs_santa_hat",
+      "mh_hats03_cc-by__elvs_unisex_chef_hat_1",
+      "mh_hats03_cc-by__mindfront_fishing_hat_01",
+      "mh_hats04_cc-by__maciekg_horned_helmet",
+      "mh_hats04_cc-by__mindfront_helmet_kz45",
+      "mh_hats03_cc-by__mindfront_knitted_hat_01",
+      "mh_hats04_cc-by__maciekg_leather_helmet",
+      "mh_hats04_cc-by__jaldmic_m1951_72",
+      "mh_hats02_cc0__mrgreaterthan_m1_helmet",
+      "mh_hats03_cc-by__elvs_male_trilby_hat",
+      "mh_hats01_cc0__toigo_maga_hat",
+      "mh_hats02_cc0__culturalibre_motorcycle_helmet",
+      "mh_hats01_cc0__jujube_newsboy_cap",
+      "mh_hats03_cc-by__mindfront_patrol_cap",
+      "mh_hats01_cc0__jujube_bag_on_head",
+      "mh_hats04_cc-by__drednicolson_pith_helmet",
+      "mh_hats04_cc-by__punkduck_riding_helmet",
+      "mh_hats03_cc-by__mindfront_sherpa_hat",
+      "mh_hats02_cc0__culturalibre_skull_helmet",
+      "mh_hats03_cc-by__punkduck_sun_visor_sports_visor",
+      "mh_hats03_cc-by__punkduck_swim_cap",
+      "mh_hats03_cc-by__elvs_tophat1",
+      "mh_hats01_cc0__grinsegold_uncle_joshis_hat",
+      "mh_hats02_cc0__culturalibre_warrior_helmet",
+      "mh_hats04_cc-by__culturalibre_warrior_helmet_02",
+      "mh_hats03_cc-by__elvs_witchy_hallows_hat1",
+      "mh_hats03_cc-by__maciekg_wizard_hat",
+      "mh_hats01_cc0__joepal_xmas_cap"
+    ],
+    "eyewear": [
+      "mh_glasses01_cc0__ews_3d_glasses",
+      "mh_glasses01_cc0__culturalibre_doc_ock_glasses",
+      "mh_glasses02_ccby__elvs_covid_goggles1",
+      "mh_glasses02_ccby__punkduck_glasses_modern_form",
+      "mh_glasses01_cc0__frankyaye_glasses_library_male",
+      "mh_glasses02_ccby__punkduck_goggles",
+      "mh_glasses02_ccby__elvs_ladies_sunglass1",
+      "mh_glasses01_cc0__kwnet_at_optical_glasses",
+      "mh_glasses01_cc0__toigo_round_glasses_leopard",
+      "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_01",
+      "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_02",
+      "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_03",
+      "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_04",
+      "mh_glasses02_ccby__punkduck_sport-sunglasses",
+      "mh_glasses01_cc0__spamrakuen_tbm_glasses_frames_01"
+    ],
+    "neck": [
+      "mh_jewelry02_cc-by__jaldmic_ankh_collar",
+      "mh_jewelry02_cc-by__elvs_chunky_chain_anklet",
+      "mh_jewelry02_cc-by__wojackowl_belly_piercing",
+      "mh_jewelry02_cc-by__elvs_heart_belly_jewel",
+      "mh_jewelry02_cc-by__punkduck_brass_circlet_crown",
+      "mh_jewelry02_cc-by__jaldmic_no_heart_enchanted_gemstone",
+      "mh_jewelry02_cc-by__elvs_candy_cane_necklace",
+      "mh_jewelry02_cc-by__culturalibre_cl_spiral_bracelets",
+      "mh_jewelry01_cc0__learning_slave_collar_chain",
+      "mh_jewelry01_cc0__toigo_diamond_ring_and_wedding_band",
+      "mh_jewelry01_cc0__wolgade_diamond_ring_01",
+      "mh_jewelry02_cc-by__elvs_double_hoops",
+      "mh_jewelry02_cc-by__elvs_pearl_anklet_1",
+      "mh_jewelry02_cc-by__elvs_braided_anklet1",
+      "mh_jewelry02_cc-by__elvs_circle_chain_anklet1",
+      "mh_jewelry02_cc-by__elvs_goth_statement_necklace1",
+      "mh_jewelry02_cc-by__elvs_interlocking_rings_anklet1",
+      "mh_jewelry02_cc-by__elvs_f_earring_array1_l",
+      "mh_jewelry02_cc-by__elvs_chunky_chain_heart_necklace",
+      "mh_jewelry01_cc0__culturalibre_hero_gem",
+      "mh_jewelry01_cc0__culturalibre_heroine_lightning_earrings",
+      "mh_jewelry01_cc0__ews_hoop_earrings",
+      "mh_jewelry01_cc0__ews_industrial_piercing_left_ear_",
+      "mh_jewelry01_cc0__ews_industrial_piercing_right_ear_",
+      "mh_jewelry02_cc-by__punkduck_bracelet_infinity_love",
+      "mh_jewelry01_cc0__punkduck_lace-choker",
+      "mh_jewelry02_cc-by__culturalibre_leather_bracelet",
+      "mh_jewelry02_cc-by__punkduck_makehuman_medal",
+      "mh_jewelry02_cc-by__elvs_m_facial_jewel_array1",
+      "mh_jewelry02_cc-by__elvs_multi_bangle_bracelet1",
+      "mh_jewelry02_cc-by__punkduck_necklace_native_american_fashion_",
+      "mh_jewelry02_cc-by__elvs_navel_ring_heartfob",
+      "mh_jewelry02_cc-by__punkduck_pearl-chain_earrings",
+      "mh_jewelry02_cc-by__elvs_bracelet_pearls-l1",
+      "mh_jewelry01_cc0__toigo_pearl_earrings",
+      "mh_jewelry01_cc0__toigo_pearl_necklace",
+      "mh_jewelry02_cc-by__elvs_pumpkin_hallows_earrings1",
+      "mh_jewelry01_cc0__joachip_ring_1",
+      "mh_jewelry02_cc-by__elvs_stars_belly_circlet",
+      "mh_jewelry01_cc0__ews_septum_ring",
+      "mh_jewelry02_cc-by__elvs_bangle_bracelet1",
+      "mh_jewelry02_cc-by__punkduck_spike_collar",
+      "mh_jewelry02_cc-by__punkduck_twisted_pearl_necklace",
+      "mh_jewelry02_cc-by__elvs_twisty_hoops1",
+      "mh_jewelry01_cc0__toigo_wedding_ring"
+    ],
+    "back": [
+      "mh_equipment03_cc-by__punkduck_electric_guitar",
+      "mh_equipment03_cc-by__punkduck_handbag01",
+      "mh_equipment03_cc-by__punkduck_head_mirror",
+      "mh_equipment03_cc-by__punkduck_wireless_headset",
+      "mh_equipment03_cc-by__punkduck_microphone",
+      "mh_equipment03_cc-by__punkduck_shopping_bag01",
+      "mh_equipment03_cc-by__elvs_sling_purse1",
+      "mh_equipment03_cc-by__punkduck_stethoscope",
+      "mh_equipment03_cc-by__culturalibre_suitcase",
+      "mh_equipment03_cc-by__punkduck_tennis_racket"
+    ],
+    "vest": [
+      "mh_equipment03_cc-by__punkduck_diver_scuba_rig",
+      "mh_equipment03_cc-by__mindfront_tactical_vest_female",
+      "mh_equipment03_cc-by__mindfront_tactical_vest_male"
     ]
   },
   "packs": [
@@ -3883,6 +6956,114 @@
       "bytes": 298384,
       "count": 4,
       "source": "underwear04_cc0.zip"
+    },
+    {
+      "file": "skirts01_cc0.vwpack.json.gz",
+      "bytes": 1063354,
+      "count": 6,
+      "source": "skirts01_cc0.zip"
+    },
+    {
+      "file": "skirts02_cc-by.vwpack.json.gz",
+      "bytes": 1757237,
+      "count": 14,
+      "source": "skirts02_cc-by.zip"
+    },
+    {
+      "file": "suits01_cc0.vwpack.json.gz",
+      "bytes": 3163734,
+      "count": 8,
+      "source": "suits01_cc0.zip"
+    },
+    {
+      "file": "dress01_cc0.vwpack.json.gz",
+      "bytes": 3403810,
+      "count": 13,
+      "source": "dress01_cc0.zip"
+    },
+    {
+      "file": "dress02_cc-by.part01.vwpack.json.gz",
+      "bytes": 7586085,
+      "count": 12,
+      "source": "dress02_cc-by.zip"
+    },
+    {
+      "file": "dress02_cc-by.part02.vwpack.json.gz",
+      "bytes": 6148899,
+      "count": 12,
+      "source": "dress02_cc-by.zip"
+    },
+    {
+      "file": "dress03_cc-by.vwpack.json.gz",
+      "bytes": 3279905,
+      "count": 19,
+      "source": "dress03_cc-by.zip"
+    },
+    {
+      "file": "gloves01_cc0.vwpack.json.gz",
+      "bytes": 1878025,
+      "count": 9,
+      "source": "gloves01_cc0.zip"
+    },
+    {
+      "file": "hats01_cc0.vwpack.json.gz",
+      "bytes": 782200,
+      "count": 6,
+      "source": "hats01_cc0.zip"
+    },
+    {
+      "file": "hats02_cc0.vwpack.json.gz",
+      "bytes": 2478229,
+      "count": 6,
+      "source": "hats02_cc0.zip"
+    },
+    {
+      "file": "hats03_cc-by.vwpack.json.gz",
+      "bytes": 2189738,
+      "count": 19,
+      "source": "hats03_cc-by.zip"
+    },
+    {
+      "file": "hats04_cc-by.vwpack.json.gz",
+      "bytes": 1142245,
+      "count": 8,
+      "source": "hats04_cc-by.zip"
+    },
+    {
+      "file": "glasses01_cc0.vwpack.json.gz",
+      "bytes": 764232,
+      "count": 10,
+      "source": "glasses01_cc0.zip"
+    },
+    {
+      "file": "glasses02_ccby.vwpack.json.gz",
+      "bytes": 1053043,
+      "count": 5,
+      "source": "glasses02_ccby.zip"
+    },
+    {
+      "file": "jewelry01_cc0.vwpack.json.gz",
+      "bytes": 2275761,
+      "count": 14,
+      "source": "jewelry01_cc0.zip"
+    },
+    {
+      "file": "jewelry02_cc-by.part01.vwpack.json.gz",
+      "bytes": 8904670,
+      "count": 15,
+      "source": "jewelry02_cc-by.zip"
+    },
+    {
+      "file": "jewelry02_cc-by.part02.vwpack.json.gz",
+      "bytes": 2994557,
+      "count": 16,
+      "source": "jewelry02_cc-by.zip"
+    },
+    {
+      "file": "equipment03_cc-by.vwpack.json.gz",
+      "bytes": 3220768,
+      "count": 13,
+      "source": "equipment03_cc-by.zip"
     }
   ]
 }
