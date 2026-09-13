@@ -10,7 +10,7 @@
     neckSize:50,torsoLength:50,armLength:50,legLength:50,handSize:50,footSize:50,
     breastSize:35,breastProjection:35,penisLength:50,penisGirth:50,testesSize:50,vulvaProminence:50,
     faceWidth:50,jawWidth:50,jawAngle:50,chinWidth:50,chinProjection:50,cheekboneHeight:50,cheekboneWidth:50,noseWidth:50,noseLength:50,noseProjection:50,eyeSpacing:50,eyeSize:50,browHeight:50,lipFullness:50,mouthWidth:50,earSize:50,
-    expressionIntensity:100,browStyle:"auto",eyelashStyle:"auto",skinMaterial:"auto",eyeMaterial:"auto",piercing:"none",faceScar:"none",
+    expressionUnit:"none",expressionIntensity:100,visemePreview:"none",visemeIntensity:100,browStyle:"auto",eyelashStyle:"auto",skinMaterial:"auto",eyeMaterial:"auto",piercing:"none",faceScar:"none",
     bodyHair:"none",bodyHairColor:"inherit",bodyScar:"none",tattoo:"none",
     clothing:{
       baseLayer:"mh_underwear02_cc0__punkduck_sport_briefs",top:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",outerwear:"none",bottoms:"mh_pants01_cc0__cortu_cargo_pants",onePiece:"none",socks:"mh_underwear04_cc0__joepal_crude_low_socks",shoes:"mh_shoes02_ccby__punkduck_comfortable_sneakers",gloves:"none",headwear:"none",eyewear:"none",neck:"none",belt:"none",vest:"none",back:"none",
@@ -19,7 +19,7 @@
     },
     cuffArm:"left",weaponPreview:"none",weaponCarry:"back",
     cybernetics:{eye:"none",eyeSide:"right",temple:"none",templeSide:"right",ear:"none",earSide:"right",jaw:"none",jawSide:"right",neck:"none",leftArm:"none",rightArm:"none",leftLeg:"none",rightLeg:"none",torso:"none"},
-    animation:"Idle",showAnatomy:false
+    animation:"Idle",posePreview:"none",showAnatomy:false
   };
   const clone=o=>JSON.parse(JSON.stringify(o||{}));
   function bridge(){ return window.VeilwatchForgeBridge; }
@@ -48,7 +48,7 @@
   }
   function range(label,key,value){ const v=Number.isFinite(Number(value))?Number(value):50; return `<label class="ff-range"><span>${label}<b data-ff-value="${key}">${v}</b></span><input type="range" min="0" max="100" value="${v}" data-ff-range="${key}"></label>`; }
   function section(titleText,html){ return `<div class="ff-section"><div class="projection-option-heading">${titleText}</div>${html}</div>`; }
-  function weaponOptions(){ const w=window.VW_CHAR_CATALOG?.weapons||{}; const rows=[['none','None']]; Object.values(w).flat().forEach(x=>rows.push([x.id,x.name])); return rows; }
+  function weaponOptions(){ const w=window.VW_CHAR_CATALOG?.weapons||{}; const rows=[['none','None']]; Object.values(w).flat().forEach(x=>rows.push([x.id,x.name])); (manifest?.nativeWeapons||[]).filter(x=>x.id&&x.id!=='none').forEach(x=>rows.push([x.id,x.label||title(x.id)])); return rows; }
   function render(){
     if(!manifest||!bridge()) return;
     const f=forge();
@@ -62,7 +62,8 @@
 
     const face=$('projectionFullForgeFace');
     if(face) face.innerHTML=
-      section('Surface & Hair Detail',`<div class="projection-form-grid projection-forge-two-col">${sel('Skin Texture','skinMaterial',manifest.nativeAppearance?.skinMaterials||[{id:'auto',label:'Automatic'}],f.skinMaterial)}${sel('Eye Material','eyeMaterial',manifest.nativeAppearance?.eyeMaterials||[{id:'auto',label:'Automatic'}],f.eyeMaterial)}${sel('Brow Style','browStyle',manifest.nativeAppearance?.brows||Object.keys(manifest.brows||{}),f.browStyle)}${sel('Eyelashes','eyelashStyle',manifest.nativeAppearance?.eyelashes||[{id:'auto',label:'Automatic'}],f.eyelashStyle)}</div><div class="ff-range-grid">${range('Expression Intensity','expressionIntensity',f.expressionIntensity)}</div>`)+
+      section('Surface & Hair Detail',`<div class="projection-form-grid projection-forge-two-col">${sel('Skin Texture','skinMaterial',manifest.nativeAppearance?.skinMaterials||[{id:'auto',label:'Automatic'}],f.skinMaterial)}${sel('Eye Material','eyeMaterial',manifest.nativeAppearance?.eyeMaterials||[{id:'auto',label:'Automatic'}],f.eyeMaterial)}${sel('Brow Style','browStyle',manifest.nativeAppearance?.brows||Object.keys(manifest.brows||{}),f.browStyle)}${sel('Eyelashes','eyelashStyle',manifest.nativeAppearance?.eyelashes||[{id:'auto',label:'Automatic'}],f.eyelashStyle)}</div>`)+
+      section('Expression & Lip Sync',`<div class="projection-form-grid projection-forge-two-col">${sel('Expression Unit','expressionUnit',manifest.face?.expressionUnits||[{id:'none',label:'None'}],f.expressionUnit)}${sel('Viseme Preview','visemePreview',manifest.face?.visemes||[{id:'none',label:'None'}],f.visemePreview)}</div><div class="ff-range-grid">${range('Expression Intensity','expressionIntensity',f.expressionIntensity)}${range('Viseme Intensity','visemeIntensity',f.visemeIntensity)}</div><div class="mini">MakeHuman faceunits and both supplied viseme sets are applied as native sparse facial targets.</div>`)+
       section('Face Structure',`<div class="ff-range-grid">${(manifest.face?.morphs||[]).map(k=>range(title(k),k,f[k])).join('')}</div>`)+
       section('Face Details',`<div class="projection-form-grid projection-forge-two-col">${sel('Piercing','piercing',manifest.face?.piercings||[],f.piercing)}${sel('Face Scar','faceScar',manifest.face?.faceScars||[],f.faceScar)}</div>`);
 
@@ -102,12 +103,12 @@
     }
 
     const a=$('projectionFullForgeAnimation');
-    if(a) a.innerHTML=section('Animation Clip',`<div class="projection-form-grid">${sel('Preview','animation',manifest.animations,f.animation)}</div><div class="mini">Uses the MakeHuman Mixamo-compatible skeleton and the CC0 Universal Animation Library. Legacy Vitruvian is retained only as a load fallback.</div>`);
+    if(a) a.innerHTML=section('Motion Preview',`<div class="projection-form-grid projection-forge-two-col">${sel('Static Pose','posePreview',manifest.poses||[{id:'none',label:'None'}],f.posePreview)}${sel('Animation Clip','animation',manifest.animations,f.animation)}</div><div class="mini">${Math.max(0,(manifest.poses||[]).length-1)} MakeHuman poses and the complete local CC0 Universal Animation Library are available. Selecting an animation automatically clears the static pose.</div>`);
     wire();
   }
   function setPath(obj,path,val){ const parts=path.split('.'); let o=obj; while(parts.length>1){ const k=parts.shift(); o[k]=o[k]||{}; o=o[k]; } o[parts[0]]=val; }
   function wire(){
-    document.querySelectorAll('[data-ff-key]').forEach(el=>{ el.onchange=()=>{ const p={}; setPath(p,el.dataset.ffKey,el.value); patch(p); render(); }; });
+    document.querySelectorAll('[data-ff-key]').forEach(el=>{ el.onchange=()=>{ const key=el.dataset.ffKey; if(key==='animation'){patch({animation:el.value,posePreview:'none'});render();return;} const p={}; setPath(p,key,el.value); patch(p); render(); }; });
     document.querySelectorAll('[data-ff-range]').forEach(el=>{ el.oninput=()=>{ const k=el.dataset.ffRange; const b=document.querySelector(`[data-ff-value="${k}"]`); if(b)b.textContent=el.value; patch({[k]:Number(el.value)}); }; });
     document.querySelectorAll('[data-ff-check]').forEach(el=>{ el.onchange=()=>patch({[el.dataset.ffCheck]:!!el.checked}); });
   }
