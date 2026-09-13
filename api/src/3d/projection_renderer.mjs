@@ -47,6 +47,7 @@ const LOCAL_WEAPON_ROOT = "/assets/characters/weapons/veilwatch_local";
 const QUATERNIUS_ANIMATION_ROOT = "/assets/characters/animations/quaternius";
 const QUATERNIUS_UAL1 = `${QUATERNIUS_ANIMATION_ROOT}/UAL1_Standard.glb`;
 const QUATERNIUS_WEAPON_ROOT = "/assets/characters/weapons/quaternius_fbx";
+const FORGE_ANIMATIONS_ENABLED = false; // Parked until MakeHuman-native clips are validated.
 const MAKEHUMAN_POSE_ROOT = "/assets/characters/makehuman/poses";
 const FORGE_EXTERNAL_ANIMATION_NAMES = new Set([
   "A_TPose", "Crouch_Fwd_Loop", "Crouch_Idle_Loop", "Dance_Loop", "Death01", "Driving_Loop",
@@ -1787,29 +1788,15 @@ class ProjectionRenderer {
   }
 
   async ensureForgeAnimationLibrary(token=this._loadToken){
-    if(this._forgeAnimationPromise) return this._forgeAnimationPromise;
-    this._forgeAnimationPromise=(async()=>{
-      try{
-        const gltf=await this.loader.loadAsync(QUATERNIUS_UAL1);
-        if(token!==this._loadToken || !this.currentObject){ disposeObject(gltf.scene||gltf.scenes?.[0]); return; }
-        const byName=new Map((this.availableAnimations||[]).map(c=>[c.name,c]));
-        let count=0;
-        const sourceRoot=gltf.scene||gltf.scenes?.[0];
-        const wanted=(gltf.animations||[]).filter(c=>FORGE_EXTERNAL_ANIMATION_NAMES.has(c.name));
-        for(const clip of wanted){ const retargeted=this.retargetQuaterniusClip(clip,sourceRoot); if(retargeted){byName.set(retargeted.name,retargeted);count++;} }
-        this.validateQuaterniusAnimationLibrary(byName);
-        disposeObject(sourceRoot);
-        this.availableAnimations=[...byName.values()];
-        const forge=this.profile?.appearance?.forge||{};
-        this._requestedAnimationName="";
-        if(String(forge.posePreview||"none")!=="none") await this.applyMakeHumanPose(forge.posePreview,true);
-        else this.applyAnimation(forge.animation||"Idle_Loop",true);
-        console.info(`Veilwatch animation library online: ${count} UAL1 clips rest-offset retargeted and validated.`);
-      }catch(err){
-        console.warn("Veilwatch external animation library unavailable; using native clips:",err?.message||err);
-      }finally{ this._forgeAnimationPromise=null; }
-    })();
-    return this._forgeAnimationPromise;
+    // Section 5 safety gate: external animation playback is intentionally parked.
+    // Keep the source assets in the repo, but do not load/retarget them at runtime
+    // until MakeHuman-native clips have been validated visually in Veilwatch.
+    this._forgeAnimationPromise = null;
+    this.availableAnimations = [];
+    this.disposeMixer();
+    this.restoreMakeHumanRestPose();
+    this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
+    return null;
   }
 
   restoreMakeHumanRestPose(){
@@ -2579,38 +2566,15 @@ class ProjectionRenderer {
     return null;
   }
 
-  applyAnimation(name="Idle_Loop", force=false){
-    if(!this.mixer || !this.availableAnimations?.length) return;
-    const rawRequested=String(name||"Idle_Loop");
-    const requested=FORGE_ANIMATION_ALIASES[rawRequested] || rawRequested;
-    if(!force && this._requestedAnimationName===requested && this.activeAnimationName) return;
-    // Never use a fuzzy `idle` search here. The UAL library contains several
-    // unrelated idle clips (crouch, sitting, pistol, swim, spell). A fuzzy
-    // match made legacy "Idle" requests consistently select Crouch_Idle_Loop.
-    const clip=this.availableAnimations.find(a=>a.name===requested)
-      || this.availableAnimations.find(a=>a.name==="Idle_Loop")
-      || this.availableAnimations[0];
-    if(!clip) return;
-    this.restoreMakeHumanRestPose();
-    this.activePoseId="none";
-    this.mixer.stopAllAction();
-    if(this._activePreparedClip){
-      this.mixer.uncacheClip?.(this._activePreparedClip);
-      this._activePreparedClip=null;
-    }
-    const actionClip=this.prepareAnimationForCurrentBody(clip);
-    if(actionClip!==clip) this._activePreparedClip=actionClip;
-    const action=this.mixer.clipAction(actionClip).reset().fadeIn(.18);
-    if(/death|punch|roll|interact|jump/i.test(clip.name)){
-      action.setLoop(THREE.LoopOnce,1);
-      action.clampWhenFinished=true;
-    }else{
-      action.setLoop(THREE.LoopRepeat,Infinity);
-      action.clampWhenFinished=false;
-    }
-    action.play();
-    this.activeAnimationName=clip.name;
-    this._requestedAnimationName=requested;
+  applyAnimation(name="none", force=false){
+    // Runtime animation playback is intentionally disabled for the stability build.
+    // Static MakeHuman poses remain available through applyMakeHumanPose().
+    this.disposeMixer();
+    this.availableAnimations = [];
+    this.activeAnimationName = "";
+    this._requestedAnimationName = "";
+    if(String(this.activePoseId||"none")==="none") this.restoreMakeHumanRestPose();
+    return false;
   }
 
   resolveMakeHumanSkinSurface(appearance={}){
@@ -2739,11 +2703,11 @@ class ProjectionRenderer {
       this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
 
       this.disposeMixer();
-      this.mixer=new THREE.AnimationMixer(this.currentObject);
+      this.availableAnimations=[];
       this._requestedAnimationName="";
       if(String(f.posePreview||"none")!=="none") await this.applyMakeHumanPose(f.posePreview,true);
-      else this.applyAnimation(f.animation||"Idle_Loop",true);
-      this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
+      else this.restoreMakeHumanRestPose();
+      this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
     }catch(err){
       console.error("Veilwatch MakeHuman morph update failed:",err);
       if(serial===this._makeHumanForgeSerial) this.setStatus("MAKEHUMAN MORPH UPDATE FAILED", "error");
@@ -2814,7 +2778,7 @@ class ProjectionRenderer {
         if(mat) mat.needsUpdate=true;
       });
     });
-    this.applyAnimation(f.animation||'Idle_Loop');
+    if(String(f.posePreview||'none')==='none') this.restoreMakeHumanRestPose();
   }
 
   applyAppearance(){
@@ -2991,13 +2955,12 @@ class ProjectionRenderer {
     }
     this.world.add(this.currentObject);
     this.availableAnimations=[];
-    this.mixer=new THREE.AnimationMixer(this.currentObject);
+    this.disposeMixer();
 
     this.frameObject(this.currentObject);
     this.applyProfile(this.profile);
     this.setView(this.viewName||"body");
-    this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
-    void this.ensureForgeAnimationLibrary(token);
+    this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
   }
 
   async loadVitruvianBundle(token){

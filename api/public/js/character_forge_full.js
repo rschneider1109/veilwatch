@@ -19,7 +19,7 @@
     },
     cuffArm:"left",weaponPreview:"none",weaponCarry:"back",
     cybernetics:{eye:"none",eyeSide:"right",temple:"none",templeSide:"right",ear:"none",earSide:"right",jaw:"none",jawSide:"right",neck:"none",leftArm:"none",rightArm:"none",leftLeg:"none",rightLeg:"none",torso:"none"},
-    animation:"Idle_Loop",posePreview:"none",showAnatomy:false
+    animation:"none",posePreview:"none",showAnatomy:false
   };
   const clone=o=>JSON.parse(JSON.stringify(o||{}));
   function bridge(){ return window.VeilwatchForgeBridge; }
@@ -41,8 +41,9 @@
     // Upgrade animation IDs saved by pre-Section-5 characters. The renderer
     // keeps the same aliases too, but upgrading here makes the selector show
     // the exact active UAL clip instead of an obsolete placeholder value.
-    const animationAliases={Idle:'Idle_Loop',HappyIdle:'Idle_Talking_Loop',Sway:'Idle_Torch_Loop',Turn:'Idle_Loop',Walk:'Walk_Loop',Wave:'Idle_Talking_Loop'};
-    f.animation=animationAliases[String(f.animation||'')]||String(f.animation||DEFAULT.animation);
+    // Animation playback is parked while MakeHuman-native clips are rebuilt.
+    // Keep legacy saved values from breaking profiles, but do not expose/play them.
+    f.animation='none';
     return f;
   }
   function merge(a,b){ const out=clone(a); for(const [k,v] of Object.entries(b||{})){ if(v&&typeof v==='object'&&!Array.isArray(v)&&out[k]&&typeof out[k]==='object'&&!Array.isArray(out[k])) out[k]=merge(out[k],v); else out[k]=v; } return out; }
@@ -108,12 +109,12 @@
     }
 
     const a=$('projectionFullForgeAnimation');
-    if(a) a.innerHTML=section('Motion Preview',`<div class="projection-form-grid projection-forge-two-col">${sel('Static Pose','posePreview',manifest.poses||[{id:'none',label:'None'}],f.posePreview)}${sel('Animation Clip','animation',manifest.animations,f.animation)}</div><div class="mini">${Math.max(0,(manifest.poses||[]).length-1)} MakeHuman poses and the complete local CC0 Universal Animation Library are available. Selecting an animation automatically clears the static pose.</div>`);
+    if(a) a.innerHTML=section('Motion Preview',`<div class="projection-form-grid">${sel('Static Pose','posePreview',manifest.poses||[{id:'none',label:'None'}],f.posePreview)}</div><div class="mini">${Math.max(0,(manifest.poses||[]).length-1)} MakeHuman static poses are available. Animation playback is temporarily parked while MakeHuman-native clips are rebuilt and visually validated.</div>`);
     wire();
   }
   function setPath(obj,path,val){ const parts=path.split('.'); let o=obj; while(parts.length>1){ const k=parts.shift(); o[k]=o[k]||{}; o=o[k]; } o[parts[0]]=val; }
   function wire(){
-    document.querySelectorAll('[data-ff-key]').forEach(el=>{ el.onchange=()=>{ const key=el.dataset.ffKey; if(key==='animation'){patch({animation:el.value,posePreview:'none'});render();return;} const p={}; setPath(p,key,el.value); patch(p); render(); }; });
+    document.querySelectorAll('[data-ff-key]').forEach(el=>{ el.onchange=()=>{ const key=el.dataset.ffKey; const p={}; setPath(p,key,el.value); patch(p); render(); }; });
     document.querySelectorAll('[data-ff-range]').forEach(el=>{ el.oninput=()=>{ const k=el.dataset.ffRange; const b=document.querySelector(`[data-ff-value="${k}"]`); if(b)b.textContent=el.value; patch({[k]:Number(el.value)}); }; });
     document.querySelectorAll('[data-ff-check]').forEach(el=>{ el.onchange=()=>patch({[el.dataset.ffCheck]:!!el.checked}); });
   }

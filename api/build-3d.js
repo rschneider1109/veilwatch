@@ -163,70 +163,9 @@ function readGlbJson(file){
 function ensureSection5RuntimeData(){
   const characterRoot=path.join("public","assets","characters");
 
-  const animationRoot=path.join(characterRoot,"animations","quaternius");
-  const animationFile=path.join(animationRoot,"UAL1_Standard.glb");
-  const basisFile=path.join(animationRoot,"UAL1_makehuman_basis.json");
-  if(!fs.existsSync(animationFile) || fs.statSync(animationFile).size < 1024*1024){
-    throw new Error(`Missing local Quaternius animation library: ${animationFile}`);
-  }
-  if(!fs.existsSync(basisFile)) throw new Error(`Missing canonical UAL1/MakeHuman rig basis: ${basisFile}`);
-
-  const glb=readGlbJson(animationFile);
-  const nodeNames=(glb.nodes||[]).map(x=>x.name||"");
-  const animationNames=(glb.animations||[]).map(x=>x.name||"");
-  const manifest=JSON.parse(fs.readFileSync(path.join(characterRoot,"character_forge_manifest.json"),"utf8"));
-  const expectedAnimations=(manifest.animations||[]).map(x=>x.id);
-  const missingAnimations=expectedAnimations.filter(x=>!animationNames.includes(x));
-  const extraAnimations=animationNames.filter(x=>!expectedAnimations.includes(x));
-  if(expectedAnimations.length!==43 || animationNames.length!==43 || missingAnimations.length || extraAnimations.length){
-    throw new Error(`UAL1 animation catalog mismatch (${animationNames.length} GLB / ${expectedAnimations.length} manifest; missing=${missingAnimations.join(",")}; extra=${extraAnimations.join(",")})`);
-  }
-
-  const basis=JSON.parse(fs.readFileSync(basisFile,"utf8"));
-  const basisBones=basis.bones||{};
-  const rig=JSON.parse(fs.readFileSync(path.join(characterRoot,"makehuman","runtime","rig.mixamo.json"),"utf8"));
-  const rigBoneNames=Object.keys(rig.bones||{});
-  if(Object.keys(basisBones).length!==52 || rigBoneNames.length!==52){
-    throw new Error(`Canonical animation basis incomplete (${Object.keys(basisBones).length} basis bones / ${rigBoneNames.length} rig bones)`);
-  }
-  for(const name of rigBoneNames){
-    const row=basisBones[name];
-    if(!row || !nodeNames.includes(row.source) || !Array.isArray(row.restLocalQuaternion) || row.restLocalQuaternion.length!==4){
-      throw new Error(`Canonical animation basis missing/invalid for ${name}`);
-    }
-  }
-
-  // Direct local-track transfer is only valid when the mapped source and target
-  // hierarchies are isomorphic. Verify that contract during the Docker build so
-  // a future asset change cannot silently reintroduce twisted limbs.
-  const mappedSourceToTarget=new Map(Object.entries(basisBones).map(([target,row])=>[row.source,target]));
-  const sourceParents=new Map();
-  for(let i=0;i<(glb.nodes||[]).length;i++){
-    for(const child of glb.nodes[i].children||[]) sourceParents.set(glb.nodes[child]?.name||"",glb.nodes[i]?.name||"");
-  }
-  for(const [target,row] of Object.entries(basisBones)){
-    let sourceParent=sourceParents.get(row.source)||"";
-    while(sourceParent && !mappedSourceToTarget.has(sourceParent)) sourceParent=sourceParents.get(sourceParent)||"";
-    const expectedParent=mappedSourceToTarget.get(sourceParent)||"";
-    const actualParent=String(rig.bones?.[target]?.parent||"");
-    if(expectedParent!==actualParent){
-      throw new Error(`UAL1/MakeHuman hierarchy mismatch for ${target}: expected parent ${expectedParent||"<root>"}, got ${actualParent||"<root>"}`);
-    }
-  }
-
-  for(const animation of glb.animations||[]){
-    const rotations=new Set();
-    let hasPelvisTranslation=false;
-    for(const channel of animation.channels||[]){
-      const nodeName=glb.nodes?.[channel.target?.node]?.name||"";
-      if(channel.target?.path==="rotation") rotations.add(nodeName);
-      if(nodeName==="pelvis" && channel.target?.path==="translation") hasPelvisTranslation=true;
-    }
-    const missingBasisTracks=Object.values(basisBones).map(x=>x.source).filter(x=>!rotations.has(x));
-    if(missingBasisTracks.length || !hasPelvisTranslation){
-      throw new Error(`Animation ${animation.name} cannot drive canonical MakeHuman rig (missing rotations=${missingBasisTracks.join(",")}, pelvisTranslation=${hasPelvisTranslation})`);
-    }
-  }
+  // Animation playback is intentionally parked in this stability build.
+  // Keep source animation assets in the repository for later offline/native
+  // MakeHuman conversion, but do not make Docker deployment depend on them.
 
   const weaponRoot=path.join(characterRoot,"weapons","quaternius_fbx");
   const weaponCatalogPath=path.join(weaponRoot,"catalog.json");
@@ -261,7 +200,7 @@ function ensureSection5RuntimeData(){
     if(!(parsed.poses||[]).length) throw new Error(`Empty MakeHuman pose pack: ${file}`);
   }
 
-  console.log(`Section 5 runtime ready: 43 canonical/validated local animation clips, 52 mapped MakeHuman bones, ${(poseCatalog.poses||[]).length} poses, ${(facialCatalog.faceUnits||[]).length} faceunits, ${(facialCatalog.visemes||[]).length} visemes, ${(weaponCatalog.weapons||[]).length} Quaternius weapons.`);
+  console.log(`Section 5 runtime ready (animations parked): ${(poseCatalog.poses||[]).length} poses, ${(facialCatalog.faceUnits||[]).length} faceunits, ${(facialCatalog.visemes||[]).length} visemes, ${(weaponCatalog.weapons||[]).length} Quaternius weapons.`);
 }
 
 async function main(){
