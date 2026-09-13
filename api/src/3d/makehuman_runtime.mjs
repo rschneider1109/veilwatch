@@ -3,6 +3,56 @@ import * as THREE from "three";
 const RUNTIME_ROOT = "/assets/characters/makehuman/runtime";
 const BASE_SCALE = 0.1;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const X_AXIS = new THREE.Vector3(1, 0, 0);
+const BLENDER_TO_THREE_QUATERNION = new THREE.Quaternion().setFromAxisAngle(X_AXIS, -Math.PI / 2);
+
+// Reproduce Blender's vec_roll_to_mat3_normalized() instead of approximating a
+// bone orientation with Quaternion.setFromUnitVectors(). The approximation is
+// almost indistinguishable for vertical bones, but it chooses a different zero-
+// roll frame for horizontal bones. On the MakeHuman Mixamo rig that made the
+// upper-arm / forearm rest axes differ from Blender by roughly 130-145 degrees,
+// which is why otherwise-correct animation deltas twisted the arms and fingers.
+//
+// MakeHuman rig positions are converted from Blender coordinates to Three.js as
+// (x, y, z) -> (x, z, -y). We therefore convert the current Three.js bone
+// direction back to Blender space, build Blender's exact rest orientation, then
+// rotate that orientation into Three.js space.
+function blenderBoneWorldQuaternionFromThreeDirection(directionThree, roll=0){
+  const nor = new THREE.Vector3(directionThree.x, -directionThree.z, directionThree.y);
+  if(nor.lengthSq() < 1e-12) nor.set(0, 1, 0);
+  else nor.normalize();
+
+  const x=nor.x, y=nor.y, z=nor.z;
+  let theta=1+y;
+  const thetaAlt=x*x+z*z;
+  const SAFE_THRESHOLD=6.1e-3;
+  const CRITICAL_THRESHOLD=2.5e-4;
+  const thresholdSquared=CRITICAL_THRESHOLD*CRITICAL_THRESHOLD;
+
+  let n11,n12,n13,n21,n22,n23,n31,n32,n33;
+  if(theta > SAFE_THRESHOLD || thetaAlt > thresholdSquared){
+    if(theta <= SAFE_THRESHOLD) theta=thetaAlt*0.5 + thetaAlt*thetaAlt*0.125;
+    n11=1-x*x/theta; n12=x; n13=-x*z/theta;
+    n21=-x;          n22=y; n23=-z;
+    n31=-x*z/theta; n32=z; n33=1-z*z/theta;
+  }else{
+    // Blender's singularity fallback for a bone aligned almost exactly to -Y.
+    n11=-1; n12=0; n13=0;
+    n21=0; n22=-1; n23=0;
+    n31=0; n32=0; n33=1;
+  }
+
+  const baseMatrix=new THREE.Matrix4().set(
+    n11,n12,n13,0,
+    n21,n22,n23,0,
+    n31,n32,n33,0,
+    0,0,0,1
+  );
+  const baseQuaternion=new THREE.Quaternion().setFromRotationMatrix(baseMatrix).normalize();
+  const rollQuaternion=new THREE.Quaternion().setFromAxisAngle(nor, Number(roll||0));
+  const blenderQuaternion=rollQuaternion.multiply(baseQuaternion).normalize();
+  return BLENDER_TO_THREE_QUATERNION.clone().multiply(blenderQuaternion).normalize();
+}
 
 async function fetchText(url){
   const res = await fetch(url, { cache:"force-cache" });
@@ -528,9 +578,7 @@ export class MakeHumanRuntime {
       const tail=this._strategyPoint(def.tail);
       const dir=tail.clone().sub(head);
       if(dir.lengthSq()<1e-9) dir.set(0,1,0); else dir.normalize();
-      const qAlign=new THREE.Quaternion().setFromUnitVectors(Y_AXIS,dir);
-      const qRoll=new THREE.Quaternion().setFromAxisAngle(Y_AXIS,Number(def.roll||0));
-      const q=qAlign.multiply(qRoll);
+      const q=blenderBoneWorldQuaternionFromThreeDirection(dir, Number(def.roll||0));
       worldMatrices.set(name,new THREE.Matrix4().compose(head,q,new THREE.Vector3(1,1,1)));
     }
 
