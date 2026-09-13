@@ -860,13 +860,41 @@ export class MakeHumanRuntime {
     const m=asset.mapping?.[index];
     const totals=new Map();
     if(m){
+      // MHCLO fitting uses barycentric coordinates and a large number of valid
+      // garments intentionally contain negative / >1 coefficients for vertices
+      // outside the source triangle. Dropping negative coefficients makes the
+      // fitted POSITION correct but the fitted SKINNING come from a different
+      // point on the body, which shows up as sleeves, hems and hair drifting or
+      // twisting when the character moves. Interpolate the base-body weights
+      // with the same signed coefficients used by the geometry, then clamp the
+      // final bone weights to the legal non-negative range before normalizing.
       for(let k=0;k<3;k++){
-        const bw=Number(m[3+k]||0);
-        if(bw<=0) continue;
-        for(const [bi,w] of this.getVertexInfluences(m[k])) totals.set(bi,(totals.get(bi)||0)+bw*w);
+        const bary=Number(m[3+k]||0);
+        if(!Number.isFinite(bary) || Math.abs(bary)<1e-12) continue;
+        for(const [bi,w] of this.getVertexInfluences(m[k])){
+          totals.set(bi,(totals.get(bi)||0)+bary*Number(w||0));
+        }
       }
     }
-    let rows=[...totals.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+    let rows=[...totals.entries()]
+      .map(([i,w])=>[i,Math.max(0,Number(w)||0)])
+      .filter(([,w])=>w>1e-8)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,4);
+
+    // Extreme extrapolation can mathematically cancel every interpolated bone
+    // weight. Fall back to the strongest source vertex rather than pinning the
+    // garment to the pelvis; that keeps the failure local to the authored area.
+    if(!rows.length && m){
+      let best=0;
+      for(let k=1;k<3;k++) if(Math.abs(Number(m[3+k]||0))>Math.abs(Number(m[3+best]||0))) best=k;
+      rows=this.getVertexInfluences(m[best])
+        .map(([i,w])=>[i,Math.max(0,Number(w)||0)])
+        .filter(([,w])=>w>1e-8)
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0,4);
+    }
     if(!rows.length) rows=[[this.getBoneIndex("mixamorig:Hips")??0,1]];
     const sum=rows.reduce((a,x)=>a+x[1],0)||1;
     return rows.map(([i,w])=>[i,w/sum]);

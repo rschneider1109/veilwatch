@@ -114,6 +114,7 @@ function ensureMakeHumanWardrobeIntegrity(){
   let checked = 0;
   let mappedVertices = 0;
   let triangles = 0;
+  let extrapolatedMappings = 0;
 
   for(const [id,row] of Object.entries(catalog.assets || {})){
     if(!wearableCategories.has(row.category)) continue;
@@ -135,6 +136,10 @@ function ensureMakeHumanWardrobeIntegrity(){
         if(!Number.isInteger(vi) || vi<0 || vi>=baseVertexCount) throw new Error(`Wardrobe base vertex out of range: ${id} -> ${vi}`);
       }
       for(let k=3;k<9;k++) if(!Number.isFinite(Number(m[k]))) throw new Error(`Wardrobe mapping contains non-finite value: ${id}`);
+      const bary=[Number(m[3]),Number(m[4]),Number(m[5])];
+      const barySum=bary[0]+bary[1]+bary[2];
+      if(Math.abs(barySum-1)>0.02) throw new Error(`Wardrobe barycentric mapping does not sum to 1: ${id} vertex ${i} -> ${barySum}`);
+      if(bary.some(w=>w<0 || w>1)) extrapolatedMappings++;
     }
 
     for(let i=0;i<tri.length;i+=2){
@@ -157,7 +162,7 @@ function ensureMakeHumanWardrobeIntegrity(){
   }
 
   if(checked < 390) throw new Error(`MakeHuman wardrobe unexpectedly small (${checked} assets)`);
-  console.log(`MakeHuman wardrobe integrity ready: ${checked} wearables, ${mappedVertices} fitted vertices, ${triangles} triangles validated against ${baseVertexCount} HM08 vertices.`);
+  console.log(`MakeHuman wardrobe integrity ready: ${checked} wearables, ${mappedVertices} fitted vertices, ${triangles} triangles, ${extrapolatedMappings} authored extrapolated mappings validated against ${baseVertexCount} HM08 vertices.`);
 }
 
 async function fetchWithRetry(url, tries=4){

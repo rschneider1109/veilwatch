@@ -48,9 +48,9 @@
   }
   function merge(a,b){ const out=clone(a); for(const [k,v] of Object.entries(b||{})){ if(v&&typeof v==='object'&&!Array.isArray(v)&&out[k]&&typeof out[k]==='object'&&!Array.isArray(out[k])) out[k]=merge(out[k],v); else out[k]=v; } return out; }
   function patch(part){ const d=forge(); const next=merge(d,part); bridge()?.patchAppearance?.({forge:next,bodyType:next.frame==='feminine'?'female':'male'}); }
-  function sel(label,key,items,value){
+  function sel(label,key,items,value,disabled=false){
     const rows=(items||[]).map(x=>typeof x==='string'?{id:x,label:title(x)}:{id:String(x?.id??x?.value??''),label:String(x?.label??title(x?.id??x?.value??''))});
-    return `<label>${label}<select data-ff-key="${key}">${rows.map(x=>`<option value="${x.id}" ${x.id===String(value??'')?'selected':''}>${x.label}</option>`).join('')}</select></label>`;
+    return `<label${disabled?' class="ff-control-disabled"':''}>${label}<select data-ff-key="${key}" ${disabled?'disabled':''}>${rows.map(x=>`<option value="${x.id}" ${x.id===String(value??'')?'selected':''}>${x.label}</option>`).join('')}</select></label>`;
   }
   function range(label,key,value){ const v=Number.isFinite(Number(value))?Number(value):50; return `<label class="ff-range"><span>${label}<b data-ff-value="${key}">${v}</b></span><input type="range" min="0" max="100" value="${v}" data-ff-range="${key}"></label>`; }
   function section(titleText,html){ return `<div class="ff-section"><div class="projection-option-heading">${titleText}</div>${html}</div>`; }
@@ -89,10 +89,12 @@
       const cc=manifest.nativeClothing?.counts||{};
       const totalCount=[...coreKeys,...accessoryKeys,'vest','back'].reduce((n,k)=>n+Number(cc[k]||0),0);
       const colorKeys=['baseLayer','top','bottoms','onePiece','shoes'];
+      const onePieceActive=String(cl.onePiece||'none')!=='none';
+      const blockedByOnePiece=k=>onePieceActive&&(k==='top'||k==='bottoms');
       c.innerHTML=`<div class="mini">MakeHuman wardrobe online: ${totalCount} fitted garments and accessories. Native .mhclo fitting keeps equipped assets attached while body proportions change, and inactive assets are disposed instead of accumulating in memory.</div>`+
-        section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${coreKeys.map(k=>sel(k==='onePiece'?'Dresses / Suits':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
+        section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${coreKeys.map(k=>sel(k==='onePiece'?'Dresses / Suits':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k],blockedByOnePiece(k))).join('')}</div>${onePieceActive?'<div class="mini">Top and Bottoms are preserved but temporarily inactive while a dress / suit is equipped.</div>':''}`)+
         section('Accessories',`<div class="projection-form-grid projection-forge-two-col">${accessoryKeys.map(k=>sel(k==='neck'?'Jewelry':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
-        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${k==='onePiece'?'Dresses / Suits':title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal')).join('')}</div>`);
+        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${k==='onePiece'?'Dresses / Suits':title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal',blockedByOnePiece(k))).join('')}</div>`);
     }
 
     const e=$('projectionFullForgeEquipment');
