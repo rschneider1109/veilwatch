@@ -1,5 +1,5 @@
 {
-  "version": "2.1.0-section2-appearance",
+  "version": "2.2.0-section3-core-clothing",
   "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
@@ -109,48 +109,416 @@
       "teal"
     ],
     "baseLayer": [
-      "none",
-      "briefs",
-      "boxer_briefs",
-      "bra",
-      "sports_bra",
-      "tank",
-      "undershirt",
-      "compression_top",
-      "compression_shorts",
-      "thermal_base"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
+        "label": "All Tiedup Kini1"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
+        "label": "Armsleeve Fishnet Large"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium",
+        "label": "Armsleeve Fishnet Medium"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small",
+        "label": "Armsleeve Fishnet Small"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large",
+        "label": "Armsleeve White L"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium",
+        "label": "Armsleeve White M"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
+        "label": "Armsleeve White S"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
+        "label": "Armsleeve02"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_babydoll",
+        "label": "Babydoll"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_bra",
+        "label": "Bandbikinibra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_slip",
+        "label": "Bandbikinislip"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bra",
+        "label": "Bandeau Bra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bikini02_bra",
+        "label": "Bikinibra2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bikini02_slip",
+        "label": "Bikinislip2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_bra",
+        "label": "BrazBikiniBra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_slip",
+        "label": "BrazBikiniSlip"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
+        "label": "Elv Bandeu Gathered Top1"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
+        "label": "Elv Microshorts1"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_crude_bootyshorts",
+        "label": "Elvs Bootyshorts2a"
+      },
+      {
+        "id": "mh_underwear02_cc0__mindfront_bikini_01",
+        "label": "F Bikini 01"
+      },
+      {
+        "id": "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
+        "label": "F One Piece Swimsuit 01"
+      },
+      {
+        "id": "mh_underwear01_cc0__wolgade_female_panties_01",
+        "label": "Female Panties 01"
+      },
+      {
+        "id": "mh_underwear01_cc0__wolgade_female_top_01",
+        "label": "Female Top 01"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_stockings",
+        "label": "Fr Stockings"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_thong",
+        "label": "Fr Thong"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_bra",
+        "label": "Frenchbra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_frill_bikini_bottom",
+        "label": "Frill Bikini Bottom"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_frill_bikini_top",
+        "label": "Frill Bikini Top"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_bow_bottom_panty",
+        "label": "Mh Bowginch Elv1"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_bow_front_bra",
+        "label": "Mhbow Braelv1"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_camisole1",
+        "label": "Minibowcamisole"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
+        "label": "OnePieceBikini01"
+      },
+      {
+        "id": "mh_underwear01_cc0__kwnet_at_pantyhose01",
+        "label": "Pantyhose01"
+      },
+      {
+        "id": "mh_underwear03_cc-by__joepal_plain_bra",
+        "label": "Plain Bra"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_halterneck_romper",
+        "label": "Romper"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_lace_panty",
+        "label": "Scallopundies"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_shapewear",
+        "label": "Shapewear"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_sport_bra",
+        "label": "Sport Bra01"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_sport_briefs",
+        "label": "Sport Briefs01"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_stocking01",
+        "label": "Stocking01"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_stocking02",
+        "label": "Stocking02"
+      },
+      {
+        "id": "mh_underwear02_cc0__jaldmic_stockings",
+        "label": "Stockings"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
+        "label": "Stockings Fishnet Large"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
+        "label": "Stockings Fishnet Medium"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
+        "label": "Stockings Fishnet Small"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
+        "label": "Stockings White L"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
+        "label": "Stockings White M"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
+        "label": "Stockings White S"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
+        "label": "StraplessBodySuit"
+      },
+      {
+        "id": "mh_underwear01_cc0__punkduck_strappy_lace_thong",
+        "label": "StrappyLaceThong"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_2",
+        "label": "String2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
+        "label": "String3"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_4",
+        "label": "String4"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_5",
+        "label": "String5"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
+        "label": "Suspender Belt"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie",
+        "label": "Teddy"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_transparent_bra",
+        "label": "Transparent Bra"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless",
+        "label": "Vintagesuit1 50selv"
+      }
     ],
     "top": [
-      "none",
-      "plain_tshirt",
-      "fitted_tshirt",
-      "vneck_tshirt",
-      "long_sleeve",
-      "henley",
-      "polo",
-      "button_down",
-      "flannel",
-      "hoodie",
-      "crew_sweater",
-      "turtleneck",
-      "tank_top",
-      "camisole",
-      "blouse",
-      "tactical_shirt",
-      "combat_shirt",
-      "scrub_top",
-      "jersey",
-      "work_shirt",
-      "graphic_tshirt",
-      "oversized_tshirt",
-      "raglan_shirt",
-      "mock_neck",
-      "cardigan",
-      "vest_top",
-      "crop_top",
-      "athletic_top",
-      "cycling_jersey",
-      "utility_shirt"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
+        "label": "Asymmetric Tunic And Sash"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_bodice-style_top",
+        "label": "Bodice Style Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_camisole_top",
+        "label": "Camisole Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__elvs_crude_t-shirt_male",
+        "label": "Crude Male Shirt"
+      },
+      {
+        "id": "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+        "label": "CrudeFemaleTshirt"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+        "label": "Deathnote"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
+        "label": "Elvs Butterflydiscotop1"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_disco_top2",
+        "label": "Elvs Discotop2"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_lara_tank1",
+        "label": "Elvs Lara Top1"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+        "label": "F Cardigan Long Open Front"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_lusekofta",
+        "label": "F Lusekofta"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_high_neck_crop_top",
+        "label": "HighNeckCropTop"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+        "label": "Knitted Sweater 01"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+        "label": "Knitted Sweater 02"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_lace_up_blouse",
+        "label": "Lace Up Blouse"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+        "label": "Ladieshoodiedown1"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_ladies_tank1",
+        "label": "Ladiestank1elv"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_athletic_tank1",
+        "label": "M Wifebeater Elv1"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_boho_top1",
+        "label": "Mens Boho Top1elv"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+        "label": "Mens Shirt Tie Tuck Elv1f"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+        "label": "Mens Shirt Untuck Elvbhp1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_tankshirt1",
+        "label": "Mens Tanks Elv1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_muscle_shirt1",
+        "label": "Mens Tanks Elvmuscle1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_logo_tshirt1",
+        "label": "Mens Teeshirt1j"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
+        "label": "Offshoulder Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__namuhekam_male_polo_shirt",
+        "label": "Polo T Shirt"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1",
+        "label": "Ruffle Sleeve Peasantblouse"
+      },
+      {
+        "id": "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
+        "label": "Short Tail Camo Tee"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_sleeveless_shirt",
+        "label": "Sleeveless"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+        "label": "SleevelessCropTop"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top",
+        "label": "Spaghetti Top"
+      },
+      {
+        "id": "mh_shirts02_ccby__ews_striped_shirt",
+        "label": "Striped Shirt"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_fisherman_sweater",
+        "label": "Sweater Fisherman"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+        "label": "T Shirt Basic Tucked"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_keyhole_tank_top",
+        "label": "Tank Keyhole Neck"
+      },
+      {
+        "id": "mh_shirts03_ccby__mindfront_tank_top_01",
+        "label": "Tank Top 01"
+      },
+      {
+        "id": "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
+        "label": "Tube Top"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_tube_top",
+        "label": "TubeTop"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+        "label": "Turtleneck Halter"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_retro_top",
+        "label": "VintageTop"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_v_neck_top",
+        "label": "VNeckTop"
+      },
+      {
+        "id": "mh_shirts02_ccby__janexx_old_female_sweater",
+        "label": "Worn Out Sweater"
+      }
     ],
     "outerwear": [
       "none",
@@ -180,59 +548,352 @@
       "fire_resistant_jacket"
     ],
     "bottoms": [
-      "none",
-      "jeans_straight",
-      "jeans_slim",
-      "jeans_relaxed",
-      "chinos",
-      "cargo_pants",
-      "joggers",
-      "sweatpants",
-      "tactical_pants",
-      "dress_pants",
-      "work_pants",
-      "leggings",
-      "athletic_shorts",
-      "cargo_shorts",
-      "denim_shorts",
-      "running_shorts",
-      "pencil_skirt",
-      "casual_skirt",
-      "scrub_pants",
-      "slim_chinos",
-      "wide_leg_pants",
-      "track_pants",
-      "parachute_pants",
-      "bike_shorts",
-      "basketball_shorts",
-      "board_shorts",
-      "pleated_skirt",
-      "maxi_skirt",
-      "utility_skirt"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_pants01_cc0__cortu_cargo_pants",
+        "label": "Cargo Pants"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
+        "label": "Elvs Disco Pant Druffles"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
+        "label": "Elvs Disco Pant1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
+        "label": "Elvs Discopant Sruffle1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_gored_elephant_pants",
+        "label": "Elvs Gored Elephantpant1"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_swim_shorts1",
+        "label": "Elvs Male Shorts1"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_female_trousers_1",
+        "label": "F Trousers 01"
+      },
+      {
+        "id": "mh_pants01_cc0__cortu_jeans_shorts",
+        "label": "Jean Shorts"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+        "label": "M Swimming Trunks 01"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
+        "label": "M Swimming Trunks 02"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
+        "label": "M Swimming Trunks 03"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_male_trousers_1",
+        "label": "M Trousers 01"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_male_trousers_2",
+        "label": "M Trousers 02"
+      },
+      {
+        "id": "mh_pants02_ccby__punkduck_male_classic_jeans",
+        "label": "Male Classic Jeans"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_jeans_bootcut",
+        "label": "Mens Elv Jeans1f"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_jeans_straight_leg",
+        "label": "Mens Elv Jeans2slf"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
+        "label": "Mens Trouser F Elv Chr"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser",
+        "label": "Mens Trouser F Elv1"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_trouser_short_1",
+        "label": "Mens Trouser Short Elv1crf"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_trouser_short_2",
+        "label": "Mens Trouser Short Nc Elvcrf"
+      },
+      {
+        "id": "mh_pants01_cc0__toigo_harem_pants",
+        "label": "Pants Harem"
+      },
+      {
+        "id": "mh_pants01_cc0__toigo_wool_pants",
+        "label": "Pants Wool"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_retro_girly_shorts1",
+        "label": "Retro Girlyshort1"
+      },
+      {
+        "id": "mh_pants03_ccby__punkduck_female_short_jeans",
+        "label": "ShortJeans"
+      },
+      {
+        "id": "mh_pants02_ccby__punkduck_female_tight_jeans",
+        "label": "Tightjeans"
+      }
     ],
     "shoes": [
-      "none",
-      "sneakers",
-      "running_shoes",
-      "high_tops",
-      "casual_boots",
-      "work_boots",
-      "tactical_boots",
-      "hiking_boots",
-      "dress_shoes",
-      "loafers",
-      "sandals",
-      "heels",
-      "canvas_shoes",
-      "basketball_shoes",
-      "combat_boots",
-      "chelsea_boots",
-      "motorcycle_boots",
-      "steel_toe_boots",
-      "trail_shoes",
-      "slip_ons",
-      "flats",
-      "ankle_boots"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_stiletto_booties",
+        "label": "Booties Stiletto"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ankle_boots_female",
+        "label": "Boots Ankle"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ankle_boots_male",
+        "label": "Boots Ankle Male"
+      },
+      {
+        "id": "mh_shoes01_cc0__scailman_semitransparent_water_boots",
+        "label": "Botas 102"
+      },
+      {
+        "id": "mh_shoes03_ccby__scailman_low-heeled_boots",
+        "label": "BotasTaconBajo"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_cycling_shoes",
+        "label": "CyclingShoes"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_balletflat1",
+        "label": "DUDoc BalletFlat1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_domsjeans1",
+        "label": "DUDoc Domsjeans1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_maryjane1",
+        "label": "DUDoc Maryjane1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_sandals1",
+        "label": "DUDoc Sandals1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
+        "label": "Elvs Basic Elfshoe1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+        "label": "Elvs Basic Flatshoe2"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_plain1",
+        "label": "Elvs Basic Flatshoe2a"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_bow1",
+        "label": "Elvs Basic Flatshoe2b"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
+        "label": "Elvs Basic Flatshoe3c"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
+        "label": "Elvs Basicflatshoes4"
+      },
+      {
+        "id": "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
+        "label": "Elvs Heelboot1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_caesar_sandals1",
+        "label": "Elvs Mh Cesaersandalf1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+        "label": "Elvs Zombiekiller Sneakers1"
+      },
+      {
+        "id": "mh_shoes03_ccby__madmanny_tight_leather_boots",
+        "label": "Exy Leather Boots"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_flats",
+        "label": "Flats"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats",
+        "label": "Flats Ballet"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
+        "label": "Flats Ballet Bow"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
+        "label": "Flats Ballet Flower"
+      },
+      {
+        "id": "mh_shoes01_cc0__cortu_floppy_overknee_shoes",
+        "label": "Floppy Overknee Shoe"
+      },
+      {
+        "id": "mh_shoes01_cc0__scailman_gogo_platform_boots",
+        "label": "Gogo Boots"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_female_half-boots",
+        "label": "HalfBoots"
+      },
+      {
+        "id": "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
+        "label": "Harvey ShoeSaddle1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_1",
+        "label": "Hero Boots 1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_2",
+        "label": "Hero Boots 2"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_3",
+        "label": "Hero Boots 3"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_4",
+        "label": "Hero Boots 4"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_5",
+        "label": "Hero Boots 5"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_1",
+        "label": "Heroine Boots 1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_2",
+        "label": "Heroine Boots 2"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_3",
+        "label": "Heroine Boots 3"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_4",
+        "label": "Heroine Boots 4"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_female_knee_boots",
+        "label": "KneeBoots"
+      },
+      {
+        "id": "mh_shoes03_ccby__maciekg_leather_boots",
+        "label": "Leather Boots"
+      },
+      {
+        "id": "mh_shoes01_cc0__grinsegold_female_pirate_boots",
+        "label": "LeatherBoots 2cm"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_male_boots",
+        "label": "Male Boots"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+        "label": "Maleflipflops1"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_kill_bill_shoes",
+        "label": "Martialartshoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_medieval_boots",
+        "label": "MedievalBoots"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+        "label": "MJ Shoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_riding_boots",
+        "label": "Riding Boots"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_running_shoes_01",
+        "label": "RunningShoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
+        "label": "Shoes Biker Boots Female"
+      },
+      {
+        "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+        "label": "Shoes Biker Boots Male"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_female",
+        "label": "Shoes Monk Strap Female"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+        "label": "Shoes Monk Strap Male"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_oxford_female",
+        "label": "Shoes Oxford Female"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_oxford_male",
+        "label": "Shoes Oxford Male"
+      },
+      {
+        "id": "mh_shoes03_ccby__elvs_wedge_tall_boots1",
+        "label": "Slouchbootwedgey Feather"
+      },
+      {
+        "id": "mh_shoes02_ccby__culturalibre_sneakers",
+        "label": "Sneakers"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+        "label": "Sneakers"
+      },
+      {
+        "id": "mh_shoes01_cc0__cortu_t-bar",
+        "label": "Tbar"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_tennis_shoes",
+        "label": "TennisShoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_winter_boots",
+        "label": "WinterBoots"
+      }
     ],
     "gloves": [
       "none",
@@ -343,13 +1004,26 @@
       "business_suit_set"
     ],
     "socks": [
-      "none",
-      "ankle_socks",
-      "crew_socks",
-      "boot_socks",
-      "dress_socks",
-      "compression_socks",
-      "thigh_highs"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_underwear04_cc0__joepal_crude_high_socks",
+        "label": "CrudeHighSocks"
+      },
+      {
+        "id": "mh_underwear04_cc0__joepal_crude_low_socks",
+        "label": "CrudeLowSocks"
+      },
+      {
+        "id": "mh_underwear04_cc0__toigo_leg_warmer_socks",
+        "label": "Leg Warmer Socks"
+      },
+      {
+        "id": "mh_underwear04_cc0__toigo_lace_frill_socks",
+        "label": "SocksLaceFrill"
+      }
     ],
     "colorSlots": [
       "baseLayer",
@@ -594,12 +1268,20 @@
     "quaterniusRetargeting": true,
     "projectionCuff": true,
     "weaponAttachment": true,
-    "makeHumanWardrobe": "next-pass",
-    "makeHumanHair": "next-pass",
+    "makeHumanWardrobe": "core-online",
+    "makeHumanHair": "online",
     "makeHumanNativeAppearance": true,
     "makeHumanSurfaceMaterials": true,
     "appearancePackCacheLimit": 1,
-    "indexedNativeMeshes": true
+    "indexedNativeMeshes": true,
+    "nativeClothingSlots": [
+      "baseLayer",
+      "top",
+      "bottoms",
+      "socks",
+      "shoes"
+    ],
+    "nativeClothingPackCacheLimit": 1
   },
   "nativeAppearance": {
     "skinMaterials": [
@@ -1214,5 +1896,879 @@
         "label": "Culturalibre Dal Moustache"
       }
     ]
+  },
+  "nativeClothing": {
+    "baseLayer": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
+        "label": "All Tiedup Kini1"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
+        "label": "Armsleeve Fishnet Large"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium",
+        "label": "Armsleeve Fishnet Medium"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small",
+        "label": "Armsleeve Fishnet Small"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large",
+        "label": "Armsleeve White L"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium",
+        "label": "Armsleeve White M"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
+        "label": "Armsleeve White S"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
+        "label": "Armsleeve02"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_babydoll",
+        "label": "Babydoll"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_bra",
+        "label": "Bandbikinibra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_slip",
+        "label": "Bandbikinislip"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bandeau_bra",
+        "label": "Bandeau Bra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bikini02_bra",
+        "label": "Bikinibra2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_bikini02_slip",
+        "label": "Bikinislip2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_bra",
+        "label": "BrazBikiniBra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_slip",
+        "label": "BrazBikiniSlip"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
+        "label": "Elv Bandeu Gathered Top1"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
+        "label": "Elv Microshorts1"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_crude_bootyshorts",
+        "label": "Elvs Bootyshorts2a"
+      },
+      {
+        "id": "mh_underwear02_cc0__mindfront_bikini_01",
+        "label": "F Bikini 01"
+      },
+      {
+        "id": "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
+        "label": "F One Piece Swimsuit 01"
+      },
+      {
+        "id": "mh_underwear01_cc0__wolgade_female_panties_01",
+        "label": "Female Panties 01"
+      },
+      {
+        "id": "mh_underwear01_cc0__wolgade_female_top_01",
+        "label": "Female Top 01"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_stockings",
+        "label": "Fr Stockings"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_thong",
+        "label": "Fr Thong"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_bra",
+        "label": "Frenchbra"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_frill_bikini_bottom",
+        "label": "Frill Bikini Bottom"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_frill_bikini_top",
+        "label": "Frill Bikini Top"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_bow_bottom_panty",
+        "label": "Mh Bowginch Elv1"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_bow_front_bra",
+        "label": "Mhbow Braelv1"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_camisole1",
+        "label": "Minibowcamisole"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
+        "label": "OnePieceBikini01"
+      },
+      {
+        "id": "mh_underwear01_cc0__kwnet_at_pantyhose01",
+        "label": "Pantyhose01"
+      },
+      {
+        "id": "mh_underwear03_cc-by__joepal_plain_bra",
+        "label": "Plain Bra"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_halterneck_romper",
+        "label": "Romper"
+      },
+      {
+        "id": "mh_underwear02_cc0__elvs_lace_panty",
+        "label": "Scallopundies"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_shapewear",
+        "label": "Shapewear"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_sport_bra",
+        "label": "Sport Bra01"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_sport_briefs",
+        "label": "Sport Briefs01"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_stocking01",
+        "label": "Stocking01"
+      },
+      {
+        "id": "mh_underwear01_cc0__marco_105_stocking02",
+        "label": "Stocking02"
+      },
+      {
+        "id": "mh_underwear02_cc0__jaldmic_stockings",
+        "label": "Stockings"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
+        "label": "Stockings Fishnet Large"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
+        "label": "Stockings Fishnet Medium"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
+        "label": "Stockings Fishnet Small"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
+        "label": "Stockings White L"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
+        "label": "Stockings White M"
+      },
+      {
+        "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
+        "label": "Stockings White S"
+      },
+      {
+        "id": "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
+        "label": "StraplessBodySuit"
+      },
+      {
+        "id": "mh_underwear01_cc0__punkduck_strappy_lace_thong",
+        "label": "StrappyLaceThong"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_2",
+        "label": "String2"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
+        "label": "String3"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_4",
+        "label": "String4"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_string_5",
+        "label": "String5"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
+        "label": "Suspender Belt"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie",
+        "label": "Teddy"
+      },
+      {
+        "id": "mh_underwear02_cc0__punkduck_transparent_bra",
+        "label": "Transparent Bra"
+      },
+      {
+        "id": "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless",
+        "label": "Vintagesuit1 50selv"
+      }
+    ],
+    "top": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
+        "label": "Asymmetric Tunic And Sash"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_bodice-style_top",
+        "label": "Bodice Style Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_camisole_top",
+        "label": "Camisole Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__elvs_crude_t-shirt_male",
+        "label": "Crude Male Shirt"
+      },
+      {
+        "id": "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+        "label": "CrudeFemaleTshirt"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+        "label": "Deathnote"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
+        "label": "Elvs Butterflydiscotop1"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_disco_top2",
+        "label": "Elvs Discotop2"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_lara_tank1",
+        "label": "Elvs Lara Top1"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+        "label": "F Cardigan Long Open Front"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_lusekofta",
+        "label": "F Lusekofta"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_high_neck_crop_top",
+        "label": "HighNeckCropTop"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+        "label": "Knitted Sweater 01"
+      },
+      {
+        "id": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+        "label": "Knitted Sweater 02"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_lace_up_blouse",
+        "label": "Lace Up Blouse"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+        "label": "Ladieshoodiedown1"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_ladies_tank1",
+        "label": "Ladiestank1elv"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_athletic_tank1",
+        "label": "M Wifebeater Elv1"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_boho_top1",
+        "label": "Mens Boho Top1elv"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+        "label": "Mens Shirt Tie Tuck Elv1f"
+      },
+      {
+        "id": "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+        "label": "Mens Shirt Untuck Elvbhp1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_tankshirt1",
+        "label": "Mens Tanks Elv1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_muscle_shirt1",
+        "label": "Mens Tanks Elvmuscle1f"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_male_logo_tshirt1",
+        "label": "Mens Teeshirt1j"
+      },
+      {
+        "id": "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
+        "label": "Offshoulder Top"
+      },
+      {
+        "id": "mh_shirts01_cc0__namuhekam_male_polo_shirt",
+        "label": "Polo T Shirt"
+      },
+      {
+        "id": "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1",
+        "label": "Ruffle Sleeve Peasantblouse"
+      },
+      {
+        "id": "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
+        "label": "Short Tail Camo Tee"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_sleeveless_shirt",
+        "label": "Sleeveless"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+        "label": "SleevelessCropTop"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top",
+        "label": "Spaghetti Top"
+      },
+      {
+        "id": "mh_shirts02_ccby__ews_striped_shirt",
+        "label": "Striped Shirt"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_fisherman_sweater",
+        "label": "Sweater Fisherman"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+        "label": "T Shirt Basic Tucked"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_keyhole_tank_top",
+        "label": "Tank Keyhole Neck"
+      },
+      {
+        "id": "mh_shirts03_ccby__mindfront_tank_top_01",
+        "label": "Tank Top 01"
+      },
+      {
+        "id": "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
+        "label": "Tube Top"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_tube_top",
+        "label": "TubeTop"
+      },
+      {
+        "id": "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+        "label": "Turtleneck Halter"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_retro_top",
+        "label": "VintageTop"
+      },
+      {
+        "id": "mh_shirts03_ccby__punkduck_v_neck_top",
+        "label": "VNeckTop"
+      },
+      {
+        "id": "mh_shirts02_ccby__janexx_old_female_sweater",
+        "label": "Worn Out Sweater"
+      }
+    ],
+    "bottoms": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_pants01_cc0__cortu_cargo_pants",
+        "label": "Cargo Pants"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
+        "label": "Elvs Disco Pant Druffles"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
+        "label": "Elvs Disco Pant1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
+        "label": "Elvs Discopant Sruffle1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_gored_elephant_pants",
+        "label": "Elvs Gored Elephantpant1"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_swim_shorts1",
+        "label": "Elvs Male Shorts1"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_female_trousers_1",
+        "label": "F Trousers 01"
+      },
+      {
+        "id": "mh_pants01_cc0__cortu_jeans_shorts",
+        "label": "Jean Shorts"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+        "label": "M Swimming Trunks 01"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
+        "label": "M Swimming Trunks 02"
+      },
+      {
+        "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
+        "label": "M Swimming Trunks 03"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_male_trousers_1",
+        "label": "M Trousers 01"
+      },
+      {
+        "id": "mh_pants02_ccby__mindfront_male_trousers_2",
+        "label": "M Trousers 02"
+      },
+      {
+        "id": "mh_pants02_ccby__punkduck_male_classic_jeans",
+        "label": "Male Classic Jeans"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_jeans_bootcut",
+        "label": "Mens Elv Jeans1f"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_jeans_straight_leg",
+        "label": "Mens Elv Jeans2slf"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
+        "label": "Mens Trouser F Elv Chr"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser",
+        "label": "Mens Trouser F Elv1"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_trouser_short_1",
+        "label": "Mens Trouser Short Elv1crf"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_male_trouser_short_2",
+        "label": "Mens Trouser Short Nc Elvcrf"
+      },
+      {
+        "id": "mh_pants01_cc0__toigo_harem_pants",
+        "label": "Pants Harem"
+      },
+      {
+        "id": "mh_pants01_cc0__toigo_wool_pants",
+        "label": "Pants Wool"
+      },
+      {
+        "id": "mh_pants03_ccby__elvs_retro_girly_shorts1",
+        "label": "Retro Girlyshort1"
+      },
+      {
+        "id": "mh_pants03_ccby__punkduck_female_short_jeans",
+        "label": "ShortJeans"
+      },
+      {
+        "id": "mh_pants02_ccby__punkduck_female_tight_jeans",
+        "label": "Tightjeans"
+      }
+    ],
+    "socks": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_underwear04_cc0__joepal_crude_high_socks",
+        "label": "CrudeHighSocks"
+      },
+      {
+        "id": "mh_underwear04_cc0__joepal_crude_low_socks",
+        "label": "CrudeLowSocks"
+      },
+      {
+        "id": "mh_underwear04_cc0__toigo_leg_warmer_socks",
+        "label": "Leg Warmer Socks"
+      },
+      {
+        "id": "mh_underwear04_cc0__toigo_lace_frill_socks",
+        "label": "SocksLaceFrill"
+      }
+    ],
+    "shoes": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_stiletto_booties",
+        "label": "Booties Stiletto"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ankle_boots_female",
+        "label": "Boots Ankle"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ankle_boots_male",
+        "label": "Boots Ankle Male"
+      },
+      {
+        "id": "mh_shoes01_cc0__scailman_semitransparent_water_boots",
+        "label": "Botas 102"
+      },
+      {
+        "id": "mh_shoes03_ccby__scailman_low-heeled_boots",
+        "label": "BotasTaconBajo"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_cycling_shoes",
+        "label": "CyclingShoes"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_balletflat1",
+        "label": "DUDoc BalletFlat1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_domsjeans1",
+        "label": "DUDoc Domsjeans1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_maryjane1",
+        "label": "DUDoc Maryjane1"
+      },
+      {
+        "id": "mh_shoes02_ccby__dressupdoc_sandals1",
+        "label": "DUDoc Sandals1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
+        "label": "Elvs Basic Elfshoe1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+        "label": "Elvs Basic Flatshoe2"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_plain1",
+        "label": "Elvs Basic Flatshoe2a"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_bow1",
+        "label": "Elvs Basic Flatshoe2b"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
+        "label": "Elvs Basic Flatshoe3c"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
+        "label": "Elvs Basicflatshoes4"
+      },
+      {
+        "id": "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
+        "label": "Elvs Heelboot1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_caesar_sandals1",
+        "label": "Elvs Mh Cesaersandalf1"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+        "label": "Elvs Zombiekiller Sneakers1"
+      },
+      {
+        "id": "mh_shoes03_ccby__madmanny_tight_leather_boots",
+        "label": "Exy Leather Boots"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_flats",
+        "label": "Flats"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats",
+        "label": "Flats Ballet"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
+        "label": "Flats Ballet Bow"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
+        "label": "Flats Ballet Flower"
+      },
+      {
+        "id": "mh_shoes01_cc0__cortu_floppy_overknee_shoes",
+        "label": "Floppy Overknee Shoe"
+      },
+      {
+        "id": "mh_shoes01_cc0__scailman_gogo_platform_boots",
+        "label": "Gogo Boots"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_female_half-boots",
+        "label": "HalfBoots"
+      },
+      {
+        "id": "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
+        "label": "Harvey ShoeSaddle1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_1",
+        "label": "Hero Boots 1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_2",
+        "label": "Hero Boots 2"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_3",
+        "label": "Hero Boots 3"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_4",
+        "label": "Hero Boots 4"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_hero_boots_5",
+        "label": "Hero Boots 5"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_1",
+        "label": "Heroine Boots 1"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_2",
+        "label": "Heroine Boots 2"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_3",
+        "label": "Heroine Boots 3"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_heroine_boots_4",
+        "label": "Heroine Boots 4"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_female_knee_boots",
+        "label": "KneeBoots"
+      },
+      {
+        "id": "mh_shoes03_ccby__maciekg_leather_boots",
+        "label": "Leather Boots"
+      },
+      {
+        "id": "mh_shoes01_cc0__grinsegold_female_pirate_boots",
+        "label": "LeatherBoots 2cm"
+      },
+      {
+        "id": "mh_shoes01_cc0__culturalibre_male_boots",
+        "label": "Male Boots"
+      },
+      {
+        "id": "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+        "label": "Maleflipflops1"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_kill_bill_shoes",
+        "label": "Martialartshoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_medieval_boots",
+        "label": "MedievalBoots"
+      },
+      {
+        "id": "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+        "label": "MJ Shoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_riding_boots",
+        "label": "Riding Boots"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_running_shoes_01",
+        "label": "RunningShoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
+        "label": "Shoes Biker Boots Female"
+      },
+      {
+        "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+        "label": "Shoes Biker Boots Male"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_female",
+        "label": "Shoes Monk Strap Female"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+        "label": "Shoes Monk Strap Male"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_oxford_female",
+        "label": "Shoes Oxford Female"
+      },
+      {
+        "id": "mh_shoes02_ccby__mindfront_shoes_oxford_male",
+        "label": "Shoes Oxford Male"
+      },
+      {
+        "id": "mh_shoes03_ccby__elvs_wedge_tall_boots1",
+        "label": "Slouchbootwedgey Feather"
+      },
+      {
+        "id": "mh_shoes02_ccby__culturalibre_sneakers",
+        "label": "Sneakers"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+        "label": "Sneakers"
+      },
+      {
+        "id": "mh_shoes01_cc0__cortu_t-bar",
+        "label": "Tbar"
+      },
+      {
+        "id": "mh_shoes02_ccby__punkduck_tennis_shoes",
+        "label": "TennisShoes"
+      },
+      {
+        "id": "mh_shoes03_ccby__punkduck_winter_boots",
+        "label": "WinterBoots"
+      }
+    ],
+    "counts": {
+      "baseLayer": 58,
+      "top": 42,
+      "bottoms": 25,
+      "socks": 4,
+      "shoes": 59
+    },
+    "source": "MakeHuman asset packs 04A/04B",
+    "fit": "native .mhclo HM08 mapping",
+    "defaults": {
+      "baseLayer": "mh_underwear02_cc0__punkduck_sport_briefs",
+      "top": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+      "bottoms": "mh_pants01_cc0__cortu_cargo_pants",
+      "socks": "mh_underwear04_cc0__joepal_crude_low_socks",
+      "shoes": "mh_shoes02_ccby__punkduck_comfortable_sneakers"
+    },
+    "legacyAliases": {
+      "baseLayer": {
+        "briefs": "mh_underwear02_cc0__punkduck_sport_briefs",
+        "boxer_briefs": "mh_underwear02_cc0__punkduck_sport_briefs",
+        "compression_shorts": "mh_underwear02_cc0__punkduck_sport_briefs",
+        "bra": "mh_underwear03_cc-by__joepal_plain_bra",
+        "sports_bra": "mh_underwear02_cc0__punkduck_sport_bra",
+        "tank": "mh_underwear01_cc0__wolgade_female_top_01",
+        "undershirt": "mh_underwear01_cc0__wolgade_female_top_01",
+        "compression_top": "mh_underwear01_cc0__wolgade_female_top_01",
+        "thermal_base": "mh_underwear01_cc0__wolgade_female_top_01"
+      },
+      "top": {
+        "plain_tshirt": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+        "fitted_tshirt": "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+        "vneck_tshirt": "mh_shirts03_ccby__punkduck_v_neck_top",
+        "long_sleeve": "mh_shirts02_ccby__ews_striped_shirt",
+        "henley": "mh_shirts02_ccby__elvs_male_boho_top1",
+        "polo": "mh_shirts01_cc0__namuhekam_male_polo_shirt",
+        "button_down": "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+        "hoodie": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+        "crew_sweater": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+        "turtleneck": "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+        "tank_top": "mh_shirts03_ccby__mindfront_tank_top_01",
+        "camisole": "mh_shirts01_cc0__toigo_camisole_top",
+        "blouse": "mh_shirts02_ccby__punkduck_lace_up_blouse",
+        "graphic_tshirt": "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+        "crop_top": "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+        "athletic_top": "mh_shirts03_ccby__elvs_male_athletic_tank1"
+      },
+      "bottoms": {
+        "jeans_straight": "mh_pants02_ccby__punkduck_male_classic_jeans",
+        "jeans_slim": "mh_pants02_ccby__punkduck_female_tight_jeans",
+        "jeans_relaxed": "mh_pants02_ccby__elvs_jeans_bootcut",
+        "chinos": "mh_pants02_ccby__mindfront_male_trousers_1",
+        "cargo_pants": "mh_pants01_cc0__cortu_cargo_pants",
+        "joggers": "mh_pants01_cc0__toigo_harem_pants",
+        "dress_pants": "mh_pants02_ccby__mindfront_male_trousers_2",
+        "work_pants": "mh_pants01_cc0__toigo_wool_pants",
+        "athletic_shorts": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+        "cargo_shorts": "mh_pants01_cc0__cortu_jeans_shorts",
+        "denim_shorts": "mh_pants03_ccby__punkduck_female_short_jeans",
+        "running_shorts": "mh_pants03_ccby__elvs_male_swim_shorts1"
+      },
+      "socks": {
+        "ankle_socks": "mh_underwear04_cc0__joepal_crude_low_socks",
+        "crew_socks": "mh_underwear04_cc0__joepal_crude_high_socks",
+        "boot_socks": "mh_underwear04_cc0__joepal_crude_high_socks",
+        "dress_socks": "mh_underwear04_cc0__joepal_crude_low_socks",
+        "compression_socks": "mh_underwear04_cc0__toigo_leg_warmer_socks",
+        "thigh_highs": "mh_underwear04_cc0__toigo_leg_warmer_socks"
+      },
+      "shoes": {
+        "sneakers": "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+        "running_shoes": "mh_shoes02_ccby__punkduck_running_shoes_01",
+        "high_tops": "mh_shoes02_ccby__culturalibre_sneakers",
+        "casual_boots": "mh_shoes01_cc0__toigo_ankle_boots_male",
+        "work_boots": "mh_shoes03_ccby__maciekg_leather_boots",
+        "tactical_boots": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+        "hiking_boots": "mh_shoes03_ccby__punkduck_winter_boots",
+        "dress_shoes": "mh_shoes02_ccby__mindfront_shoes_oxford_male",
+        "loafers": "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+        "sandals": "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+        "heels": "mh_shoes01_cc0__toigo_stiletto_booties",
+        "canvas_shoes": "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+        "combat_boots": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+        "chelsea_boots": "mh_shoes01_cc0__toigo_ankle_boots_female",
+        "motorcycle_boots": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+        "trail_shoes": "mh_shoes02_ccby__punkduck_running_shoes_01",
+        "slip_ons": "mh_shoes01_cc0__toigo_flats",
+        "flats": "mh_shoes01_cc0__toigo_ballet_flats",
+        "ankle_boots": "mh_shoes01_cc0__toigo_ankle_boots_female"
+      }
+    }
   }
 }
