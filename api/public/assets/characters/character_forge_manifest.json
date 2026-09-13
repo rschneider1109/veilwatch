@@ -118,6 +118,10 @@
         "label": "All Tiedup Kini1"
       },
       {
+        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
+        "label": "Armsleeve02"
+      },
+      {
         "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
         "label": "Armsleeve Fishnet Large"
       },
@@ -140,10 +144,6 @@
       {
         "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
         "label": "Armsleeve White S"
-      },
-      {
-        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
-        "label": "Armsleeve02"
       },
       {
         "id": "mh_underwear02_cc0__punkduck_babydoll",
@@ -553,16 +553,28 @@
         "label": "None"
       },
       {
+        "id": "mh_skirts02_cc-by__elvs_asymmetrical_skirt",
+        "label": "Asym Skirt3"
+      },
+      {
         "id": "mh_pants01_cc0__cortu_cargo_pants",
         "label": "Cargo Pants"
+      },
+      {
+        "id": "mh_skirts02_cc-by__elvs_disco_mini_skirt",
+        "label": "Elvs Disco Mini1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
+        "label": "Elvs Disco Pant1"
       },
       {
         "id": "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
         "label": "Elvs Disco Pant Druffles"
       },
       {
-        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
-        "label": "Elvs Disco Pant1"
+        "id": "mh_skirts02_cc-by__elvs_pencil_skirt",
+        "label": "Elvs Disco Pencilskirt1"
       },
       {
         "id": "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
@@ -573,6 +585,10 @@
         "label": "Elvs Gored Elephantpant1"
       },
       {
+        "id": "mh_skirts02_cc-by__elvs_gored_midi_skirt",
+        "label": "Elvs Gored Midiskirt1"
+      },
+      {
         "id": "mh_pants03_ccby__elvs_male_swim_shorts1",
         "label": "Elvs Male Shorts1"
       },
@@ -581,8 +597,20 @@
         "label": "F Trousers 01"
       },
       {
+        "id": "mh_skirts02_cc-by__callharvey3d_harvey_pskirt01",
+        "label": "Harvey PSkirt01"
+      },
+      {
         "id": "mh_pants01_cc0__cortu_jeans_shorts",
         "label": "Jean Shorts"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_jeans_skirt",
+        "label": "JeansSkirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__mtknife_low_mini_skirt",
+        "label": "Low Mini Skirt"
       },
       {
         "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
@@ -609,6 +637,10 @@
         "label": "Male Classic Jeans"
       },
       {
+        "id": "mh_skirts02_cc-by__sonicteam998_maria_skirt",
+        "label": "Mariaskirt"
+      },
+      {
         "id": "mh_pants02_ccby__elvs_jeans_bootcut",
         "label": "Mens Elv Jeans1f"
       },
@@ -617,12 +649,12 @@
         "label": "Mens Elv Jeans2slf"
       },
       {
-        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
-        "label": "Mens Trouser F Elv Chr"
-      },
-      {
         "id": "mh_pants02_ccby__elvs_male_trouser",
         "label": "Mens Trouser F Elv1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
+        "label": "Mens Trouser F Elv Chr"
       },
       {
         "id": "mh_pants03_ccby__elvs_male_trouser_short_1",
@@ -633,6 +665,22 @@
         "label": "Mens Trouser Short Nc Elvcrf"
       },
       {
+        "id": "mh_skirts01_cc0__frankyaye_mini_skirt_01",
+        "label": "Mini Skirt 01"
+      },
+      {
+        "id": "mh_skirts01_cc0__frankyaye_mini_skirt_02",
+        "label": "Mini Skirt 02"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_black_mini_skirt",
+        "label": "Miniskirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_skirt_native_american_fashion",
+        "label": "NamFashionSkirt"
+      },
+      {
         "id": "mh_pants01_cc0__toigo_harem_pants",
         "label": "Pants Harem"
       },
@@ -641,12 +689,44 @@
         "label": "Pants Wool"
       },
       {
+        "id": "mh_skirts02_cc-by__mtknife_pleated_mini_skirt",
+        "label": "Pleated Miniskirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__elvs_pleated_plaid_mini_skirt",
+        "label": "Pleated Skirtelv1"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_retro_polka_dot_skirt",
+        "label": "PolkadotSkirt"
+      },
+      {
         "id": "mh_pants03_ccby__elvs_retro_girly_shorts1",
         "label": "Retro Girlyshort1"
       },
       {
         "id": "mh_pants03_ccby__punkduck_female_short_jeans",
         "label": "ShortJeans"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_skirt_with_lace_ruffle",
+        "label": "Skirt Full Lace Ruffle"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_long_full_skirt",
+        "label": "Skirt Full Long"
+      },
+      {
+        "id": "mh_skirts02_cc-by__scsouza_mini_denin_skirt",
+        "label": "Skirt Mini"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_tiered_skirt",
+        "label": "Tier Skirt"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_tiered_mini_skirt",
+        "label": "Tier Skirt Mini"
       },
       {
         "id": "mh_pants02_ccby__punkduck_female_tight_jeans",
@@ -684,7 +764,7 @@
       },
       {
         "id": "mh_shoes02_ccby__dressupdoc_balletflat1",
-        "label": "DUDoc BalletFlat1"
+        "label": "DUDoc balletFlat1"
       },
       {
         "id": "mh_shoes02_ccby__dressupdoc_domsjeans1",
@@ -896,60 +976,460 @@
       }
     ],
     "gloves": [
-      "none",
-      "work_gloves",
-      "tactical_gloves",
-      "fingerless_gloves",
-      "winter_gloves",
-      "medical_gloves",
-      "mechanic_gloves",
-      "armored_gloves"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_short",
+        "label": "Gloves Hand"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_long",
+        "label": "Gloves Long"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_medium",
+        "label": "Gloves Medium"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_1",
+        "label": "Hero Heroine Gloves 1"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_2",
+        "label": "Hero Heroine Gloves 2"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+        "label": "Hero Heroine Gloves 3"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_4",
+        "label": "Hero Heroine Gloves 4"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+        "label": "Hero Heroine Gloves 5"
+      },
+      {
+        "id": "mh_gloves01_cc0__learning_mma_fighting_gloves",
+        "label": "Mma Gloves"
+      }
     ],
     "headwear": [
-      "none",
-      "baseball_cap",
-      "backwards_cap",
-      "beanie",
-      "tactical_cap",
-      "boonie_hat",
-      "watch_cap",
-      "bike_helmet",
-      "tactical_helmet",
-      "ballistic_helmet",
-      "hard_hat",
-      "medical_cap",
-      "trucker_cap",
-      "flat_cap",
-      "bucket_hat",
-      "cowboy_hat",
-      "motorcycle_helmet",
-      "fire_helmet",
-      "respirator_hood"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_hats04_cc-by__punkduck_bicycle_helmet_time_trial_aero_helmet",
+        "label": "BikeHelmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_basic_brave_feathers1",
+        "label": "Brave Feathers"
+      },
+      {
+        "id": "mh_hats02_cc0__javherre_casco_caballero_templario_templar_knight_helmet",
+        "label": "Casco Templario"
+      },
+      {
+        "id": "mh_hats03_cc-by__culturalibre_cl_bowler_hat",
+        "label": "Cl Bowler Hat"
+      },
+      {
+        "id": "mh_hats03_cc-by__culturalibre_cl_don_quixote_hat",
+        "label": "Cl Don Quixote Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__aethelraed_unraed_cloche_hat",
+        "label": "Cloche Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__grinsegold_corinthian_helmet",
+        "label": "Corinthian Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_dirty_lil_maid_bonnet",
+        "label": "Elv Maidonnet1"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_slouchy_beanie1",
+        "label": "Elvs Beanie Slouch"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_charity_veil1",
+        "label": "Elvs Charity Veil M1a Over"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_male_flat_cap1",
+        "label": "Elvs Male Flat Cap1"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_santa_hat",
+        "label": "Elvs Santa Hat"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_unisex_chef_hat_1",
+        "label": "Elvs Unisex Chef Hat1"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_fishing_hat_01",
+        "label": "Fishing Hat 01"
+      },
+      {
+        "id": "mh_hats04_cc-by__maciekg_horned_helmet",
+        "label": "Helmet Horn"
+      },
+      {
+        "id": "mh_hats04_cc-by__mindfront_helmet_kz45",
+        "label": "Helmet KZ45"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_knitted_hat_01",
+        "label": "Knitted Hat 01"
+      },
+      {
+        "id": "mh_hats04_cc-by__maciekg_leather_helmet",
+        "label": "Leather Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__jaldmic_m1951_72",
+        "label": "M1951 72"
+      },
+      {
+        "id": "mh_hats02_cc0__mrgreaterthan_m1_helmet",
+        "label": "M1Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_male_trilby_hat",
+        "label": "M Trilby Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__toigo_maga_hat",
+        "label": "MAGA Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_motorcycle_helmet",
+        "label": "Motorcyclehelmet"
+      },
+      {
+        "id": "mh_hats01_cc0__jujube_newsboy_cap",
+        "label": "Newsboy Cap"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_patrol_cap",
+        "label": "Patrol Cap"
+      },
+      {
+        "id": "mh_hats01_cc0__jujube_bag_on_head",
+        "label": "Pillow Man"
+      },
+      {
+        "id": "mh_hats04_cc-by__drednicolson_pith_helmet",
+        "label": "Pith Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__punkduck_riding_helmet",
+        "label": "Riding Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_sherpa_hat",
+        "label": "Sherpa Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_skull_helmet",
+        "label": "Skull Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__punkduck_sun_visor_sports_visor",
+        "label": "SunVisor"
+      },
+      {
+        "id": "mh_hats03_cc-by__punkduck_swim_cap",
+        "label": "Swim Cap"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_tophat1",
+        "label": "Tophat1"
+      },
+      {
+        "id": "mh_hats01_cc0__grinsegold_uncle_joshis_hat",
+        "label": "Uncle Joshi's Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_warrior_helmet",
+        "label": "Warrior Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__culturalibre_warrior_helmet_02",
+        "label": "Warrior Helmet 02"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_witchy_hallows_hat1",
+        "label": "Witchy Hat1 Elv"
+      },
+      {
+        "id": "mh_hats03_cc-by__maciekg_wizard_hat",
+        "label": "Wizard Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__joepal_xmas_cap",
+        "label": "Xmascap"
+      }
     ],
     "eyewear": [
-      "none",
-      "glasses_round",
-      "glasses_rectangular",
-      "sunglasses_aviator",
-      "sunglasses_wayfarer",
-      "ballistic_glasses",
-      "clear_safety_glasses",
-      "goggles",
-      "sport_sunglasses",
-      "visor_glasses",
-      "reading_glasses",
-      "welding_goggles",
-      "respirator_goggles"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_glasses01_cc0__ews_3d_glasses",
+        "label": "3dglasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__culturalibre_doc_ock_glasses",
+        "label": "Doc Ock Glasses"
+      },
+      {
+        "id": "mh_glasses02_ccby__elvs_covid_goggles1",
+        "label": "Elvs Covid Goggles Uni1"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_glasses_modern_form",
+        "label": "Glasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__frankyaye_glasses_library_male",
+        "label": "Glasses Library Male"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_goggles",
+        "label": "Goggles"
+      },
+      {
+        "id": "mh_glasses02_ccby__elvs_ladies_sunglass1",
+        "label": "Ladies Sunglass1"
+      },
+      {
+        "id": "mh_glasses01_cc0__kwnet_at_optical_glasses",
+        "label": "M Opticals01"
+      },
+      {
+        "id": "mh_glasses01_cc0__toigo_round_glasses_leopard",
+        "label": "RoundGlasses Leopard"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_01",
+        "label": "Sagerfrog's Glasses 01"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_02",
+        "label": "Sagerfrog's Glasses 02"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_03",
+        "label": "Sagerfrog's Glasses 03"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_04",
+        "label": "Sagerfrog's Glasses 04"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_sport-sunglasses",
+        "label": "Sport Sunglasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_tbm_glasses_frames_01",
+        "label": "TBM Glasses Frames 01"
+      }
     ],
     "neck": [
-      "none",
-      "chain",
-      "dog_tags",
-      "lanyard",
-      "scarf",
-      "shemagh",
-      "neck_gaiter",
-      "medical_id"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__jaldmic_ankh_collar",
+        "label": "Ank Collar"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_chunky_chain_anklet",
+        "label": "Anklet1 Quad"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__wojackowl_belly_piercing",
+        "label": "Belly Piercing"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_heart_belly_jewel",
+        "label": "Belly Jewel1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_brass_circlet_crown",
+        "label": "Brass Circlet Crown"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__jaldmic_no_heart_enchanted_gemstone",
+        "label": "Care Bears No Heart Enchanted Gemstone"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_candy_cane_necklace",
+        "label": "Cc Necklace1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__culturalibre_cl_spiral_bracelets",
+        "label": "Cl Spiral Bracelets"
+      },
+      {
+        "id": "mh_jewelry01_cc0__learning_slave_collar_chain",
+        "label": "Collar Chain"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_diamond_ring_and_wedding_band",
+        "label": "Diamond Ring+Wedding Band"
+      },
+      {
+        "id": "mh_jewelry01_cc0__wolgade_diamond_ring_01",
+        "label": "Diamond Ring 01"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_double_hoops",
+        "label": "Doublehoops Elv1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_pearl_anklet_1",
+        "label": "Elvs Anklet Pearls1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_braided_anklet1",
+        "label": "Elvs Braided Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_circle_chain_anklet1",
+        "label": "Elvs Circle Chain Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_goth_statement_necklace1",
+        "label": "Elvs Goth Neckdrape2"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_interlocking_rings_anklet1",
+        "label": "Elvs Interlockrings Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_f_earring_array1_l",
+        "label": "Full Ears2"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_chunky_chain_heart_necklace",
+        "label": "Heartneck2"
+      },
+      {
+        "id": "mh_jewelry01_cc0__culturalibre_hero_gem",
+        "label": "Hero Gem"
+      },
+      {
+        "id": "mh_jewelry01_cc0__culturalibre_heroine_lightning_earrings",
+        "label": "Heroine Lightning Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_hoop_earrings",
+        "label": "Hoop Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_industrial_piercing_left_ear_",
+        "label": "Industrial Left Ear"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_industrial_piercing_right_ear_",
+        "label": "Industrial Right Ear"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_bracelet_infinity_love",
+        "label": "Infinity Love Bracelet"
+      },
+      {
+        "id": "mh_jewelry01_cc0__punkduck_lace-choker",
+        "label": "LaceChoker"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__culturalibre_leather_bracelet",
+        "label": "Leather Bracelet"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_makehuman_medal",
+        "label": "MakeHuman Medal"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_m_facial_jewel_array1",
+        "label": "Malefacejewels1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_multi_bangle_bracelet1",
+        "label": "Multi Bangle1elv"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_necklace_native_american_fashion_",
+        "label": "NamFashionNecklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_navel_ring_heartfob",
+        "label": "Naval Ring Heartfob"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_pearl-chain_earrings",
+        "label": "Pearl Chain Earrings"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_bracelet_pearls-l1",
+        "label": "Pearl braceletL1elv"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_pearl_earrings",
+        "label": "Pearl Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_pearl_necklace",
+        "label": "Pearl Necklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_pumpkin_hallows_earrings1",
+        "label": "Pumkin Earrings Mh"
+      },
+      {
+        "id": "mh_jewelry01_cc0__joachip_ring_1",
+        "label": "Ring 1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_stars_belly_circlet",
+        "label": "Round Belly Stars2"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_septum_ring",
+        "label": "Septum Ring"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_bangle_bracelet1",
+        "label": "Simple Bangle1elv"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_spike_collar",
+        "label": "Spike Collar"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_twisted_pearl_necklace",
+        "label": "Twisted Pearl Necklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_twisty_hoops1",
+        "label": "Twisty Hoops1"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_wedding_ring",
+        "label": "WeddingRing"
+      }
     ],
     "belt": [
       "none",
@@ -960,48 +1440,330 @@
       "dress_belt"
     ],
     "vest": [
-      "none",
-      "soft_armor",
-      "plate_carrier",
-      "chest_rig",
-      "medical_harness",
-      "load_bearing_vest",
-      "high_vis_vest",
-      "concealable_armor",
-      "tactical_chest_rig",
-      "heavy_plate_carrier",
-      "light_plate_carrier",
-      "rescue_harness",
-      "tool_harness"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_diver_scuba_rig",
+        "label": "Diver Scuba Rig"
+      },
+      {
+        "id": "mh_equipment03_cc-by__mindfront_tactical_vest_female",
+        "label": "Tactical Vest Female"
+      },
+      {
+        "id": "mh_equipment03_cc-by__mindfront_tactical_vest_male",
+        "label": "Tactical Vest Male"
+      }
     ],
     "back": [
-      "none",
-      "daypack",
-      "tactical_pack",
-      "sling_bag",
-      "messenger_bag",
-      "hydration_pack",
-      "medical_pack",
-      "rifle_pack",
-      "civilian_backpack",
-      "duffel_sling",
-      "hard_case_pack",
-      "tech_pack",
-      "oxygen_pack"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_electric_guitar",
+        "label": "ElectricGuitar"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_handbag01",
+        "label": "Handbag"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_head_mirror",
+        "label": "Headmirror"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_wireless_headset",
+        "label": "Headset"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_microphone",
+        "label": "Microphone"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_shopping_bag01",
+        "label": "ShoppingBag"
+      },
+      {
+        "id": "mh_equipment03_cc-by__elvs_sling_purse1",
+        "label": "Slingpurse Elv1b"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_stethoscope",
+        "label": "Stethoscope"
+      },
+      {
+        "id": "mh_equipment03_cc-by__culturalibre_suitcase",
+        "label": "Suitcase"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_tennis_racket",
+        "label": "Tennisracket"
+      }
     ],
     "onePiece": [
-      "none",
-      "casual_dress",
-      "formal_dress",
-      "sundress",
-      "shirt_dress",
-      "jumpsuit",
-      "work_coveralls",
-      "mechanic_coveralls",
-      "tactical_coveralls",
-      "medical_gown",
-      "hazmat_suit",
-      "business_suit_set"
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_crochet_baby_doll",
+        "label": "Babydoll Elvruff1a"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_ballet_dress_the_swan",
+        "label": "Ballet Dress The Swan"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_winter_coat",
+        "label": "Coat"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_black_cocktail_dress",
+        "label": "Cocktaildress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_double_handkerchief_halter_dress",
+        "label": "Doublechiefhalterdress1"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_bodice_dress_with_lace_ruffle_skirt",
+        "label": "Dress Bodice Ruffle Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+        "label": "Dress Camisole Full Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_cut_out_dress",
+        "label": "Dress Cut Outs"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_keyhole_neck_dress",
+        "label": "Dress Keyhole Neck"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_knee_length",
+        "label": "Dress Knee Halter"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_with_fluted_skirt",
+        "label": "Dress Long Fluted Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_midi",
+        "label": "Dress Midi Halter"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_shift_dress",
+        "label": "Dress Shift"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_strapless_ruffle_top_dress",
+        "label": "Dress Strapless Ruffle Top"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_dress_with_tiered_skirt",
+        "label": "DressTierSkirt"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_1",
+        "label": "Elv Simple Fashiondress1a"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_2",
+        "label": "Elv Simple Fashiondressd"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_hippy_dress",
+        "label": "Elvs Fringe Dress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress2",
+        "label": "Elvs Goddess Dress2"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress3",
+        "label": "Elvs Goddess Dress3"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress4",
+        "label": "Elvs Goddess Dress4"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress5",
+        "label": "Elvs Goddess Dress5"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress6",
+        "label": "Elvs Goddess Dress6"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress1",
+        "label": "Elvs Goddessdress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress7",
+        "label": "Elvs Goddessdress7"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress8",
+        "label": "Elvs Goddessdress8"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_60s_dress",
+        "label": "Elvs Hippydress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_ladies_apron",
+        "label": "Elvs Lady Apron1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_leather_dress",
+        "label": "Elvs Leather Fringedress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_long",
+        "label": "Elvs Long Halterdress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_mini",
+        "label": "Elvs Mini Halterdress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_off_shoulder_dress",
+        "label": "Elvs Offshoulder Fringedress2 P"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_knee_length",
+        "label": "Elvs Short Halterdress1"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_evening_gown",
+        "label": "EveningGown"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_01",
+        "label": "F Dress 01"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_02",
+        "label": "F Dress 02"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_03",
+        "label": "F Dress 03"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_04",
+        "label": "F Dress 04"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_05",
+        "label": "F Dress 05"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_06",
+        "label": "F Dress 06"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_07",
+        "label": "F Dress 07"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_08",
+        "label": "F Dress 08"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_09",
+        "label": "F Dress 09"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_10",
+        "label": "F Dress 10"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_11",
+        "label": "F Dress 11"
+      },
+      {
+        "id": "mh_dress01_cc0__mindfront_kimono",
+        "label": "F Kimono"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_suit",
+        "label": "Fem Suit"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_suit_2",
+        "label": "Fem Suit2"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_double-breasted_suit",
+        "label": "Fem Suit Double Breasted"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_figure_skating_dress",
+        "label": "Figure Skating Dress"
+      },
+      {
+        "id": "mh_dress01_cc0__aethelraed_flapper_dress",
+        "label": "Flapper Dress 1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_frilled_party_dress",
+        "label": "Frill Partydress1"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_suit_with_jacket_and_bowtie",
+        "label": "Jacket Bowtie Pants"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_suit_tie_and_jacket",
+        "label": "Jacket Tie Pants"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_medieval_dress",
+        "label": "MedievalDress"
+      },
+      {
+        "id": "mh_dress01_cc0__wdg_mycenaean_tunic",
+        "label": "Mycenaean Tunic"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_middle_length_qipao",
+        "label": "Qipao"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_sarong_cover_up",
+        "label": "Sarong Coverup1"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_suit_3",
+        "label": "Suit3"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_suit_with_dinner_jacket",
+        "label": "Suit Dinner Jacket"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_double-breasted_suit",
+        "label": "Suit Double Breasted"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_tiered",
+        "label": "Tieredhalterdress1"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_tube_dress",
+        "label": "TubeDress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fashion_stylized_qipoa",
+        "label": "Westernized Quipoa"
+      }
     ],
     "socks": [
       {
@@ -1281,7 +2043,8 @@
       "socks",
       "shoes"
     ],
-    "nativeClothingPackCacheLimit": 1
+    "nativeClothingPackCacheLimit": 1,
+    "makeHumanExtendedWardrobe": true
   },
   "nativeAppearance": {
     "skinMaterials": [
@@ -1908,6 +2671,10 @@
         "label": "All Tiedup Kini1"
       },
       {
+        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
+        "label": "Armsleeve02"
+      },
+      {
         "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
         "label": "Armsleeve Fishnet Large"
       },
@@ -1930,10 +2697,6 @@
       {
         "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
         "label": "Armsleeve White S"
-      },
-      {
-        "id": "mh_underwear01_cc0__marco_105_armsleeve02",
-        "label": "Armsleeve02"
       },
       {
         "id": "mh_underwear02_cc0__punkduck_babydoll",
@@ -2316,16 +3079,28 @@
         "label": "None"
       },
       {
+        "id": "mh_skirts02_cc-by__elvs_asymmetrical_skirt",
+        "label": "Asym Skirt3"
+      },
+      {
         "id": "mh_pants01_cc0__cortu_cargo_pants",
         "label": "Cargo Pants"
+      },
+      {
+        "id": "mh_skirts02_cc-by__elvs_disco_mini_skirt",
+        "label": "Elvs Disco Mini1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
+        "label": "Elvs Disco Pant1"
       },
       {
         "id": "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
         "label": "Elvs Disco Pant Druffles"
       },
       {
-        "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
-        "label": "Elvs Disco Pant1"
+        "id": "mh_skirts02_cc-by__elvs_pencil_skirt",
+        "label": "Elvs Disco Pencilskirt1"
       },
       {
         "id": "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
@@ -2336,6 +3111,10 @@
         "label": "Elvs Gored Elephantpant1"
       },
       {
+        "id": "mh_skirts02_cc-by__elvs_gored_midi_skirt",
+        "label": "Elvs Gored Midiskirt1"
+      },
+      {
         "id": "mh_pants03_ccby__elvs_male_swim_shorts1",
         "label": "Elvs Male Shorts1"
       },
@@ -2344,8 +3123,20 @@
         "label": "F Trousers 01"
       },
       {
+        "id": "mh_skirts02_cc-by__callharvey3d_harvey_pskirt01",
+        "label": "Harvey PSkirt01"
+      },
+      {
         "id": "mh_pants01_cc0__cortu_jeans_shorts",
         "label": "Jean Shorts"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_jeans_skirt",
+        "label": "JeansSkirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__mtknife_low_mini_skirt",
+        "label": "Low Mini Skirt"
       },
       {
         "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
@@ -2372,6 +3163,10 @@
         "label": "Male Classic Jeans"
       },
       {
+        "id": "mh_skirts02_cc-by__sonicteam998_maria_skirt",
+        "label": "Mariaskirt"
+      },
+      {
         "id": "mh_pants02_ccby__elvs_jeans_bootcut",
         "label": "Mens Elv Jeans1f"
       },
@@ -2380,12 +3175,12 @@
         "label": "Mens Elv Jeans2slf"
       },
       {
-        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
-        "label": "Mens Trouser F Elv Chr"
-      },
-      {
         "id": "mh_pants02_ccby__elvs_male_trouser",
         "label": "Mens Trouser F Elv1"
+      },
+      {
+        "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
+        "label": "Mens Trouser F Elv Chr"
       },
       {
         "id": "mh_pants03_ccby__elvs_male_trouser_short_1",
@@ -2396,6 +3191,22 @@
         "label": "Mens Trouser Short Nc Elvcrf"
       },
       {
+        "id": "mh_skirts01_cc0__frankyaye_mini_skirt_01",
+        "label": "Mini Skirt 01"
+      },
+      {
+        "id": "mh_skirts01_cc0__frankyaye_mini_skirt_02",
+        "label": "Mini Skirt 02"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_black_mini_skirt",
+        "label": "Miniskirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_skirt_native_american_fashion",
+        "label": "NamFashionSkirt"
+      },
+      {
         "id": "mh_pants01_cc0__toigo_harem_pants",
         "label": "Pants Harem"
       },
@@ -2404,12 +3215,44 @@
         "label": "Pants Wool"
       },
       {
+        "id": "mh_skirts02_cc-by__mtknife_pleated_mini_skirt",
+        "label": "Pleated Miniskirt"
+      },
+      {
+        "id": "mh_skirts02_cc-by__elvs_pleated_plaid_mini_skirt",
+        "label": "Pleated Skirtelv1"
+      },
+      {
+        "id": "mh_skirts02_cc-by__punkduck_retro_polka_dot_skirt",
+        "label": "PolkadotSkirt"
+      },
+      {
         "id": "mh_pants03_ccby__elvs_retro_girly_shorts1",
         "label": "Retro Girlyshort1"
       },
       {
         "id": "mh_pants03_ccby__punkduck_female_short_jeans",
         "label": "ShortJeans"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_skirt_with_lace_ruffle",
+        "label": "Skirt Full Lace Ruffle"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_long_full_skirt",
+        "label": "Skirt Full Long"
+      },
+      {
+        "id": "mh_skirts02_cc-by__scsouza_mini_denin_skirt",
+        "label": "Skirt Mini"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_tiered_skirt",
+        "label": "Tier Skirt"
+      },
+      {
+        "id": "mh_skirts01_cc0__toigo_tiered_mini_skirt",
+        "label": "Tier Skirt Mini"
       },
       {
         "id": "mh_pants02_ccby__punkduck_female_tight_jeans",
@@ -2469,7 +3312,7 @@
       },
       {
         "id": "mh_shoes02_ccby__dressupdoc_balletflat1",
-        "label": "DUDoc BalletFlat1"
+        "label": "DUDoc balletFlat1"
       },
       {
         "id": "mh_shoes02_ccby__dressupdoc_domsjeans1",
@@ -2683,18 +3526,32 @@
     "counts": {
       "baseLayer": 58,
       "top": 42,
-      "bottoms": 25,
+      "bottoms": 45,
       "socks": 4,
-      "shoes": 59
+      "shoes": 59,
+      "onePiece": 64,
+      "gloves": 9,
+      "headwear": 39,
+      "eyewear": 15,
+      "neck": 45,
+      "vest": 3,
+      "back": 10
     },
-    "source": "MakeHuman asset packs 04A/04B",
+    "source": "MakeHuman asset packs 04A/04B/04C/04D/04E/05/06",
     "fit": "native .mhclo HM08 mapping",
     "defaults": {
       "baseLayer": "mh_underwear02_cc0__punkduck_sport_briefs",
       "top": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
       "bottoms": "mh_pants01_cc0__cortu_cargo_pants",
       "socks": "mh_underwear04_cc0__joepal_crude_low_socks",
-      "shoes": "mh_shoes02_ccby__punkduck_comfortable_sneakers"
+      "shoes": "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+      "onePiece": "none",
+      "gloves": "none",
+      "headwear": "none",
+      "eyewear": "none",
+      "neck": "none",
+      "vest": "none",
+      "back": "none"
     },
     "legacyAliases": {
       "baseLayer": {
@@ -2738,7 +3595,12 @@
         "athletic_shorts": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
         "cargo_shorts": "mh_pants01_cc0__cortu_jeans_shorts",
         "denim_shorts": "mh_pants03_ccby__punkduck_female_short_jeans",
-        "running_shorts": "mh_pants03_ccby__elvs_male_swim_shorts1"
+        "running_shorts": "mh_pants03_ccby__elvs_male_swim_shorts1",
+        "pencil_skirt": "mh_skirts02_cc-by__elvs_pencil_skirt",
+        "mini_skirt": "mh_skirts01_cc0__frankyaye_mini_skirt_01",
+        "midi_skirt": "mh_skirts02_cc-by__elvs_gored_midi_skirt",
+        "maxi_skirt": "mh_skirts01_cc0__toigo_long_full_skirt",
+        "pleated_skirt": "mh_skirts01_cc0__toigo_tiered_skirt"
       },
       "socks": {
         "ankle_socks": "mh_underwear04_cc0__joepal_crude_low_socks",
@@ -2768,7 +3630,858 @@
         "slip_ons": "mh_shoes01_cc0__toigo_flats",
         "flats": "mh_shoes01_cc0__toigo_ballet_flats",
         "ankle_boots": "mh_shoes01_cc0__toigo_ankle_boots_female"
+      },
+      "onePiece": {
+        "casual_dress": "mh_dress01_cc0__toigo_shift_dress",
+        "formal_dress": "mh_dress03_cc-by__punkduck_evening_gown",
+        "sundress": "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+        "shirt_dress": "mh_dress01_cc0__toigo_keyhole_neck_dress",
+        "cocktail_dress": "mh_dress03_cc-by__punkduck_black_cocktail_dress",
+        "suit": "mh_suits01_cc0__toigo_male_suit_3"
+      },
+      "gloves": {
+        "work_gloves": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+        "tactical_gloves": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+        "fingerless_gloves": "mh_gloves01_cc0__learning_mma_fighting_gloves",
+        "winter_gloves": "mh_gloves01_cc0__toigo_gloves_long",
+        "medical_gloves": "mh_gloves01_cc0__toigo_gloves_short"
+      },
+      "headwear": {
+        "baseball_cap": "mh_hats03_cc-by__mindfront_patrol_cap",
+        "backwards_cap": "mh_hats01_cc0__jujube_newsboy_cap",
+        "beanie": "mh_hats03_cc-by__elvs_slouchy_beanie1",
+        "tactical_cap": "mh_hats03_cc-by__mindfront_patrol_cap",
+        "helmet": "mh_hats02_cc0__mrgreaterthan_m1_helmet",
+        "motorcycle_helmet": "mh_hats02_cc0__culturalibre_motorcycle_helmet",
+        "winter_hat": "mh_hats03_cc-by__mindfront_knitted_hat_01",
+        "chef_hat": "mh_hats03_cc-by__elvs_unisex_chef_hat_1"
+      },
+      "eyewear": {
+        "glasses_round": "mh_glasses01_cc0__toigo_round_glasses_leopard",
+        "glasses_rectangular": "mh_glasses01_cc0__kwnet_at_optical_glasses",
+        "sunglasses_aviator": "mh_glasses02_ccby__punkduck_sport-sunglasses",
+        "sunglasses_wayfarer": "mh_glasses02_ccby__elvs_ladies_sunglass1",
+        "goggles": "mh_glasses02_ccby__elvs_covid_goggles1"
+      },
+      "neck": {
+        "chain": "mh_jewelry01_cc0__learning_slave_collar_chain",
+        "dog_tags": "mh_jewelry02_cc-by__punkduck_makehuman_medal",
+        "choker": "mh_jewelry01_cc0__punkduck_lace-choker",
+        "necklace": "mh_jewelry02_cc-by__elvs_goth_statement_necklace1"
+      },
+      "vest": {
+        "soft_armor": "mh_equipment03_cc-by__mindfront_tactical_vest_male",
+        "plate_carrier": "mh_equipment03_cc-by__mindfront_tactical_vest_male",
+        "chest_rig": "mh_equipment03_cc-by__mindfront_tactical_vest_female",
+        "medical_harness": "mh_equipment03_cc-by__punkduck_diver_scuba_rig"
+      },
+      "back": {
+        "daypack": "mh_equipment03_cc-by__culturalibre_suitcase",
+        "tactical_pack": "mh_equipment03_cc-by__culturalibre_suitcase",
+        "sling_bag": "mh_equipment03_cc-by__elvs_sling_purse1",
+        "messenger_bag": "mh_equipment03_cc-by__punkduck_handbag01",
+        "medical_bag": "mh_equipment03_cc-by__punkduck_handbag01"
       }
+    },
+    "onePiece": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_crochet_baby_doll",
+        "label": "Babydoll Elvruff1a"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_ballet_dress_the_swan",
+        "label": "Ballet Dress The Swan"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_winter_coat",
+        "label": "Coat"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_black_cocktail_dress",
+        "label": "Cocktaildress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_double_handkerchief_halter_dress",
+        "label": "Doublechiefhalterdress1"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_bodice_dress_with_lace_ruffle_skirt",
+        "label": "Dress Bodice Ruffle Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+        "label": "Dress Camisole Full Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_cut_out_dress",
+        "label": "Dress Cut Outs"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_keyhole_neck_dress",
+        "label": "Dress Keyhole Neck"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_knee_length",
+        "label": "Dress Knee Halter"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_with_fluted_skirt",
+        "label": "Dress Long Fluted Skirt"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_halter_dress_midi",
+        "label": "Dress Midi Halter"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_shift_dress",
+        "label": "Dress Shift"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_strapless_ruffle_top_dress",
+        "label": "Dress Strapless Ruffle Top"
+      },
+      {
+        "id": "mh_dress01_cc0__toigo_dress_with_tiered_skirt",
+        "label": "DressTierSkirt"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_1",
+        "label": "Elv Simple Fashiondress1a"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_fashion_dress_2",
+        "label": "Elv Simple Fashiondressd"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_hippy_dress",
+        "label": "Elvs Fringe Dress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress2",
+        "label": "Elvs Goddess Dress2"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress3",
+        "label": "Elvs Goddess Dress3"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress4",
+        "label": "Elvs Goddess Dress4"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress5",
+        "label": "Elvs Goddess Dress5"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress6",
+        "label": "Elvs Goddess Dress6"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress1",
+        "label": "Elvs Goddessdress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress7",
+        "label": "Elvs Goddessdress7"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_goddess_dress8",
+        "label": "Elvs Goddessdress8"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_simple_60s_dress",
+        "label": "Elvs Hippydress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_ladies_apron",
+        "label": "Elvs Lady Apron1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_leather_dress",
+        "label": "Elvs Leather Fringedress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_long",
+        "label": "Elvs Long Halterdress1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_mini",
+        "label": "Elvs Mini Halterdress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fringe_off_shoulder_dress",
+        "label": "Elvs Offshoulder Fringedress2 P"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_knee_length",
+        "label": "Elvs Short Halterdress1"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_evening_gown",
+        "label": "EveningGown"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_01",
+        "label": "F Dress 01"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_02",
+        "label": "F Dress 02"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_03",
+        "label": "F Dress 03"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_04",
+        "label": "F Dress 04"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_05",
+        "label": "F Dress 05"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_06",
+        "label": "F Dress 06"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_07",
+        "label": "F Dress 07"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_08",
+        "label": "F Dress 08"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_09",
+        "label": "F Dress 09"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_10",
+        "label": "F Dress 10"
+      },
+      {
+        "id": "mh_dress03_cc-by__mindfront_f_dress_11",
+        "label": "F Dress 11"
+      },
+      {
+        "id": "mh_dress01_cc0__mindfront_kimono",
+        "label": "F Kimono"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_suit",
+        "label": "Fem Suit"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_suit_2",
+        "label": "Fem Suit2"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_female_double-breasted_suit",
+        "label": "Fem Suit Double Breasted"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_figure_skating_dress",
+        "label": "Figure Skating Dress"
+      },
+      {
+        "id": "mh_dress01_cc0__aethelraed_flapper_dress",
+        "label": "Flapper Dress 1"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_frilled_party_dress",
+        "label": "Frill Partydress1"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_suit_with_jacket_and_bowtie",
+        "label": "Jacket Bowtie Pants"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_suit_tie_and_jacket",
+        "label": "Jacket Tie Pants"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_medieval_dress",
+        "label": "MedievalDress"
+      },
+      {
+        "id": "mh_dress01_cc0__wdg_mycenaean_tunic",
+        "label": "Mycenaean Tunic"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_middle_length_qipao",
+        "label": "Qipao"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_sarong_cover_up",
+        "label": "Sarong Coverup1"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_suit_3",
+        "label": "Suit3"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_suit_with_dinner_jacket",
+        "label": "Suit Dinner Jacket"
+      },
+      {
+        "id": "mh_suits01_cc0__toigo_male_double-breasted_suit",
+        "label": "Suit Double Breasted"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_halter_dress_tiered",
+        "label": "Tieredhalterdress1"
+      },
+      {
+        "id": "mh_dress03_cc-by__punkduck_tube_dress",
+        "label": "TubeDress"
+      },
+      {
+        "id": "mh_dress02_cc-by__elvs_fashion_stylized_qipoa",
+        "label": "Westernized Quipoa"
+      }
+    ],
+    "gloves": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_short",
+        "label": "Gloves Hand"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_long",
+        "label": "Gloves Long"
+      },
+      {
+        "id": "mh_gloves01_cc0__toigo_gloves_medium",
+        "label": "Gloves Medium"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_1",
+        "label": "Hero Heroine Gloves 1"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_2",
+        "label": "Hero Heroine Gloves 2"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+        "label": "Hero Heroine Gloves 3"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_4",
+        "label": "Hero Heroine Gloves 4"
+      },
+      {
+        "id": "mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+        "label": "Hero Heroine Gloves 5"
+      },
+      {
+        "id": "mh_gloves01_cc0__learning_mma_fighting_gloves",
+        "label": "Mma Gloves"
+      }
+    ],
+    "headwear": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_hats04_cc-by__punkduck_bicycle_helmet_time_trial_aero_helmet",
+        "label": "BikeHelmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_basic_brave_feathers1",
+        "label": "Brave Feathers"
+      },
+      {
+        "id": "mh_hats02_cc0__javherre_casco_caballero_templario_templar_knight_helmet",
+        "label": "Casco Templario"
+      },
+      {
+        "id": "mh_hats03_cc-by__culturalibre_cl_bowler_hat",
+        "label": "Cl Bowler Hat"
+      },
+      {
+        "id": "mh_hats03_cc-by__culturalibre_cl_don_quixote_hat",
+        "label": "Cl Don Quixote Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__aethelraed_unraed_cloche_hat",
+        "label": "Cloche Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__grinsegold_corinthian_helmet",
+        "label": "Corinthian Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_dirty_lil_maid_bonnet",
+        "label": "Elv Maidonnet1"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_slouchy_beanie1",
+        "label": "Elvs Beanie Slouch"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_charity_veil1",
+        "label": "Elvs Charity Veil M1a Over"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_male_flat_cap1",
+        "label": "Elvs Male Flat Cap1"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_santa_hat",
+        "label": "Elvs Santa Hat"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_unisex_chef_hat_1",
+        "label": "Elvs Unisex Chef Hat1"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_fishing_hat_01",
+        "label": "Fishing Hat 01"
+      },
+      {
+        "id": "mh_hats04_cc-by__maciekg_horned_helmet",
+        "label": "Helmet Horn"
+      },
+      {
+        "id": "mh_hats04_cc-by__mindfront_helmet_kz45",
+        "label": "Helmet KZ45"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_knitted_hat_01",
+        "label": "Knitted Hat 01"
+      },
+      {
+        "id": "mh_hats04_cc-by__maciekg_leather_helmet",
+        "label": "Leather Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__jaldmic_m1951_72",
+        "label": "M1951 72"
+      },
+      {
+        "id": "mh_hats02_cc0__mrgreaterthan_m1_helmet",
+        "label": "M1Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_male_trilby_hat",
+        "label": "M Trilby Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__toigo_maga_hat",
+        "label": "MAGA Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_motorcycle_helmet",
+        "label": "Motorcyclehelmet"
+      },
+      {
+        "id": "mh_hats01_cc0__jujube_newsboy_cap",
+        "label": "Newsboy Cap"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_patrol_cap",
+        "label": "Patrol Cap"
+      },
+      {
+        "id": "mh_hats01_cc0__jujube_bag_on_head",
+        "label": "Pillow Man"
+      },
+      {
+        "id": "mh_hats04_cc-by__drednicolson_pith_helmet",
+        "label": "Pith Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__punkduck_riding_helmet",
+        "label": "Riding Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__mindfront_sherpa_hat",
+        "label": "Sherpa Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_skull_helmet",
+        "label": "Skull Helmet"
+      },
+      {
+        "id": "mh_hats03_cc-by__punkduck_sun_visor_sports_visor",
+        "label": "SunVisor"
+      },
+      {
+        "id": "mh_hats03_cc-by__punkduck_swim_cap",
+        "label": "Swim Cap"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_tophat1",
+        "label": "Tophat1"
+      },
+      {
+        "id": "mh_hats01_cc0__grinsegold_uncle_joshis_hat",
+        "label": "Uncle Joshi's Hat"
+      },
+      {
+        "id": "mh_hats02_cc0__culturalibre_warrior_helmet",
+        "label": "Warrior Helmet"
+      },
+      {
+        "id": "mh_hats04_cc-by__culturalibre_warrior_helmet_02",
+        "label": "Warrior Helmet 02"
+      },
+      {
+        "id": "mh_hats03_cc-by__elvs_witchy_hallows_hat1",
+        "label": "Witchy Hat1 Elv"
+      },
+      {
+        "id": "mh_hats03_cc-by__maciekg_wizard_hat",
+        "label": "Wizard Hat"
+      },
+      {
+        "id": "mh_hats01_cc0__joepal_xmas_cap",
+        "label": "Xmascap"
+      }
+    ],
+    "eyewear": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_glasses01_cc0__ews_3d_glasses",
+        "label": "3dglasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__culturalibre_doc_ock_glasses",
+        "label": "Doc Ock Glasses"
+      },
+      {
+        "id": "mh_glasses02_ccby__elvs_covid_goggles1",
+        "label": "Elvs Covid Goggles Uni1"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_glasses_modern_form",
+        "label": "Glasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__frankyaye_glasses_library_male",
+        "label": "Glasses Library Male"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_goggles",
+        "label": "Goggles"
+      },
+      {
+        "id": "mh_glasses02_ccby__elvs_ladies_sunglass1",
+        "label": "Ladies Sunglass1"
+      },
+      {
+        "id": "mh_glasses01_cc0__kwnet_at_optical_glasses",
+        "label": "M Opticals01"
+      },
+      {
+        "id": "mh_glasses01_cc0__toigo_round_glasses_leopard",
+        "label": "RoundGlasses Leopard"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_01",
+        "label": "Sagerfrog's Glasses 01"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_02",
+        "label": "Sagerfrog's Glasses 02"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_03",
+        "label": "Sagerfrog's Glasses 03"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_sagerfrogs_glasses_04",
+        "label": "Sagerfrog's Glasses 04"
+      },
+      {
+        "id": "mh_glasses02_ccby__punkduck_sport-sunglasses",
+        "label": "Sport Sunglasses"
+      },
+      {
+        "id": "mh_glasses01_cc0__spamrakuen_tbm_glasses_frames_01",
+        "label": "TBM Glasses Frames 01"
+      }
+    ],
+    "neck": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__jaldmic_ankh_collar",
+        "label": "Ank Collar"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_chunky_chain_anklet",
+        "label": "Anklet1 Quad"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__wojackowl_belly_piercing",
+        "label": "Belly Piercing"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_heart_belly_jewel",
+        "label": "Belly Jewel1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_brass_circlet_crown",
+        "label": "Brass Circlet Crown"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__jaldmic_no_heart_enchanted_gemstone",
+        "label": "Care Bears No Heart Enchanted Gemstone"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_candy_cane_necklace",
+        "label": "Cc Necklace1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__culturalibre_cl_spiral_bracelets",
+        "label": "Cl Spiral Bracelets"
+      },
+      {
+        "id": "mh_jewelry01_cc0__learning_slave_collar_chain",
+        "label": "Collar Chain"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_diamond_ring_and_wedding_band",
+        "label": "Diamond Ring+Wedding Band"
+      },
+      {
+        "id": "mh_jewelry01_cc0__wolgade_diamond_ring_01",
+        "label": "Diamond Ring 01"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_double_hoops",
+        "label": "Doublehoops Elv1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_pearl_anklet_1",
+        "label": "Elvs Anklet Pearls1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_braided_anklet1",
+        "label": "Elvs Braided Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_circle_chain_anklet1",
+        "label": "Elvs Circle Chain Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_goth_statement_necklace1",
+        "label": "Elvs Goth Neckdrape2"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_interlocking_rings_anklet1",
+        "label": "Elvs Interlockrings Anklet1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_f_earring_array1_l",
+        "label": "Full Ears2"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_chunky_chain_heart_necklace",
+        "label": "Heartneck2"
+      },
+      {
+        "id": "mh_jewelry01_cc0__culturalibre_hero_gem",
+        "label": "Hero Gem"
+      },
+      {
+        "id": "mh_jewelry01_cc0__culturalibre_heroine_lightning_earrings",
+        "label": "Heroine Lightning Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_hoop_earrings",
+        "label": "Hoop Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_industrial_piercing_left_ear_",
+        "label": "Industrial Left Ear"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_industrial_piercing_right_ear_",
+        "label": "Industrial Right Ear"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_bracelet_infinity_love",
+        "label": "Infinity Love Bracelet"
+      },
+      {
+        "id": "mh_jewelry01_cc0__punkduck_lace-choker",
+        "label": "LaceChoker"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__culturalibre_leather_bracelet",
+        "label": "Leather Bracelet"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_makehuman_medal",
+        "label": "MakeHuman Medal"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_m_facial_jewel_array1",
+        "label": "Malefacejewels1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_multi_bangle_bracelet1",
+        "label": "Multi Bangle1elv"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_necklace_native_american_fashion_",
+        "label": "NamFashionNecklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_navel_ring_heartfob",
+        "label": "Naval Ring Heartfob"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_pearl-chain_earrings",
+        "label": "Pearl Chain Earrings"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_bracelet_pearls-l1",
+        "label": "Pearl braceletL1elv"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_pearl_earrings",
+        "label": "Pearl Earrings"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_pearl_necklace",
+        "label": "Pearl Necklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_pumpkin_hallows_earrings1",
+        "label": "Pumkin Earrings Mh"
+      },
+      {
+        "id": "mh_jewelry01_cc0__joachip_ring_1",
+        "label": "Ring 1"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_stars_belly_circlet",
+        "label": "Round Belly Stars2"
+      },
+      {
+        "id": "mh_jewelry01_cc0__ews_septum_ring",
+        "label": "Septum Ring"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_bangle_bracelet1",
+        "label": "Simple Bangle1elv"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_spike_collar",
+        "label": "Spike Collar"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__punkduck_twisted_pearl_necklace",
+        "label": "Twisted Pearl Necklace"
+      },
+      {
+        "id": "mh_jewelry02_cc-by__elvs_twisty_hoops1",
+        "label": "Twisty Hoops1"
+      },
+      {
+        "id": "mh_jewelry01_cc0__toigo_wedding_ring",
+        "label": "WeddingRing"
+      }
+    ],
+    "vest": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_diver_scuba_rig",
+        "label": "Diver Scuba Rig"
+      },
+      {
+        "id": "mh_equipment03_cc-by__mindfront_tactical_vest_female",
+        "label": "Tactical Vest Female"
+      },
+      {
+        "id": "mh_equipment03_cc-by__mindfront_tactical_vest_male",
+        "label": "Tactical Vest Male"
+      }
+    ],
+    "back": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_electric_guitar",
+        "label": "ElectricGuitar"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_handbag01",
+        "label": "Handbag"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_head_mirror",
+        "label": "Headmirror"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_wireless_headset",
+        "label": "Headset"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_microphone",
+        "label": "Microphone"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_shopping_bag01",
+        "label": "ShoppingBag"
+      },
+      {
+        "id": "mh_equipment03_cc-by__elvs_sling_purse1",
+        "label": "Slingpurse Elv1b"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_stethoscope",
+        "label": "Stethoscope"
+      },
+      {
+        "id": "mh_equipment03_cc-by__culturalibre_suitcase",
+        "label": "Suitcase"
+      },
+      {
+        "id": "mh_equipment03_cc-by__punkduck_tennis_racket",
+        "label": "Tennisracket"
+      }
+    ],
+    "section4": {
+      "extendedSlots": [
+        "onePiece",
+        "gloves",
+        "headwear",
+        "eyewear",
+        "neck",
+        "vest",
+        "back"
+      ],
+      "skirtsMergedInto": "bottoms",
+      "jewelryMappedTo": "neck",
+      "equipmentMappedTo": [
+        "vest",
+        "back"
+      ],
+      "materialOnlyPack": "system_clothes_materials01_cc0.zip retained for later variant pass"
     }
   }
 }
