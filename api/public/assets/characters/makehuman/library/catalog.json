@@ -860,94 +860,2916 @@
         "eyelashes"
       ],
       "pack": "eyelashes01_cc0.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__punkduck_male_classic_jeans": {
+      "id": "mh_pants02_ccby__punkduck_male_classic_jeans",
+      "label": "male-classic-jeans",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "jeans",
+        "pants",
+        "male"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__mindfront_male_trousers_2": {
+      "id": "mh_pants02_ccby__mindfront_male_trousers_2",
+      "label": "M_Trousers_02",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "male",
+        "trousers",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__mindfront_male_trousers_1": {
+      "id": "mh_pants02_ccby__mindfront_male_trousers_1",
+      "label": "M_Trousers_01",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "male",
+        "trousers",
+        "jeans",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_jeans_bootcut": {
+      "id": "mh_pants02_ccby__elvs_jeans_bootcut",
+      "label": "mens_elv_jeans1f",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "pant",
+        "menswear",
+        "fashion",
+        "traditional",
+        "jeans",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__punkduck_female_tight_jeans": {
+      "id": "mh_pants02_ccby__punkduck_female_tight_jeans",
+      "label": "Tightjeans",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "pants",
+        "jeans"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_disco_pants_single_ruffles": {
+      "id": "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
+      "label": "elvs_discopant_sruffle1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "festive",
+        "vintage",
+        "pants",
+        "disco"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_male_trouser_with_chain": {
+      "id": "mh_pants02_ccby__elvs_male_trouser_with_chain",
+      "label": "mens_trouser_f_elv_chr",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "pant",
+        "menswear",
+        "fashion",
+        "traditional",
+        "trouser",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_disco_pants_double_ruffles": {
+      "id": "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
+      "label": "elvs_disco_pant_druffles",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "festive",
+        "vintage",
+        "pants",
+        "disco"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__mindfront_female_trousers_1": {
+      "id": "mh_pants02_ccby__mindfront_female_trousers_1",
+      "label": "F_Trousers_01",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "trousers",
+        "jeans",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_gored_elephant_pants": {
+      "id": "mh_pants02_ccby__elvs_gored_elephant_pants",
+      "label": "elvs_gored_elephantpant1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "fantasy",
+        "festive",
+        "vintage",
+        "pants",
+        "disco"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_male_trouser": {
+      "id": "mh_pants02_ccby__elvs_male_trouser",
+      "label": "mens_trouser_f_elv1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "pant",
+        "menswear",
+        "fashion",
+        "traditional",
+        "trouser",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_jeans_straight_leg": {
+      "id": "mh_pants02_ccby__elvs_jeans_straight_leg",
+      "label": "mens_elv_jeans2slf",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "jeans",
+        "menswear",
+        "fashion",
+        "traditional",
+        "casual",
+        "pants"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_pants02_ccby__elvs_disco_pants_skinny": {
+      "id": "mh_pants02_ccby__elvs_disco_pants_skinny",
+      "label": "elvs_disco_pant1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants02_ccby.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "pants",
+        "disco"
+      ],
+      "pack": "pants02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__punkduck_female_half-boots": {
+      "id": "mh_shoes03_ccby__punkduck_female_half-boots",
+      "label": "HalfBoots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes",
+        "boots",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__punkduck_female_knee_boots": {
+      "id": "mh_shoes03_ccby__punkduck_female_knee_boots",
+      "label": "KneeBoots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes",
+        "boots",
+        "female",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__punkduck_winter_boots": {
+      "id": "mh_shoes03_ccby__punkduck_winter_boots",
+      "label": "WinterBoots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "female",
+        "boots",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__mindfront_shoes_biker_boots_female": {
+      "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
+      "label": "Shoes_Biker_Boots_female",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes",
+        "female",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__scailman_low-heeled_boots": {
+      "id": "mh_shoes03_ccby__scailman_low-heeled_boots",
+      "label": "BotasTaconBajo",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "scailman",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__maciekg_leather_boots": {
+      "id": "mh_shoes03_ccby__maciekg_leather_boots",
+      "label": "leather_boots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "MaciekG",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "boots",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__madmanny_tight_leather_boots": {
+      "id": "mh_shoes03_ccby__madmanny_tight_leather_boots",
+      "label": "exy_leather_boots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "madmanny",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__punkduck_riding_boots": {
+      "id": "mh_shoes03_ccby__punkduck_riding_boots",
+      "label": "riding_boots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "riding",
+        "female",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__elvs_wedge_tall_boots1": {
+      "id": "mh_shoes03_ccby__elvs_wedge_tall_boots1",
+      "label": "slouchbootwedgey_feather",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes",
+        "ladies",
+        "heels",
+        "laced",
+        "sockless",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__elvs_knee_high_heel_boots1": {
+      "id": "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
+      "label": "elvs_heelboot1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__mindfront_shoes_biker_boots_male": {
+      "id": "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+      "label": "Shoes_Biker_Boots_male",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "shoes",
+        "male",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes03_ccby__punkduck_medieval_boots": {
+      "id": "mh_shoes03_ccby__punkduck_medieval_boots",
+      "label": "MedievalBoots",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes03_ccby.zip",
+      "tags": [
+        "female",
+        "boots",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes03_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__punkduck_running_shoes_01": {
+      "id": "mh_shoes02_ccby__punkduck_running_shoes_01",
+      "label": "RunningShoes",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "sport",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_zombie_killer_sneakers": {
+      "id": "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+      "label": "elvs_zombiekiller_sneakers1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "sport",
+        "contemporary",
+        "shoes",
+        "shoe",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__punkduck_kill_bill_shoes": {
+      "id": "mh_shoes02_ccby__punkduck_kill_bill_shoes",
+      "label": "martialartshoes",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "sport",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_flatshoe_bow1": {
+      "id": "mh_shoes02_ccby__elvs_flatshoe_bow1",
+      "label": "elvs_basic_flatshoe2b",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoe",
+        "ladies ware",
+        "ladies shoes",
+        "fashion",
+        "flats",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__dressupdoc_domsjeans1": {
+      "id": "mh_shoes02_ccby__dressupdoc_domsjeans1",
+      "label": "DUDoc_domsjeans1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "DressUpDoc",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__mindfront_shoes_monk_strap_male": {
+      "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+      "label": "Shoes_Monk_Strap_male",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "male",
+        "elegant",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_flatshoe_gemmed1": {
+      "id": "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
+      "label": "elvs_basic_flatshoe3c",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoe",
+        "flats",
+        "ladies ware",
+        "dress shoe",
+        "no sock",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__mindfront_shoes_oxford_female": {
+      "id": "mh_shoes02_ccby__mindfront_shoes_oxford_female",
+      "label": "Shoes_Oxford_female",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "female",
+        "elegant",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_caesar_sandals1": {
+      "id": "mh_shoes02_ccby__elvs_caesar_sandals1",
+      "label": "elvs_mh_cesaersandalf1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "sandal",
+        "ladiesware",
+        "female",
+        "shoe",
+        "ceasar",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_basic_felt_elf_shoes": {
+      "id": "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
+      "label": "elvs_basic_elfshoe1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1": {
+      "id": "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
+      "label": "Harvey_ShoeSaddle1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "callharvey3d",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_male_flip_flop_sandals1": {
+      "id": "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+      "label": "maleflipflops1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "casual",
+        "shoe",
+        "male",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__dressupdoc_maryjane1": {
+      "id": "mh_shoes02_ccby__dressupdoc_maryjane1",
+      "label": "DUDoc_maryjane1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "DressUpDoc",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__mindfront_shoes_monk_strap_female": {
+      "id": "mh_shoes02_ccby__mindfront_shoes_monk_strap_female",
+      "label": "Shoes_Monk_Strap_female",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "female",
+        "elegant",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_flatshoe_pointy1": {
+      "id": "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+      "label": "elvs_basic_flatshoe2",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoe",
+        "flats",
+        "ladies ware",
+        "dress shoe",
+        "no sock",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__dressupdoc_balletflat1": {
+      "id": "mh_shoes02_ccby__dressupdoc_balletflat1",
+      "label": "DUDoc_balletFlat1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "DressUpDoc",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_flatshoe_buckle_1": {
+      "id": "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
+      "label": "elvs_basicflatshoes4",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoe",
+        "ladies ware",
+        "ladies shoes",
+        "fashion",
+        "flats",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__punkduck_comfortable_sneakers": {
+      "id": "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+      "label": "Sneakers",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "female",
+        "shoes",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__dressupdoc_sandals1": {
+      "id": "mh_shoes02_ccby__dressupdoc_sandals1",
+      "label": "DUDoc_sandals1",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "DressUpDoc",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__punkduck_cycling_shoes": {
+      "id": "mh_shoes02_ccby__punkduck_cycling_shoes",
+      "label": "CyclingShoes",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "sport",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__elvs_flatshoe_plain1": {
+      "id": "mh_shoes02_ccby__elvs_flatshoe_plain1",
+      "label": "elvs_basic_flatshoe2a",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoe",
+        "ladies ware",
+        "ladies shoes",
+        "fashion",
+        "flats",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__mindfront_shoes_oxford_male": {
+      "id": "mh_shoes02_ccby__mindfront_shoes_oxford_male",
+      "label": "Shoes_Oxford_male",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "male",
+        "elegant",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__culturalibre_sneakers": {
+      "id": "mh_shoes02_ccby__culturalibre_sneakers",
+      "label": "sneakers",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_shoes02_ccby__punkduck_tennis_shoes": {
+      "id": "mh_shoes02_ccby__punkduck_tennis_shoes",
+      "label": "TennisShoes",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shoes02_ccby.zip",
+      "tags": [
+        "shoes",
+        "sport",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes02_ccby.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless": {
+      "id": "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless",
+      "label": "vintagesuit1_50selv",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "one piece",
+        "vintage",
+        "ladies wear",
+        "summer",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__punkduck_one_piece_bikini01": {
+      "id": "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
+      "label": "OnePieceBikini01",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__punkduck_halterneck_romper": {
+      "id": "mh_underwear03_cc-by__punkduck_halterneck_romper",
+      "label": "Romper",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "female",
+        "dress",
+        "gown/robe"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit": {
+      "id": "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
+      "label": "StraplessBodySuit",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1": {
+      "id": "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
+      "label": "elv_bandeu_gathered_top1",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "bandeau",
+        "swimwear",
+        "female",
+        "ladiesware",
+        "gathered",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__elvs_swimwear_micro_shorts": {
+      "id": "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
+      "label": "elv_microshorts1",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "bandeau",
+        "swimwear",
+        "female",
+        "ladiesware",
+        "gathered",
+        "pants"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__elvs_camisole1": {
+      "id": "mh_underwear03_cc-by__elvs_camisole1",
+      "label": "minibowcamisole",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "camisole",
+        "lingerie",
+        "female",
+        "ladiesware",
+        "scalloped",
+        "underwear"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__joepal_plain_bra": {
+      "id": "mh_underwear03_cc-by__joepal_plain_bra",
+      "label": "plain_bra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Joel Palmius",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01": {
+      "id": "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
+      "label": "F_One-piece_Swimsuit_01",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "female",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__punkduck_shapewear": {
+      "id": "mh_underwear03_cc-by__punkduck_shapewear",
+      "label": "shapewear",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear03_cc-by__elvs_all_tied_up_bikini": {
+      "id": "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
+      "label": "all_tiedup_kini1",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear03_cc-by.zip",
+      "tags": [
+        "bathing suit",
+        "bikini",
+        "ladies wear",
+        "summer",
+        "unsorted/other"
+      ],
+      "pack": "underwear03_cc-by.vwpack.json.gz"
+    },
+    "mh_underwear04_cc0__joepal_crude_high_socks": {
+      "id": "mh_underwear04_cc0__joepal_crude_high_socks",
+      "label": "CrudeHighSocks",
+      "category": "socks",
+      "license": "CC0",
+      "author": "Joel Palmius",
+      "sourcePack": "underwear04_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "underwear04_cc0.vwpack.json.gz"
+    },
+    "mh_underwear04_cc0__toigo_leg_warmer_socks": {
+      "id": "mh_underwear04_cc0__toigo_leg_warmer_socks",
+      "label": "Leg_Warmer_Socks",
+      "category": "socks",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "underwear04_cc0.zip",
+      "tags": [
+        "socks",
+        "shoes/boots/socks"
+      ],
+      "pack": "underwear04_cc0.vwpack.json.gz"
+    },
+    "mh_underwear04_cc0__toigo_lace_frill_socks": {
+      "id": "mh_underwear04_cc0__toigo_lace_frill_socks",
+      "label": "SocksLaceFrill",
+      "category": "socks",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "underwear04_cc0.zip",
+      "tags": [
+        "socks",
+        "shoes/boots/socks"
+      ],
+      "pack": "underwear04_cc0.vwpack.json.gz"
+    },
+    "mh_underwear04_cc0__joepal_crude_low_socks": {
+      "id": "mh_underwear04_cc0__joepal_crude_low_socks",
+      "label": "CrudeLowSocks",
+      "category": "socks",
+      "license": "CC0",
+      "author": "Joel Palmius",
+      "sourcePack": "underwear04_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "underwear04_cc0.vwpack.json.gz"
+    },
+    "mh_pants01_cc0__toigo_wool_pants": {
+      "id": "mh_pants01_cc0__toigo_wool_pants",
+      "label": "Pants_Wool",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "pants01_cc0.zip",
+      "tags": [
+        "pants",
+        "male"
+      ],
+      "pack": "pants01_cc0.vwpack.json.gz"
+    },
+    "mh_pants01_cc0__toigo_harem_pants": {
+      "id": "mh_pants01_cc0__toigo_harem_pants",
+      "label": "Pants_Harem",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "pants01_cc0.zip",
+      "tags": [
+        "pants"
+      ],
+      "pack": "pants01_cc0.vwpack.json.gz"
+    },
+    "mh_pants01_cc0__cortu_cargo_pants": {
+      "id": "mh_pants01_cc0__cortu_cargo_pants",
+      "label": "cargo_pants",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "Cortu",
+      "sourcePack": "pants01_cc0.zip",
+      "tags": [
+        "pants"
+      ],
+      "pack": "pants01_cc0.vwpack.json.gz"
+    },
+    "mh_pants01_cc0__cortu_jeans_shorts": {
+      "id": "mh_pants01_cc0__cortu_jeans_shorts",
+      "label": "jean_shorts",
+      "category": "bottoms",
+      "license": "CC0",
+      "author": "Cortu",
+      "sourcePack": "pants01_cc0.zip",
+      "tags": [
+        "pants"
+      ],
+      "pack": "pants01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_bikini02_slip": {
+      "id": "mh_underwear02_cc0__punkduck_bikini02_slip",
+      "label": "bikinislip2",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_babydoll": {
+      "id": "mh_underwear02_cc0__punkduck_babydoll",
+      "label": "Babydoll",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_brazilian_bikini_bra": {
+      "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_bra",
+      "label": "BrazBikiniBra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_brazilian_bikini_slip": {
+      "id": "mh_underwear02_cc0__punkduck_brazilian_bikini_slip",
+      "label": "BrazBikiniSlip",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_string_5": {
+      "id": "mh_underwear02_cc0__punkduck_string_5",
+      "label": "String5",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_sport_briefs": {
+      "id": "mh_underwear02_cc0__punkduck_sport_briefs",
+      "label": "sport-briefs01",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "sport",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_bandeau_bra": {
+      "id": "mh_underwear02_cc0__punkduck_bandeau_bra",
+      "label": "bandeau_bra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_bandeau_bikini_bra": {
+      "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_bra",
+      "label": "bandbikinibra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_bandeau_bikini_slip": {
+      "id": "mh_underwear02_cc0__punkduck_bandeau_bikini_slip",
+      "label": "bandbikinislip",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__elvs_bow_bottom_panty": {
+      "id": "mh_underwear02_cc0__elvs_bow_bottom_panty",
+      "label": "mh_bowginch_elv1",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "underwear",
+        "fashion",
+        "bow",
+        "ladies",
+        "lingerie"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs": {
+      "id": "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
+      "label": "String3",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__elvs_bow_front_bra": {
+      "id": "mh_underwear02_cc0__elvs_bow_front_bra",
+      "label": "mhbow_braelv1",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "bra",
+        "fashion",
+        "bow",
+        "ladies",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_transparent_bra": {
+      "id": "mh_underwear02_cc0__punkduck_transparent_bra",
+      "label": "transparent_bra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_frill_bikini_bottom": {
+      "id": "mh_underwear02_cc0__punkduck_frill_bikini_bottom",
+      "label": "frill-bikini-bottom",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__elvs_lace_panty": {
+      "id": "mh_underwear02_cc0__elvs_lace_panty",
+      "label": "scallopundies",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "panty",
+        "lingerie",
+        "female",
+        "ladiesware",
+        "scalloped",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_string_2": {
+      "id": "mh_underwear02_cc0__punkduck_string_2",
+      "label": "String2",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt": {
+      "id": "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
+      "label": "suspender-belt",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_french_lingerie_bra": {
+      "id": "mh_underwear02_cc0__punkduck_french_lingerie_bra",
+      "label": "frenchbra",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_string_4": {
+      "id": "mh_underwear02_cc0__punkduck_string_4",
+      "label": "String4",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_french_lingerie_thong": {
+      "id": "mh_underwear02_cc0__punkduck_french_lingerie_thong",
+      "label": "fr_thong",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_frill_bikini_top": {
+      "id": "mh_underwear02_cc0__punkduck_frill_bikini_top",
+      "label": "frill-bikini-top",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__jaldmic_stockings": {
+      "id": "mh_underwear02_cc0__jaldmic_stockings",
+      "label": "Stockings",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "JALdMIC",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "stockings",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_french_lingerie_stockings": {
+      "id": "mh_underwear02_cc0__punkduck_french_lingerie_stockings",
+      "label": "fr_stockings",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_bikini02_bra": {
+      "id": "mh_underwear02_cc0__punkduck_bikini02_bra",
+      "label": "bikinibra2",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "bikini",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie": {
+      "id": "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie",
+      "label": "Teddy",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__elvs_crude_bootyshorts": {
+      "id": "mh_underwear02_cc0__elvs_crude_bootyshorts",
+      "label": "elvs_bootyshorts2a",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "shorts",
+        "pant",
+        "ladies ware",
+        "bootyshort",
+        "fashion",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__mindfront_bikini_01": {
+      "id": "mh_underwear02_cc0__mindfront_bikini_01",
+      "label": "F_Bikini_01",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_underwear02_cc0__punkduck_sport_bra": {
+      "id": "mh_underwear02_cc0__punkduck_sport_bra",
+      "label": "sport-bra01",
+      "category": "baseLayer",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "underwear02_cc0.zip",
+      "tags": [
+        "female",
+        "sport",
+        "underwear"
+      ],
+      "pack": "underwear02_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__grinsegold_female_pirate_boots": {
+      "id": "mh_shoes01_cc0__grinsegold_female_pirate_boots",
+      "label": "LeatherBoots_2cm",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "grinsegold",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_heroine_boots_4": {
+      "id": "mh_shoes01_cc0__culturalibre_heroine_boots_4",
+      "label": "heroine_boots_4",
+      "category": "shoes",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_hero_boots_4": {
+      "id": "mh_shoes01_cc0__culturalibre_hero_boots_4",
+      "label": "hero_boots_4",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_hero_boots_2": {
+      "id": "mh_shoes01_cc0__culturalibre_hero_boots_2",
+      "label": "hero_boots_2",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_mj_cloth_shoes": {
+      "id": "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+      "label": "MJ-Shoes",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_heroine_boots_3": {
+      "id": "mh_shoes01_cc0__culturalibre_heroine_boots_3",
+      "label": "heroine_boots_3",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_ballet_flats": {
+      "id": "mh_shoes01_cc0__toigo_ballet_flats",
+      "label": "Flats_ballet",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_hero_boots_3": {
+      "id": "mh_shoes01_cc0__culturalibre_hero_boots_3",
+      "label": "hero_boots_3",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__cortu_floppy_overknee_shoes": {
+      "id": "mh_shoes01_cc0__cortu_floppy_overknee_shoes",
+      "label": "floppy_overknee_shoe",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "Cortu",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_male_boots": {
+      "id": "mh_shoes01_cc0__culturalibre_male_boots",
+      "label": "male_boots",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_ballet_flats_with_bows": {
+      "id": "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
+      "label": "Flats_ballet_bow",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__scailman_semitransparent_water_boots": {
+      "id": "mh_shoes01_cc0__scailman_semitransparent_water_boots",
+      "label": "Botas_102",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "scailman",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_hero_boots_5": {
+      "id": "mh_shoes01_cc0__culturalibre_hero_boots_5",
+      "label": "hero_boots_5",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_ankle_boots_male": {
+      "id": "mh_shoes01_cc0__toigo_ankle_boots_male",
+      "label": "Boots_Ankle_Male",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_ballet_flats_with_flowers": {
+      "id": "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
+      "label": "Flats_ballet_flower",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__cortu_t-bar": {
+      "id": "mh_shoes01_cc0__cortu_t-bar",
+      "label": "tbar",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "Cortu",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__scailman_gogo_platform_boots": {
+      "id": "mh_shoes01_cc0__scailman_gogo_platform_boots",
+      "label": "gogo_boots",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "scailman",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_ankle_boots_female": {
+      "id": "mh_shoes01_cc0__toigo_ankle_boots_female",
+      "label": "Boots_Ankle",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_heroine_boots_1": {
+      "id": "mh_shoes01_cc0__culturalibre_heroine_boots_1",
+      "label": "heroine_boots_1",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_heroine_boots_2": {
+      "id": "mh_shoes01_cc0__culturalibre_heroine_boots_2",
+      "label": "heroine_boots_2",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_stiletto_booties": {
+      "id": "mh_shoes01_cc0__toigo_stiletto_booties",
+      "label": "Booties_stiletto",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__culturalibre_hero_boots_1": {
+      "id": "mh_shoes01_cc0__culturalibre_hero_boots_1",
+      "label": "hero_boots_1",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_shoes01_cc0__toigo_flats": {
+      "id": "mh_shoes01_cc0__toigo_flats",
+      "label": "Flats",
+      "category": "shoes",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shoes01_cc0.zip",
+      "tags": [
+        "shoes",
+        "shoes/boots/socks"
+      ],
+      "pack": "shoes01_cc0.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__mindfront_male_swimming_trunks_01": {
+      "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+      "label": "M_Swimming_trunks_01",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "male",
+        "swimwear",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__elvs_male_trouser_short_1": {
+      "id": "mh_pants03_ccby__elvs_male_trouser_short_1",
+      "label": "mens_trouser_short_elv1crf",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "shorts",
+        "menswear",
+        "fashion",
+        "traditional",
+        "trouser",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__punkduck_female_short_jeans": {
+      "id": "mh_pants03_ccby__punkduck_female_short_jeans",
+      "label": "ShortJeans",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "female",
+        "jeans",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__mindfront_male_swimming_trunks_03": {
+      "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
+      "label": "M_Swimming_trunks_03",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "male",
+        "swimwear",
+        "unsorted/other"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__elvs_retro_girly_shorts1": {
+      "id": "mh_pants03_ccby__elvs_retro_girly_shorts1",
+      "label": "retro_girlyshort1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "shorts",
+        "ribbon",
+        "vintage",
+        "retro",
+        "ladies ware",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__elvs_male_trouser_short_2": {
+      "id": "mh_pants03_ccby__elvs_male_trouser_short_2",
+      "label": "mens_trouser_short_nc_elvcrf",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "shorts",
+        "menswear",
+        "fashion",
+        "traditional",
+        "trouser",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__mindfront_male_swimming_trunks_02": {
+      "id": "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
+      "label": "M_Swimming_trunks_02",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "male",
+        "swimwear",
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_pants03_ccby__elvs_male_swim_shorts1": {
+      "id": "mh_pants03_ccby__elvs_male_swim_shorts1",
+      "label": "elvs_male_shorts1",
+      "category": "bottoms",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "pants03_ccby.zip",
+      "tags": [
+        "pants"
+      ],
+      "pack": "pants03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_tube_top": {
+      "id": "mh_shirts03_ccby__punkduck_tube_top",
+      "label": "TubeTop",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "shirt",
+        "top",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top": {
+      "id": "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top",
+      "label": "spaghetti-top",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "shirt",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_disco_top2": {
+      "id": "mh_shirts03_ccby__elvs_disco_top2",
+      "label": "elvs_discotop2",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "shirt",
+        "disco",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_sleeveless_crop_top": {
+      "id": "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+      "label": "SleevelessCropTop",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "top",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_retro_top": {
+      "id": "mh_shirts03_ccby__punkduck_retro_top",
+      "label": "VintageTop",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "top",
+        "vintage",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_high_neck_crop_top": {
+      "id": "mh_shirts03_ccby__punkduck_high_neck_crop_top",
+      "label": "HighNeckCropTop",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "top",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_ladies_tank1": {
+      "id": "mh_shirts03_ccby__elvs_ladies_tank1",
+      "label": "ladiestank1elv",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_male_muscle_shirt1": {
+      "id": "mh_shirts03_ccby__elvs_male_muscle_shirt1",
+      "label": "mens_tanks_elvmuscle1f",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt",
+        "menswear",
+        "fashion",
+        "traditional",
+        "sleeveless",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__mindfront_tank_top_01": {
+      "id": "mh_shirts03_ccby__mindfront_tank_top_01",
+      "label": "Tank_Top_01",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "casual",
+        "sport",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_lara_tank1": {
+      "id": "mh_shirts03_ccby__elvs_lara_tank1",
+      "label": "elvs_lara_top1",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "sport",
+        "contemporary",
+        "shirt",
+        "sleeveless",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_male_athletic_tank1": {
+      "id": "mh_shirts03_ccby__elvs_male_athletic_tank1",
+      "label": "m_wifebeater_elv1",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_disco_top_1_butterfly": {
+      "id": "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
+      "label": "elvs_butterflydiscotop1",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "formal",
+        "festive",
+        "vintage",
+        "shirt",
+        "disco",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_male_logo_tshirt1": {
+      "id": "mh_shirts03_ccby__elvs_male_logo_tshirt1",
+      "label": "mens_teeshirt1j",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_v_neck_top": {
+      "id": "mh_shirts03_ccby__punkduck_v_neck_top",
+      "label": "VNeckTop",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "shirt",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash": {
+      "id": "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
+      "label": "Asymmetric_Tunic_and_Sash",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "DredNicolson",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "asymmetric",
+        "female",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__punkduck_sleeveless_shirt": {
+      "id": "mh_shirts03_ccby__punkduck_sleeveless_shirt",
+      "label": "Sleeveless",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "female",
+        "shirt",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_male_tankshirt1": {
+      "id": "mh_shirts03_ccby__elvs_male_tankshirt1",
+      "label": "mens_tanks_elv1f",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt",
+        "menswear",
+        "fashion",
+        "traditional",
+        "sleeveless",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1": {
+      "id": "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1",
+      "label": "ruffle_sleeve_peasantblouse",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_shirts03_ccby__drednicolson_short-tail_camo_tee": {
+      "id": "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
+      "label": "short_tail_camo_tee",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "DredNicolson",
+      "sourcePack": "shirts03_ccby.zip",
+      "tags": [
+        "casual",
+        "female",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts03_ccby.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__wolgade_female_panties_01": {
+      "id": "mh_underwear01_cc0__wolgade_female_panties_01",
+      "label": "female_panties_01",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "wolgade",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "female",
+        "underwear",
+        "panties"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large",
+      "label": "armsleeve_white_l",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
+      "label": "armsleeve_fishnet_large",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__kwnet_at_pantyhose01": {
+      "id": "mh_underwear01_cc0__kwnet_at_pantyhose01",
+      "label": "pantyhose01",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "kwnet_at",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "lingerie",
+        "female",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__punkduck_strappy_lace_thong": {
+      "id": "mh_underwear01_cc0__punkduck_strappy_lace_thong",
+      "label": "StrappyLaceThong",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "punkduck",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "female",
+        "lingerie",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__marco_105_stocking01": {
+      "id": "mh_underwear01_cc0__marco_105_stocking01",
+      "label": "Stocking01",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "Marco_105",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "fgh_fashion",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__marco_105_stocking02": {
+      "id": "mh_underwear01_cc0__marco_105_stocking02",
+      "label": "Stocking02",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "Marco_105",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "fgh_fashion",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium",
+      "label": "armsleeve_fishnet_medium",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
+      "label": "stockings_white_m",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium",
+      "label": "armsleeve_white_m",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
+      "label": "stockings_white_l",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
+      "label": "stockings_fishnet_small",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__marco_105_armsleeve02": {
+      "id": "mh_underwear01_cc0__marco_105_armsleeve02",
+      "label": "Armsleeve02",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "Marco_105",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "fgh_fashion",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
+      "label": "stockings_fishnet_large",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
+      "label": "stockings_fishnet_medium",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
+      "label": "armsleeve_white_s",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__wolgade_female_top_01": {
+      "id": "mh_underwear01_cc0__wolgade_female_top_01",
+      "label": "female_top_01",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "wolgade",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "female",
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small": {
+      "id": "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small",
+      "label": "armsleeve_fishnet_small",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small": {
+      "id": "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
+      "label": "stockings_white_s",
+      "category": "baseLayer",
+      "license": "CC0",
+      "author": "V0rT3X",
+      "sourcePack": "underwear01_cc0.zip",
+      "tags": [
+        "underwear"
+      ],
+      "pack": "underwear01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1": {
+      "id": "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+      "label": "mens_shirt_untuck_elvbhp1f",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "shirt",
+        "menswear",
+        "fashion",
+        "traditional",
+        "untucked",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__punkduck_deathnote_t-shirt": {
+      "id": "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+      "label": "Deathnote",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "shirt",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top": {
+      "id": "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
+      "label": "offshoulder_top",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "female",
+        "shirt",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__mindfront_knitted_sweater_02": {
+      "id": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+      "label": "Knitted_Sweater_02",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "sweater",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__elvs_hooded_sweat_jacket1": {
+      "id": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "label": "ladieshoodiedown1",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__mindfront_cardigan_long_open_front": {
+      "id": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "label": "F_Cardigan_Long_Open_Front",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "female",
+        "sweater",
+        "cardigan",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__janexx_old_female_sweater": {
+      "id": "mh_shirts02_ccby__janexx_old_female_sweater",
+      "label": "Worn out sweater",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "janexx",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "leisure",
+        "contemporary",
+        "shirt",
+        "swater",
+        "pullover",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__elvs_male_boho_top1": {
+      "id": "mh_shirts02_ccby__elvs_male_boho_top1",
+      "label": "mens_boho_top1elv",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "shirt",
+        "menswear",
+        "fashion",
+        "bohemian",
+        "loose fit",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1": {
+      "id": "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+      "label": "mens_shirt_tie_tuck_elv1f",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "shirt",
+        "menswear",
+        "fashion",
+        "traditional",
+        "tie",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__ews_striped_shirt": {
+      "id": "mh_shirts02_ccby__ews_striped_shirt",
+      "label": "Striped_Shirt",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "EWS",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "striped",
+        "shirt",
+        "long sleeve",
+        "crop top",
+        "female",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__mindfront_lusekofta": {
+      "id": "mh_shirts02_ccby__mindfront_lusekofta",
+      "label": "F_Lusekofta",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "female",
+        "sweater",
+        "cardigan",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__mindfront_knitted_sweater_01": {
+      "id": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+      "label": "Knitted_Sweater_01",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "Mindfront",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "sweater",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts02_ccby__punkduck_lace_up_blouse": {
+      "id": "mh_shirts02_ccby__punkduck_lace_up_blouse",
+      "label": "lace_up_blouse",
+      "category": "top",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "shirts02_ccby.zip",
+      "tags": [
+        "costume",
+        "female",
+        "blouse",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts02_ccby.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_camisole_top": {
+      "id": "mh_shirts01_cc0__toigo_camisole_top",
+      "label": "Camisole_Top",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_basic_tucked_t-shirt": {
+      "id": "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+      "label": "T-shirt_basic_tucked",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "t-shirt",
+        "shirt",
+        "top",
+        "knit",
+        "casual",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__namuhekam_male_polo_shirt": {
+      "id": "mh_shirts01_cc0__namuhekam_male_polo_shirt",
+      "label": "Polo t-shirt",
+      "category": "top",
+      "license": "CC0",
+      "author": "namuhekam",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "male",
+        "casual",
+        "profession",
+        "contemporary",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__elvs_crude_t-shirt_male": {
+      "id": "mh_shirts01_cc0__elvs_crude_t-shirt_male",
+      "label": "crude_male_shirt",
+      "category": "top",
+      "license": "CC0",
+      "author": "Elvaerwyn",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_fisherman_sweater": {
+      "id": "mh_shirts01_cc0__toigo_fisherman_sweater",
+      "label": "Sweater_Fisherman",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "sweater",
+        "shirt",
+        "top",
+        "knit",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_keyhole_tank_top": {
+      "id": "mh_shirts01_cc0__toigo_keyhole_tank_top",
+      "label": "Tank_Keyhole_Neck",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_turtleneck_halter_top": {
+      "id": "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+      "label": "Turtleneck_Halter",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors": {
+      "id": "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
+      "label": "tube_top",
+      "category": "top",
+      "license": "CC0",
+      "author": "skalldyrssuppe",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "top",
+        "egen",
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__joepal_crude_t-shirt_female": {
+      "id": "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+      "label": "CrudeFemaleTshirt",
+      "category": "top",
+      "license": "CC0",
+      "author": "Joel Palmius",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
+    },
+    "mh_shirts01_cc0__toigo_bodice-style_top": {
+      "id": "mh_shirts01_cc0__toigo_bodice-style_top",
+      "label": "Bodice_style_top",
+      "category": "top",
+      "license": "CC0",
+      "author": "MargaretToigo",
+      "sourcePack": "shirts01_cc0.zip",
+      "tags": [
+        "shirt/t-shirt/sweater"
+      ],
+      "pack": "shirts01_cc0.vwpack.json.gz"
     }
   },
   "categories": {
     "hair": [
-      "mh_hair02_ccby__elvs_short_side_do",
-      "mh_hair02_ccby__elvs_daisy_hair",
-      "mh_hair02_ccby__elvs_lady_hippy_hair",
-      "mh_hair02_ccby__elvs_braid_bun",
-      "mh_hair02_ccby__elvs_maxwell_hair",
-      "mh_hair02_ccby__elvs_island_princess_hair",
-      "mh_hair02_ccby__elvs_short_daisy_hair",
       "mh_hair02_ccby__elvs_50s_updo",
       "mh_hair02_ccby__elvs_adrienne_hair",
-      "mh_hair02_ccby__elvs_lara_hair",
-      "mh_hair02_ccby__elvs_inverted_curly_bob",
-      "mh_hair02_ccby__elvs_keylth_hair",
       "mh_hair02_ccby__elvs_ashley_may_hair",
+      "mh_hair02_ccby__elvs_braid_bun",
+      "mh_hair02_ccby__elvs_braided_rows",
+      "mh_hair02_ccby__elvs_daisy_hair",
+      "mh_hair02_ccby__elvs_grump_hair",
+      "mh_hair02_ccby__elvs_hazel_hair",
+      "mh_hair02_ccby__elvs_inverted_curly_bob",
+      "mh_hair02_ccby__elvs_island_princess_hair",
+      "mh_hair02_ccby__elvs_katherine_hair",
+      "mh_hair02_ccby__elvs_keylth_hair",
+      "mh_hair02_ccby__elvs_lady_hippy_hair",
+      "mh_hair02_ccby__elvs_lara_hair",
+      "mh_hair02_ccby__elvs_maxwell_hair",
       "mh_hair02_ccby__elvs_micky_afro",
+      "mh_hair02_ccby__elvs_short_daisy_hair",
+      "mh_hair02_ccby__elvs_short_side_do",
+      "mh_hair02_ccby__elvs_that_80s_babe_hair",
       "mh_hair02_ccby__elvs_wavy_bob",
       "mh_hair02_ccby__elvs_witchy_lil_bob",
-      "mh_hair02_ccby__elvs_hazel_hair",
-      "mh_hair02_ccby__elvs_grump_hair",
-      "mh_hair02_ccby__elvs_that_80s_babe_hair",
-      "mh_hair02_ccby__elvs_katherine_hair",
-      "mh_hair02_ccby__elvs_braided_rows",
-      "mh_hair03_ccby__culturalibre_hair_18",
-      "mh_hair03_ccby__punkduck_alpha7_curly",
-      "mh_hair03_ccby__culturalibre_hair_12",
-      "mh_hair03_ccby__o4saken_curly01",
-      "mh_hair03_ccby__grinsegold_wig_bow_tie",
-      "mh_hair03_ccby__punkduck_alpha7_curly2",
       "mh_hair03_ccby__culturalibre_hair_11",
+      "mh_hair03_ccby__culturalibre_hair_12",
       "mh_hair03_ccby__culturalibre_hair_13",
-      "mh_hair03_ccby__punkduck_alpha7_long",
-      "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
-      "mh_hair03_ccby__punkduck_alpha7_long2",
+      "mh_hair03_ccby__culturalibre_hair_14",
       "mh_hair03_ccby__culturalibre_hair_17",
+      "mh_hair03_ccby__culturalibre_hair_18",
+      "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
       "mh_hair03_ccby__o4saken_chinesebob01",
-      "mh_hair03_ccby__culturalibre_hair_14"
+      "mh_hair03_ccby__o4saken_curly01",
+      "mh_hair03_ccby__punkduck_alpha7_curly",
+      "mh_hair03_ccby__punkduck_alpha7_curly2",
+      "mh_hair03_ccby__punkduck_alpha7_long",
+      "mh_hair03_ccby__punkduck_alpha7_long2"
     ],
     "facialHair": [
-      "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
-      "mh_bodyparts05_cc0__wdg_scruffy_beard",
-      "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
-      "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
       "mh_bodyparts05_cc0__culturalibre_faun_beard",
+      "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+      "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
       "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
-      "mh_bodyparts06_cc-by__grinsegold_moustache",
       "mh_bodyparts06_cc-by__grinsegold_full_beard",
-      "mh_bodyparts06_cc-by__culturalibre_dal_moustache"
+      "mh_bodyparts06_cc-by__grinsegold_moustache"
     ],
     "brows": [
-      "mh_eyebrows01_cc0__mindfront_eyebrows_11",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_03",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_14",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_09",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_02",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_10",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_04",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_07",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_06",
       "mh_eyebrows01_cc0__mindfront_eyebrows_01",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_12",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_02",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_03",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_04",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_05",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_06",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_07",
       "mh_eyebrows01_cc0__mindfront_eyebrows_08",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_09",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_10",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_11",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_12",
       "mh_eyebrows01_cc0__mindfront_eyebrows_13",
-      "mh_eyebrows01_cc0__mindfront_eyebrows_05"
+      "mh_eyebrows01_cc0__mindfront_eyebrows_14"
     ],
     "eyelashes": [
+      "mh_eyelashes01_cc0__mindfront_eyelashes_01",
       "mh_eyelashes01_cc0__mindfront_eyelashes_02",
       "mh_eyelashes01_cc0__mindfront_eyelashes_03",
-      "mh_eyelashes01_cc0__mindfront_eyelashes_01",
       "mh_eyelashes01_cc0__mindfront_eyelashes_04",
       "mh_eyelashes01_cc0__mindfront_eyelashes_05"
+    ],
+    "bottoms": [
+      "mh_pants01_cc0__cortu_cargo_pants",
+      "mh_pants01_cc0__cortu_jeans_shorts",
+      "mh_pants01_cc0__toigo_harem_pants",
+      "mh_pants01_cc0__toigo_wool_pants",
+      "mh_pants02_ccby__elvs_disco_pants_double_ruffles",
+      "mh_pants02_ccby__elvs_disco_pants_single_ruffles",
+      "mh_pants02_ccby__elvs_disco_pants_skinny",
+      "mh_pants02_ccby__elvs_gored_elephant_pants",
+      "mh_pants02_ccby__elvs_jeans_bootcut",
+      "mh_pants02_ccby__elvs_jeans_straight_leg",
+      "mh_pants02_ccby__elvs_male_trouser",
+      "mh_pants02_ccby__elvs_male_trouser_with_chain",
+      "mh_pants02_ccby__mindfront_female_trousers_1",
+      "mh_pants02_ccby__mindfront_male_trousers_1",
+      "mh_pants02_ccby__mindfront_male_trousers_2",
+      "mh_pants02_ccby__punkduck_female_tight_jeans",
+      "mh_pants02_ccby__punkduck_male_classic_jeans",
+      "mh_pants03_ccby__elvs_male_swim_shorts1",
+      "mh_pants03_ccby__elvs_male_trouser_short_1",
+      "mh_pants03_ccby__elvs_male_trouser_short_2",
+      "mh_pants03_ccby__elvs_retro_girly_shorts1",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_02",
+      "mh_pants03_ccby__mindfront_male_swimming_trunks_03",
+      "mh_pants03_ccby__punkduck_female_short_jeans"
+    ],
+    "shoes": [
+      "mh_shoes01_cc0__cortu_floppy_overknee_shoes",
+      "mh_shoes01_cc0__cortu_t-bar",
+      "mh_shoes01_cc0__culturalibre_hero_boots_1",
+      "mh_shoes01_cc0__culturalibre_hero_boots_2",
+      "mh_shoes01_cc0__culturalibre_hero_boots_3",
+      "mh_shoes01_cc0__culturalibre_hero_boots_4",
+      "mh_shoes01_cc0__culturalibre_hero_boots_5",
+      "mh_shoes01_cc0__culturalibre_heroine_boots_1",
+      "mh_shoes01_cc0__culturalibre_heroine_boots_2",
+      "mh_shoes01_cc0__culturalibre_heroine_boots_3",
+      "mh_shoes01_cc0__culturalibre_heroine_boots_4",
+      "mh_shoes01_cc0__culturalibre_male_boots",
+      "mh_shoes01_cc0__grinsegold_female_pirate_boots",
+      "mh_shoes01_cc0__scailman_gogo_platform_boots",
+      "mh_shoes01_cc0__scailman_semitransparent_water_boots",
+      "mh_shoes01_cc0__toigo_ankle_boots_female",
+      "mh_shoes01_cc0__toigo_ankle_boots_male",
+      "mh_shoes01_cc0__toigo_ballet_flats",
+      "mh_shoes01_cc0__toigo_ballet_flats_with_bows",
+      "mh_shoes01_cc0__toigo_ballet_flats_with_flowers",
+      "mh_shoes01_cc0__toigo_flats",
+      "mh_shoes01_cc0__toigo_mj_cloth_shoes",
+      "mh_shoes01_cc0__toigo_stiletto_booties",
+      "mh_shoes02_ccby__callharvey3d_harvey_saddleshoes1",
+      "mh_shoes02_ccby__culturalibre_sneakers",
+      "mh_shoes02_ccby__dressupdoc_balletflat1",
+      "mh_shoes02_ccby__dressupdoc_domsjeans1",
+      "mh_shoes02_ccby__dressupdoc_maryjane1",
+      "mh_shoes02_ccby__dressupdoc_sandals1",
+      "mh_shoes02_ccby__elvs_basic_felt_elf_shoes",
+      "mh_shoes02_ccby__elvs_caesar_sandals1",
+      "mh_shoes02_ccby__elvs_flatshoe_bow1",
+      "mh_shoes02_ccby__elvs_flatshoe_buckle_1",
+      "mh_shoes02_ccby__elvs_flatshoe_gemmed1",
+      "mh_shoes02_ccby__elvs_flatshoe_plain1",
+      "mh_shoes02_ccby__elvs_flatshoe_pointy1",
+      "mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+      "mh_shoes02_ccby__elvs_zombie_killer_sneakers",
+      "mh_shoes02_ccby__mindfront_shoes_monk_strap_female",
+      "mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+      "mh_shoes02_ccby__mindfront_shoes_oxford_female",
+      "mh_shoes02_ccby__mindfront_shoes_oxford_male",
+      "mh_shoes02_ccby__punkduck_comfortable_sneakers",
+      "mh_shoes02_ccby__punkduck_cycling_shoes",
+      "mh_shoes02_ccby__punkduck_kill_bill_shoes",
+      "mh_shoes02_ccby__punkduck_running_shoes_01",
+      "mh_shoes02_ccby__punkduck_tennis_shoes",
+      "mh_shoes03_ccby__elvs_knee_high_heel_boots1",
+      "mh_shoes03_ccby__elvs_wedge_tall_boots1",
+      "mh_shoes03_ccby__maciekg_leather_boots",
+      "mh_shoes03_ccby__madmanny_tight_leather_boots",
+      "mh_shoes03_ccby__mindfront_shoes_biker_boots_female",
+      "mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+      "mh_shoes03_ccby__punkduck_female_half-boots",
+      "mh_shoes03_ccby__punkduck_female_knee_boots",
+      "mh_shoes03_ccby__punkduck_medieval_boots",
+      "mh_shoes03_ccby__punkduck_riding_boots",
+      "mh_shoes03_ccby__punkduck_winter_boots",
+      "mh_shoes03_ccby__scailman_low-heeled_boots"
+    ],
+    "baseLayer": [
+      "mh_underwear01_cc0__kwnet_at_pantyhose01",
+      "mh_underwear01_cc0__marco_105_armsleeve02",
+      "mh_underwear01_cc0__marco_105_stocking01",
+      "mh_underwear01_cc0__marco_105_stocking02",
+      "mh_underwear01_cc0__punkduck_strappy_lace_thong",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_black_fishnet_small",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_armsleeves_white_fishnet_small",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_stockings_black_fishnet_small",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_large",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_medium",
+      "mh_underwear01_cc0__v0rt3x_stockings_white_fishnet_small",
+      "mh_underwear01_cc0__wolgade_female_panties_01",
+      "mh_underwear01_cc0__wolgade_female_top_01",
+      "mh_underwear02_cc0__elvs_bow_bottom_panty",
+      "mh_underwear02_cc0__elvs_bow_front_bra",
+      "mh_underwear02_cc0__elvs_crude_bootyshorts",
+      "mh_underwear02_cc0__elvs_lace_panty",
+      "mh_underwear02_cc0__jaldmic_stockings",
+      "mh_underwear02_cc0__mindfront_bikini_01",
+      "mh_underwear02_cc0__punkduck_babydoll",
+      "mh_underwear02_cc0__punkduck_bandeau_bikini_bra",
+      "mh_underwear02_cc0__punkduck_bandeau_bikini_slip",
+      "mh_underwear02_cc0__punkduck_bandeau_bra",
+      "mh_underwear02_cc0__punkduck_bikini02_bra",
+      "mh_underwear02_cc0__punkduck_bikini02_slip",
+      "mh_underwear02_cc0__punkduck_brazilian_bikini_bra",
+      "mh_underwear02_cc0__punkduck_brazilian_bikini_slip",
+      "mh_underwear02_cc0__punkduck_french_lingerie_bra",
+      "mh_underwear02_cc0__punkduck_french_lingerie_mini_briefs",
+      "mh_underwear02_cc0__punkduck_french_lingerie_stockings",
+      "mh_underwear02_cc0__punkduck_french_lingerie_suspender_belt",
+      "mh_underwear02_cc0__punkduck_french_lingerie_thong",
+      "mh_underwear02_cc0__punkduck_frill_bikini_bottom",
+      "mh_underwear02_cc0__punkduck_frill_bikini_top",
+      "mh_underwear02_cc0__punkduck_sport_bra",
+      "mh_underwear02_cc0__punkduck_sport_briefs",
+      "mh_underwear02_cc0__punkduck_string_2",
+      "mh_underwear02_cc0__punkduck_string_4",
+      "mh_underwear02_cc0__punkduck_string_5",
+      "mh_underwear02_cc0__punkduck_teddy_erotic_lingerie",
+      "mh_underwear02_cc0__punkduck_transparent_bra",
+      "mh_underwear03_cc-by__elvs_all_tied_up_bikini",
+      "mh_underwear03_cc-by__elvs_bandeau_swimwear_top_1",
+      "mh_underwear03_cc-by__elvs_camisole1",
+      "mh_underwear03_cc-by__elvs_swimwear_micro_shorts",
+      "mh_underwear03_cc-by__elvs_vintage_swimwear1_50s_strapless",
+      "mh_underwear03_cc-by__joepal_plain_bra",
+      "mh_underwear03_cc-by__mindfront_f_one-piece_swimsuit_01",
+      "mh_underwear03_cc-by__punkduck_female_strapless_bodysuit",
+      "mh_underwear03_cc-by__punkduck_halterneck_romper",
+      "mh_underwear03_cc-by__punkduck_one_piece_bikini01",
+      "mh_underwear03_cc-by__punkduck_shapewear"
+    ],
+    "socks": [
+      "mh_underwear04_cc0__joepal_crude_high_socks",
+      "mh_underwear04_cc0__joepal_crude_low_socks",
+      "mh_underwear04_cc0__toigo_lace_frill_socks",
+      "mh_underwear04_cc0__toigo_leg_warmer_socks"
+    ],
+    "top": [
+      "mh_shirts01_cc0__elvs_crude_t-shirt_male",
+      "mh_shirts01_cc0__joepal_crude_t-shirt_female",
+      "mh_shirts01_cc0__namuhekam_male_polo_shirt",
+      "mh_shirts01_cc0__skalldyrssuppe_tube_top_funky_colors",
+      "mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+      "mh_shirts01_cc0__toigo_bodice-style_top",
+      "mh_shirts01_cc0__toigo_camisole_top",
+      "mh_shirts01_cc0__toigo_fisherman_sweater",
+      "mh_shirts01_cc0__toigo_keyhole_tank_top",
+      "mh_shirts01_cc0__toigo_turtleneck_halter_top",
+      "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "mh_shirts02_ccby__elvs_male_boho_top1",
+      "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+      "mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+      "mh_shirts02_ccby__ews_striped_shirt",
+      "mh_shirts02_ccby__janexx_old_female_sweater",
+      "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_01",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+      "mh_shirts02_ccby__mindfront_lusekofta",
+      "mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+      "mh_shirts02_ccby__punkduck_lace_up_blouse",
+      "mh_shirts02_ccby__punkduck_off-shoulder_long-sleeve_top",
+      "mh_shirts03_ccby__drednicolson_asymmetric_tunic_and_sash",
+      "mh_shirts03_ccby__drednicolson_short-tail_camo_tee",
+      "mh_shirts03_ccby__elvs_disco_top2",
+      "mh_shirts03_ccby__elvs_disco_top_1_butterfly",
+      "mh_shirts03_ccby__elvs_ladies_tank1",
+      "mh_shirts03_ccby__elvs_lara_tank1",
+      "mh_shirts03_ccby__elvs_male_athletic_tank1",
+      "mh_shirts03_ccby__elvs_male_logo_tshirt1",
+      "mh_shirts03_ccby__elvs_male_muscle_shirt1",
+      "mh_shirts03_ccby__elvs_male_tankshirt1",
+      "mh_shirts03_ccby__elvs_ruffle_sleeve_peasant_blouse_1",
+      "mh_shirts03_ccby__mindfront_tank_top_01",
+      "mh_shirts03_ccby__punkduck_high_neck_crop_top",
+      "mh_shirts03_ccby__punkduck_retro_top",
+      "mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+      "mh_shirts03_ccby__punkduck_sleeveless_shirt",
+      "mh_shirts03_ccby__punkduck_spaghetti_strap_tank_top",
+      "mh_shirts03_ccby__punkduck_tube_top",
+      "mh_shirts03_ccby__punkduck_v_neck_top"
     ]
   },
   "packs": [
-    {
-      "file": "hair02_ccby.vwpack.json.gz",
-      "bytes": 7158260,
-      "count": 21,
-      "source": "hair02_ccby.zip"
-    },
-    {
-      "file": "hair03_ccby.vwpack.json.gz",
-      "bytes": 8712583,
-      "count": 14,
-      "source": "hair03_ccby.zip"
-    },
     {
       "file": "bodyparts05_cc0.vwpack.json.gz",
       "bytes": 850308,
@@ -971,6 +3793,96 @@
       "bytes": 2279824,
       "count": 5,
       "source": "eyelashes01_cc0.zip"
+    },
+    {
+      "file": "hair02_ccby.vwpack.json.gz",
+      "bytes": 7158260,
+      "count": 21,
+      "source": "hair02_ccby.zip"
+    },
+    {
+      "file": "hair03_ccby.vwpack.json.gz",
+      "bytes": 8712583,
+      "count": 14,
+      "source": "hair03_ccby.zip"
+    },
+    {
+      "file": "pants01_cc0.vwpack.json.gz",
+      "bytes": 441529,
+      "count": 4,
+      "source": "pants01_cc0.zip"
+    },
+    {
+      "file": "pants02_ccby.vwpack.json.gz",
+      "bytes": 2670683,
+      "count": 13,
+      "source": "pants02_ccby.zip"
+    },
+    {
+      "file": "pants03_ccby.vwpack.json.gz",
+      "bytes": 1660956,
+      "count": 8,
+      "source": "pants03_ccby.zip"
+    },
+    {
+      "file": "shirts01_cc0.vwpack.json.gz",
+      "bytes": 1025646,
+      "count": 10,
+      "source": "shirts01_cc0.zip"
+    },
+    {
+      "file": "shirts02_ccby.vwpack.json.gz",
+      "bytes": 2520682,
+      "count": 13,
+      "source": "shirts02_ccby.zip"
+    },
+    {
+      "file": "shirts03_ccby.vwpack.json.gz",
+      "bytes": 6053798,
+      "count": 19,
+      "source": "shirts03_ccby.zip"
+    },
+    {
+      "file": "shoes01_cc0.vwpack.json.gz",
+      "bytes": 6659205,
+      "count": 23,
+      "source": "shoes01_cc0.zip"
+    },
+    {
+      "file": "shoes02_ccby.vwpack.json.gz",
+      "bytes": 9850949,
+      "count": 24,
+      "source": "shoes02_ccby.zip"
+    },
+    {
+      "file": "shoes03_ccby.vwpack.json.gz",
+      "bytes": 4404522,
+      "count": 12,
+      "source": "shoes03_ccby.zip"
+    },
+    {
+      "file": "underwear01_cc0.vwpack.json.gz",
+      "bytes": 2408118,
+      "count": 19,
+      "source": "underwear01_cc0.zip"
+    },
+    {
+      "file": "underwear02_cc0.vwpack.json.gz",
+      "bytes": 3216198,
+      "count": 28,
+      "source": "underwear02_cc0.zip"
+    },
+    {
+      "file": "underwear03_cc-by.vwpack.json.gz",
+      "bytes": 5332597,
+      "count": 11,
+      "source": "underwear03_cc-by.zip"
+    },
+    {
+      "file": "underwear04_cc0.vwpack.json.gz",
+      "bytes": 298384,
+      "count": 4,
+      "source": "underwear04_cc0.zip"
     }
   ]
 }
