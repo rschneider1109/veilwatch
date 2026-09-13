@@ -513,17 +513,34 @@ export class MakeHumanRuntime {
         nor.array[d]=sourceNormals[s]; nor.array[d+1]=sourceNormals[s+1]; nor.array[d+2]=sourceNormals[s+2];
       }
       if(mesh.name === "MakeHumanBody" && this.hiddenBodyVertices?.size){
-        // Collapse covered triangles in place instead of throwing them to a huge
-        // negative coordinate. That keeps bounding boxes sane for camera framing.
+        // Covered body triangles are made degenerate instead of being moved to a
+        // distant coordinate. IMPORTANT: a skinned triangle is not truly
+        // degenerate unless all three corners also use the SAME skinning data.
+        // Previously we collapsed only the positions. The three coincident
+        // corners kept different bone weights, so animation immediately pulled
+        // them apart into the giant skin-colored shards/spikes seen around the
+        // arms and torso whenever clothing was equipped.
+        const skinIndex=mesh.geometry.getAttribute("skinIndex");
+        const skinWeight=mesh.geometry.getAttribute("skinWeight");
         for(let i=0;i<src.length;i+=3){
           if(this.hiddenBodyVertices.has(src[i]) || this.hiddenBodyVertices.has(src[i+1]) || this.hiddenBodyVertices.has(src[i+2])){
             const anchor=i*3, ax=pos.array[anchor], ay=pos.array[anchor+1], az=pos.array[anchor+2];
             for(let j=0;j<3;j++){
-              const d=(i+j)*3; pos.array[d]=ax; pos.array[d+1]=ay; pos.array[d+2]=az;
+              const d=(i+j)*3;
+              pos.array[d]=ax; pos.array[d+1]=ay; pos.array[d+2]=az;
               nor.array[d]=0; nor.array[d+1]=1; nor.array[d+2]=0;
+              if(j>0 && skinIndex && skinWeight){
+                const srcSkin=i*4, dstSkin=(i+j)*4;
+                for(let k=0;k<4;k++){
+                  skinIndex.array[dstSkin+k]=skinIndex.array[srcSkin+k];
+                  skinWeight.array[dstSkin+k]=skinWeight.array[srcSkin+k];
+                }
+              }
             }
           }
         }
+        if(skinIndex) skinIndex.needsUpdate=true;
+        if(skinWeight) skinWeight.needsUpdate=true;
       }
       pos.needsUpdate=true; nor.needsUpdate=true;
       mesh.geometry.computeBoundingBox();

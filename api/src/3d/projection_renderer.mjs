@@ -1593,17 +1593,21 @@ class ProjectionRenderer {
   retargetQuaterniusClip(clip,sourceRoot){
     if(!clip || !sourceRoot || !this.currentObject) return null;
 
-    // UAL1 is a T-pose rig; MakeHuman HM08 is an A-pose rig. The target must
-    // keep its MPFB bind/rest basis. For every mapped bone we therefore build a
-    // constant WORLD-space rest offset:
+    // Retarget motion as a LOCAL rest-pose delta, then conjugate that delta from
+    // the UAL bone basis into the MakeHuman bone basis.  The previous world-space
+    // retarget preserved absolute orientations but massively amplified local joint
+    // rotations on fingers, feet and arms (for example a 0° source finger could
+    // become ~170° on MakeHuman).  This formulation preserves the actual joint
+    // motion magnitude while still accounting for the T-pose -> A-pose basis
+    // difference:
     //
-    //   offset = TargetRestWorld * inverse(SourceRestWorld)
-    //   TargetAnimWorld = offset * SourceAnimWorld
+    //   D_source = inverse(S_local_rest) * S_local_anim
+    //   B        = inverse(T_world_rest) * S_world_rest
+    //   D_target = B * D_source * inverse(B)
+    //   T_local_anim = T_local_rest * D_target
     //
-    // This maps the authored UAL orientation into the MakeHuman orientation
-    // without replacing MakeHuman's bind axes. Converting the result back to a
-    // local quaternion through the ANIMATED target parent keeps the hierarchy
-    // coherent through shoulders, arms, wrists, fingers, hips and legs.
+    // Quaternion conjugation changes only the axis representation, not the
+    // rotation angle, so every mapped joint keeps the authored UAL motion.
     sourceRoot.updateMatrixWorld?.(true);
     this.currentObject.updateMatrixWorld?.(true);
 
@@ -1639,76 +1643,40 @@ class ProjectionRenderer {
     }
 
     const mapped=[];
-    const targetToRow=new Map();
     for(const [sourceKey,targetShort] of Object.entries(UAL_TO_MAKEHUMAN_BONES)){
       const sourceNode=sourceNodes.get(sourceKey);
       const sourceTrack=tracksByKey.get(`${sourceKey}:quaternion`);
-      const sourceRest=sourceRestWorld.get(sourceKey);
+      const sourceWorldRest=sourceRestWorld.get(sourceKey);
       const targetBone=this.boneByName(targetShort);
-      const saved=targetBone?.userData?.makeHumanRestWorldQuaternion;
-      if(!sourceNode || !sourceTrack || !sourceRest || !targetBone || !Array.isArray(saved)) continue;
-      const targetRestWorld=new THREE.Quaternion().fromArray(saved).normalize();
-      const restOffset=targetRestWorld.clone().multiply(sourceRest.clone().invert()).normalize();
-      const row={sourceKey,sourceNode,sourceTrack,targetBone,targetRestWorld,restOffset};
-      mapped.push(row);
-      targetToRow.set(targetBone,row);
+      const targetWorldSaved=targetBone?.userData?.makeHumanRestWorldQuaternion;
+      const targetLocalSaved=targetBone?.userData?.makeHumanRestQuaternion;
+      if(!sourceNode || !sourceTrack || !sourceWorldRest || !targetBone || !Array.isArray(targetWorldSaved) || !Array.isArray(targetLocalSaved)) continue;
+
+      const sourceLocalRest=sourceNode.quaternion.clone().normalize();
+      const targetWorldRest=new THREE.Quaternion().fromArray(targetWorldSaved).normalize();
+      const targetLocalRest=new THREE.Quaternion().fromArray(targetLocalSaved).normalize();
+      // Maps a rotation axis expressed in UAL bone-local coordinates into the
+      // corresponding MakeHuman bone-local coordinates.
+      const basis=targetWorldRest.clone().invert().multiply(sourceWorldRest).normalize();
+      mapped.push({sourceKey,sourceNode,sourceTrack,sourceLocalRest,targetBone,targetLocalRest,basis});
     }
     if(!mapped.length) return null;
-
-    const sourceWorldAt=(node,time,cache)=>{
-      if(cache.has(node)) return cache.get(node);
-      const key=this.normalizeRigName(node?.name);
-      const qi=interpolantFor(key,"quaternion");
-      let local=node?.quaternion?.clone?.()||new THREE.Quaternion();
-      if(qi){
-        const v=qi.evaluate(time);
-        local=new THREE.Quaternion(v[0],v[1],v[2],v[3]).normalize();
-      }
-      const parent=node?.parent;
-      const world=(parent && parent!==sourceRoot.parent)
-        ? sourceWorldAt(parent,time,cache).clone().multiply(local).normalize()
-        : local.normalize();
-      cache.set(node,world);
-      return world;
-    };
-
-    const targetWorldAt=(row,time,sourceCache,targetCache)=>{
-      if(targetCache.has(row.targetBone)) return targetCache.get(row.targetBone);
-      const sourceAnimWorld=sourceWorldAt(row.sourceNode,time,sourceCache);
-      const targetAnimWorld=row.restOffset.clone().multiply(sourceAnimWorld).normalize();
-      targetCache.set(row.targetBone,targetAnimWorld);
-      return targetAnimWorld;
-    };
-
-    const targetParentWorldAt=(bone,time,sourceCache,targetCache)=>{
-      const parent=bone?.parent;
-      if(!parent?.isBone) return new THREE.Quaternion();
-      const parentRow=targetToRow.get(parent);
-      if(parentRow) return targetWorldAt(parentRow,time,sourceCache,targetCache);
-      const saved=parent.userData?.makeHumanRestWorldQuaternion;
-      return Array.isArray(saved)
-        ? new THREE.Quaternion().fromArray(saved).normalize()
-        : new THREE.Quaternion();
-    };
-
-    const frameCaches=new Map();
-    const cachesFor=(time)=>{
-      let row=frameCaches.get(time);
-      if(!row){ row={source:new Map(),target:new Map()}; frameCaches.set(time,row); }
-      return row;
-    };
 
     const out=[];
     for(const row of mapped){
       const times=row.sourceTrack.times.slice();
       const values=new Float32Array(times.length*4);
+      const qi=interpolantFor(row.sourceKey,"quaternion");
+      const basisInv=row.basis.clone().invert();
+      const sourceRestInv=row.sourceLocalRest.clone().invert();
+
       for(let frame=0;frame<times.length;frame++){
-        const time=times[frame];
-        const caches=cachesFor(time);
-        const world=targetWorldAt(row,time,caches.source,caches.target);
-        const parentWorld=targetParentWorldAt(row.targetBone,time,caches.source,caches.target);
-        const local=parentWorld.clone().invert().multiply(world).normalize();
-        local.toArray(values,frame*4);
+        const sample=qi.evaluate(times[frame]);
+        const sourceLocalAnim=new THREE.Quaternion(sample[0],sample[1],sample[2],sample[3]).normalize();
+        const sourceDelta=sourceRestInv.clone().multiply(sourceLocalAnim).normalize();
+        const targetDelta=row.basis.clone().multiply(sourceDelta).multiply(basisInv).normalize();
+        const targetLocalAnim=row.targetLocalRest.clone().multiply(targetDelta).normalize();
+        targetLocalAnim.toArray(values,frame*4);
       }
       out.push(new THREE.QuaternionKeyframeTrack(`${row.targetBone.name}.quaternion`,times,values));
     }
@@ -1725,12 +1693,12 @@ class ProjectionRenderer {
       const pelvisInterp=interpolantFor("pelvis","position");
       const rootPosInterp=interpolantFor("root","position");
       const rootRotInterp=interpolantFor("root","quaternion");
-      const sourceRestWorld=new THREE.Vector3();
-      pelvisNode.getWorldPosition(sourceRestWorld);
+      const sourceRestWorldPosition=new THREE.Vector3();
+      pelvisNode.getWorldPosition(sourceRestWorldPosition);
       for(let i=0;i<times.length;i++){
         const time=times[i];
         const pv=pelvisInterp.evaluate(time);
-        const p=new THREE.Vector3(pv[0],pv[1],pv[2]);
+        const point=new THREE.Vector3(pv[0],pv[1],pv[2]);
         let rootQ=rootNode?.quaternion?.clone?.()||new THREE.Quaternion();
         if(rootRotInterp){
           const q=rootRotInterp.evaluate(time);
@@ -1741,12 +1709,11 @@ class ProjectionRenderer {
           const r=rootPosInterp.evaluate(time);
           rootP.set(r[0],r[1],r[2]);
         }
-        p.applyQuaternion(rootQ).add(rootP).sub(sourceRestWorld).toArray(deltas,i*3);
+        point.applyQuaternion(rootQ).add(rootP).sub(sourceRestWorldPosition).toArray(deltas,i*3);
       }
       pelvisMotion={times,deltas};
     }
 
-    if(!out.length) return null;
     const result=new THREE.AnimationClip(clip.name,clip.duration,out);
     result.userData={...(result.userData||{}),veilwatchPelvisMotion:pelvisMotion};
     return result;
