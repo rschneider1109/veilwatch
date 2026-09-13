@@ -84,6 +84,82 @@ function ensureMakeHumanAppearanceData(){
   console.log(`MakeHuman appearance/wardrobe ready: ${requiredCounts.hair} hair, ${requiredCounts.facialHair} facial hair, ${requiredCounts.brows} brows, ${requiredCounts.eyelashes} lashes, ${requiredCounts.top} tops, ${requiredCounts.bottoms} bottoms, ${requiredCounts.onePiece} dresses/suits, ${requiredCounts.baseLayer} base layers, ${requiredCounts.socks} socks, ${requiredCounts.shoes} shoes, ${requiredCounts.gloves} gloves, ${requiredCounts.headwear} headwear, ${requiredCounts.eyewear} eyewear, ${requiredCounts.neck} jewelry, ${requiredCounts.vest} vests/rigs, ${requiredCounts.back} carried gear, ${skins} skins, ${eyes} eye materials.`);
 }
 
+
+function ensureMakeHumanWardrobeIntegrity(){
+  const root = path.join("public", "assets", "characters", "makehuman");
+  const runtimeRoot = path.join(root, "runtime");
+  const catalogPath = path.join(root, "library", "catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+
+  // The native MHCLO mapping references vertices in HM08 base.obj. Validate the
+  // entire wardrobe during Docker build so one malformed community asset cannot
+  // crash the Character Forge later during a long browser session.
+  const baseObj = fs.readFileSync(path.join(runtimeRoot, "base.obj"), "utf8");
+  let baseVertexCount = 0;
+  for(const line of baseObj.split(/\r?\n/)) if(line.startsWith("v ")) baseVertexCount++;
+  if(baseVertexCount < 10000) throw new Error(`Unexpected MakeHuman base vertex count: ${baseVertexCount}`);
+
+  const packCache = new Map();
+  const getPack = (file)=>{
+    if(packCache.has(file)) return packCache.get(file);
+    const fp = path.join(root, "library", "packs", file);
+    const parsed = JSON.parse(zlib.gunzipSync(fs.readFileSync(fp)).toString("utf8"));
+    if((parsed.failures || []).length) throw new Error(`MakeHuman pack contains conversion failures: ${file}`);
+    const map = new Map((parsed.assets || []).map(asset=>[asset.id, asset]));
+    packCache.set(file, map);
+    return map;
+  };
+
+  const wearableCategories = new Set(["baseLayer","top","bottoms","onePiece","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]);
+  let checked = 0;
+  let mappedVertices = 0;
+  let triangles = 0;
+
+  for(const [id,row] of Object.entries(catalog.assets || {})){
+    if(!wearableCategories.has(row.category)) continue;
+    const asset = getPack(row.pack).get(id);
+    if(!asset) throw new Error(`Wardrobe catalog asset missing from pack: ${id} -> ${row.pack}`);
+    const mapping = asset.mapping || [];
+    const geometry = asset.geometry || {};
+    const uv = geometry.uvs || [];
+    const tri = geometry.triangles || [];
+    const declared = Number(geometry.vertexCount ?? mapping.length);
+    if(!mapping.length || mapping.length !== declared) throw new Error(`Wardrobe mapping/vertex mismatch: ${id}`);
+    if(tri.length < 6 || tri.length % 6 !== 0) throw new Error(`Wardrobe triangle stream invalid: ${id}`);
+
+    for(let i=0;i<mapping.length;i++){
+      const m=mapping[i];
+      if(!Array.isArray(m) || m.length < 9) throw new Error(`Wardrobe MHCLO mapping invalid: ${id} vertex ${i}`);
+      for(let k=0;k<3;k++){
+        const vi=Number(m[k]);
+        if(!Number.isInteger(vi) || vi<0 || vi>=baseVertexCount) throw new Error(`Wardrobe base vertex out of range: ${id} -> ${vi}`);
+      }
+      for(let k=3;k<9;k++) if(!Number.isFinite(Number(m[k]))) throw new Error(`Wardrobe mapping contains non-finite value: ${id}`);
+    }
+
+    for(let i=0;i<tri.length;i+=2){
+      const vi=Number(tri[i]);
+      const ti=Number(tri[i+1]);
+      if(!Number.isInteger(vi) || vi<0 || vi>=mapping.length) throw new Error(`Wardrobe triangle vertex out of range: ${id}`);
+      if(ti>=0 && (!Number.isInteger(ti) || ti*2+1>=uv.length)) throw new Error(`Wardrobe UV index out of range: ${id}`);
+    }
+
+    for(const viRaw of asset.delete || []){
+      const vi=Number(viRaw);
+      if(!Number.isInteger(vi) || vi<0 || vi>=baseVertexCount) throw new Error(`Wardrobe delete_verts index out of range: ${id} -> ${vi}`);
+    }
+
+    const zDepth=Number(asset.mhclo?.z_depth ?? 50);
+    if(!Number.isFinite(zDepth) || zDepth<0 || zDepth>100) throw new Error(`Wardrobe z_depth invalid: ${id} -> ${zDepth}`);
+    checked++;
+    mappedVertices += mapping.length;
+    triangles += tri.length/6;
+  }
+
+  if(checked < 390) throw new Error(`MakeHuman wardrobe unexpectedly small (${checked} assets)`);
+  console.log(`MakeHuman wardrobe integrity ready: ${checked} wearables, ${mappedVertices} fitted vertices, ${triangles} triangles validated against ${baseVertexCount} HM08 vertices.`);
+}
+
 async function fetchWithRetry(url, tries=4){
   let lastErr = null;
   for(let attempt=1; attempt<=tries; attempt++){
@@ -206,6 +282,7 @@ function ensureSection5RuntimeData(){
 async function main(){
   ensureMakeHumanRuntimeData();
   ensureMakeHumanAppearanceData();
+  ensureMakeHumanWardrobeIntegrity();
   await ensureFpsWeaponAssets();
   ensureSection5RuntimeData();
 

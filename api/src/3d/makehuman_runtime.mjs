@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
 const RUNTIME_ROOT = "/assets/characters/makehuman/runtime";
-const UAL1_BASIS_URL = "/assets/characters/animations/quaternius/UAL1_makehuman_basis.json";
 const BASE_SCALE = 0.1;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const X_AXIS = new THREE.Vector3(1, 0, 0);
@@ -258,13 +257,12 @@ export class MakeHumanRuntime {
   }
 
   async init(initialForge={}){
-    const [objText, vertexGroups, rig, weightsText, targetManifest, animationBasis] = await Promise.all([
+    const [objText, vertexGroups, rig, weightsText, targetManifest] = await Promise.all([
       fetchText(`${RUNTIME_ROOT}/base.obj`),
       fetchJson(`${RUNTIME_ROOT}/basemesh_vertex_groups.json`),
       fetchJson(`${RUNTIME_ROOT}/rig.mixamo.json`),
       fetchGzipText(`${RUNTIME_ROOT}/weights.mixamo.json.gz`),
-      fetchJson(`${RUNTIME_ROOT}/target_manifest.json`),
-      fetchJson(UAL1_BASIS_URL)
+      fetchJson(`${RUNTIME_ROOT}/target_manifest.json`)
     ]);
 
     const parsed = parseObj(objText);
@@ -277,7 +275,7 @@ export class MakeHumanRuntime {
     this.rig = rig;
     this.weightData = JSON.parse(weightsText);
     this.targetManifest = targetManifest;
-    this.animationBasis = animationBasis;
+    this.animationBasis = null;
 
     this._buildRenderMeshes();
     this._prepareVertexWeights();
@@ -370,6 +368,12 @@ export class MakeHumanRuntime {
       }
       mesh.geometry.setAttribute("skinIndex", new THREE.BufferAttribute(skinIndex,4));
       mesh.geometry.setAttribute("skinWeight", new THREE.BufferAttribute(skinWeight,4));
+      // Body masking temporarily makes covered triangles degenerate. Keep an
+      // immutable copy of the authored skinning so removing/changing clothing
+      // restores the original weights instead of leaving previously hidden
+      // vertices welded to the wrong bone.
+      mesh.userData.baseSkinIndex = new Uint16Array(skinIndex);
+      mesh.userData.baseSkinWeight = new Float32Array(skinWeight);
     }
   }
 
@@ -511,6 +515,16 @@ export class MakeHumanRuntime {
         const s=src[i]*3, d=i*3;
         pos.array[d]=this.transformed[s]; pos.array[d+1]=this.transformed[s+1]; pos.array[d+2]=this.transformed[s+2];
         nor.array[d]=sourceNormals[s]; nor.array[d+1]=sourceNormals[s+1]; nor.array[d+2]=sourceNormals[s+2];
+      }
+      if(mesh.name === "MakeHumanBody"){
+        const skinIndex=mesh.geometry.getAttribute("skinIndex");
+        const skinWeight=mesh.geometry.getAttribute("skinWeight");
+        const baseSkinIndex=mesh.userData.baseSkinIndex;
+        const baseSkinWeight=mesh.userData.baseSkinWeight;
+        if(skinIndex && baseSkinIndex?.length===skinIndex.array.length) skinIndex.array.set(baseSkinIndex);
+        if(skinWeight && baseSkinWeight?.length===skinWeight.array.length) skinWeight.array.set(baseSkinWeight);
+        if(skinIndex) skinIndex.needsUpdate=true;
+        if(skinWeight) skinWeight.needsUpdate=true;
       }
       if(mesh.name === "MakeHumanBody" && this.hiddenBodyVertices?.size){
         // Covered body triangles are made degenerate instead of being moved to a
@@ -660,13 +674,9 @@ export class MakeHumanRuntime {
     // Source pelvis motion is meter-ish; the MakeHuman runtime renders around
     // 0.1 scene scale. Scale translation using current morphed pelvis height.
     const hips=this.boneMap.get("mixamorig:Hips");
-    const sourcePelvisY=Math.abs(Number(this.animationBasis?.pelvisRestWorldPosition?.[1]||0));
-    const targetHipsWorld=new THREE.Vector3();
-    hips?.getWorldPosition?.(targetHipsWorld);
-    const targetHipsY=Math.abs(Number(targetHipsWorld.y||0));
-    this.animationTranslationScale=(sourcePelvisY>1e-6 && targetHipsY>1e-6)
-      ? targetHipsY/sourcePelvisY
-      : BASE_SCALE;
+    // Animation playback is currently parked. Keep a deterministic fallback
+    // scale without fetching any animation-basis file during character startup.
+    this.animationTranslationScale=BASE_SCALE;
 
     for(const mesh of this.renderMeshes){
       if(mesh.skeleton!==this.skeleton){
@@ -876,7 +886,24 @@ export class MakeHumanRuntime {
     }finally{ URL.revokeObjectURL(url); }
   }
 
-  async _nativeMaterial(asset,tint){
+  _nativeLayerInfo(slot,asset){
+    const raw=Number(asset?.mhclo?.z_depth ?? 50);
+    const zDepth=Number.isFinite(raw)?THREE.MathUtils.clamp(raw,0,100):50;
+    // MakeHuman z_depth is a stacking/render-order hint: underwear is lower,
+    // shirts/trousers are around 50 and coats/backpacks are higher. Preserve
+    // that authored order so transparent/cutout wardrobe pieces render in the
+    // same deterministic sequence instead of flickering as assets are swapped.
+    const slotBias={
+      hair:80,brows:82,eyelashes:83,facialHair:84,
+      clothing_baseLayer:0,clothing_socks:1,clothing_top:2,clothing_bottoms:2,
+      clothing_onePiece:3,clothing_shoes:4,clothing_gloves:5,
+      clothing_headwear:6,clothing_eyewear:7,clothing_neck:7,
+      clothing_vest:8,clothing_back:9
+    }[String(slot||"")] ?? 0;
+    return {zDepth,renderOrder:100+Math.round(zDepth)*10+slotBias};
+  }
+
+  async _nativeMaterial(asset,tint,slot){
     const m=asset.material||{};
     const dc=Array.isArray(m.diffuseColor)?m.diffuseColor:[.8,.8,.8];
     const color=new THREE.Color(dc[0]??.8,dc[1]??.8,dc[2]??.8);
@@ -887,12 +914,13 @@ export class MakeHumanRuntime {
       side:THREE.DoubleSide,alphaTest:(!!m.transparent?0.08:0)
     });
     material.name=`MHNative_${asset.id}`; material.userData.veilwatchNativeAsset=true;
+    material.userData.makeHumanZDepth=this._nativeLayerInfo(slot,asset).zDepth;
     const diffuse=await this._textureFromEmbedded(asset.textures?.diffuse,"diffuse");
     if(diffuse){ material.map=diffuse; material.needsUpdate=true; }
     return material;
   }
 
-  async _createNativeAssetMesh(asset,tint){
+  async _createNativeAssetMesh(asset,tint,slot){
     const tri=asset.geometry?.triangles||[], uvs=asset.geometry?.uvs||[];
 
     // OBJ faces carry separate position/UV indices. Deduplicate each (v,vt)
@@ -922,8 +950,12 @@ export class MakeHumanRuntime {
     geometry.setAttribute("skinWeight",new THREE.Float32BufferAttribute(skinWeights,4));
     geometry.setIndex(new THREE.BufferAttribute(sourceRefs.length>65535?new Uint32Array(indices):new Uint16Array(indices),1));
     geometry.computeVertexNormals(); geometry.computeBoundingBox(); geometry.computeBoundingSphere();
-    const material=await this._nativeMaterial(asset,tint);
+    const material=await this._nativeMaterial(asset,tint,slot);
     const mesh=new THREE.SkinnedMesh(geometry,material); mesh.name=`MHNative_${asset.id}`; mesh.frustumCulled=false;
+    const layer=this._nativeLayerInfo(slot,asset);
+    mesh.renderOrder=layer.renderOrder;
+    mesh.userData.makeHumanZDepth=layer.zDepth;
+    mesh.userData.makeHumanSlot=String(slot||"");
     mesh.userData.nativeVertexRefs=new Uint32Array(sourceRefs);
     mesh.bind(this.skeleton); mesh.normalizeSkinWeights();
     return mesh;
@@ -959,6 +991,7 @@ export class MakeHumanRuntime {
       mappingIndices,
       mappingValues,
       mhclo:asset.mhclo||{},
+      category:asset.category||"",
       delete:new Uint32Array(asset.delete||[]),
       material:asset.material||{}
     };
@@ -978,27 +1011,63 @@ export class MakeHumanRuntime {
   async setNativeAssets(requests=[]){
     const serial=++this._nativeLoadSerial;
     const desired=new Map((requests||[]).filter(r=>r?.slot&&r?.id).map(r=>[r.slot,r]));
-    for(const [slot,row] of [...this.nativeAssets.entries()]){
-      const d=desired.get(slot);
-      if(!d || d.id!==row.id){ this._disposeNativeRoot(row.root); this.nativeAssets.delete(slot); }
-    }
+    const pending=[];
+
+    // Build replacement meshes off-scene first. The currently equipped item is
+    // kept alive until its replacement is fully decoded, textured and skinned.
+    // This makes wardrobe changes transactional: a bad/slow asset cannot leave
+    // the character half-dressed or with a half-updated body mask.
     for(const [slot,req] of desired.entries()){
       const existing=this.nativeAssets.get(slot);
-      if(existing?.id===req.id){ this._updateNativeTint(existing,req.tint); continue; }
+      if(existing?.id===req.id) continue;
       try{
         const asset=await this._nativeAssetData(req.id);
-        if(serial!==this._nativeLoadSerial) return false;
+        if(serial!==this._nativeLoadSerial){
+          for(const item of pending) this._disposeNativeRoot(item.row.root);
+          return false;
+        }
         const tint=req.tint?new THREE.Color(req.tint):null;
-        const mesh=await this._createNativeAssetMesh(asset,tint);
-        if(serial!==this._nativeLoadSerial){ this._disposeNativeRoot(mesh); return false; }
-        const root=new THREE.Group(); root.name=`MHNativeSlot_${slot}`; root.add(mesh); this.root.add(root);
-        // Keep only refit data after the mesh is built. Geometry/UV/base64 texture
-        // payloads belong to the temporary pack cache and may be garbage collected.
+        const mesh=await this._createNativeAssetMesh(asset,tint,slot);
+        if(serial!==this._nativeLoadSerial){
+          this._disposeNativeRoot(mesh);
+          for(const item of pending) this._disposeNativeRoot(item.row.root);
+          return false;
+        }
+        const root=new THREE.Group();
+        root.name=`MHNativeSlot_${slot}`;
+        root.add(mesh);
         const activeAsset=this._compactNativeAsset(asset);
-        const row={id:req.id,asset:activeAsset,root,mesh,tint:req.tint||null};
-        this.nativeAssets.set(slot,row);
-      }catch(err){ console.warn(`MakeHuman native asset failed (${slot}:${req.id}):`,err?.message||err); }
+        pending.push({slot,row:{id:req.id,asset:activeAsset,root,mesh,tint:req.tint||null}});
+      }catch(err){
+        console.warn(`MakeHuman native asset failed (${slot}:${req.id}):`,err?.message||err);
+        // Keep the currently equipped item in this slot if a replacement fails.
+      }
     }
+
+    if(serial!==this._nativeLoadSerial){
+      for(const item of pending) this._disposeNativeRoot(item.row.root);
+      return false;
+    }
+
+    const pendingSlots=new Set(pending.map(x=>x.slot));
+    for(const [slot,row] of [...this.nativeAssets.entries()]){
+      const d=desired.get(slot);
+      if(!d || pendingSlots.has(slot)){
+        this._disposeNativeRoot(row.root);
+        this.nativeAssets.delete(slot);
+      }
+    }
+
+    for(const {slot,row} of pending){
+      this.root.add(row.root);
+      this.nativeAssets.set(slot,row);
+    }
+
+    for(const [slot,req] of desired.entries()){
+      const existing=this.nativeAssets.get(slot);
+      if(existing?.id===req.id) this._updateNativeTint(existing,req.tint);
+    }
+
     const helperLashes=this.renderMeshes.find(m=>m.name==="MakeHumanEyelashes");
     if(helperLashes) helperLashes.visible=!desired.has("eyelashes");
     this._refreshNativeBodyMask();
