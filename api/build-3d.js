@@ -1,6 +1,53 @@
 const esbuild = require("esbuild");
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
+
+function ensureMakeHumanRuntimeData(){
+  const root = path.join("public", "assets", "characters", "makehuman", "runtime");
+  const required = [
+    "base.obj",
+    "basemesh_vertex_groups.json",
+    "hm08_config.json",
+    "rig.mixamo.json",
+    "weights.mixamo.json.gz",
+    "target_manifest.json"
+  ];
+  for(const name of required){
+    const fp = path.join(root, name);
+    if(!fs.existsSync(fp) || fs.statSync(fp).size < 16){
+      throw new Error(`Missing MakeHuman runtime file: ${fp}`);
+    }
+  }
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, "target_manifest.json"), "utf8"));
+  const targets = new Set();
+  for(const pair of Object.values(manifest.pairs || {})) for(const rel of pair) targets.add(rel);
+  for(const pair of Object.values(manifest.breastCup || {})) for(const rel of pair) targets.add(rel);
+  const macro = manifest.macro || {};
+  for(const gender of macro.genders || []) for(const age of macro.ages || []){
+    for(const muscle of macro.muscle || []) for(const weight of macro.weight || []){
+      targets.add(String(macro.pattern || "")
+        .replace("{gender}", gender)
+        .replace("{age}", age)
+        .replace("{muscle}", muscle)
+        .replace("{weight}", weight));
+    }
+  }
+  for(const rel of targets){
+    const fp = path.join(root, "targets", rel);
+    if(!fs.existsSync(fp)) throw new Error(`Missing MakeHuman target: ${rel}`);
+  }
+
+  const rig = JSON.parse(fs.readFileSync(path.join(root, "rig.mixamo.json"), "utf8"));
+  const weights = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(root, "weights.mixamo.json.gz"))).toString("utf8"));
+  const rigBones = Object.keys(rig.bones || {});
+  const weightBones = Object.keys(weights.weights || {});
+  if(!rigBones.length || rigBones.length !== weightBones.length){
+    throw new Error(`MakeHuman Mixamo rig/weight mismatch (${rigBones.length} rig bones, ${weightBones.length} weight bones)`);
+  }
+  console.log(`MakeHuman runtime ready: ${rigBones.length} bones, ${targets.size} target files.`);
+}
 
 function rebuildChunkedAsset({ partsDir, partPrefix, outputFile }){
   if(fs.existsSync(outputFile)) return;
@@ -146,6 +193,7 @@ async function ensureQuaterniusAnimationAssets(){
 }
 
 async function main(){
+  ensureMakeHumanRuntimeData();
   rebuildChunkedAsset({
     partsDir: path.join("public", "assets", "characters", "bases", "chunks"),
     partPrefix: "vitruvian_body.glb.part",
