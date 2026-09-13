@@ -1,0 +1,17 @@
+MakeHuman HM08 / MPFB data foundation
+======================================
+
+Veilwatch Character Forge v2 uses selected MakeHuman HM08 data files sourced
+from the MPFB 2.0.17 distribution as its browser-native human foundation.
+The included basemesh identifies itself as CC0 and retains its original
+copyright/license header in:
+
+  api/public/assets/characters/makehuman/runtime/base.obj
+
+Veilwatch does not bundle or execute Blender or the MPFB Blender add-on at
+runtime. The browser runtime in api/src/3d/makehuman_runtime.mjs is Veilwatch
+code that consumes the compatible HM08 basemesh, rig, weights, and selected
+target data directly.
+
+Legacy Vitruvian assets remain in the repository only as a load fallback while
+the MakeHuman asset-library migration is completed.
