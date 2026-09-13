@@ -150,6 +150,91 @@ const DEFAULT_MH_APPEARANCE = {
   eyelashes:"mh_eyelashes01_cc0__mindfront_eyelashes_01"
 };
 
+const DEFAULT_MH_CLOTHING = {
+  baseLayer:"mh_underwear02_cc0__punkduck_sport_briefs",
+  top:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+  bottoms:"mh_pants01_cc0__cortu_cargo_pants",
+  socks:"mh_underwear04_cc0__joepal_crude_low_socks",
+  shoes:"mh_shoes02_ccby__punkduck_comfortable_sneakers"
+};
+
+// Compatibility aliases keep older saved Veilwatch characters usable while
+// the UI transitions from generic wardrobe IDs to real MakeHuman .mhclo IDs.
+const LEGACY_MH_CLOTHING = {
+  baseLayer:{
+    briefs:"mh_underwear02_cc0__punkduck_sport_briefs",
+    boxer_briefs:"mh_underwear02_cc0__punkduck_sport_briefs",
+    compression_shorts:"mh_underwear02_cc0__punkduck_sport_briefs",
+    bra:"mh_underwear03_cc-by__joepal_plain_bra",
+    sports_bra:"mh_underwear02_cc0__punkduck_sport_bra",
+    tank:"mh_underwear01_cc0__wolgade_female_top_01",
+    undershirt:"mh_underwear01_cc0__wolgade_female_top_01",
+    compression_top:"mh_underwear01_cc0__wolgade_female_top_01",
+    thermal_base:"mh_underwear01_cc0__wolgade_female_top_01"
+  },
+  top:{
+    plain_tshirt:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+    fitted_tshirt:"mh_shirts01_cc0__joepal_crude_t-shirt_female",
+    vneck_tshirt:"mh_shirts03_ccby__punkduck_v_neck_top",
+    long_sleeve:"mh_shirts02_ccby__ews_striped_shirt",
+    henley:"mh_shirts02_ccby__elvs_male_boho_top1",
+    polo:"mh_shirts01_cc0__namuhekam_male_polo_shirt",
+    button_down:"mh_shirts02_ccby__elvs_male_shirt_untucked_bd1",
+    hoodie:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    crew_sweater:"mh_shirts02_ccby__mindfront_knitted_sweater_01",
+    turtleneck:"mh_shirts01_cc0__toigo_turtleneck_halter_top",
+    tank_top:"mh_shirts03_ccby__mindfront_tank_top_01",
+    camisole:"mh_shirts01_cc0__toigo_camisole_top",
+    blouse:"mh_shirts02_ccby__punkduck_lace_up_blouse",
+    graphic_tshirt:"mh_shirts02_ccby__punkduck_deathnote_t-shirt",
+    crop_top:"mh_shirts03_ccby__punkduck_sleeveless_crop_top",
+    athletic_top:"mh_shirts03_ccby__elvs_male_athletic_tank1"
+  },
+  bottoms:{
+    jeans_straight:"mh_pants02_ccby__punkduck_male_classic_jeans",
+    jeans_slim:"mh_pants02_ccby__punkduck_female_tight_jeans",
+    jeans_relaxed:"mh_pants02_ccby__elvs_jeans_bootcut",
+    chinos:"mh_pants02_ccby__mindfront_male_trousers_1",
+    cargo_pants:"mh_pants01_cc0__cortu_cargo_pants",
+    joggers:"mh_pants01_cc0__toigo_harem_pants",
+    dress_pants:"mh_pants02_ccby__mindfront_male_trousers_2",
+    work_pants:"mh_pants01_cc0__toigo_wool_pants",
+    athletic_shorts:"mh_pants03_ccby__mindfront_male_swimming_trunks_01",
+    cargo_shorts:"mh_pants01_cc0__cortu_jeans_shorts",
+    denim_shorts:"mh_pants03_ccby__punkduck_female_short_jeans",
+    running_shorts:"mh_pants03_ccby__elvs_male_swim_shorts1"
+  },
+  socks:{
+    ankle_socks:"mh_underwear04_cc0__joepal_crude_low_socks",
+    crew_socks:"mh_underwear04_cc0__joepal_crude_high_socks",
+    boot_socks:"mh_underwear04_cc0__joepal_crude_high_socks",
+    dress_socks:"mh_underwear04_cc0__joepal_crude_low_socks",
+    compression_socks:"mh_underwear04_cc0__toigo_leg_warmer_socks",
+    thigh_highs:"mh_underwear04_cc0__toigo_leg_warmer_socks"
+  },
+  shoes:{
+    sneakers:"mh_shoes02_ccby__punkduck_comfortable_sneakers",
+    running_shoes:"mh_shoes02_ccby__punkduck_running_shoes_01",
+    high_tops:"mh_shoes02_ccby__culturalibre_sneakers",
+    casual_boots:"mh_shoes01_cc0__toigo_ankle_boots_male",
+    work_boots:"mh_shoes03_ccby__maciekg_leather_boots",
+    tactical_boots:"mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+    hiking_boots:"mh_shoes03_ccby__punkduck_winter_boots",
+    dress_shoes:"mh_shoes02_ccby__mindfront_shoes_oxford_male",
+    loafers:"mh_shoes02_ccby__mindfront_shoes_monk_strap_male",
+    sandals:"mh_shoes02_ccby__elvs_male_flip_flop_sandals1",
+    heels:"mh_shoes01_cc0__toigo_stiletto_booties",
+    canvas_shoes:"mh_shoes01_cc0__toigo_mj_cloth_shoes",
+    combat_boots:"mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+    chelsea_boots:"mh_shoes01_cc0__toigo_ankle_boots_female",
+    motorcycle_boots:"mh_shoes03_ccby__mindfront_shoes_biker_boots_male",
+    trail_shoes:"mh_shoes02_ccby__punkduck_running_shoes_01",
+    slip_ons:"mh_shoes01_cc0__toigo_flats",
+    flats:"mh_shoes01_cc0__toigo_ballet_flats",
+    ankle_boots:"mh_shoes01_cc0__toigo_ankle_boots_female"
+  }
+};
+
 const AUTO_MH_EYE_SURFACES = {
   brown:"makehuman_system_assets:brown",
   hazel:"makehuman_system_assets:brownlight",
@@ -2056,6 +2141,21 @@ class ProjectionRenderer {
     return id.startsWith("mh_")?id:fallback;
   }
 
+  resolveMakeHumanClothingId(slot,value){
+    const raw=String(value||"");
+    if(!raw || raw==="none") return "";
+    if(raw.startsWith("mh_")) return raw;
+    return LEGACY_MH_CLOTHING?.[slot]?.[raw] || DEFAULT_MH_CLOTHING?.[slot] || "";
+  }
+
+  makeHumanClothingTint(clothing,slot){
+    const colors=clothing?.colors||{};
+    const colorSlot=slot==="socks"?"baseLayer":slot;
+    const fallback=slot==="bottoms"?"navy":(slot==="shoes"?"black":"charcoal");
+    const hex=this.clothingColor(colors[colorSlot]||clothing?.color||fallback);
+    return `#${new THREE.Color(hex).getHexString()}`;
+  }
+
   async applyMakeHumanSurfaces(appearance,skinColor,eyeColor){
     const runtime=this.makeHumanRuntime;
     if(!runtime) return;
@@ -2096,11 +2196,17 @@ class ProjectionRenderer {
       const browId=this.resolveMakeHumanNativeId(f.browStyle,DEFAULT_MH_APPEARANCE.brows);
       const eyelashId=this.resolveMakeHumanNativeId(f.eyelashStyle,DEFAULT_MH_APPEARANCE.eyelashes);
       const tint=hairColor?.isColor?`#${hairColor.getHexString()}`:hairColor;
+      const cl=f.clothing||{};
+      const clothingRequests=["baseLayer","top","bottoms","socks","shoes"].map((slot)=>{
+        const id=this.resolveMakeHumanClothingId(slot,cl?.[slot]);
+        return id?{slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)}:null;
+      }).filter(Boolean);
       const nativeRequests=[
         hairId&&{slot:"hair",id:hairId,tint},
         browId&&{slot:"brows",id:browId,tint},
         eyelashId&&{slot:"eyelashes",id:eyelashId,tint},
-        beardId&&{slot:"facialHair",id:beardId,tint}
+        beardId&&{slot:"facialHair",id:beardId,tint},
+        ...clothingRequests
       ].filter(Boolean);
       await runtime.setNativeAssets(nativeRequests);
       if(serial!==this._makeHumanForgeSerial || runtime!==this.makeHumanRuntime || !this.currentObject) return;
