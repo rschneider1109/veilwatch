@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "weapons": [
+    {
+      "id": "q_animated_p90",
+      "label": "P90 (Animated Guns)",
+      "file": "q_animated_p90.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_animated_pistol",
+      "label": "Pistol (Animated Guns)",
+      "file": "q_animated_pistol.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_animated_revolver",
+      "label": "Revolver (Animated Guns)",
+      "file": "q_animated_revolver.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_animated_rifle",
+      "label": "Rifle (Animated Guns)",
+      "file": "q_animated_rifle.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_animated_shotgun",
+      "label": "Shotgun (Animated Guns)",
+      "file": "q_animated_shotgun.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_animated_sniperrifle",
+      "label": "Sniper Rifle (Animated Guns)",
+      "file": "q_animated_sniperrifle.fbx",
+      "source": "Animated Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_1",
+      "label": "Assault Rifle 1 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_2",
+      "label": "Assault Rifle 2 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_3",
+      "label": "Assault Rifle 3 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_4",
+      "label": "Assault Rifle 4 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle_5",
+      "label": "Assault Rifle 5 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle_5.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_1",
+      "label": "Assault Rifle2 1 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle2_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_2",
+      "label": "Assault Rifle2 2 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle2_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_3",
+      "label": "Assault Rifle2 3 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle2_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_assaultrifle2_4",
+      "label": "Assault Rifle2 4 (Ultimate Guns)",
+      "file": "q_ultimate_assaultrifle2_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_bullpup_1",
+      "label": "Bullpup 1 (Ultimate Guns)",
+      "file": "q_ultimate_bullpup_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_bullpup_2",
+      "label": "Bullpup 2 (Ultimate Guns)",
+      "file": "q_ultimate_bullpup_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_bullpup_3",
+      "label": "Bullpup 3 (Ultimate Guns)",
+      "file": "q_ultimate_bullpup_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_1",
+      "label": "Pistol 1 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_2",
+      "label": "Pistol 2 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_3",
+      "label": "Pistol 3 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_4",
+      "label": "Pistol 4 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_5",
+      "label": "Pistol 5 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_5.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_pistol_6",
+      "label": "Pistol 6 (Ultimate Guns)",
+      "file": "q_ultimate_pistol_6.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_revolver_1",
+      "label": "Revolver 1 (Ultimate Guns)",
+      "file": "q_ultimate_revolver_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_revolver_2",
+      "label": "Revolver 2 (Ultimate Guns)",
+      "file": "q_ultimate_revolver_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_revolver_3",
+      "label": "Revolver 3 (Ultimate Guns)",
+      "file": "q_ultimate_revolver_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_revolver_4",
+      "label": "Revolver 4 (Ultimate Guns)",
+      "file": "q_ultimate_revolver_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_revolver_5",
+      "label": "Revolver 5 (Ultimate Guns)",
+      "file": "q_ultimate_revolver_5.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_1",
+      "label": "Shotgun 1 (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_2",
+      "label": "Shotgun 2 (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_3",
+      "label": "Shotgun 3 (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_4",
+      "label": "Shotgun 4 (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_sawedoff",
+      "label": "Shotgun Sawed Off (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_sawedoff.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_shotgun_shortstock",
+      "label": "Shotgun Short Stock (Ultimate Guns)",
+      "file": "q_ultimate_shotgun_shortstock.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_1",
+      "label": "Sniper Rifle 1 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_2",
+      "label": "Sniper Rifle 2 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_3",
+      "label": "Sniper Rifle 3 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_4",
+      "label": "Sniper Rifle 4 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_5",
+      "label": "Sniper Rifle 5 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_5.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_sniperrifle_6",
+      "label": "Sniper Rifle 6 (Ultimate Guns)",
+      "file": "q_ultimate_sniperrifle_6.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_submachinegun_1",
+      "label": "Submachine Gun 1 (Ultimate Guns)",
+      "file": "q_ultimate_submachinegun_1.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_submachinegun_2",
+      "label": "Submachine Gun 2 (Ultimate Guns)",
+      "file": "q_ultimate_submachinegun_2.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_submachinegun_3",
+      "label": "Submachine Gun 3 (Ultimate Guns)",
+      "file": "q_ultimate_submachinegun_3.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_submachinegun_4",
+      "label": "Submachine Gun 4 (Ultimate Guns)",
+      "file": "q_ultimate_submachinegun_4.fbx",
+      "source": "Ultimate Guns"
+    },
+    {
+      "id": "q_ultimate_submachinegun_5",
+      "label": "Submachine Gun 5 (Ultimate Guns)",
+      "file": "q_ultimate_submachinegun_5.fbx",
+      "source": "Ultimate Guns"
+    }
+  ]
+}
