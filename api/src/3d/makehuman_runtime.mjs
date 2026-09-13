@@ -234,7 +234,14 @@ export class MakeHumanRuntime {
     this.nativeCatalog = null;
     this._nativeCatalogPromise = null;
     this._nativePackCache = new Map();
+    // Wardrobe loads are isolated per slot. A shirt change must not cancel a
+    // shoe/hair load (or wait for the entire character wardrobe to rebuild).
+    // _nativeLoadSerial remains the whole-runtime epoch used by clear/dispose;
+    // slot serials handle normal rapid selector changes independently.
     this._nativeLoadSerial = 0;
+    this._nativeSlotSerial = new Map();
+    this._nativePending = new Map();
+    this._nativeDesired = new Map();
     this.hiddenBodyVertices = new Set();
 
     // Surface textures are separate from mesh assets so changing skin/eyes never
@@ -803,10 +810,12 @@ export class MakeHumanRuntime {
     const data=await this._fetchGzipJson(`${RUNTIME_ROOT}/../library/packs/${file}`);
     const map=new Map((data.assets||[]).map(a=>[a.id,a]));
     this._nativePackCache.set(file,map);
-    // Keep only one decompressed source pack. Active meshes retain only the
-    // mapping data they need, so browsing large hair packs cannot grow the heap
-    // without bound during a long Projection Bay session.
-    while(this._nativePackCache.size>1){
+    // Keep a small LRU of decompressed source packs. One-pack caching forced a
+    // re-download whenever shirt/pants/shoes lived in different packs, making
+    // rapid wardrobe browsing look like the selector was not working. Four is
+    // enough to keep the active outfit hot without letting long sessions grow
+    // without bound.
+    while(this._nativePackCache.size>4){
       const first=this._nativePackCache.keys().next().value;
       this._nativePackCache.delete(first);
     }
@@ -936,15 +945,39 @@ export class MakeHumanRuntime {
     const dc=Array.isArray(m.diffuseColor)?m.diffuseColor:[.8,.8,.8];
     const color=new THREE.Color(dc[0]??.8,dc[1]??.8,dc[2]??.8);
     if(tint) color.multiply(tint);
+
+    // A subset of MakeHuman community .mhmat files carry transparency metadata
+    // that was converted as opacity=0 even though their diffuse texture is the
+    // visible garment. Treat zero as opaque for textured native assets; genuine
+    // semi-transparent values (for example stockings at 0.2) are preserved.
+    const packedOpacity=Number(m.opacity??1);
+    const hasDiffuse=!!asset.textures?.diffuse?.data;
+    const opacity=(hasDiffuse && packedOpacity<=.001)?1:THREE.MathUtils.clamp(Number.isFinite(packedOpacity)?packedOpacity:1,0,1);
+    const transparent=!!m.transparent || opacity<.999;
+    const shininess=THREE.MathUtils.clamp(Number(m.shininess??.2),0,1);
+    const roughness=Number.isFinite(Number(m.roughness))
+      ? THREE.MathUtils.clamp(Number(m.roughness),.05,1)
+      : THREE.MathUtils.clamp(.88-shininess*.50,.28,.92);
+
     const material=new THREE.MeshStandardMaterial({
-      color,roughness:.72,metalness:Math.max(0,Math.min(1,Number(m.metallic||0))),
-      transparent:!!m.transparent || Number(m.opacity??1)<.999,opacity:Number(m.opacity??1),
-      side:THREE.DoubleSide,alphaTest:(!!m.transparent?0.08:0)
+      color,roughness,metalness:Math.max(0,Math.min(1,Number(m.metallic||0))),
+      transparent,opacity,
+      side:m.backfaceCull===true?THREE.FrontSide:THREE.DoubleSide,
+      alphaTest:transparent?0.04:0
     });
     material.name=`MHNative_${asset.id}`; material.userData.veilwatchNativeAsset=true;
     material.userData.makeHumanZDepth=this._nativeLayerInfo(slot,asset).zDepth;
+    material.userData.makeHumanPackedOpacity=packedOpacity;
     const diffuse=await this._textureFromEmbedded(asset.textures?.diffuse,"diffuse");
-    if(diffuse){ material.map=diffuse; material.needsUpdate=true; }
+    if(diffuse){
+      // MakeHuman/OBJ libraries legitimately use UVs slightly outside 0..1.
+      // Repeat wrapping preserves those authored seams instead of smearing edge
+      // pixels across sleeves, hems and accessories.
+      diffuse.wrapS=THREE.RepeatWrapping;
+      diffuse.wrapT=THREE.RepeatWrapping;
+      diffuse.needsUpdate=true;
+      material.map=diffuse; material.needsUpdate=true;
+    }
     return material;
   }
 
@@ -1037,69 +1070,102 @@ export class MakeHumanRuntime {
   }
 
   async setNativeAssets(requests=[]){
-    const serial=++this._nativeLoadSerial;
-    const desired=new Map((requests||[]).filter(r=>r?.slot&&r?.id).map(r=>[r.slot,r]));
-    const pending=[];
+    const epoch=this._nativeLoadSerial;
+    const desired=new Map((requests||[])
+      .filter(r=>r?.slot&&r?.id)
+      .map(r=>[String(r.slot),{slot:String(r.slot),id:String(r.id),tint:r.tint||null}]));
+    this._nativeDesired=desired;
 
-    // Build replacement meshes off-scene first. The currently equipped item is
-    // kept alive until its replacement is fully decoded, textured and skinned.
-    // This makes wardrobe changes transactional: a bad/slow asset cannot leave
-    // the character half-dressed or with a half-updated body mask.
+    // Remove deselected slots immediately. This is intentionally independent
+    // from replacement loading so choosing "None" is visibly instant.
+    for(const [slot,row] of [...this.nativeAssets.entries()]){
+      if(desired.has(slot)) continue;
+      this._nativeSlotSerial.set(slot,(this._nativeSlotSerial.get(slot)||0)+1);
+      this._disposeNativeRoot(row.root);
+      this.nativeAssets.delete(slot);
+    }
+
+    const jobs=[];
     for(const [slot,req] of desired.entries()){
       const existing=this.nativeAssets.get(slot);
-      if(existing?.id===req.id) continue;
-      try{
-        const asset=await this._nativeAssetData(req.id);
-        if(serial!==this._nativeLoadSerial){
-          for(const item of pending) this._disposeNativeRoot(item.row.root);
-          return false;
-        }
-        const tint=req.tint?new THREE.Color(req.tint):null;
-        const mesh=await this._createNativeAssetMesh(asset,tint,slot);
-        if(serial!==this._nativeLoadSerial){
-          this._disposeNativeRoot(mesh);
-          for(const item of pending) this._disposeNativeRoot(item.row.root);
-          return false;
-        }
-        const root=new THREE.Group();
-        root.name=`MHNativeSlot_${slot}`;
-        root.add(mesh);
-        const activeAsset=this._compactNativeAsset(asset);
-        pending.push({slot,row:{id:req.id,asset:activeAsset,root,mesh,tint:req.tint||null}});
-      }catch(err){
-        console.warn(`MakeHuman native asset failed (${slot}:${req.id}):`,err?.message||err);
-        // Keep the currently equipped item in this slot if a replacement fails.
+      if(existing?.id===req.id){
+        this._updateNativeTint(existing,req.tint);
+        continue;
       }
-    }
 
-    if(serial!==this._nativeLoadSerial){
-      for(const item of pending) this._disposeNativeRoot(item.row.root);
-      return false;
-    }
-
-    const pendingSlots=new Set(pending.map(x=>x.slot));
-    for(const [slot,row] of [...this.nativeAssets.entries()]){
-      const d=desired.get(slot);
-      if(!d || pendingSlots.has(slot)){
-        this._disposeNativeRoot(row.root);
-        this.nativeAssets.delete(slot);
+      // If this exact geometry is already loading, reuse it. The promise reads
+      // the latest desired tint before commit, so color changes do not trigger
+      // another geometry download.
+      const inFlight=this._nativePending.get(slot);
+      if(inFlight?.id===req.id && inFlight.token===this._nativeSlotSerial.get(slot)){
+        jobs.push(inFlight.promise);
+        continue;
       }
+
+      const token=(this._nativeSlotSerial.get(slot)||0)+1;
+      this._nativeSlotSerial.set(slot,token);
+
+      const promise=(async()=>{
+        let root=null;
+        try{
+          const asset=await this._nativeAssetData(req.id);
+          const wantedAfterData=this._nativeDesired.get(slot);
+          if(epoch!==this._nativeLoadSerial || this._nativeSlotSerial.get(slot)!==token || wantedAfterData?.id!==req.id) return false;
+
+          const tint=wantedAfterData?.tint?new THREE.Color(wantedAfterData.tint):null;
+          const mesh=await this._createNativeAssetMesh(asset,tint,slot);
+          root=new THREE.Group();
+          root.name=`MHNativeSlot_${slot}`;
+          root.add(mesh);
+
+          const wantedAtCommit=this._nativeDesired.get(slot);
+          if(epoch!==this._nativeLoadSerial || this._nativeSlotSerial.get(slot)!==token || wantedAtCommit?.id!==req.id){
+            this._disposeNativeRoot(root);
+            return false;
+          }
+
+          const activeAsset=this._compactNativeAsset(asset);
+          const next={id:req.id,asset:activeAsset,root,mesh,tint:wantedAtCommit?.tint||null};
+          const old=this.nativeAssets.get(slot);
+          if(old) this._disposeNativeRoot(old.root);
+          this.root.add(root);
+          this.nativeAssets.set(slot,next);
+          this._updateNativeTint(next,wantedAtCommit?.tint||null);
+
+          // Refresh masking per committed slot. The new garment becomes visible
+          // as soon as it is ready instead of waiting for unrelated wardrobe
+          // assets to finish loading.
+          this._refreshNativeBodyMask();
+          return true;
+        }catch(err){
+          if(root) this._disposeNativeRoot(root);
+          console.warn(`MakeHuman native asset failed (${slot}:${req.id}):`,err?.message||err);
+          // Keep the previous item in this slot if replacement loading fails.
+          return false;
+        }finally{
+          const current=this._nativePending.get(slot);
+          if(current?.token===token) this._nativePending.delete(slot);
+        }
+      })();
+
+      this._nativePending.set(slot,{id:req.id,token,promise});
+      jobs.push(promise);
     }
 
-    for(const {slot,row} of pending){
-      this.root.add(row.root);
-      this.nativeAssets.set(slot,row);
-    }
+    if(jobs.length) await Promise.allSettled(jobs);
+    if(epoch!==this._nativeLoadSerial) return false;
 
-    for(const [slot,req] of desired.entries()){
+    // A tint may have changed while geometry was loading. Always finish by
+    // applying the newest requested tint to whatever slot ultimately won.
+    for(const [slot,req] of this._nativeDesired.entries()){
       const existing=this.nativeAssets.get(slot);
       if(existing?.id===req.id) this._updateNativeTint(existing,req.tint);
     }
 
     const helperLashes=this.renderMeshes.find(m=>m.name==="MakeHumanEyelashes");
-    if(helperLashes) helperLashes.visible=!desired.has("eyelashes");
+    if(helperLashes) helperLashes.visible=!this._nativeDesired.has("eyelashes");
     this._refreshNativeBodyMask();
-    return serial===this._nativeLoadSerial;
+    return true;
   }
 
   refitNativeAssets(){
@@ -1119,6 +1185,9 @@ export class MakeHumanRuntime {
 
   clearNativeAssets(){
     this._nativeLoadSerial++;
+    this._nativeDesired.clear();
+    this._nativePending.clear();
+    this._nativeSlotSerial.clear();
     for(const row of this.nativeAssets.values()) this._disposeNativeRoot(row.root);
     this.nativeAssets.clear(); this.hiddenBodyVertices.clear(); this._nativePackCache.clear();
   }

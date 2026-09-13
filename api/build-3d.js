@@ -85,6 +85,27 @@ function ensureMakeHumanAppearanceData(){
 }
 
 
+function ensureMakeHumanWardrobeManifestAlignment(){
+  const root = path.join("public", "assets", "characters", "makehuman");
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, "library", "catalog.json"), "utf8"));
+  const manifestPath = path.join("public", "assets", "characters", "character_forge_manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const slots = ["baseLayer","top","bottoms","onePiece","socks","shoes","gloves","headwear","eyewear","neck","vest","back"];
+  let checked = 0;
+  for(const slot of slots){
+    for(const row of manifest.clothing?.[slot] || []){
+      const id=String(typeof row === "string" ? row : row?.id || "");
+      if(!id || id === "none") continue;
+      const nativeRow=catalog.assets?.[id];
+      if(!nativeRow) throw new Error(`Character Forge wardrobe option missing from native catalog: ${slot} -> ${id}`);
+      if(String(nativeRow.category||"") !== slot) throw new Error(`Character Forge wardrobe category mismatch: ${slot} -> ${id} (${nativeRow.category})`);
+      checked++;
+    }
+  }
+  if(checked < 390) throw new Error(`Character Forge wardrobe manifest unexpectedly small (${checked} native options)`);
+  console.log(`Character Forge wardrobe alignment ready: ${checked} selectable native assets resolve to their runtime catalog slots.`);
+}
+
 function ensureMakeHumanWardrobeIntegrity(){
   const root = path.join("public", "assets", "characters", "makehuman");
   const runtimeRoot = path.join(root, "runtime");
@@ -287,6 +308,7 @@ function ensureSection5RuntimeData(){
 async function main(){
   ensureMakeHumanRuntimeData();
   ensureMakeHumanAppearanceData();
+  ensureMakeHumanWardrobeManifestAlignment();
   ensureMakeHumanWardrobeIntegrity();
   await ensureFpsWeaponAssets();
   ensureSection5RuntimeData();
