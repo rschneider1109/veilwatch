@@ -1,0 +1,428 @@
+{
+  "version": "7.0.0-alpha.1",
+  "characterStandard": "veilwatch_human_makehuman_v2",
+  "species": [
+    "human"
+  ],
+  "licenses": [
+    {
+      "name": "MakeHuman HM08 runtime data",
+      "license": "CC0-1.0 data foundation",
+      "source": "MakeHuman Community / MPFB 2.0.17 data"
+    },
+    {
+      "name": "Vitruvian",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Upliner/CharMorph-Vitruvian"
+    },
+    {
+      "name": "VitruvianGodot runtime preparation",
+      "license": "MIT / CC0 assets",
+      "source": "https://github.com/ibrews/VitruvianGodot"
+    }
+  ],
+  "skinTones": [
+    {
+      "id": "very_fair",
+      "label": "Very Fair",
+      "hex": "#F5D9C9"
+    },
+    {
+      "id": "fair",
+      "label": "Fair",
+      "hex": "#EBC7B0"
+    },
+    {
+      "id": "light",
+      "label": "Light",
+      "hex": "#DDAF91"
+    },
+    {
+      "id": "warm",
+      "label": "Warm",
+      "hex": "#CC9874"
+    },
+    {
+      "id": "tan",
+      "label": "Tan",
+      "hex": "#B67B57"
+    },
+    {
+      "id": "olive",
+      "label": "Olive",
+      "hex": "#9F7655"
+    },
+    {
+      "id": "medium_brown",
+      "label": "Medium Brown",
+      "hex": "#875A3D"
+    },
+    {
+      "id": "brown",
+      "label": "Brown",
+      "hex": "#70462F"
+    },
+    {
+      "id": "dark_brown",
+      "label": "Dark Brown",
+      "hex": "#543321"
+    },
+    {
+      "id": "deep",
+      "label": "Deep",
+      "hex": "#3A2419"
+    }
+  ],
+  "eyeColors": [
+    {
+      "id": "brown",
+      "label": "Brown",
+      "hex": "#5C3924"
+    },
+    {
+      "id": "hazel",
+      "label": "Hazel",
+      "hex": "#806736"
+    },
+    {
+      "id": "blue",
+      "label": "Blue",
+      "hex": "#4E86B4"
+    },
+    {
+      "id": "green",
+      "label": "Green",
+      "hex": "#527C58"
+    },
+    {
+      "id": "gray",
+      "label": "Gray",
+      "hex": "#8F97A0"
+    },
+    {
+      "id": "amber",
+      "label": "Amber",
+      "hex": "#AA7B30"
+    }
+  ],
+  "hairColors": [
+    {
+      "id": "black",
+      "label": "Black",
+      "hex": "#171411"
+    },
+    {
+      "id": "dark_brown",
+      "label": "Dark Brown",
+      "hex": "#34261C"
+    },
+    {
+      "id": "brown",
+      "label": "Brown",
+      "hex": "#5B3B26"
+    },
+    {
+      "id": "blonde",
+      "label": "Blonde",
+      "hex": "#CFAF63"
+    },
+    {
+      "id": "auburn",
+      "label": "Auburn",
+      "hex": "#7C3D28"
+    },
+    {
+      "id": "red",
+      "label": "Red",
+      "hex": "#9D4021"
+    },
+    {
+      "id": "gray",
+      "label": "Gray",
+      "hex": "#808188"
+    },
+    {
+      "id": "white",
+      "label": "White",
+      "hex": "#E7E7E7"
+    }
+  ],
+  "facePresets": [
+    {
+      "id": "neutral",
+      "label": "Neutral",
+      "description": "Relaxed resting face",
+      "weights": {}
+    },
+    {
+      "id": "friendly",
+      "label": "Friendly",
+      "description": "Soft smile and slightly raised brows",
+      "weights": {
+        "Smile_Lips_Closed": 0.32,
+        "Happy": 0.06,
+        "Lips_Up_Corner_Wide_Left": 0.035,
+        "Lips_Up_Corner_Wide_Right": 0.035,
+        "Eyebrows_Raised_Left": 0.025,
+        "Eyebrows_Raised_Right": 0.025
+      }
+    },
+    {
+      "id": "serious",
+      "label": "Serious",
+      "description": "Firm mouth with a subtle brow set",
+      "weights": {
+        "Eyebrows_Frown_Left": 0.11,
+        "Eyebrows_Frown_Right": 0.11,
+        "Eyes_Squint": 0.035
+      }
+    },
+    {
+      "id": "focused",
+      "label": "Focused",
+      "description": "Concentrated, slightly narrowed gaze",
+      "weights": {
+        "Thinking": 0.16,
+        "Eyes_Squint": 0.07,
+        "Eyebrows_Frown_Left": 0.045,
+        "Eyebrows_Frown_Right": 0.045
+      }
+    },
+    {
+      "id": "concerned",
+      "label": "Concerned",
+      "description": "Mild worry without an exaggerated expression",
+      "weights": {
+        "Sad": 0.12,
+        "Eyebrows_Raised_Left": 0.055,
+        "Eyebrows_Raised_Right": 0.055
+      }
+    },
+    {
+      "id": "confident",
+      "label": "Confident",
+      "description": "Subtle asymmetric smirk",
+      "weights": {
+        "Smile_Lips_Closed": 0.16,
+        "Lips_Up_Corner_Wide_Left": 0.08,
+        "Eyebrows_Raised_Left": 0.035
+      }
+    }
+  ],
+  "hairStyles": [
+    {
+      "id": "bald",
+      "label": "Bald",
+      "kind": "none",
+      "variant": "none",
+      "description": "No scalp hair"
+    },
+    {
+      "id": "classic_bob",
+      "label": "Classic Bob",
+      "kind": "asset",
+      "variant": "classic",
+      "description": "Original Vitruvian jaw-length card groom"
+    },
+    {
+      "id": "buzz",
+      "label": "Buzz Cut",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/buzz.glb",
+      "description": "Very short fitted fiber cut"
+    },
+    {
+      "id": "close_crop",
+      "label": "Close Crop",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/close_crop.glb",
+      "description": "Short cropped fitted hair"
+    },
+    {
+      "id": "short_messy",
+      "label": "Short Messy",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/short_messy.glb",
+      "description": "Short textured messy cut"
+    },
+    {
+      "id": "side_part",
+      "label": "Side Part",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/side_part.glb",
+      "description": "Short side-parted style"
+    },
+    {
+      "id": "slicked_back",
+      "label": "Slicked Back",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/slicked_back.glb",
+      "description": "Swept-back short style"
+    },
+    {
+      "id": "classic_ponytail",
+      "label": "Ponytail",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/classic_ponytail.glb",
+      "description": "Tied-back ponytail"
+    },
+    {
+      "id": "high_bun",
+      "label": "High Bun",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/high_bun.glb",
+      "description": "Tied high bun"
+    },
+    {
+      "id": "long_straight",
+      "label": "Long Straight",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/long_straight.glb",
+      "description": "Long straight shoulder-length hair"
+    },
+    {
+      "id": "shoulder_waves",
+      "label": "Shoulder Waves",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/shoulder_waves.glb",
+      "description": "Medium-long wavy hair"
+    },
+    {
+      "id": "locs",
+      "label": "Locs",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/locs.glb",
+      "description": "Individual loc strands"
+    },
+    {
+      "id": "braids",
+      "label": "Braids",
+      "kind": "asset",
+      "path": "/assets/characters/hair/veilwatch_original/braids.glb",
+      "description": "Braided rows and lengths"
+    }
+  ],
+  "facialHairStyles": [
+    {
+      "id": "none",
+      "label": "None",
+      "kind": "none"
+    },
+    {
+      "id": "stubble",
+      "label": "Stubble",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/stubble.glb"
+    },
+    {
+      "id": "short_beard",
+      "label": "Short Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/short_beard.glb"
+    },
+    {
+      "id": "trimmed_beard",
+      "label": "Trimmed Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/trimmed_beard.glb"
+    },
+    {
+      "id": "boxed_beard",
+      "label": "Boxed Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/boxed_beard.glb"
+    },
+    {
+      "id": "full_beard",
+      "label": "Full Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/full_beard.glb"
+    },
+    {
+      "id": "mustache",
+      "label": "Mustache",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/mustache.glb"
+    },
+    {
+      "id": "goatee",
+      "label": "Goatee",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/goatee.glb"
+    },
+    {
+      "id": "circle_beard",
+      "label": "Circle Beard",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/circle_beard.glb"
+    },
+    {
+      "id": "soul_patch",
+      "label": "Soul Patch",
+      "kind": "asset",
+      "path": "/assets/characters/facial_hair/veilwatch_original/soul_patch.glb"
+    }
+  ],
+  "aliases": {
+    "skinTones": {
+      "light": "light",
+      "fair": "fair",
+      "warm": "warm",
+      "tan": "tan",
+      "olive": "olive",
+      "brown": "brown",
+      "deep": "deep"
+    },
+    "facePresets": {
+      "clean": "neutral",
+      "sharp": "serious",
+      "tired": "concerned",
+      "scarred": "serious",
+      "weathered": "focused"
+    },
+    "hairStyles": {
+      "short": "close_crop",
+      "buzz": "buzz",
+      "fade": "close_crop",
+      "long_straight": "long_straight",
+      "wavy": "shoulder_waves",
+      "curly": "shoulder_waves",
+      "bun": "high_bun",
+      "ponytail": "classic_ponytail",
+      "bald": "bald",
+      "close_crop": "close_crop",
+      "short_bob": "classic_bob",
+      "long_bob": "long_straight",
+      "slicked_back": "slicked_back",
+      "side_part": "side_part",
+      "short_curls": "classic_bob",
+      "braids": "braids",
+      "locs": "locs"
+    },
+    "facialHairStyles": {
+      "trimmed": "trimmed_beard",
+      "full": "full_beard"
+    }
+  },
+  "futureSlots": [
+    "headwear",
+    "eyewear",
+    "neck",
+    "shirt",
+    "outerwear",
+    "pants",
+    "belt",
+    "shoes",
+    "gloves",
+    "vest",
+    "back",
+    "left_hip",
+    "right_hip"
+  ],
+  "foundation": {
+    "id": "makehuman_hm08",
+    "runtime": "browser-native",
+    "manualBlenderRequired": false,
+    "fallback": "vitruvian"
+  }
+}
