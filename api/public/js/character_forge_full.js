@@ -1,4 +1,4 @@
-// Veilwatch Full Character Forge v1.0
+// Veilwatch Full Character Forge v2.0 MakeHuman foundation
 (function(){
   "use strict";
   const $=id=>document.getElementById(id);
@@ -56,7 +56,7 @@
       section('Face Details',`<div class="projection-form-grid projection-forge-two-col">${sel('Piercing','piercing',manifest.face?.piercings||[],f.piercing)}${sel('Face Scar','faceScar',manifest.face?.faceScars||[],f.faceScar)}</div>`);
 
     const hair=$('projectionFullForgeHair');
-    if(hair) hair.innerHTML='<div class="mini">Scalp hair and facial hair are backed by individual fitted meshes. Hair color is applied consistently to scalp hair, brows, facial hair, and inherited body hair.</div>';
+    if(hair) hair.innerHTML='<div class="mini">MakeHuman HM08 is now the character foundation. The uploaded MakeHuman hair packs are being connected through the native asset pipeline instead of forcing old Vitruvian-fitted meshes onto the new body.</div>';
 
     const c=$('projectionFullForgeClothing');
     if(c){
@@ -79,7 +79,7 @@
     }
 
     const a=$('projectionFullForgeAnimation');
-    if(a) a.innerHTML=section('Animation Clip',`<div class="projection-form-grid">${sel('Preview','animation',manifest.animations,f.animation)}</div><div class="mini">Includes native Vitruvian clips plus the CC0 Universal Animation Library when available.</div>`);
+    if(a) a.innerHTML=section('Animation Clip',`<div class="projection-form-grid">${sel('Preview','animation',manifest.animations,f.animation)}</div><div class="mini">Uses the MakeHuman Mixamo-compatible skeleton and the CC0 Universal Animation Library. Legacy Vitruvian is retained only as a load fallback.</div>`);
     wire();
   }
   function setPath(obj,path,val){ const parts=path.split('.'); let o=obj; while(parts.length>1){ const k=parts.shift(); o[k]=o[k]||{}; o=o[k]; } o[parts[0]]=val; }
