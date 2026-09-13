@@ -13,7 +13,7 @@
     expressionIntensity:100,browStyle:"auto",eyelashStyle:"auto",skinMaterial:"auto",eyeMaterial:"auto",piercing:"none",faceScar:"none",
     bodyHair:"none",bodyHairColor:"inherit",bodyScar:"none",tattoo:"none",
     clothing:{
-      baseLayer:"boxer_briefs",top:"plain_tshirt",outerwear:"none",bottoms:"jeans_straight",onePiece:"none",socks:"crew_socks",shoes:"sneakers",gloves:"none",headwear:"none",eyewear:"none",neck:"none",belt:"civilian_belt",vest:"none",back:"none",
+      baseLayer:"mh_underwear02_cc0__punkduck_sport_briefs",top:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",outerwear:"none",bottoms:"mh_pants01_cc0__cortu_cargo_pants",onePiece:"none",socks:"mh_underwear04_cc0__joepal_crude_low_socks",shoes:"mh_shoes02_ccby__punkduck_comfortable_sneakers",gloves:"none",headwear:"none",eyewear:"none",neck:"none",belt:"none",vest:"none",back:"none",
       color:"charcoal",
       colors:{baseLayer:"charcoal",top:"charcoal",outerwear:"black",bottoms:"navy",onePiece:"charcoal",shoes:"black",gear:"black"}
     },
@@ -29,6 +29,14 @@
     const f=Object.assign(clone(DEFAULT),clone(raw));
     f.clothing=Object.assign({},DEFAULT.clothing,raw.clothing||{});
     f.clothing.colors=Object.assign({},DEFAULT.clothing.colors,raw.clothing?.colors||{});
+    // Upgrade legacy generic wardrobe IDs in-memory so old characters display
+    // the exact MakeHuman garment that the renderer will use.
+    for(const slot of ['baseLayer','top','bottoms','socks','shoes']){
+      const current=String(f.clothing?.[slot]||'none');
+      if(current==='none'||current.startsWith('mh_')) continue;
+      const aliases=manifest?.nativeClothing?.legacyAliases?.[slot]||{};
+      f.clothing[slot]=aliases[current]||manifest?.nativeClothing?.defaults?.[slot]||'none';
+    }
     f.cybernetics=Object.assign({},DEFAULT.cybernetics,raw.cybernetics||{});
     return f;
   }
@@ -67,10 +75,14 @@
 
     const c=$('projectionFullForgeClothing');
     if(c){
-      const cl=f.clothing; const keys=['baseLayer','top','outerwear','bottoms','onePiece','socks','shoes','gloves','headwear','eyewear','neck','belt','vest','back'];
+      const cl=f.clothing; const keys=['baseLayer','top','bottoms','socks','shoes'];
       const colors=cl.colors||{};
-      c.innerHTML=section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${keys.map(k=>sel(title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
-        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${(manifest.clothing.colorSlots||[]).map(k=>sel(`${title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal')).join('')}</div>`);
+      const cc=manifest.nativeClothing?.counts||{};
+      const coreCount=Number(cc.baseLayer||0)+Number(cc.top||0)+Number(cc.bottoms||0)+Number(cc.socks||0)+Number(cc.shoes||0);
+      const colorKeys=['baseLayer','top','bottoms','shoes'];
+      c.innerHTML=`<div class="mini">MakeHuman core wardrobe online: ${coreCount} fitted garments across base layers, tops, bottoms, socks, and shoes. These use native .mhclo fitting and refit when body proportions change. Extended wardrobe and gear are intentionally held for Section 4.</div>`+
+        section('Core Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${keys.map(k=>sel(title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
+        section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal')).join('')}</div>`);
     }
 
     const e=$('projectionFullForgeEquipment');
