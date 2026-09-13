@@ -57,7 +57,7 @@ function ensureMakeHumanAppearanceData(){
   if(!fs.existsSync(surfaceCatalogPath)) throw new Error(`Missing MakeHuman surface catalog: ${surfaceCatalogPath}`);
 
   const library = JSON.parse(fs.readFileSync(libraryCatalogPath, "utf8"));
-  const requiredCounts = { hair:35, facialHair:9, brows:14, eyelashes:5, baseLayer:58, top:42, bottoms:25, socks:4, shoes:59 };
+  const requiredCounts = { hair:35, facialHair:9, brows:14, eyelashes:5, baseLayer:58, top:42, bottoms:45, onePiece:64, socks:4, shoes:59, gloves:9, headwear:39, eyewear:15, neck:45, vest:3, back:10 };
   for(const [category, minimum] of Object.entries(requiredCounts)){
     const count = (library.categories?.[category] || []).length;
     if(count < minimum) throw new Error(`MakeHuman ${category} catalog incomplete (${count}/${minimum})`);
@@ -81,7 +81,7 @@ function ensureMakeHumanAppearanceData(){
     const parsed = JSON.parse(zlib.gunzipSync(fs.readFileSync(fp)).toString("utf8"));
     if(!(parsed.surfaces || []).length) throw new Error(`Empty MakeHuman surface pack: ${file}`);
   }
-  console.log(`MakeHuman appearance/wardrobe ready: ${requiredCounts.hair} hair, ${requiredCounts.facialHair} facial hair, ${requiredCounts.brows} brows, ${requiredCounts.eyelashes} lashes, ${requiredCounts.top} tops, ${requiredCounts.bottoms} bottoms, ${requiredCounts.baseLayer} base layers, ${requiredCounts.socks} socks, ${requiredCounts.shoes} shoes, ${skins} skins, ${eyes} eye materials.`);
+  console.log(`MakeHuman appearance/wardrobe ready: ${requiredCounts.hair} hair, ${requiredCounts.facialHair} facial hair, ${requiredCounts.brows} brows, ${requiredCounts.eyelashes} lashes, ${requiredCounts.top} tops, ${requiredCounts.bottoms} bottoms, ${requiredCounts.onePiece} dresses/suits, ${requiredCounts.baseLayer} base layers, ${requiredCounts.socks} socks, ${requiredCounts.shoes} shoes, ${requiredCounts.gloves} gloves, ${requiredCounts.headwear} headwear, ${requiredCounts.eyewear} eyewear, ${requiredCounts.neck} jewelry, ${requiredCounts.vest} vests/rigs, ${requiredCounts.back} carried gear, ${skins} skins, ${eyes} eye materials.`);
 }
 
 function rebuildChunkedAsset({ partsDir, partPrefix, outputFile }){

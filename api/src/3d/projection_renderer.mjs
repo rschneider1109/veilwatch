@@ -154,8 +154,10 @@ const DEFAULT_MH_CLOTHING = {
   baseLayer:"mh_underwear02_cc0__punkduck_sport_briefs",
   top:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
   bottoms:"mh_pants01_cc0__cortu_cargo_pants",
+  onePiece:"",
   socks:"mh_underwear04_cc0__joepal_crude_low_socks",
-  shoes:"mh_shoes02_ccby__punkduck_comfortable_sneakers"
+  shoes:"mh_shoes02_ccby__punkduck_comfortable_sneakers",
+  gloves:"", headwear:"", eyewear:"", neck:"", vest:"", back:""
 };
 
 // Compatibility aliases keep older saved Veilwatch characters usable while
@@ -232,6 +234,43 @@ const LEGACY_MH_CLOTHING = {
     slip_ons:"mh_shoes01_cc0__toigo_flats",
     flats:"mh_shoes01_cc0__toigo_ballet_flats",
     ankle_boots:"mh_shoes01_cc0__toigo_ankle_boots_female"
+  },
+  onePiece:{
+    casual_dress:"mh_dress01_cc0__toigo_shift_dress",
+    formal_dress:"mh_dress03_cc-by__punkduck_evening_gown",
+    sundress:"mh_dress01_cc0__toigo_camisole_dress_with_full_skirt",
+    cocktail_dress:"mh_dress03_cc-by__punkduck_black_cocktail_dress"
+  },
+  gloves:{
+    work_gloves:"mh_gloves01_cc0__culturalibre_hero-heroine_gloves_3",
+    tactical_gloves:"mh_gloves01_cc0__culturalibre_hero-heroine_gloves_5",
+    fingerless_gloves:"mh_gloves01_cc0__learning_mma_fighting_gloves",
+    winter_gloves:"mh_gloves01_cc0__toigo_gloves_long"
+  },
+  headwear:{
+    baseball_cap:"mh_hats03_cc-by__mindfront_patrol_cap",
+    beanie:"mh_hats03_cc-by__elvs_slouchy_beanie1",
+    tactical_cap:"mh_hats03_cc-by__mindfront_patrol_cap",
+    helmet:"mh_hats02_cc0__mrgreaterthan_m1_helmet"
+  },
+  eyewear:{
+    glasses_round:"mh_glasses01_cc0__toigo_round_glasses_leopard",
+    glasses_rectangular:"mh_glasses01_cc0__kwnet_at_optical_glasses",
+    goggles:"mh_glasses02_ccby__elvs_covid_goggles1"
+  },
+  neck:{
+    chain:"mh_jewelry01_cc0__learning_slave_collar_chain",
+    dog_tags:"mh_jewelry02_cc-by__punkduck_makehuman_medal"
+  },
+  vest:{
+    soft_armor:"mh_equipment03_cc-by__mindfront_tactical_vest_male",
+    plate_carrier:"mh_equipment03_cc-by__mindfront_tactical_vest_male",
+    chest_rig:"mh_equipment03_cc-by__mindfront_tactical_vest_female"
+  },
+  back:{
+    daypack:"mh_equipment03_cc-by__culturalibre_suitcase",
+    sling_bag:"mh_equipment03_cc-by__elvs_sling_purse1",
+    messenger_bag:"mh_equipment03_cc-by__punkduck_handbag01"
   }
 };
 
@@ -2149,9 +2188,13 @@ class ProjectionRenderer {
   }
 
   makeHumanClothingTint(clothing,slot){
+    // Preserve authored colors for eyewear and jewelry. Other wardrobe pieces
+    // can use the Character Forge palette without multiplying every accessory
+    // texture into a muddy tint.
+    if(slot==="eyewear" || slot==="neck") return null;
     const colors=clothing?.colors||{};
-    const colorSlot=slot==="socks"?"baseLayer":slot;
-    const fallback=slot==="bottoms"?"navy":(slot==="shoes"?"black":"charcoal");
+    const colorSlot=slot==="socks"?"baseLayer":(["gloves","headwear","vest","back"].includes(slot)?"gear":slot);
+    const fallback=slot==="bottoms"?"navy":(slot==="shoes"?"black":(["gloves","headwear","vest","back"].includes(slot)?"black":"charcoal"));
     const hex=this.clothingColor(colors[colorSlot]||clothing?.color||fallback);
     return `#${new THREE.Color(hex).getHexString()}`;
   }
@@ -2197,8 +2240,15 @@ class ProjectionRenderer {
       const eyelashId=this.resolveMakeHumanNativeId(f.eyelashStyle,DEFAULT_MH_APPEARANCE.eyelashes);
       const tint=hairColor?.isColor?`#${hairColor.getHexString()}`:hairColor;
       const cl=f.clothing||{};
-      const clothingRequests=["baseLayer","top","bottoms","socks","shoes"].map((slot)=>{
-        const id=this.resolveMakeHumanClothingId(slot,cl?.[slot]);
+      const onePieceId=this.resolveMakeHumanClothingId("onePiece",cl?.onePiece);
+      // Dresses and full suits replace separate top/bottom geometry while selected.
+      // The saved shirt/pants choices are left intact so they return immediately
+      // when the one-piece item is removed.
+      const clothingSlots=onePieceId
+        ? ["baseLayer","onePiece","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]
+        : ["baseLayer","top","bottoms","socks","shoes","gloves","headwear","eyewear","neck","vest","back"];
+      const clothingRequests=clothingSlots.map((slot)=>{
+        const id=slot==="onePiece"?onePieceId:this.resolveMakeHumanClothingId(slot,cl?.[slot]);
         return id?{slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)}:null;
       }).filter(Boolean);
       const nativeRequests=[
