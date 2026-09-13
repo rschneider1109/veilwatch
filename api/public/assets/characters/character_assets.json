@@ -1,10 +1,15 @@
 {
-  "version": "6.0.0",
-  "characterStandard": "veilwatch_human_v1",
+  "version": "7.0.0-alpha.1",
+  "characterStandard": "veilwatch_human_makehuman_v2",
   "species": [
     "human"
   ],
   "licenses": [
+    {
+      "name": "MakeHuman HM08 runtime data",
+      "license": "CC0-1.0 data foundation",
+      "source": "MakeHuman Community / MPFB 2.0.17 data"
+    },
     {
       "name": "Vitruvian",
       "license": "CC0-1.0",
@@ -413,5 +418,11 @@
     "back",
     "left_hip",
     "right_hip"
-  ]
+  ],
+  "foundation": {
+    "id": "makehuman_hm08",
+    "runtime": "browser-native",
+    "manualBlenderRequired": false,
+    "fallback": "vitruvian"
+  }
 }

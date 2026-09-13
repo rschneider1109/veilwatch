@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
-  "standard": "veilwatch_character_forge_v1",
+  "version": "2.0.0-alpha.1",
+  "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
       "masculine",
@@ -578,5 +578,23 @@
       0,
       100
     ]
+  },
+  "foundation": {
+    "id": "makehuman_hm08",
+    "name": "MakeHuman HM08",
+    "source": "MPFB 2.0.17 data foundation",
+    "runtime": "browser-native",
+    "manualBlenderRequired": false,
+    "legacyFallback": "vitruvian",
+    "stage": "foundation-online"
+  },
+  "runtimeCapabilities": {
+    "trueTargetMorphs": true,
+    "mixamoSkeleton": true,
+    "quaterniusRetargeting": true,
+    "projectionCuff": true,
+    "weaponAttachment": true,
+    "makeHumanWardrobe": "next-pass",
+    "makeHumanHair": "next-pass"
   }
 }
