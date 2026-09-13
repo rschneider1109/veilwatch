@@ -66,7 +66,7 @@ const FORGE_ANIMATION_ALIASES = {
   Walk:"Walk_Loop",
   Wave:"Idle_Talking_Loop"
 };
-const UAL_TO_VITRUVIAN_BONES = {
+const UAL_TO_MAKEHUMAN_BONES = {
   pelvis:"Hips",
   spine01:"Spine", spine02:"Spine1", spine03:"Spine2",
   neck01:"Neck", head:"Head",
@@ -529,6 +529,7 @@ class ProjectionRenderer {
     this.activeAnimationName = "";
     this._requestedAnimationName = "";
     this._forgeAnimationPromise = null;
+    this._activePreparedClip = null;
     this._poseCatalog = null;
     this._poseCatalogPromise = null;
     this._posePackCache = new Map();
@@ -567,11 +568,13 @@ class ProjectionRenderer {
     if(!this.mixer) return;
     try{
       this.mixer.stopAllAction?.();
+      if(this._activePreparedClip) this.mixer.uncacheClip?.(this._activePreparedClip);
       if(this.currentObject) this.mixer.uncacheRoot?.(this.currentObject);
     }catch(err){
       console.warn("Veilwatch animation mixer cleanup warning:", err?.message || err);
     }
     this.mixer = null;
+    this._activePreparedClip = null;
     this.activeAnimationName = "";
     this._requestedAnimationName = "";
   }
@@ -1588,7 +1591,201 @@ class ProjectionRenderer {
   }
 
   retargetQuaterniusClip(clip,sourceRoot){
-    return this.retargetExternalClip(clip,sourceRoot,UAL_TO_VITRUVIAN_BONES);
+    if(!clip || !sourceRoot) return null;
+
+    // The MakeHuman runtime now uses the exact UAL1 local bone basis.  Because
+    // the target hierarchy is isomorphic to the mapped UAL1 hierarchy, the 43
+    // clips no longer need heuristic quaternion retargeting at all: mapped bone
+    // rotations can be copied directly.  Only the source `root` transform is
+    // folded into MakeHuman Hips because the target skeleton intentionally has
+    // no extra root bone.  This removes the cumulative shoulder/arm/wrist roll
+    // errors that affected every previous retarget pass.
+    sourceRoot.updateMatrixWorld?.(true);
+
+    const sourceNodes=new Map();
+    sourceRoot.traverse?.(obj=>{
+      const key=this.normalizeRigName(obj.name);
+      if(key && !sourceNodes.has(key)) sourceNodes.set(key,obj);
+    });
+
+    const tracksByKey=new Map();
+    for(const track of clip.tracks||[]){
+      const nodeKey=this.normalizeRigName(this.animationTrackNodeName(track.name));
+      let property="";
+      if(/\.quaternion$/i.test(track.name)) property="quaternion";
+      else if(/\.position$/i.test(track.name)) property="position";
+      else if(/\.scale$/i.test(track.name)) property="scale";
+      if(nodeKey && property) tracksByKey.set(`${nodeKey}:${property}`,track);
+    }
+
+    const quaternionAt=(key,time)=>{
+      const track=tracksByKey.get(`${key}:quaternion`);
+      if(track){
+        const v=track.createInterpolant().evaluate(time);
+        return new THREE.Quaternion(v[0],v[1],v[2],v[3]).normalize();
+      }
+      return sourceNodes.get(key)?.quaternion?.clone?.() || new THREE.Quaternion();
+    };
+
+    const vectorAt=(key,time)=>{
+      const track=tracksByKey.get(`${key}:position`);
+      if(track){
+        const v=track.createInterpolant().evaluate(time);
+        return new THREE.Vector3(v[0],v[1],v[2]);
+      }
+      return sourceNodes.get(key)?.position?.clone?.() || new THREE.Vector3();
+    };
+
+    const out=[];
+    const rootRotTrack=tracksByKey.get("root:quaternion");
+    const rootRotInterpolant=rootRotTrack?.createInterpolant?.();
+    const rootNode=sourceNodes.get("root");
+
+    for(const [sourceKey,targetShort] of Object.entries(UAL_TO_MAKEHUMAN_BONES)){
+      const sourceTrack=tracksByKey.get(`${sourceKey}:quaternion`);
+      const targetBone=this.boneByName(targetShort);
+      if(!sourceTrack || !targetBone) continue;
+      const times=sourceTrack.times.slice();
+
+      if(sourceKey!=="pelvis"){
+        // UAL1 basis == MakeHuman animation basis, so preserve the authored
+        // local quaternion track bit-for-bit.
+        out.push(new THREE.QuaternionKeyframeTrack(
+          `${targetBone.name}.quaternion`,
+          sourceTrack.times,
+          sourceTrack.values
+        ));
+        continue;
+      }
+
+      // Hips absorbs the source library's static/animated root rotation.
+      const values=new Float32Array(times.length*4);
+      const pelvisInterpolant=sourceTrack.createInterpolant();
+      for(let i=0;i<times.length;i++){
+        const time=times[i];
+        const pv=pelvisInterpolant.evaluate(time);
+        const pelvisQ=new THREE.Quaternion(pv[0],pv[1],pv[2],pv[3]).normalize();
+        let rootQ=rootNode?.quaternion?.clone?.() || new THREE.Quaternion();
+        if(rootRotInterpolant){
+          const rv=rootRotInterpolant.evaluate(time);
+          rootQ=new THREE.Quaternion(rv[0],rv[1],rv[2],rv[3]).normalize();
+        }
+        rootQ.multiply(pelvisQ).normalize().toArray(values,i*4);
+      }
+      out.push(new THREE.QuaternionKeyframeTrack(`${targetBone.name}.quaternion`,times,values));
+    }
+
+    // Keep pelvis motion as a source-space delta on the clip.  A tiny absolute
+    // Hips.position track is generated only for the animation that is currently
+    // playing, using the character's *current* morphed rest position and scale.
+    // This prevents 43 body-size-specific position tracks from being rebuilt
+    // every time the user moves a height/body slider.
+    let pelvisMotion=null;
+    const pelvisPosTrack=tracksByKey.get("pelvis:position");
+    const pelvisNode=sourceNodes.get("pelvis");
+    if(pelvisPosTrack && pelvisNode){
+      const times=pelvisPosTrack.times;
+      const deltas=new Float32Array(times.length*3);
+      const pelvisInterpolant=pelvisPosTrack.createInterpolant();
+      const rootPosTrack=tracksByKey.get("root:position");
+      const rootPosInterpolant=rootPosTrack?.createInterpolant?.();
+      const sourceRestWorld=new THREE.Vector3();
+      pelvisNode.getWorldPosition(sourceRestWorld);
+
+      for(let i=0;i<times.length;i++){
+        const time=times[i];
+        const pv=pelvisInterpolant.evaluate(time);
+        const pelvisLocal=new THREE.Vector3(pv[0],pv[1],pv[2]);
+
+        let rootQ=rootNode?.quaternion?.clone?.() || new THREE.Quaternion();
+        if(rootRotInterpolant){
+          const rv=rootRotInterpolant.evaluate(time);
+          rootQ=new THREE.Quaternion(rv[0],rv[1],rv[2],rv[3]).normalize();
+        }
+
+        let rootPos=rootNode?.position?.clone?.() || new THREE.Vector3();
+        if(rootPosInterpolant){
+          const rv=rootPosInterpolant.evaluate(time);
+          rootPos=new THREE.Vector3(rv[0],rv[1],rv[2]);
+        }
+
+        pelvisLocal.applyQuaternion(rootQ).add(rootPos).sub(sourceRestWorld).toArray(deltas,i*3);
+      }
+      pelvisMotion={times,deltas};
+    }
+
+    if(!out.length) return null;
+    const result=new THREE.AnimationClip(clip.name,clip.duration,out);
+    result.userData={...(result.userData||{}),veilwatchPelvisMotion:pelvisMotion};
+    return result;
+  }
+
+  validateQuaterniusAnimationLibrary(byName){
+    const expected=FORGE_EXTERNAL_ANIMATION_NAMES.size;
+    const mappedBones=Object.keys(UAL_TO_MAKEHUMAN_BONES).length;
+    const failures=[];
+
+    for(const name of FORGE_EXTERNAL_ANIMATION_NAMES){
+      const clip=byName.get(name);
+      if(!clip){ failures.push(`${name}: missing clip`); continue; }
+      const qTracks=(clip.tracks||[]).filter(t=>/\.quaternion$/i.test(t.name));
+      if(qTracks.length!==mappedBones) failures.push(`${name}: ${qTracks.length}/${mappedBones} rotation tracks`);
+      for(const track of qTracks){
+        const values=track.values||[];
+        for(let i=0;i+3<values.length;i+=4){
+          const x=values[i],y=values[i+1],z=values[i+2],w=values[i+3];
+          const norm=Math.hypot(x,y,z,w);
+          if(!Number.isFinite(norm) || Math.abs(norm-1)>.02){
+            failures.push(`${name}: invalid quaternion track ${track.name}`);
+            break;
+          }
+        }
+      }
+      const motion=clip.userData?.veilwatchPelvisMotion;
+      if(!motion?.times || !motion?.deltas) failures.push(`${name}: missing pelvis motion metadata`);
+    }
+
+    // Calibration is authored as the UAL rest pose.  Because MakeHuman now uses
+    // that exact local basis, every mapped bone must land almost exactly on its
+    // saved rest quaternion.  Treat a mismatch as a hard failure instead of
+    // letting a mangled rig silently enter the Projection Bay.
+    const calibration=byName.get("A_TPose");
+    if(calibration){
+      for(const track of calibration.tracks||[]){
+        if(!/\.quaternion$/i.test(track.name) || track.values.length<4) continue;
+        const nodeName=this.animationTrackNodeName(track.name);
+        const bone=this.currentObject?.getObjectByName?.(nodeName) || this.boneByName(nodeName);
+        const rest=bone?.userData?.makeHumanRestQuaternion;
+        if(!bone?.isBone || !Array.isArray(rest)) continue;
+        const sample=new THREE.Quaternion().fromArray(track.values,0).normalize();
+        const restQ=new THREE.Quaternion().fromArray(rest).normalize();
+        if(THREE.MathUtils.radToDeg(sample.angleTo(restQ))>.75){
+          failures.push(`A_TPose calibration mismatch: ${track.name}`);
+        }
+      }
+    }
+
+    if(failures.length) throw new Error(`UAL1 validation failed (${failures.slice(0,8).join("; ")})`);
+    return expected;
+  }
+
+  prepareAnimationForCurrentBody(clip){
+    const motion=clip?.userData?.veilwatchPelvisMotion;
+    const hips=this.boneByName("Hips");
+    if(!motion?.times || !motion?.deltas || !hips) return clip;
+
+    const rest=new THREE.Vector3().fromArray(hips.userData?.makeHumanRestPosition||[hips.position.x,hips.position.y,hips.position.z]);
+    const scale=Number(this.makeHumanRuntime?.getAnimationTranslationScale?.()||0.1);
+    const values=new Float32Array(motion.deltas.length);
+    for(let i=0;i<motion.deltas.length;i+=3){
+      values[i]=rest.x+motion.deltas[i]*scale;
+      values[i+1]=rest.y+motion.deltas[i+1]*scale;
+      values[i+2]=rest.z+motion.deltas[i+2]*scale;
+    }
+    const positionTrack=new THREE.VectorKeyframeTrack(`${hips.name}.position`,motion.times,values);
+    const prepared=new THREE.AnimationClip(clip.name,clip.duration,[...(clip.tracks||[]),positionTrack]);
+    prepared.userData={...(clip.userData||{}),veilwatchPrepared:true};
+    return prepared;
   }
 
   async ensureForgeAnimationLibrary(token=this._loadToken){
@@ -1602,13 +1799,14 @@ class ProjectionRenderer {
         const sourceRoot=gltf.scene||gltf.scenes?.[0];
         const wanted=(gltf.animations||[]).filter(c=>FORGE_EXTERNAL_ANIMATION_NAMES.has(c.name));
         for(const clip of wanted){ const retargeted=this.retargetQuaterniusClip(clip,sourceRoot); if(retargeted){byName.set(retargeted.name,retargeted);count++;} }
+        this.validateQuaterniusAnimationLibrary(byName);
         disposeObject(sourceRoot);
         this.availableAnimations=[...byName.values()];
         const forge=this.profile?.appearance?.forge||{};
         this._requestedAnimationName="";
         if(String(forge.posePreview||"none")!=="none") await this.applyMakeHumanPose(forge.posePreview,true);
         else this.applyAnimation(forge.animation||"Idle_Loop",true);
-        console.info(`Veilwatch animation library online: ${count} local CC0 clips retargeted.`);
+        console.info(`Veilwatch animation library online: ${count} canonical UAL1 clips validated.`);
       }catch(err){
         console.warn("Veilwatch external animation library unavailable; using native clips:",err?.message||err);
       }finally{ this._forgeAnimationPromise=null; }
@@ -1620,7 +1818,9 @@ class ProjectionRenderer {
     if(!this.currentObject) return;
     this.currentObject.traverse?.(obj=>{
       if(!obj.isBone) return;
+      const p=obj.userData?.makeHumanRestPosition;
       const q=obj.userData?.makeHumanRestQuaternion;
+      if(Array.isArray(p) && p.length===3) obj.position.fromArray(p);
       if(Array.isArray(q) && q.length===4) obj.quaternion.fromArray(q);
     });
     this.currentObject.updateMatrixWorld?.(true);
@@ -2396,7 +2596,13 @@ class ProjectionRenderer {
     this.restoreMakeHumanRestPose();
     this.activePoseId="none";
     this.mixer.stopAllAction();
-    const action=this.mixer.clipAction(clip).reset().fadeIn(.18);
+    if(this._activePreparedClip){
+      this.mixer.uncacheClip?.(this._activePreparedClip);
+      this._activePreparedClip=null;
+    }
+    const actionClip=this.prepareAnimationForCurrentBody(clip);
+    if(actionClip!==clip) this._activePreparedClip=actionClip;
+    const action=this.mixer.clipAction(actionClip).reset().fadeIn(.18);
     if(/death|punch|roll|interact|jump/i.test(clip.name)){
       action.setLoop(THREE.LoopOnce,1);
       action.clampWhenFinished=true;

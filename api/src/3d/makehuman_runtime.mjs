@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 const RUNTIME_ROOT = "/assets/characters/makehuman/runtime";
+const UAL1_BASIS_URL = "/assets/characters/animations/quaternius/UAL1_makehuman_basis.json";
 const BASE_SCALE = 0.1;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const X_AXIS = new THREE.Vector3(1, 0, 0);
@@ -206,6 +207,7 @@ export class MakeHumanRuntime {
     this.rig = null;
     this.weightData = null;
     this.targetManifest = null;
+    this.animationBasis = null;
     this.targetCache = new Map();
 
     // MakeHuman facial expression / lip-sync targets. The compressed source
@@ -256,12 +258,13 @@ export class MakeHumanRuntime {
   }
 
   async init(initialForge={}){
-    const [objText, vertexGroups, rig, weightsText, targetManifest] = await Promise.all([
+    const [objText, vertexGroups, rig, weightsText, targetManifest, animationBasis] = await Promise.all([
       fetchText(`${RUNTIME_ROOT}/base.obj`),
       fetchJson(`${RUNTIME_ROOT}/basemesh_vertex_groups.json`),
       fetchJson(`${RUNTIME_ROOT}/rig.mixamo.json`),
       fetchGzipText(`${RUNTIME_ROOT}/weights.mixamo.json.gz`),
-      fetchJson(`${RUNTIME_ROOT}/target_manifest.json`)
+      fetchJson(`${RUNTIME_ROOT}/target_manifest.json`),
+      fetchJson(UAL1_BASIS_URL)
     ]);
 
     const parsed = parseObj(objText);
@@ -274,6 +277,7 @@ export class MakeHumanRuntime {
     this.rig = rig;
     this.weightData = JSON.parse(weightsText);
     this.targetManifest = targetManifest;
+    this.animationBasis = animationBasis;
 
     this._buildRenderMeshes();
     this._prepareVertexWeights();
@@ -570,21 +574,46 @@ export class MakeHumanRuntime {
   _rebuildSkeleton(){
     const definitions=this.rig?.bones || {};
     const names=Object.keys(definitions);
-    const worldMatrices=new Map();
+    const basisBones=this.animationBasis?.bones || {};
+    const headPositions=new Map();
+    const localRotations=new Map();
+    const worldRotations=new Map();
 
+    // UAL1 is the canonical animation basis for the browser runtime.  The
+    // MakeHuman mesh keeps its own morphed joint positions and weights, but the
+    // bone coordinate frames are rebuilt in the exact local basis used by the
+    // 43 Quaternius clips.  That removes the arm/forearm/wrist roll mismatch at
+    // its source instead of attempting to compensate for it per animation.
     for(const name of names){
       const def=definitions[name];
-      const head=this._strategyPoint(def.head);
-      const tail=this._strategyPoint(def.tail);
-      const dir=tail.clone().sub(head);
-      if(dir.lengthSq()<1e-9) dir.set(0,1,0); else dir.normalize();
-      const q=blenderBoneWorldQuaternionFromThreeDirection(dir, Number(def.roll||0));
-      worldMatrices.set(name,new THREE.Matrix4().compose(head,q,new THREE.Vector3(1,1,1)));
+      headPositions.set(name,this._strategyPoint(def.head));
+      const row=basisBones[name];
+      if(row?.restLocalQuaternion?.length===4){
+        localRotations.set(name,new THREE.Quaternion().fromArray(row.restLocalQuaternion).normalize());
+      }else{
+        const head=this._strategyPoint(def.head);
+        const tail=this._strategyPoint(def.tail);
+        const dir=tail.clone().sub(head);
+        if(dir.lengthSq()<1e-9) dir.set(0,1,0); else dir.normalize();
+        localRotations.set(name,blenderBoneWorldQuaternionFromThreeDirection(dir,Number(def.roll||0)));
+      }
     }
 
-    // Build the bone hierarchy once. Reusing the same Bone and Skeleton objects
-    // is important for long-running Projection Bay sessions: it prevents every
-    // slider movement from orphaning AnimationMixer bindings and old skeletons.
+    const worldRotationFor=(name)=>{
+      if(worldRotations.has(name)) return worldRotations.get(name);
+      const def=definitions[name]||{};
+      const local=(localRotations.get(name)||new THREE.Quaternion()).clone();
+      const parentName=String(def.parent||"");
+      const world=parentName && definitions[parentName]
+        ? worldRotationFor(parentName).clone().multiply(local).normalize()
+        : local.normalize();
+      worldRotations.set(name,world);
+      return world;
+    };
+    for(const name of names) worldRotationFor(name);
+
+    // Build the hierarchy once. Reusing Bone/Skeleton objects prevents slider
+    // changes from orphaning AnimationMixer bindings during long Forge sessions.
     if(!this.skeleton){
       this.boneMap.clear();
       this._boneRoots=[];
@@ -604,18 +633,27 @@ export class MakeHumanRuntime {
       this.skeleton=new THREE.Skeleton(names.map(n=>this.boneMap.get(n)));
     }
 
-    // Update the existing hierarchy to the freshly morphed MakeHuman rest pose.
+    // Keep the MakeHuman joint heads exactly where the morphed body says they
+    // belong.  Because the canonical UAL rotations differ from MPFB's Blender
+    // roll frames, each child offset is re-expressed in its canonical parent's
+    // local frame.  The world-space rest joint positions therefore do not move.
     for(const name of names){
       const def=definitions[name];
       const bone=this.boneMap.get(name);
       const parentName=String(def.parent||"");
       const parent=this.boneMap.get(parentName);
-      const world=worldMatrices.get(name);
-      const local=parent
-        ? new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().copy(worldMatrices.get(parentName)).invert(),world)
-        : world.clone();
-      local.decompose(bone.position,bone.quaternion,bone.scale);
-      bone.userData.makeHumanRestQuaternion = [bone.quaternion.x,bone.quaternion.y,bone.quaternion.z,bone.quaternion.w];
+      const head=headPositions.get(name)||new THREE.Vector3();
+      if(parent){
+        const parentHead=headPositions.get(parentName)||new THREE.Vector3();
+        const parentWorldQ=worldRotations.get(parentName)||new THREE.Quaternion();
+        bone.position.copy(head).sub(parentHead).applyQuaternion(parentWorldQ.clone().invert());
+      }else{
+        bone.position.copy(head);
+      }
+      bone.quaternion.copy(localRotations.get(name)||new THREE.Quaternion());
+      bone.scale.set(1,1,1);
+      bone.userData.makeHumanRestPosition=[bone.position.x,bone.position.y,bone.position.z];
+      bone.userData.makeHumanRestQuaternion=[bone.quaternion.x,bone.quaternion.y,bone.quaternion.z,bone.quaternion.w];
     }
 
     this.root.updateMatrixWorld(true);
@@ -626,6 +664,17 @@ export class MakeHumanRuntime {
       bone.userData.makeHumanRestWorldQuaternion=[q.x,q.y,q.z,q.w];
     }
 
+    // Scale source pelvis motion to the currently morphed MakeHuman body.  The
+    // source library is roughly meter-scaled; this runtime deliberately renders
+    // MakeHuman at ~0.1 scene scale. Using pelvis height makes the scale follow
+    // the character's height morph without accumulating per-clip heuristics.
+    const hips=this.boneMap.get("mixamorig:Hips");
+    const sourcePelvisY=Math.abs(Number(this.animationBasis?.pelvisRestWorldPosition?.[1]||0));
+    const targetHipsY=Math.abs(Number(hips?.userData?.makeHumanRestPosition?.[1]||0));
+    this.animationTranslationScale=(sourcePelvisY>1e-6 && targetHipsY>1e-6)
+      ? targetHipsY/sourcePelvisY
+      : BASE_SCALE;
+
     for(const mesh of this.renderMeshes){
       if(mesh.skeleton!==this.skeleton){
         mesh.bind(this.skeleton);
@@ -633,6 +682,10 @@ export class MakeHumanRuntime {
       }
     }
     this.root.updateMatrixWorld(true);
+  }
+
+  getAnimationTranslationScale(){
+    return Number(this.animationTranslationScale||BASE_SCALE);
   }
 
   transformRawPoint(x,y,z,target=new THREE.Vector3()){

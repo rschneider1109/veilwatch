@@ -1,0 +1,497 @@
+{
+  "version": 1,
+  "source": "Quaternius Universal Animation Library Standard",
+  "rootSource": "root",
+  "hipsSource": "pelvis",
+  "rootRestQuaternion": [
+    -0.7071067690849304,
+    0,
+    0,
+    0.7071067690849304
+  ],
+  "rootRestTranslation": [
+    0,
+    0,
+    0
+  ],
+  "pelvisRestTranslation": [
+    0,
+    0.05010002851486206,
+    0.916700005531311
+  ],
+  "pelvisRestWorldPosition": [
+    0.0,
+    0.9166999758688575,
+    -0.05009999542270671
+  ],
+  "bones": {
+    "mixamorig:Hips": {
+      "source": "pelvis",
+      "restLocalQuaternion": [
+        0.12584079372469859,
+        0.0,
+        0.0,
+        0.9920504802224741
+      ]
+    },
+    "mixamorig:Spine": {
+      "source": "spine_01",
+      "restLocalQuaternion": [
+        -0.06470262259244919,
+        0,
+        0,
+        0.9979045987129211
+      ]
+    },
+    "mixamorig:Spine1": {
+      "source": "spine_02",
+      "restLocalQuaternion": [
+        -0.07727984338998795,
+        0,
+        0,
+        0.9970094561576843
+      ]
+    },
+    "mixamorig:Spine2": {
+      "source": "spine_03",
+      "restLocalQuaternion": [
+        -0.0002685915678739548,
+        0,
+        0,
+        1
+      ]
+    },
+    "mixamorig:Neck": {
+      "source": "neck_01",
+      "restLocalQuaternion": [
+        0.11098591238260269,
+        0,
+        0,
+        0.9938219785690308
+      ]
+    },
+    "mixamorig:Head": {
+      "source": "Head",
+      "restLocalQuaternion": [
+        -0.07867422699928284,
+        0,
+        0,
+        0.9969003796577454
+      ]
+    },
+    "mixamorig:LeftShoulder": {
+      "source": "clavicle_l",
+      "restLocalQuaternion": [
+        -0.6040205955505371,
+        -0.34510302543640137,
+        -0.35671767592430115,
+        0.6235507726669312
+      ]
+    },
+    "mixamorig:LeftArm": {
+      "source": "upperarm_l",
+      "restLocalQuaternion": [
+        0.18026958405971527,
+        0.6838500499725342,
+        -0.17983640730381012,
+        0.6837477087974548
+      ]
+    },
+    "mixamorig:LeftForeArm": {
+      "source": "lowerarm_l",
+      "restLocalQuaternion": [
+        0.01718229055404663,
+        -2.035305260505993e-05,
+        3.6708831885334803e-07,
+        0.9998524188995361
+      ]
+    },
+    "mixamorig:LeftHand": {
+      "source": "hand_l",
+      "restLocalQuaternion": [
+        -0.008619682863354683,
+        -4.1722387322806753e-07,
+        2.1919726034269615e-09,
+        0.9999628663063049
+      ]
+    },
+    "mixamorig:RightShoulder": {
+      "source": "clavicle_r",
+      "restLocalQuaternion": [
+        -0.6040205955505371,
+        0.34510302543640137,
+        0.35671767592430115,
+        0.6235507726669312
+      ]
+    },
+    "mixamorig:RightArm": {
+      "source": "upperarm_r",
+      "restLocalQuaternion": [
+        0.18026958405971527,
+        -0.6838500499725342,
+        0.17983640730381012,
+        0.6837477087974548
+      ]
+    },
+    "mixamorig:RightForeArm": {
+      "source": "lowerarm_r",
+      "restLocalQuaternion": [
+        0.017182305455207825,
+        2.035305260505993e-05,
+        -3.691950496431673e-07,
+        0.9998524188995361
+      ]
+    },
+    "mixamorig:RightHand": {
+      "source": "hand_r",
+      "restLocalQuaternion": [
+        -0.008619682863354683,
+        5.364287289921776e-07,
+        -2.1920292248012174e-09,
+        0.9999628663063049
+      ]
+    },
+    "mixamorig:LeftUpLeg": {
+      "source": "thigh_l",
+      "restLocalQuaternion": [
+        0.992484450340271,
+        0,
+        0,
+        0.12237062305212021
+      ]
+    },
+    "mixamorig:LeftLeg": {
+      "source": "calf_l",
+      "restLocalQuaternion": [
+        0.03658590838313103,
+        -0.0001311732194153592,
+        -4.802307103091152e-06,
+        0.9993305206298828
+      ]
+    },
+    "mixamorig:LeftFoot": {
+      "source": "foot_l",
+      "restLocalQuaternion": [
+        -0.5290717482566833,
+        -0.0003280931559856981,
+        0.00034345293533988297,
+        0.8485770225524902
+      ]
+    },
+    "mixamorig:LeftToeBase": {
+      "source": "ball_l",
+      "restLocalQuaternion": [
+        0.0001371279067825526,
+        -0.9643067717552185,
+        0.26478710770606995,
+        0.0004994344199076295
+      ]
+    },
+    "mixamorig:RightUpLeg": {
+      "source": "thigh_r",
+      "restLocalQuaternion": [
+        0.992484450340271,
+        0,
+        0,
+        0.12237062305212021
+      ]
+    },
+    "mixamorig:RightLeg": {
+      "source": "calf_r",
+      "restLocalQuaternion": [
+        0.03658590838313103,
+        -0.0001311732194153592,
+        -4.802307103091152e-06,
+        0.9993305206298828
+      ]
+    },
+    "mixamorig:RightFoot": {
+      "source": "foot_r",
+      "restLocalQuaternion": [
+        -0.5290717482566833,
+        -0.0003280931559856981,
+        0.00034345293533988297,
+        0.8485770225524902
+      ]
+    },
+    "mixamorig:RightToeBase": {
+      "source": "ball_r",
+      "restLocalQuaternion": [
+        0.0001371279067825526,
+        -0.9643067717552185,
+        0.26478710770606995,
+        0.0004994344199076295
+      ]
+    },
+    "mixamorig:LeftHandThumb1": {
+      "source": "thumb_01_l",
+      "restLocalQuaternion": [
+        0.2474130243062973,
+        0.9457945227622986,
+        0.20344115793704987,
+        0.05358405411243439
+      ]
+    },
+    "mixamorig:LeftHandThumb2": {
+      "source": "thumb_02_l",
+      "restLocalQuaternion": [
+        -0.000135714202770032,
+        -7.41071708034724e-05,
+        4.7934565372997895e-05,
+        1
+      ]
+    },
+    "mixamorig:LeftHandThumb3": {
+      "source": "thumb_03_l",
+      "restLocalQuaternion": [
+        0.0002478846290614456,
+        8.091918425634503e-05,
+        -0.0005353352753445506,
+        0.9999998211860657
+      ]
+    },
+    "mixamorig:LeftHandIndex1": {
+      "source": "index_01_l",
+      "restLocalQuaternion": [
+        -4.854115687180638e-08,
+        0.7071095705032349,
+        -4.854154056488369e-08,
+        0.707103967666626
+      ]
+    },
+    "mixamorig:LeftHandIndex2": {
+      "source": "index_02_l",
+      "restLocalQuaternion": [
+        -4.4818607104670644e-14,
+        -9.671452971815597e-09,
+        -2.7004171121447484e-10,
+        1
+      ]
+    },
+    "mixamorig:LeftHandIndex3": {
+      "source": "index_03_l",
+      "restLocalQuaternion": [
+        7.348758588704803e-18,
+        1.1368683772161603e-13,
+        -1.327914859583146e-16,
+        1
+      ]
+    },
+    "mixamorig:LeftHandMiddle1": {
+      "source": "middle_01_l",
+      "restLocalQuaternion": [
+        -0.01670246012508869,
+        0.7069122791290283,
+        -0.016702570021152496,
+        0.7069067358970642
+      ]
+    },
+    "mixamorig:LeftHandMiddle2": {
+      "source": "middle_02_l",
+      "restLocalQuaternion": [
+        -1.1900032070855104e-08,
+        -9.910034570737025e-09,
+        0.0015135601861402392,
+        0.9999988675117493
+      ]
+    },
+    "mixamorig:LeftHandMiddle3": {
+      "source": "middle_03_l",
+      "restLocalQuaternion": [
+        8.156294306616019e-09,
+        -3.566927135600917e-12,
+        -0.0011296597076579928,
+        0.9999993443489075
+      ]
+    },
+    "mixamorig:LeftHandRing1": {
+      "source": "ring_01_l",
+      "restLocalQuaternion": [
+        -0.012588735669851303,
+        0.7069975137710571,
+        -0.012588820420205593,
+        0.706991970539093
+      ]
+    },
+    "mixamorig:LeftHandRing2": {
+      "source": "ring_02_l",
+      "restLocalQuaternion": [
+        -8.660336892063469e-10,
+        -9.627518338106711e-09,
+        1.2190081179141998e-05,
+        1
+      ]
+    },
+    "mixamorig:LeftHandRing3": {
+      "source": "ring_03_l",
+      "restLocalQuaternion": [
+        7.704945126363327e-09,
+        -2.098988951398928e-12,
+        -0.0010670634219422936,
+        0.9999994039535522
+      ]
+    },
+    "mixamorig:LeftHandPinky1": {
+      "source": "pinky_01_l",
+      "restLocalQuaternion": [
+        -0.023706039413809776,
+        0.7067120671272278,
+        -0.02370619960129261,
+        0.7067065238952637
+      ]
+    },
+    "mixamorig:LeftHandPinky2": {
+      "source": "pinky_02_l",
+      "restLocalQuaternion": [
+        5.882122788847255e-09,
+        -1.0178268894378562e-08,
+        -0.0008342716027982533,
+        0.9999996423721313
+      ]
+    },
+    "mixamorig:LeftHandPinky3": {
+      "source": "pinky_03_l",
+      "restLocalQuaternion": [
+        -4.400461328657457e-09,
+        4.186874371508997e-12,
+        0.000609522860031575,
+        0.9999998211860657
+      ]
+    },
+    "mixamorig:RightHandThumb1": {
+      "source": "thumb_01_r",
+      "restLocalQuaternion": [
+        0.2474130541086197,
+        -0.9457944631576538,
+        -0.2034410983324051,
+        0.053584057837724686
+      ]
+    },
+    "mixamorig:RightHandThumb2": {
+      "source": "thumb_02_r",
+      "restLocalQuaternion": [
+        -0.00013566949928645045,
+        7.40157556720078e-05,
+        -4.7864316002232954e-05,
+        1
+      ]
+    },
+    "mixamorig:RightHandThumb3": {
+      "source": "thumb_03_r",
+      "restLocalQuaternion": [
+        0.0002478510432410985,
+        -8.099935803329572e-05,
+        0.0005353167653083801,
+        0.9999998807907104
+      ]
+    },
+    "mixamorig:RightHandIndex1": {
+      "source": "index_01_r",
+      "restLocalQuaternion": [
+        -4.8541142660951664e-08,
+        -0.7071096301078796,
+        4.854153345945633e-08,
+        0.7071039080619812
+      ]
+    },
+    "mixamorig:RightHandIndex2": {
+      "source": "index_02_r",
+      "restLocalQuaternion": [
+        -5.2394442679858794e-14,
+        -3.824084160441998e-09,
+        2.7004842806377383e-10,
+        1
+      ]
+    },
+    "mixamorig:RightHandIndex3": {
+      "source": "index_03_r",
+      "restLocalQuaternion": [
+        -1.1838301877415552e-16,
+        -1.1368683772161603e-13,
+        -4.1818744524883854e-16,
+        1
+      ]
+    },
+    "mixamorig:RightHandMiddle1": {
+      "source": "middle_01_r",
+      "restLocalQuaternion": [
+        -0.01670246012508869,
+        -0.7069123387336731,
+        0.016702566295862198,
+        0.7069066762924194
+      ]
+    },
+    "mixamorig:RightHandMiddle2": {
+      "source": "middle_02_r",
+      "restLocalQuaternion": [
+        -1.100992630398423e-08,
+        -3.3837239676870468e-09,
+        -0.0015135611174628139,
+        0.9999988675117493
+      ]
+    },
+    "mixamorig:RightHandMiddle3": {
+      "source": "middle_03_r",
+      "restLocalQuaternion": [
+        8.186298749990328e-09,
+        2.2575290595239217e-11,
+        0.0011296587763354182,
+        0.9999993443489075
+      ]
+    },
+    "mixamorig:RightHandRing1": {
+      "source": "ring_01_r",
+      "restLocalQuaternion": [
+        -0.012588738463819027,
+        -0.7069975137710571,
+        0.01258881762623787,
+        0.706991970539093
+      ]
+    },
+    "mixamorig:RightHandRing2": {
+      "source": "ring_02_r",
+      "restLocalQuaternion": [
+        7.371431243186066e-10,
+        -3.438689111234794e-09,
+        -1.2191012501716614e-05,
+        1
+      ]
+    },
+    "mixamorig:RightHandRing3": {
+      "source": "ring_03_r",
+      "restLocalQuaternion": [
+        7.732828599671393e-09,
+        2.1304747896411236e-11,
+        0.0010670634219422936,
+        0.9999994039535522
+      ]
+    },
+    "mixamorig:RightHandPinky1": {
+      "source": "pinky_01_r",
+      "restLocalQuaternion": [
+        -0.023706039413809776,
+        -0.7067121267318726,
+        0.02370619773864746,
+        0.7067064642906189
+      ]
+    },
+    "mixamorig:RightHandPinky2": {
+      "source": "pinky_02_r",
+      "restLocalQuaternion": [
+        5.623980836588771e-09,
+        -2.9140143631423143e-09,
+        0.0008342642686329782,
+        0.9999996423721313
+      ]
+    },
+    "mixamorig:RightHandPinky3": {
+      "source": "pinky_03_r",
+      "restLocalQuaternion": [
+        -4.416420118502629e-09,
+        -1.6191496060580235e-11,
+        -0.0006095209391787648,
+        0.9999998211860657
+      ]
+    }
+  }
+}
