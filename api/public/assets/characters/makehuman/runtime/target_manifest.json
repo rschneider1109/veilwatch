@@ -1,0 +1,218 @@
+{
+  "version": "2.0.0-alpha.1",
+  "foundation": "MakeHuman HM08 / MPFB 2.0.17 data",
+  "scale": 0.1,
+  "bodyVertexRange": [
+    0,
+    13379
+  ],
+  "macro": {
+    "genders": [
+      "male",
+      "female"
+    ],
+    "ages": [
+      "young",
+      "old"
+    ],
+    "muscle": [
+      "minmuscle",
+      "averagemuscle",
+      "maxmuscle"
+    ],
+    "weight": [
+      "minweight",
+      "averageweight",
+      "maxweight"
+    ],
+    "pattern": "macrodetails/proportions/{gender}-{age}-{muscle}-{weight}-idealproportions.target.gz"
+  },
+  "pairs": {
+    "shoulders": [
+      "torso/measure-shoulder-dist-decr.target.gz",
+      "torso/measure-shoulder-dist-incr.target.gz"
+    ],
+    "chestVolume": [
+      "torso/measure-bust-circ-decr.target.gz",
+      "torso/measure-bust-circ-incr.target.gz"
+    ],
+    "waist": [
+      "torso/measure-waist-circ-decr.target.gz",
+      "torso/measure-waist-circ-incr.target.gz"
+    ],
+    "hips": [
+      "torso/measure-hips-circ-decr.target.gz",
+      "torso/measure-hips-circ-incr.target.gz"
+    ],
+    "glutes": [
+      "buttocks/buttocks-volume-decr.target.gz",
+      "buttocks/buttocks-volume-incr.target.gz"
+    ],
+    "armSize": [
+      "arms/measure-upperarm-circ-decr.target.gz",
+      "arms/measure-upperarm-circ-incr.target.gz"
+    ],
+    "legSize": [
+      "legs/measure-thigh-circ-decr.target.gz",
+      "legs/measure-thigh-circ-incr.target.gz"
+    ],
+    "neckSize": [
+      "neck/measure-neck-circ-decr.target.gz",
+      "neck/measure-neck-circ-incr.target.gz"
+    ],
+    "torsoLength": [
+      "torso/measure-napetowaist-dist-decr.target.gz",
+      "torso/measure-napetowaist-dist-incr.target.gz"
+    ],
+    "armLengthUpper": [
+      "arms/measure-upperarm-length-decr.target.gz",
+      "arms/measure-upperarm-length-incr.target.gz"
+    ],
+    "armLengthLower": [
+      "arms/measure-lowerarm-length-decr.target.gz",
+      "arms/measure-lowerarm-length-incr.target.gz"
+    ],
+    "legLengthUpper": [
+      "legs/measure-upperleg-height-decr.target.gz",
+      "legs/measure-upperleg-height-incr.target.gz"
+    ],
+    "legLengthLower": [
+      "legs/measure-lowerleg-height-decr.target.gz",
+      "legs/measure-lowerleg-height-incr.target.gz"
+    ],
+    "handSizeLeft": [
+      "hands/l-hand-scale-decr.target.gz",
+      "hands/l-hand-scale-incr.target.gz"
+    ],
+    "handSizeRight": [
+      "hands/r-hand-scale-decr.target.gz",
+      "hands/r-hand-scale-incr.target.gz"
+    ],
+    "footSizeLeft": [
+      "feet/l-foot-scale-decr.target.gz",
+      "feet/l-foot-scale-incr.target.gz"
+    ],
+    "footSizeRight": [
+      "feet/r-foot-scale-decr.target.gz",
+      "feet/r-foot-scale-incr.target.gz"
+    ],
+    "faceWidth": [
+      "head/head-scale-horiz-decr.target.gz",
+      "head/head-scale-horiz-incr.target.gz"
+    ],
+    "jawWidth": [
+      "chin/chin-bones-decr.target.gz",
+      "chin/chin-bones-incr.target.gz"
+    ],
+    "jawAngle": [
+      "chin/chin-jaw-drop-decr.target.gz",
+      "chin/chin-jaw-drop-incr.target.gz"
+    ],
+    "chinWidth": [
+      "chin/chin-width-decr.target.gz",
+      "chin/chin-width-incr.target.gz"
+    ],
+    "chinProjection": [
+      "chin/chin-prognathism-decr.target.gz",
+      "chin/chin-prognathism-incr.target.gz"
+    ],
+    "cheekHeightLeft": [
+      "cheek/l-cheek-trans-down.target.gz",
+      "cheek/l-cheek-trans-up.target.gz"
+    ],
+    "cheekHeightRight": [
+      "cheek/r-cheek-trans-down.target.gz",
+      "cheek/r-cheek-trans-up.target.gz"
+    ],
+    "cheekWidthLeft": [
+      "cheek/l-cheek-bones-decr.target.gz",
+      "cheek/l-cheek-bones-incr.target.gz"
+    ],
+    "cheekWidthRight": [
+      "cheek/r-cheek-bones-decr.target.gz",
+      "cheek/r-cheek-bones-incr.target.gz"
+    ],
+    "noseWidth": [
+      "nose/nose-scale-horiz-decr.target.gz",
+      "nose/nose-scale-horiz-incr.target.gz"
+    ],
+    "noseLength": [
+      "nose/nose-scale-vert-decr.target.gz",
+      "nose/nose-scale-vert-incr.target.gz"
+    ],
+    "noseProjection": [
+      "nose/nose-scale-depth-decr.target.gz",
+      "nose/nose-scale-depth-incr.target.gz"
+    ],
+    "eyeSpacingLeft": [
+      "eyes/l-eye-trans-in.target.gz",
+      "eyes/l-eye-trans-out.target.gz"
+    ],
+    "eyeSpacingRight": [
+      "eyes/r-eye-trans-in.target.gz",
+      "eyes/r-eye-trans-out.target.gz"
+    ],
+    "eyeSizeLeft": [
+      "eyes/l-eye-scale-decr.target.gz",
+      "eyes/l-eye-scale-incr.target.gz"
+    ],
+    "eyeSizeRight": [
+      "eyes/r-eye-scale-decr.target.gz",
+      "eyes/r-eye-scale-incr.target.gz"
+    ],
+    "browHeight": [
+      "eyebrows/eyebrows-trans-down.target.gz",
+      "eyebrows/eyebrows-trans-up.target.gz"
+    ],
+    "lipFullnessUpper": [
+      "mouth/mouth-upperlip-volume-decr.target.gz",
+      "mouth/mouth-upperlip-volume-incr.target.gz"
+    ],
+    "lipFullnessLower": [
+      "mouth/mouth-lowerlip-volume-decr.target.gz",
+      "mouth/mouth-lowerlip-volume-incr.target.gz"
+    ],
+    "mouthWidth": [
+      "mouth/mouth-scale-horiz-decr.target.gz",
+      "mouth/mouth-scale-horiz-incr.target.gz"
+    ],
+    "earSizeLeft": [
+      "ears/l-ear-scale-decr.target.gz",
+      "ears/l-ear-scale-incr.target.gz"
+    ],
+    "earSizeRight": [
+      "ears/r-ear-scale-decr.target.gz",
+      "ears/r-ear-scale-incr.target.gz"
+    ],
+    "breastProjection": [
+      "breast/breast-point-decr.target.gz",
+      "breast/breast-point-incr.target.gz"
+    ],
+    "penisLength": [
+      "genitals/penis-length-decr.target.gz",
+      "genitals/penis-length-incr.target.gz"
+    ],
+    "penisGirth": [
+      "genitals/penis-circ-decr.target.gz",
+      "genitals/penis-circ-incr.target.gz"
+    ],
+    "testesSize": [
+      "genitals/penis-testicles-decr.target.gz",
+      "genitals/penis-testicles-incr.target.gz"
+    ],
+    "vulvaProminence": [
+      "pelvis/bulge-decr.target.gz",
+      "pelvis/bulge-incr.target.gz"
+    ]
+  },
+  "breastCup": {
+    "young": [
+      "breast/female-young-averagemuscle-averageweight-mincup-averagefirmness.target.gz",
+      "breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness.target.gz"
+    ],
+    "old": [
+      "breast/female-old-averagemuscle-averageweight-mincup-averagefirmness.target.gz",
+      "breast/female-old-averagemuscle-averageweight-maxcup-averagefirmness.target.gz"
+    ]
+  }
+}
