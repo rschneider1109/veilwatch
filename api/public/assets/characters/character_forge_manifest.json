@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-alpha.1",
+  "version": "2.1.0-section2-appearance",
   "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
@@ -425,9 +425,9 @@
         "left",
         "right"
       ],
-      "style": "veilwatch_projection_cuff_v1",
-      "asset": "/assets/characters/equipment/veilwatch_projection_cuff_v1.glb",
-      "design": "original_veilwatch_qb_style_v1"
+      "style": "veilwatch_projection_cuff_v2",
+      "asset": "procedural://veilwatch_projection_cuff_v2",
+      "design": "tapered_low_profile_forearm_bracer_v2"
     },
     "carry": [
       "right_hand",
@@ -595,6 +595,624 @@
     "projectionCuff": true,
     "weaponAttachment": true,
     "makeHumanWardrobe": "next-pass",
-    "makeHumanHair": "next-pass"
+    "makeHumanHair": "next-pass",
+    "makeHumanNativeAppearance": true,
+    "makeHumanSurfaceMaterials": true,
+    "appearancePackCacheLimit": 1,
+    "indexedNativeMeshes": true
+  },
+  "nativeAppearance": {
+    "skinMaterials": [
+      {
+        "id": "auto",
+        "label": "Automatic"
+      },
+      {
+        "id": "skins01:blindsaypatten_uniform_skin_texture",
+        "label": "Blindsaypatten Uniform Skin Texture"
+      },
+      {
+        "id": "skins01:bobby_03_young_female_hairless",
+        "label": "Bobby 03 Young Female Hairless"
+      },
+      {
+        "id": "skins01:callharvey3d_midtoned_female",
+        "label": "Callharvey3d Midtoned Female"
+      },
+      {
+        "id": "skins01:cutoff3d_indian_female_enhanced",
+        "label": "Cutoff3d Indian Female Enhanced"
+      },
+      {
+        "id": "skins01:cutoff3d_indian_female_skin",
+        "label": "Cutoff3d Indian Female Skin"
+      },
+      {
+        "id": "skins01:darthfurby_caucasian_female",
+        "label": "Darthfurby Caucasian Female"
+      },
+      {
+        "id": "skins01:flower-angel_red_head_skin",
+        "label": "Flower Angel Red Head Skin"
+      },
+      {
+        "id": "skins02:jartur69_middleage_slavic_male_with_genitals_and_beard",
+        "label": "Jartur69 Middleage Slavic Male With Genitals And Beard"
+      },
+      {
+        "id": "skins02:jartur69_old_slavic_male_with_genitals_and_beard",
+        "label": "Jartur69 Old Slavic Male With Genitals And Beard"
+      },
+      {
+        "id": "skins02:ken1138_caucasian_male_tattooed_skin",
+        "label": "Ken1138 Caucasian Male Tattooed Skin"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_african_female",
+        "label": "Middleage African Female"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_african_male",
+        "label": "Middleage African Male"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_asian_female",
+        "label": "Middleage Asian Female"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_asian_male",
+        "label": "Middleage Asian Male"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_caucasian_female",
+        "label": "Middleage Caucasian Female"
+      },
+      {
+        "id": "makehuman_system_assets:middleage_caucasian_male",
+        "label": "Middleage Caucasian Male"
+      },
+      {
+        "id": "skins02:mindfront_aksel_skin",
+        "label": "Mindfront Aksel Skin"
+      },
+      {
+        "id": "skins02:mindfront_skin_male_african_middleage",
+        "label": "Mindfront Skin Male African Middleage"
+      },
+      {
+        "id": "skins01:nyloseth_zoeyskin",
+        "label": "Nyloseth Zoeyskin"
+      },
+      {
+        "id": "makehuman_system_assets:old_african_female",
+        "label": "Old African Female"
+      },
+      {
+        "id": "makehuman_system_assets:old_african_male",
+        "label": "Old African Male"
+      },
+      {
+        "id": "makehuman_system_assets:old_asian_female",
+        "label": "Old Asian Female"
+      },
+      {
+        "id": "makehuman_system_assets:old_asian_male",
+        "label": "Old Asian Male"
+      },
+      {
+        "id": "makehuman_system_assets:old_caucasian_female",
+        "label": "Old Caucasian Female"
+      },
+      {
+        "id": "makehuman_system_assets:old_caucasian_male",
+        "label": "Old Caucasian Male"
+      },
+      {
+        "id": "skins01:onlytheghosts_middle_aged_eurasian_female",
+        "label": "Onlytheghosts Middle Aged Eurasian Female"
+      },
+      {
+        "id": "skins01:onlytheghosts_old_eurasian_female",
+        "label": "Onlytheghosts Old Eurasian Female"
+      },
+      {
+        "id": "skins02:onlytheghosts_old_eurasian_male",
+        "label": "Onlytheghosts Old Eurasian Male"
+      },
+      {
+        "id": "skins01:onlytheghosts_young_eurasian_female",
+        "label": "Onlytheghosts Young Eurasian Female"
+      },
+      {
+        "id": "skins02:rehmanpolanski_skin_viking_tattoos",
+        "label": "Rehmanpolanski Skin Viking Tattoos"
+      },
+      {
+        "id": "skins01:saltycowdawg_genuine_caucasian_female_with_genitals",
+        "label": "Saltycowdawg Genuine Caucasian Female With Genitals"
+      },
+      {
+        "id": "skins01:skalldyrssuppe_creamy_female",
+        "label": "Skalldyrssuppe Creamy Female"
+      },
+      {
+        "id": "skins01:spreadcore_alana_caucasian_female_with_genitals_skin",
+        "label": "Spreadcore Alana Caucasian Female With Genitals Skin"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_bronze",
+        "label": "Toigo Light Skin Female Bronze"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_bronze_with_makeup",
+        "label": "Toigo Light Skin Female Bronze With Makeup"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_freckles",
+        "label": "Toigo Light Skin Female Freckles"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_ginger",
+        "label": "Toigo Light Skin Female Ginger"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_ginger_2",
+        "label": "Toigo Light Skin Female Ginger 2"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_ginger_with_makeup",
+        "label": "Toigo Light Skin Female Ginger With Makeup"
+      },
+      {
+        "id": "skins01:toigo_light_skin_female_with_violet_makeup",
+        "label": "Toigo Light Skin Female With Violet Makeup"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_bronze",
+        "label": "Toigo Light Skin Male Bronze"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_freckles",
+        "label": "Toigo Light Skin Male Freckles"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_ginger",
+        "label": "Toigo Light Skin Male Ginger"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_with_emo_eyes",
+        "label": "Toigo Light Skin Male With Emo Eyes"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_with_eyeliner",
+        "label": "Toigo Light Skin Male With Eyeliner"
+      },
+      {
+        "id": "skins02:toigo_light_skin_male_with_goth_makeup",
+        "label": "Toigo Light Skin Male With Goth Makeup"
+      },
+      {
+        "id": "skins01:toigo_light_skin_with_makeup",
+        "label": "Toigo Light Skin With Makeup"
+      },
+      {
+        "id": "skins01:toigo_light_skin_with_natural_makeup",
+        "label": "Toigo Light Skin With Natural Makeup"
+      },
+      {
+        "id": "makehuman_system_assets:toon01",
+        "label": "Toon01"
+      },
+      {
+        "id": "makehuman_system_assets:young_african_female",
+        "label": "Young African Female"
+      },
+      {
+        "id": "makehuman_system_assets:young_african_male",
+        "label": "Young African Male"
+      },
+      {
+        "id": "makehuman_system_assets:young_asian_female",
+        "label": "Young Asian Female"
+      },
+      {
+        "id": "makehuman_system_assets:young_asian_male",
+        "label": "Young Asian Male"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_female",
+        "label": "Young Caucasian Female"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_female_special_suit",
+        "label": "Young Caucasian Female Special Suit"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_female2",
+        "label": "Young Caucasian Female2"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_male",
+        "label": "Young Caucasian Male"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_male_special_suit",
+        "label": "Young Caucasian Male Special Suit"
+      },
+      {
+        "id": "makehuman_system_assets:young_caucasian_male2",
+        "label": "Young Caucasian Male2"
+      }
+    ],
+    "eyeMaterials": [
+      {
+        "id": "auto",
+        "label": "Automatic"
+      },
+      {
+        "id": "system_eye_materials01:bobby_03_diffuse_amber_eyes",
+        "label": "Bobby 03 Diffuse Amber Eyes"
+      },
+      {
+        "id": "system_eye_materials01:bobby_03_diffuse_blue_eyes",
+        "label": "Bobby 03 Diffuse Blue Eyes"
+      },
+      {
+        "id": "system_eye_materials01:bobby_03_diffuse_grey_eyes",
+        "label": "Bobby 03 Diffuse Grey Eyes"
+      },
+      {
+        "id": "system_eye_materials01:bobby_03_diffuse_hazel_eyes",
+        "label": "Bobby 03 Diffuse Hazel Eyes"
+      },
+      {
+        "id": "system_eye_materials01:bobby_03_diffuse_sea_breeze_eyes",
+        "label": "Bobby 03 Diffuse Sea Breeze Eyes"
+      },
+      {
+        "id": "makehuman_system_assets:brownlight",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:ice",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:brown",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:bluegreen",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:green",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:lightblue",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:blue",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:deepblue",
+        "label": "Materials"
+      },
+      {
+        "id": "makehuman_system_assets:grey",
+        "label": "Materials"
+      },
+      {
+        "id": "system_eye_materials01:mindfront_brown_eye_02",
+        "label": "Mindfront Brown Eye 02"
+      },
+      {
+        "id": "system_eye_materials01:nyloseth_sapphire_blue_eyes",
+        "label": "Nyloseth Sapphire Blue Eyes"
+      },
+      {
+        "id": "system_eye_materials01:spamrakuen_sr_anime_eyes_navy",
+        "label": "Spamrakuen Sr Anime Eyes Navy"
+      },
+      {
+        "id": "system_eye_materials01:spamrakuen_sr_anime_maid-san_blue_eyes",
+        "label": "Spamrakuen Sr Anime Maid San Blue Eyes"
+      },
+      {
+        "id": "system_eye_materials01:spamrakuen_sr_anime_maid-san_red_eyes",
+        "label": "Spamrakuen Sr Anime Maid San Red Eyes"
+      },
+      {
+        "id": "system_eye_materials01:wojackowl_blue_eyes_toon",
+        "label": "Wojackowl Blue Eyes Toon"
+      },
+      {
+        "id": "system_eye_materials01:wojackowl_brown_eyes_toon",
+        "label": "Wojackowl Brown Eyes Toon"
+      },
+      {
+        "id": "system_eye_materials01:wojackowl_green_eyes_toon",
+        "label": "Wojackowl Green Eyes Toon"
+      }
+    ],
+    "brows": [
+      {
+        "id": "auto",
+        "label": "Automatic"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_11",
+        "label": "Mindfront Eyebrows 11"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_03",
+        "label": "Mindfront Eyebrows 03"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_14",
+        "label": "Mindfront Eyebrows 14"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_09",
+        "label": "Mindfront Eyebrows 09"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_02",
+        "label": "Mindfront Eyebrows 02"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_10",
+        "label": "Mindfront Eyebrows 10"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_04",
+        "label": "Mindfront Eyebrows 04"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_07",
+        "label": "Mindfront Eyebrows 07"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_06",
+        "label": "Mindfront Eyebrows 06"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_01",
+        "label": "Mindfront Eyebrows 01"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_12",
+        "label": "Mindfront Eyebrows 12"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_08",
+        "label": "Mindfront Eyebrows 08"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_13",
+        "label": "Mindfront Eyebrows 13"
+      },
+      {
+        "id": "mh_eyebrows01_cc0__mindfront_eyebrows_05",
+        "label": "Mindfront Eyebrows 05"
+      }
+    ],
+    "eyelashes": [
+      {
+        "id": "auto",
+        "label": "Automatic"
+      },
+      {
+        "id": "mh_eyelashes01_cc0__mindfront_eyelashes_02",
+        "label": "Mindfront Eyelashes 02"
+      },
+      {
+        "id": "mh_eyelashes01_cc0__mindfront_eyelashes_03",
+        "label": "Mindfront Eyelashes 03"
+      },
+      {
+        "id": "mh_eyelashes01_cc0__mindfront_eyelashes_01",
+        "label": "Mindfront Eyelashes 01"
+      },
+      {
+        "id": "mh_eyelashes01_cc0__mindfront_eyelashes_04",
+        "label": "Mindfront Eyelashes 04"
+      },
+      {
+        "id": "mh_eyelashes01_cc0__mindfront_eyelashes_05",
+        "label": "Mindfront Eyelashes 05"
+      }
+    ],
+    "hair": [
+      {
+        "id": "bald",
+        "label": "Bald"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_short_side_do",
+        "label": "Elvs Short Side Do"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_daisy_hair",
+        "label": "Elvs Daisy Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_lady_hippy_hair",
+        "label": "Elvs Lady Hippy Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_braid_bun",
+        "label": "Elvs Braid Bun"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_maxwell_hair",
+        "label": "Elvs Maxwell Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_island_princess_hair",
+        "label": "Elvs Island Princess Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_short_daisy_hair",
+        "label": "Elvs Short Daisy Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_50s_updo",
+        "label": "Elvs 50s Updo"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_adrienne_hair",
+        "label": "Elvs Adrienne Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_lara_hair",
+        "label": "Elvs Lara Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_inverted_curly_bob",
+        "label": "Elvs Inverted Curly Bob"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_keylth_hair",
+        "label": "Elvs Keylth Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_ashley_may_hair",
+        "label": "Elvs Ashley May Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_micky_afro",
+        "label": "Elvs Micky Afro"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_wavy_bob",
+        "label": "Elvs Wavy Bob"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_witchy_lil_bob",
+        "label": "Elvs Witchy Lil Bob"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_hazel_hair",
+        "label": "Elvs Hazel Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_grump_hair",
+        "label": "Elvs Grump Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_that_80s_babe_hair",
+        "label": "Elvs That 80s Babe Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_katherine_hair",
+        "label": "Elvs Katherine Hair"
+      },
+      {
+        "id": "mh_hair02_ccby__elvs_braided_rows",
+        "label": "Elvs Braided Rows"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_18",
+        "label": "Culturalibre Hair 18"
+      },
+      {
+        "id": "mh_hair03_ccby__punkduck_alpha7_curly",
+        "label": "Punkduck Alpha7 Curly"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_12",
+        "label": "Culturalibre Hair 12"
+      },
+      {
+        "id": "mh_hair03_ccby__o4saken_curly01",
+        "label": "O4saken Curly01"
+      },
+      {
+        "id": "mh_hair03_ccby__grinsegold_wig_bow_tie",
+        "label": "Grinsegold Wig Bow Tie"
+      },
+      {
+        "id": "mh_hair03_ccby__punkduck_alpha7_curly2",
+        "label": "Punkduck Alpha7 Curly2"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_11",
+        "label": "Culturalibre Hair 11"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_13",
+        "label": "Culturalibre Hair 13"
+      },
+      {
+        "id": "mh_hair03_ccby__punkduck_alpha7_long",
+        "label": "Punkduck Alpha7 Long"
+      },
+      {
+        "id": "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+        "label": "Grinsegold Wig Bun Blonde Braids"
+      },
+      {
+        "id": "mh_hair03_ccby__punkduck_alpha7_long2",
+        "label": "Punkduck Alpha7 Long2"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_17",
+        "label": "Culturalibre Hair 17"
+      },
+      {
+        "id": "mh_hair03_ccby__o4saken_chinesebob01",
+        "label": "O4saken Chinesebob01"
+      },
+      {
+        "id": "mh_hair03_ccby__culturalibre_hair_14",
+        "label": "Culturalibre Hair 14"
+      }
+    ],
+    "facialHair": [
+      {
+        "id": "none",
+        "label": "None"
+      },
+      {
+        "id": "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+        "label": "Rehmanpolanski Beard Viking"
+      },
+      {
+        "id": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+        "label": "Wdg Scruffy Beard"
+      },
+      {
+        "id": "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+        "label": "Rehmanpolanski Moustache Viking"
+      },
+      {
+        "id": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+        "label": "Grinsegold Beard Sigmund Wip"
+      },
+      {
+        "id": "mh_bodyparts05_cc0__culturalibre_faun_beard",
+        "label": "Culturalibre Faun Beard"
+      },
+      {
+        "id": "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+        "label": "Elvs Scruffy Beard1"
+      },
+      {
+        "id": "mh_bodyparts06_cc-by__grinsegold_moustache",
+        "label": "Grinsegold Moustache"
+      },
+      {
+        "id": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+        "label": "Grinsegold Full Beard"
+      },
+      {
+        "id": "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
+        "label": "Culturalibre Dal Moustache"
+      }
+    ]
   }
 }

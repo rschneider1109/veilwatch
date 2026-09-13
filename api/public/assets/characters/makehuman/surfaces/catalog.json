@@ -1,0 +1,572 @@
+{
+  "version": 1,
+  "surfaces": {
+    "skins01:blindsaypatten_uniform_skin_texture": {
+      "id": "skins01:blindsaypatten_uniform_skin_texture",
+      "label": "Blindsaypatten Uniform Skin Texture",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:bobby_03_young_female_hairless": {
+      "id": "skins01:bobby_03_young_female_hairless",
+      "label": "Bobby 03 Young Female Hairless",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:callharvey3d_midtoned_female": {
+      "id": "skins01:callharvey3d_midtoned_female",
+      "label": "Callharvey3d Midtoned Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:cutoff3d_indian_female_enhanced": {
+      "id": "skins01:cutoff3d_indian_female_enhanced",
+      "label": "Cutoff3d Indian Female Enhanced",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:cutoff3d_indian_female_skin": {
+      "id": "skins01:cutoff3d_indian_female_skin",
+      "label": "Cutoff3d Indian Female Skin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:darthfurby_caucasian_female": {
+      "id": "skins01:darthfurby_caucasian_female",
+      "label": "Darthfurby Caucasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:flower-angel_red_head_skin": {
+      "id": "skins01:flower-angel_red_head_skin",
+      "label": "Flower Angel Red Head Skin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:jartur69_middleage_slavic_male_with_genitals_and_beard": {
+      "id": "skins02:jartur69_middleage_slavic_male_with_genitals_and_beard",
+      "label": "Jartur69 Middleage Slavic Male With Genitals And Beard",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:jartur69_old_slavic_male_with_genitals_and_beard": {
+      "id": "skins02:jartur69_old_slavic_male_with_genitals_and_beard",
+      "label": "Jartur69 Old Slavic Male With Genitals And Beard",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:ken1138_caucasian_male_tattooed_skin": {
+      "id": "skins02:ken1138_caucasian_male_tattooed_skin",
+      "label": "Ken1138 Caucasian Male Tattooed Skin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_african_female": {
+      "id": "makehuman_system_assets:middleage_african_female",
+      "label": "Middleage African Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_african_male": {
+      "id": "makehuman_system_assets:middleage_african_male",
+      "label": "Middleage African Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_asian_female": {
+      "id": "makehuman_system_assets:middleage_asian_female",
+      "label": "Middleage Asian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_asian_male": {
+      "id": "makehuman_system_assets:middleage_asian_male",
+      "label": "Middleage Asian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_caucasian_female": {
+      "id": "makehuman_system_assets:middleage_caucasian_female",
+      "label": "Middleage Caucasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:middleage_caucasian_male": {
+      "id": "makehuman_system_assets:middleage_caucasian_male",
+      "label": "Middleage Caucasian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:mindfront_aksel_skin": {
+      "id": "skins02:mindfront_aksel_skin",
+      "label": "Mindfront Aksel Skin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:mindfront_skin_male_african_middleage": {
+      "id": "skins02:mindfront_skin_male_african_middleage",
+      "label": "Mindfront Skin Male African Middleage",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:nyloseth_zoeyskin": {
+      "id": "skins01:nyloseth_zoeyskin",
+      "label": "Nyloseth Zoeyskin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_african_female": {
+      "id": "makehuman_system_assets:old_african_female",
+      "label": "Old African Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_african_male": {
+      "id": "makehuman_system_assets:old_african_male",
+      "label": "Old African Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_asian_female": {
+      "id": "makehuman_system_assets:old_asian_female",
+      "label": "Old Asian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_asian_male": {
+      "id": "makehuman_system_assets:old_asian_male",
+      "label": "Old Asian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_caucasian_female": {
+      "id": "makehuman_system_assets:old_caucasian_female",
+      "label": "Old Caucasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:old_caucasian_male": {
+      "id": "makehuman_system_assets:old_caucasian_male",
+      "label": "Old Caucasian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:onlytheghosts_middle_aged_eurasian_female": {
+      "id": "skins01:onlytheghosts_middle_aged_eurasian_female",
+      "label": "Onlytheghosts Middle Aged Eurasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:onlytheghosts_old_eurasian_female": {
+      "id": "skins01:onlytheghosts_old_eurasian_female",
+      "label": "Onlytheghosts Old Eurasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:onlytheghosts_old_eurasian_male": {
+      "id": "skins02:onlytheghosts_old_eurasian_male",
+      "label": "Onlytheghosts Old Eurasian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:onlytheghosts_young_eurasian_female": {
+      "id": "skins01:onlytheghosts_young_eurasian_female",
+      "label": "Onlytheghosts Young Eurasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:rehmanpolanski_skin_viking_tattoos": {
+      "id": "skins02:rehmanpolanski_skin_viking_tattoos",
+      "label": "Rehmanpolanski Skin Viking Tattoos",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:saltycowdawg_genuine_caucasian_female_with_genitals": {
+      "id": "skins01:saltycowdawg_genuine_caucasian_female_with_genitals",
+      "label": "Saltycowdawg Genuine Caucasian Female With Genitals",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:skalldyrssuppe_creamy_female": {
+      "id": "skins01:skalldyrssuppe_creamy_female",
+      "label": "Skalldyrssuppe Creamy Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:spreadcore_alana_caucasian_female_with_genitals_skin": {
+      "id": "skins01:spreadcore_alana_caucasian_female_with_genitals_skin",
+      "label": "Spreadcore Alana Caucasian Female With Genitals Skin",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_bronze": {
+      "id": "skins01:toigo_light_skin_female_bronze",
+      "label": "Toigo Light Skin Female Bronze",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_bronze_with_makeup": {
+      "id": "skins01:toigo_light_skin_female_bronze_with_makeup",
+      "label": "Toigo Light Skin Female Bronze With Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_freckles": {
+      "id": "skins01:toigo_light_skin_female_freckles",
+      "label": "Toigo Light Skin Female Freckles",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_ginger": {
+      "id": "skins01:toigo_light_skin_female_ginger",
+      "label": "Toigo Light Skin Female Ginger",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_ginger_2": {
+      "id": "skins01:toigo_light_skin_female_ginger_2",
+      "label": "Toigo Light Skin Female Ginger 2",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_ginger_with_makeup": {
+      "id": "skins01:toigo_light_skin_female_ginger_with_makeup",
+      "label": "Toigo Light Skin Female Ginger With Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_female_with_violet_makeup": {
+      "id": "skins01:toigo_light_skin_female_with_violet_makeup",
+      "label": "Toigo Light Skin Female With Violet Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_bronze": {
+      "id": "skins02:toigo_light_skin_male_bronze",
+      "label": "Toigo Light Skin Male Bronze",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_freckles": {
+      "id": "skins02:toigo_light_skin_male_freckles",
+      "label": "Toigo Light Skin Male Freckles",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_ginger": {
+      "id": "skins02:toigo_light_skin_male_ginger",
+      "label": "Toigo Light Skin Male Ginger",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_with_emo_eyes": {
+      "id": "skins02:toigo_light_skin_male_with_emo_eyes",
+      "label": "Toigo Light Skin Male With Emo Eyes",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_with_eyeliner": {
+      "id": "skins02:toigo_light_skin_male_with_eyeliner",
+      "label": "Toigo Light Skin Male With Eyeliner",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins02:toigo_light_skin_male_with_goth_makeup": {
+      "id": "skins02:toigo_light_skin_male_with_goth_makeup",
+      "label": "Toigo Light Skin Male With Goth Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_with_makeup": {
+      "id": "skins01:toigo_light_skin_with_makeup",
+      "label": "Toigo Light Skin With Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "skins01:toigo_light_skin_with_natural_makeup": {
+      "id": "skins01:toigo_light_skin_with_natural_makeup",
+      "label": "Toigo Light Skin With Natural Makeup",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:toon01": {
+      "id": "makehuman_system_assets:toon01",
+      "label": "Toon01",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_african_female": {
+      "id": "makehuman_system_assets:young_african_female",
+      "label": "Young African Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_african_male": {
+      "id": "makehuman_system_assets:young_african_male",
+      "label": "Young African Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_asian_female": {
+      "id": "makehuman_system_assets:young_asian_female",
+      "label": "Young Asian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_asian_male": {
+      "id": "makehuman_system_assets:young_asian_male",
+      "label": "Young Asian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_female": {
+      "id": "makehuman_system_assets:young_caucasian_female",
+      "label": "Young Caucasian Female",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_female_special_suit": {
+      "id": "makehuman_system_assets:young_caucasian_female_special_suit",
+      "label": "Young Caucasian Female Special Suit",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_female2": {
+      "id": "makehuman_system_assets:young_caucasian_female2",
+      "label": "Young Caucasian Female2",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_male": {
+      "id": "makehuman_system_assets:young_caucasian_male",
+      "label": "Young Caucasian Male",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_male_special_suit": {
+      "id": "makehuman_system_assets:young_caucasian_male_special_suit",
+      "label": "Young Caucasian Male Special Suit",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:young_caucasian_male2": {
+      "id": "makehuman_system_assets:young_caucasian_male2",
+      "label": "Young Caucasian Male2",
+      "kind": "skin",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:bobby_03_diffuse_amber_eyes": {
+      "id": "system_eye_materials01:bobby_03_diffuse_amber_eyes",
+      "label": "Bobby 03 Diffuse Amber Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:bobby_03_diffuse_blue_eyes": {
+      "id": "system_eye_materials01:bobby_03_diffuse_blue_eyes",
+      "label": "Bobby 03 Diffuse Blue Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:bobby_03_diffuse_grey_eyes": {
+      "id": "system_eye_materials01:bobby_03_diffuse_grey_eyes",
+      "label": "Bobby 03 Diffuse Grey Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:bobby_03_diffuse_hazel_eyes": {
+      "id": "system_eye_materials01:bobby_03_diffuse_hazel_eyes",
+      "label": "Bobby 03 Diffuse Hazel Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:bobby_03_diffuse_sea_breeze_eyes": {
+      "id": "system_eye_materials01:bobby_03_diffuse_sea_breeze_eyes",
+      "label": "Bobby 03 Diffuse Sea Breeze Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:brownlight": {
+      "id": "makehuman_system_assets:brownlight",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:ice": {
+      "id": "makehuman_system_assets:ice",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:brown": {
+      "id": "makehuman_system_assets:brown",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:bluegreen": {
+      "id": "makehuman_system_assets:bluegreen",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:green": {
+      "id": "makehuman_system_assets:green",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:lightblue": {
+      "id": "makehuman_system_assets:lightblue",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:blue": {
+      "id": "makehuman_system_assets:blue",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:deepblue": {
+      "id": "makehuman_system_assets:deepblue",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "makehuman_system_assets:grey": {
+      "id": "makehuman_system_assets:grey",
+      "label": "Materials",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:mindfront_brown_eye_02": {
+      "id": "system_eye_materials01:mindfront_brown_eye_02",
+      "label": "Mindfront Brown Eye 02",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:nyloseth_sapphire_blue_eyes": {
+      "id": "system_eye_materials01:nyloseth_sapphire_blue_eyes",
+      "label": "Nyloseth Sapphire Blue Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:spamrakuen_sr_anime_eyes_navy": {
+      "id": "system_eye_materials01:spamrakuen_sr_anime_eyes_navy",
+      "label": "Spamrakuen Sr Anime Eyes Navy",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:spamrakuen_sr_anime_maid-san_blue_eyes": {
+      "id": "system_eye_materials01:spamrakuen_sr_anime_maid-san_blue_eyes",
+      "label": "Spamrakuen Sr Anime Maid San Blue Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:spamrakuen_sr_anime_maid-san_red_eyes": {
+      "id": "system_eye_materials01:spamrakuen_sr_anime_maid-san_red_eyes",
+      "label": "Spamrakuen Sr Anime Maid San Red Eyes",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:wojackowl_blue_eyes_toon": {
+      "id": "system_eye_materials01:wojackowl_blue_eyes_toon",
+      "label": "Wojackowl Blue Eyes Toon",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:wojackowl_brown_eyes_toon": {
+      "id": "system_eye_materials01:wojackowl_brown_eyes_toon",
+      "label": "Wojackowl Brown Eyes Toon",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    },
+    "system_eye_materials01:wojackowl_green_eyes_toon": {
+      "id": "system_eye_materials01:wojackowl_green_eyes_toon",
+      "label": "Wojackowl Green Eyes Toon",
+      "kind": "eye",
+      "license": "CC0",
+      "pack": "surface_00.json.gz"
+    }
+  }
+}

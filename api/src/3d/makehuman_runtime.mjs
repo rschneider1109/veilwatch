@@ -161,7 +161,31 @@ export class MakeHumanRuntime {
     this.boneMap = new Map();
     this.skeleton = null;
     this._boneRoots = [];
+    this.boneNames = [];
+    this.boneIndexByName = new Map();
+    this.vertexInfluences = null;
+    this._transformMeta = { minY:0, heightScale:1, massScale:1 };
     this._applySerial = 0;
+
+    // Native MakeHuman asset runtime. Only currently selected assets are kept
+    // as Three.js objects. Pack JSON is held in a tiny LRU so long sessions do
+    // not accumulate hundreds of meshes/textures in memory.
+    this.nativeAssets = new Map();
+    this.nativeCatalog = null;
+    this._nativeCatalogPromise = null;
+    this._nativePackCache = new Map();
+    this._nativeLoadSerial = 0;
+    this.hiddenBodyVertices = new Set();
+
+    // Surface textures are separate from mesh assets so changing skin/eyes never
+    // rebuilds geometry. Only the active textures are retained on GPU.
+    this.surfaceCatalog = null;
+    this._surfaceCatalogPromise = null;
+    this._surfacePackCache = new Map();
+    this._surfaceLoadSerial = { skin:0, eye:0 };
+    this.activeSurfaces = { skin:null, eye:null };
+    this._skinTint = new THREE.Color(0xcc9874);
+    this._eyeTint = new THREE.Color(0x5c3924);
 
     this.materials = {
       skin:rgbMaterial("MHBody", 0xcc9874, {roughness:.76}),
@@ -250,6 +274,8 @@ export class MakeHumanRuntime {
   _prepareVertexWeights(){
     const boneNames = Object.keys(this.rig?.bones || {});
     const boneIndex = new Map(boneNames.map((name, index)=>[name,index]));
+    this.boneNames = boneNames.slice();
+    this.boneIndexByName = boneIndex;
     const vertexCount = this.basePositions.length / 3;
     const influences = Array.from({length:vertexCount}, ()=>[]);
 
@@ -263,6 +289,7 @@ export class MakeHumanRuntime {
       }
     }
 
+    this.vertexInfluences = influences;
     const hipsIndex = boneIndex.get("mixamorig:Hips") ?? 0;
     for(const mesh of this.renderMeshes){
       const src = mesh.userData.sourceIndices;
@@ -381,6 +408,7 @@ export class MakeHumanRuntime {
 
     const heightScale = .90 + THREE.MathUtils.clamp(Number(f.height ?? 50),0,100) / 100 * .20;
     const massScale = .94 + THREE.MathUtils.clamp(Number(f.mass ?? 50),0,100) / 100 * .12;
+    this._transformMeta = { minY, heightScale, massScale };
     for(let i=0; i<p.length; i+=3){
       out[i] = p[i] * BASE_SCALE * massScale;
       out[i+1] = (p[i+1] - minY) * BASE_SCALE * heightScale;
@@ -420,6 +448,19 @@ export class MakeHumanRuntime {
         const s=src[i]*3, d=i*3;
         pos.array[d]=this.transformed[s]; pos.array[d+1]=this.transformed[s+1]; pos.array[d+2]=this.transformed[s+2];
         nor.array[d]=sourceNormals[s]; nor.array[d+1]=sourceNormals[s+1]; nor.array[d+2]=sourceNormals[s+2];
+      }
+      if(mesh.name === "MakeHumanBody" && this.hiddenBodyVertices?.size){
+        // Collapse covered triangles in place instead of throwing them to a huge
+        // negative coordinate. That keeps bounding boxes sane for camera framing.
+        for(let i=0;i<src.length;i+=3){
+          if(this.hiddenBodyVertices.has(src[i]) || this.hiddenBodyVertices.has(src[i+1]) || this.hiddenBodyVertices.has(src[i+2])){
+            const anchor=i*3, ax=pos.array[anchor], ay=pos.array[anchor+1], az=pos.array[anchor+2];
+            for(let j=0;j<3;j++){
+              const d=(i+j)*3; pos.array[d]=ax; pos.array[d+1]=ay; pos.array[d+2]=az;
+              nor.array[d]=0; nor.array[d+1]=1; nor.array[d+2]=0;
+            }
+          }
+        }
       }
       pos.needsUpdate=true; nor.needsUpdate=true;
       mesh.geometry.computeBoundingBox();
@@ -463,17 +504,15 @@ export class MakeHumanRuntime {
     return new THREE.Vector3();
   }
 
-  _rebuildSkeleton(){
-    if(this.skeleton){
-      for(const root of this._boneRoots) root.parent?.remove(root);
-      this.skeleton.dispose?.();
-    }
-    this.boneMap.clear();
-    this._boneRoots=[];
+  _safeBoneName(name){
+    return String(name || "bone").replace(/[^A-Za-z0-9_-]/g, "_");
+  }
 
+  _rebuildSkeleton(){
     const definitions=this.rig?.bones || {};
     const names=Object.keys(definitions);
     const worldMatrices=new Map();
+
     for(const name of names){
       const def=definitions[name];
       const head=this._strategyPoint(def.head);
@@ -483,11 +522,32 @@ export class MakeHumanRuntime {
       const qAlign=new THREE.Quaternion().setFromUnitVectors(Y_AXIS,dir);
       const qRoll=new THREE.Quaternion().setFromAxisAngle(Y_AXIS,Number(def.roll||0));
       const q=qAlign.multiply(qRoll);
-      const matrix=new THREE.Matrix4().compose(head,q,new THREE.Vector3(1,1,1));
-      worldMatrices.set(name,matrix);
-      const bone=new THREE.Bone(); bone.name=name; this.boneMap.set(name,bone);
+      worldMatrices.set(name,new THREE.Matrix4().compose(head,q,new THREE.Vector3(1,1,1)));
     }
 
+    // Build the bone hierarchy once. Reusing the same Bone and Skeleton objects
+    // is important for long-running Projection Bay sessions: it prevents every
+    // slider movement from orphaning AnimationMixer bindings and old skeletons.
+    if(!this.skeleton){
+      this.boneMap.clear();
+      this._boneRoots=[];
+      for(const name of names){
+        const bone=new THREE.Bone();
+        bone.name=this._safeBoneName(name);
+        bone.userData.makeHumanBoneName=name;
+        this.boneMap.set(name,bone);
+      }
+      for(const name of names){
+        const def=definitions[name];
+        const bone=this.boneMap.get(name);
+        const parent=this.boneMap.get(String(def.parent||""));
+        if(parent) parent.add(bone);
+        else { this.root.add(bone); this._boneRoots.push(bone); }
+      }
+      this.skeleton=new THREE.Skeleton(names.map(n=>this.boneMap.get(n)));
+    }
+
+    // Update the existing hierarchy to the freshly morphed MakeHuman rest pose.
     for(const name of names){
       const def=definitions[name];
       const bone=this.boneMap.get(name);
@@ -498,20 +558,35 @@ export class MakeHumanRuntime {
         ? new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().copy(worldMatrices.get(parentName)).invert(),world)
         : world.clone();
       local.decompose(bone.position,bone.quaternion,bone.scale);
-      if(parent) parent.add(bone); else { this.root.add(bone); this._boneRoots.push(bone); }
     }
 
     this.root.updateMatrixWorld(true);
-    const bones=names.map(n=>this.boneMap.get(n));
-    this.skeleton=new THREE.Skeleton(bones);
+    this.skeleton.calculateInverses();
+
     for(const mesh of this.renderMeshes){
-      // Let Three use the mesh's current world matrix as the bind matrix. This
-      // keeps skinning stable after Projection Bay camera framing repositions
-      // the character root between proportion edits.
-      mesh.bind(this.skeleton);
-      mesh.normalizeSkinWeights();
+      if(mesh.skeleton!==this.skeleton){
+        mesh.bind(this.skeleton);
+        mesh.normalizeSkinWeights();
+      }
     }
     this.root.updateMatrixWorld(true);
+  }
+
+  transformRawPoint(x,y,z,target=new THREE.Vector3()){
+    const t=this._transformMeta || {minY:0,heightScale:1,massScale:1};
+    return target.set(
+      Number(x||0) * BASE_SCALE * t.massScale,
+      (Number(y||0) - t.minY) * BASE_SCALE * t.heightScale,
+      Number(z||0) * BASE_SCALE * t.massScale
+    );
+  }
+
+  getVertexInfluences(index){
+    return this.vertexInfluences?.[Number(index)] || [];
+  }
+
+  getBoneIndex(name){
+    return this.boneIndexByName.get(name);
   }
 
   async applyForge(forge={}, options={}){
@@ -524,15 +599,367 @@ export class MakeHumanRuntime {
     this._transformPositions(forge);
     this._updateGeometries();
     this._rebuildSkeleton();
+    this.refitNativeAssets();
     this.root.userData.lastForge = {...forge};
     if(options.initial) this.root.updateMatrixWorld(true);
     return true;
   }
 
-  setSkinColor(color){ this.materials.skin.color.copy(color); this.materials.skin.needsUpdate=true; }
+  async _fetchGzipJson(url){
+    const res=await fetch(url,{cache:"force-cache"});
+    if(!res.ok) throw new Error(`MakeHuman asset fetch failed ${res.status}: ${url}`);
+    if(typeof DecompressionStream!=="function") throw new Error("Browser does not support gzip asset packs.");
+    const stream=res.body.pipeThrough(new DecompressionStream("gzip"));
+    return new Response(stream).json();
+  }
+
+  async loadNativeCatalog(){
+    if(this.nativeCatalog) return this.nativeCatalog;
+    if(this._nativeCatalogPromise) return this._nativeCatalogPromise;
+    this._nativeCatalogPromise=fetch(`${RUNTIME_ROOT}/../library/catalog.json`,{cache:"force-cache"})
+      .then(r=>{ if(!r.ok) throw new Error(`Native catalog ${r.status}`); return r.json(); })
+      .then(data=>{ this.nativeCatalog=data; return data; })
+      .finally(()=>{ this._nativeCatalogPromise=null; });
+    return this._nativeCatalogPromise;
+  }
+
+  async _loadNativePack(file){
+    if(this._nativePackCache.has(file)){
+      const cached=this._nativePackCache.get(file);
+      this._nativePackCache.delete(file); this._nativePackCache.set(file,cached);
+      return cached;
+    }
+    const data=await this._fetchGzipJson(`${RUNTIME_ROOT}/../library/packs/${file}`);
+    const map=new Map((data.assets||[]).map(a=>[a.id,a]));
+    this._nativePackCache.set(file,map);
+    // Keep only one decompressed source pack. Active meshes retain only the
+    // mapping data they need, so browsing large hair packs cannot grow the heap
+    // without bound during a long Projection Bay session.
+    while(this._nativePackCache.size>1){
+      const first=this._nativePackCache.keys().next().value;
+      this._nativePackCache.delete(first);
+    }
+    return map;
+  }
+
+  async _nativeAssetData(id){
+    const catalog=await this.loadNativeCatalog();
+    const row=catalog?.assets?.[id];
+    if(!row) throw new Error(`Unknown MakeHuman asset: ${id}`);
+    const pack=await this._loadNativePack(row.pack);
+    const data=pack.get(id);
+    if(!data) throw new Error(`Asset ${id} missing from ${row.pack}`);
+    return data;
+  }
+
+  _nativeScale(meta={}){
+    const p=this.deformedRaw;
+    const axis=(spec,axisIndex)=>{
+      if(!Array.isArray(spec)||spec.length<3) return 1;
+      const a=Number(spec[0])*3+axisIndex,b=Number(spec[1])*3+axisIndex,den=Math.abs(Number(spec[2]))||1;
+      if(a<0||b<0||a>=p.length||b>=p.length) return 1;
+      return Math.abs(p[a]-p[b])/den;
+    };
+    return {x:axis(meta.x_scale,0),y:axis(meta.y_scale,1),z:axis(meta.z_scale,2)};
+  }
+
+  _fitNativeVertex(asset,index,target=new THREE.Vector3()){
+    const p=this.deformedRaw, sc=this._nativeScale(asset.mhclo||{});
+    if(asset.mappingIndices && asset.mappingValues){
+      const io=index*3, vo=index*6;
+      if(io+2>=asset.mappingIndices.length || vo+5>=asset.mappingValues.length) return target.set(0,0,0);
+      const a=asset.mappingIndices[io]*3,b=asset.mappingIndices[io+1]*3,c=asset.mappingIndices[io+2]*3;
+      const w0=asset.mappingValues[vo],w1=asset.mappingValues[vo+1],w2=asset.mappingValues[vo+2];
+      const ox=asset.mappingValues[vo+3],oy=asset.mappingValues[vo+4],oz=asset.mappingValues[vo+5];
+      const x=w0*p[a]+w1*p[b]+w2*p[c]+ox*sc.x;
+      const y=w0*p[a+1]+w1*p[b+1]+w2*p[c+1]+oy*sc.y;
+      const z=w0*p[a+2]+w1*p[b+2]+w2*p[c+2]+oz*sc.z;
+      return this.transformRawPoint(x,y,z,target);
+    }
+    const m=asset.mapping?.[index];
+    if(!m) return target.set(0,0,0);
+    const i0=m[0]*3,i1=m[1]*3,i2=m[2]*3;
+    const x=m[3]*p[i0]+m[4]*p[i1]+m[5]*p[i2]+m[6]*sc.x;
+    const y=m[3]*p[i0+1]+m[4]*p[i1+1]+m[5]*p[i2+1]+m[7]*sc.y;
+    const z=m[3]*p[i0+2]+m[4]*p[i1+2]+m[5]*p[i2+2]+m[8]*sc.z;
+    return this.transformRawPoint(x,y,z,target);
+  }
+
+  _nativeVertexSkin(asset,index){
+    const m=asset.mapping?.[index];
+    const totals=new Map();
+    if(m){
+      for(let k=0;k<3;k++){
+        const bw=Number(m[3+k]||0);
+        if(bw<=0) continue;
+        for(const [bi,w] of this.getVertexInfluences(m[k])) totals.set(bi,(totals.get(bi)||0)+bw*w);
+      }
+    }
+    let rows=[...totals.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4);
+    if(!rows.length) rows=[[this.getBoneIndex("mixamorig:Hips")??0,1]];
+    const sum=rows.reduce((a,x)=>a+x[1],0)||1;
+    return rows.map(([i,w])=>[i,w/sum]);
+  }
+
+  async _textureFromEmbedded(tex,slot){
+    if(!tex?.data) return null;
+    const binary=atob(tex.data); const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const url=URL.createObjectURL(new Blob([bytes],{type:tex.mime||"image/webp"}));
+    try{
+      const texture=await new THREE.TextureLoader().loadAsync(url);
+      texture.flipY=false;
+      if(slot==="diffuse") texture.colorSpace=THREE.SRGBColorSpace;
+      texture.needsUpdate=true;
+      return texture;
+    }finally{ URL.revokeObjectURL(url); }
+  }
+
+  async _nativeMaterial(asset,tint){
+    const m=asset.material||{};
+    const dc=Array.isArray(m.diffuseColor)?m.diffuseColor:[.8,.8,.8];
+    const color=new THREE.Color(dc[0]??.8,dc[1]??.8,dc[2]??.8);
+    if(tint) color.multiply(tint);
+    const material=new THREE.MeshStandardMaterial({
+      color,roughness:.72,metalness:Math.max(0,Math.min(1,Number(m.metallic||0))),
+      transparent:!!m.transparent || Number(m.opacity??1)<.999,opacity:Number(m.opacity??1),
+      side:THREE.DoubleSide,alphaTest:(!!m.transparent?0.08:0)
+    });
+    material.name=`MHNative_${asset.id}`; material.userData.veilwatchNativeAsset=true;
+    const diffuse=await this._textureFromEmbedded(asset.textures?.diffuse,"diffuse");
+    if(diffuse){ material.map=diffuse; material.needsUpdate=true; }
+    return material;
+  }
+
+  async _createNativeAssetMesh(asset,tint){
+    const tri=asset.geometry?.triangles||[], uvs=asset.geometry?.uvs||[];
+
+    // OBJ faces carry separate position/UV indices. Deduplicate each (v,vt)
+    // pair instead of expanding every triangle corner into a new vertex. This is
+    // a major memory reduction for high-poly MakeHuman hairstyles.
+    const pairToIndex=new Map();
+    const positions=[], texcoords=[], skinIndices=[], skinWeights=[], sourceRefs=[], indices=[];
+    const cachePos=new Map(), cacheSkin=new Map();
+    for(let c=0;c<Math.floor(tri.length/2);c++){
+      const vi=Number(tri[c*2]), ti=Number(tri[c*2+1]);
+      const key=`${vi}/${ti}`;
+      let outIndex=pairToIndex.get(key);
+      if(outIndex===undefined){
+        outIndex=sourceRefs.length; pairToIndex.set(key,outIndex); sourceRefs.push(vi);
+        let v=cachePos.get(vi); if(!v){v=this._fitNativeVertex(asset,vi,new THREE.Vector3());cachePos.set(vi,v);}
+        positions.push(v.x,v.y,v.z);
+        texcoords.push(ti>=0?(uvs[ti*2]??0):0,ti>=0?(uvs[ti*2+1]??0):0);
+        let sk=cacheSkin.get(vi); if(!sk){sk=this._nativeVertexSkin(asset,vi);cacheSkin.set(vi,sk);}
+        for(let j=0;j<4;j++){skinIndices.push(sk[j]?.[0]??0);skinWeights.push(sk[j]?.[1]??0);}
+      }
+      indices.push(outIndex);
+    }
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+    geometry.setAttribute("uv",new THREE.Float32BufferAttribute(texcoords,2));
+    geometry.setAttribute("skinIndex",new THREE.BufferAttribute(new Uint16Array(skinIndices),4));
+    geometry.setAttribute("skinWeight",new THREE.Float32BufferAttribute(skinWeights,4));
+    geometry.setIndex(new THREE.BufferAttribute(sourceRefs.length>65535?new Uint32Array(indices):new Uint16Array(indices),1));
+    geometry.computeVertexNormals(); geometry.computeBoundingBox(); geometry.computeBoundingSphere();
+    const material=await this._nativeMaterial(asset,tint);
+    const mesh=new THREE.SkinnedMesh(geometry,material); mesh.name=`MHNative_${asset.id}`; mesh.frustumCulled=false;
+    mesh.userData.nativeVertexRefs=new Uint32Array(sourceRefs);
+    mesh.bind(this.skeleton); mesh.normalizeSkinWeights();
+    return mesh;
+  }
+
+  _disposeNativeRoot(root){
+    root?.traverse?.(obj=>{
+      obj.geometry?.dispose?.();
+      const mats=Array.isArray(obj.material)?obj.material:[obj.material];
+      for(const mat of mats){ if(!mat) continue; for(const v of Object.values(mat)){if(v?.isTexture)v.dispose?.();} mat.dispose?.(); }
+    });
+    root?.parent?.remove(root);
+  }
+
+  _refreshNativeBodyMask(){
+    const next=new Set();
+    for(const row of this.nativeAssets.values()) for(const vi of row.asset?.delete||[]) next.add(Number(vi));
+    this.hiddenBodyVertices=next;
+    this._updateGeometries();
+  }
+
+  _compactNativeAsset(asset){
+    const rows=asset.mapping||[];
+    const mappingIndices=new Int32Array(rows.length*3);
+    const mappingValues=new Float32Array(rows.length*6);
+    for(let i=0;i<rows.length;i++){
+      const m=rows[i]||[]; const io=i*3, vo=i*6;
+      mappingIndices[io]=Number(m[0]||0); mappingIndices[io+1]=Number(m[1]||0); mappingIndices[io+2]=Number(m[2]||0);
+      for(let j=0;j<6;j++) mappingValues[vo+j]=Number(m[3+j]||0);
+    }
+    return {
+      id:asset.id,
+      mappingIndices,
+      mappingValues,
+      mhclo:asset.mhclo||{},
+      delete:new Uint32Array(asset.delete||[]),
+      material:asset.material||{}
+    };
+  }
+
+  _updateNativeTint(row,tint){
+    if(!row?.mesh?.material) return;
+    const m=row.asset?.material||{};
+    const dc=Array.isArray(m.diffuseColor)?m.diffuseColor:[.8,.8,.8];
+    const c=new THREE.Color(dc[0]??.8,dc[1]??.8,dc[2]??.8);
+    if(tint) c.multiply(new THREE.Color(tint));
+    const mats=Array.isArray(row.mesh.material)?row.mesh.material:[row.mesh.material];
+    for(const mat of mats){if(mat?.color){mat.color.copy(c);mat.needsUpdate=true;}}
+    row.tint=tint||null;
+  }
+
+  async setNativeAssets(requests=[]){
+    const serial=++this._nativeLoadSerial;
+    const desired=new Map((requests||[]).filter(r=>r?.slot&&r?.id).map(r=>[r.slot,r]));
+    for(const [slot,row] of [...this.nativeAssets.entries()]){
+      const d=desired.get(slot);
+      if(!d || d.id!==row.id){ this._disposeNativeRoot(row.root); this.nativeAssets.delete(slot); }
+    }
+    for(const [slot,req] of desired.entries()){
+      const existing=this.nativeAssets.get(slot);
+      if(existing?.id===req.id){ this._updateNativeTint(existing,req.tint); continue; }
+      try{
+        const asset=await this._nativeAssetData(req.id);
+        if(serial!==this._nativeLoadSerial) return false;
+        const tint=req.tint?new THREE.Color(req.tint):null;
+        const mesh=await this._createNativeAssetMesh(asset,tint);
+        if(serial!==this._nativeLoadSerial){ this._disposeNativeRoot(mesh); return false; }
+        const root=new THREE.Group(); root.name=`MHNativeSlot_${slot}`; root.add(mesh); this.root.add(root);
+        // Keep only refit data after the mesh is built. Geometry/UV/base64 texture
+        // payloads belong to the temporary pack cache and may be garbage collected.
+        const activeAsset=this._compactNativeAsset(asset);
+        const row={id:req.id,asset:activeAsset,root,mesh,tint:req.tint||null};
+        this.nativeAssets.set(slot,row);
+      }catch(err){ console.warn(`MakeHuman native asset failed (${slot}:${req.id}):`,err?.message||err); }
+    }
+    const helperLashes=this.renderMeshes.find(m=>m.name==="MakeHumanEyelashes");
+    if(helperLashes) helperLashes.visible=!desired.has("eyelashes");
+    this._refreshNativeBodyMask();
+    return serial===this._nativeLoadSerial;
+  }
+
+  refitNativeAssets(){
+    for(const row of this.nativeAssets.values()){
+      const mesh=row.mesh, asset=row.asset; if(!mesh?.geometry||!asset) continue;
+      const refs=mesh.userData.nativeVertexRefs||[]; const pos=mesh.geometry.getAttribute("position");
+      const cache=new Map();
+      for(let c=0;c<refs.length;c++){
+        const vi=refs[c]; let v=cache.get(vi); if(!v){v=this._fitNativeVertex(asset,vi,new THREE.Vector3());cache.set(vi,v);}
+        pos.array[c*3]=v.x;pos.array[c*3+1]=v.y;pos.array[c*3+2]=v.z;
+      }
+      pos.needsUpdate=true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingBox(); mesh.geometry.computeBoundingSphere();
+      if(mesh.skeleton!==this.skeleton) mesh.bind(this.skeleton,new THREE.Matrix4());
+    }
+    if(this.hiddenBodyVertices?.size) this._updateGeometries();
+  }
+
+  clearNativeAssets(){
+    this._nativeLoadSerial++;
+    for(const row of this.nativeAssets.values()) this._disposeNativeRoot(row.root);
+    this.nativeAssets.clear(); this.hiddenBodyVertices.clear(); this._nativePackCache.clear();
+  }
+
+  async loadSurfaceCatalog(){
+    if(this.surfaceCatalog) return this.surfaceCatalog;
+    if(this._surfaceCatalogPromise) return this._surfaceCatalogPromise;
+    this._surfaceCatalogPromise=fetch(`${RUNTIME_ROOT}/../surfaces/catalog.json`,{cache:"force-cache"})
+      .then(r=>{if(!r.ok)throw new Error(`Surface catalog ${r.status}`);return r.json();})
+      .then(data=>{this.surfaceCatalog=data;return data;})
+      .finally(()=>{this._surfaceCatalogPromise=null;});
+    return this._surfaceCatalogPromise;
+  }
+
+  async _surfaceData(id){
+    const catalog=await this.loadSurfaceCatalog();
+    const row=catalog?.surfaces?.[id];
+    if(!row) throw new Error(`Unknown MakeHuman surface: ${id}`);
+    let pack=this._surfacePackCache.get(row.pack);
+    if(!pack){
+      const data=await this._fetchGzipJson(`${RUNTIME_ROOT}/../surfaces/packs/${row.pack}`);
+      pack=new Map((data.surfaces||[]).map(x=>[x.id,x]));
+      this._surfacePackCache.clear();
+      this._surfacePackCache.set(row.pack,pack);
+    }
+    const surface=pack.get(id);
+    if(!surface) throw new Error(`Surface ${id} missing from ${row.pack}`);
+    return surface;
+  }
+
+  _disposeSurfaceTextures(material){
+    if(!material) return;
+    for(const key of ["map","normalMap","bumpMap","roughnessMap","aoMap","alphaMap"]){
+      const tex=material[key];
+      if(tex?.userData?.veilwatchSurfaceTexture) tex.dispose?.();
+      if(tex?.userData?.veilwatchSurfaceTexture) material[key]=null;
+    }
+  }
+
+  async setSurface(kind,id,tint=null){
+    kind=kind==="eye"?"eye":"skin";
+    const material=kind==="eye"?this.materials.eye:this.materials.skin;
+    if(id && this.activeSurfaces[kind]===id){
+      if(kind==="skin") this.setSkinColor(tint||this._skinTint); else this.setEyeColor(tint||this._eyeTint);
+      return true;
+    }
+    const serial=++this._surfaceLoadSerial[kind];
+    if(!id || id==="none"){
+      this._disposeSurfaceTextures(material);
+      this.activeSurfaces[kind]=null;
+      if(kind==="skin") this.setSkinColor(tint||this._skinTint); else this.setEyeColor(tint||this._eyeTint);
+      material.needsUpdate=true;
+      return true;
+    }
+    try{
+      const surface=await this._surfaceData(id);
+      const built={};
+      for(const [slot,key] of [["diffuse","map"],["normal","normalMap"],["bump","bumpMap"],["roughness","roughnessMap"],["ao","aoMap"],["alpha","alphaMap"]]){
+        const tex=await this._textureFromEmbedded(surface.textures?.[slot],slot);
+        if(tex){tex.userData.veilwatchSurfaceTexture=true;built[key]=tex;}
+      }
+      if(serial!==this._surfaceLoadSerial[kind]){for(const tex of Object.values(built))tex.dispose?.();return false;}
+      this._disposeSurfaceTextures(material);
+      Object.assign(material,built);
+      const dc=surface.material?.diffuseColor;
+      const base=Array.isArray(dc)?new THREE.Color(dc[0]??1,dc[1]??1,dc[2]??1):new THREE.Color(0xffffff);
+      const wanted=tint?new THREE.Color(tint):(kind==="skin"?this._skinTint:this._eyeTint);
+      // Preserve photographed/material coloration while letting Veilwatch's color
+      // swatches gently bias the result instead of repainting the texture.
+      material.userData.veilwatchSurfaceBaseColor=base.clone();
+      material.color.copy(base.clone().lerp(wanted,kind==="skin"?.16:.08));
+      material.roughness=kind==="eye"?.20:Math.max(.38,Math.min(.9,1-Number(surface.material?.shininess??.5)*.35));
+      material.metalness=0;
+      material.transparent=!!surface.material?.transparent || Number(surface.material?.opacity??1)<.999;
+      material.opacity=Number(surface.material?.opacity??1);
+      material.alphaTest=material.alphaMap?.isTexture?.08:0;
+      material.needsUpdate=true;
+      this.activeSurfaces[kind]=id;
+      return true;
+    }catch(err){
+      console.warn(`MakeHuman ${kind} surface failed (${id}):`,err?.message||err);
+      return false;
+    }
+  }
+
+  setSkinColor(color){
+    this._skinTint.copy(color instanceof THREE.Color?color:new THREE.Color(color));
+    if(this.materials.skin.map){
+      const base=this.materials.skin.userData?.veilwatchSurfaceBaseColor?.clone?.()||new THREE.Color(0xffffff);
+      this.materials.skin.color.copy(base.lerp(this._skinTint,.16));
+    }else this.materials.skin.color.copy(this._skinTint);
+    this.materials.skin.needsUpdate=true;
+  }
   setEyeColor(color){
-    // Until iris materials from the asset packs are wired in, use a subtle eye tint.
-    this.materials.eye.color.copy(new THREE.Color(0xf1ece4).lerp(color,.12));
+    this._eyeTint.copy(color instanceof THREE.Color?color:new THREE.Color(color));
+    if(this.materials.eye.map){
+      const base=this.materials.eye.userData?.veilwatchSurfaceBaseColor?.clone?.()||new THREE.Color(0xffffff);
+      this.materials.eye.color.copy(base.lerp(this._eyeTint,.08));
+    }else this.materials.eye.color.copy(new THREE.Color(0xf1ece4).lerp(this._eyeTint,.12));
     this.materials.eye.needsUpdate=true;
   }
 
@@ -546,8 +973,14 @@ export class MakeHumanRuntime {
   }
 
   dispose(){
+    this.clearNativeAssets();
+    this._disposeSurfaceTextures(this.materials.skin);
+    this._disposeSurfaceTextures(this.materials.eye);
+    this._surfacePackCache.clear();
+    this.surfaceCatalog=null;
     this.skeleton?.dispose?.();
     this.targetCache.clear();
+    this._nativePackCache.clear();
   }
 }
 

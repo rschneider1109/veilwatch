@@ -144,6 +144,21 @@ const EYE_COLORS = {
   amber: 0xaa7b30
 };
 
+const DEFAULT_MH_APPEARANCE = {
+  hair:"mh_hair03_ccby__o4saken_chinesebob01",
+  brows:"mh_eyebrows01_cc0__mindfront_eyebrows_01",
+  eyelashes:"mh_eyelashes01_cc0__mindfront_eyelashes_01"
+};
+
+const AUTO_MH_EYE_SURFACES = {
+  brown:"makehuman_system_assets:brown",
+  hazel:"makehuman_system_assets:brownlight",
+  blue:"makehuman_system_assets:blue",
+  green:"makehuman_system_assets:green",
+  gray:"makehuman_system_assets:grey",
+  amber:"system_eye_materials01:bobby_03_diffuse_amber_eyes"
+};
+
 const SHIRT_COLORS = {
   t_shirt: 0x2f343a,
   long_sleeve: 0x4c5864,
@@ -317,9 +332,10 @@ class ProjectionRenderer {
     this._vitruvianTexturePromise = null;
     this.makeHumanRuntime = null;
     this._makeHumanForgeSerial = 0;
+    this._makeHumanApplyTimer = null;
+    this._pendingMakeHumanHairColor = null;
     this.currentObject = null;
     this.currentVrm = null;
-    this.mixer = null;
     this.faceMeshes = [];
     this.bodyMorphMeshes = [];
     this.faceMorphMeshes = [];
@@ -375,7 +391,23 @@ class ProjectionRenderer {
     this.camera.updateProjectionMatrix();
   }
 
+  disposeMixer(){
+    if(!this.mixer) return;
+    try{
+      this.mixer.stopAllAction?.();
+      if(this.currentObject) this.mixer.uncacheRoot?.(this.currentObject);
+    }catch(err){
+      console.warn("Veilwatch animation mixer cleanup warning:", err?.message || err);
+    }
+    this.mixer = null;
+    this.activeAnimationName = "";
+    this._requestedAnimationName = "";
+  }
+
   clearCurrent(){
+    if(this._makeHumanApplyTimer){ clearTimeout(this._makeHumanApplyTimer); this._makeHumanApplyTimer=null; }
+    this._pendingMakeHumanHairColor=null;
+    this.disposeMixer();
     if(this.makeHumanRuntime){
       this.makeHumanRuntime.dispose?.();
       this.makeHumanRuntime = null;
@@ -1313,35 +1345,61 @@ class ProjectionRenderer {
 
   forgeMat(color,metalness=.05,roughness=.72){ return new THREE.MeshStandardMaterial({color,metalness,roughness,side:THREE.DoubleSide}); }
 
-  createCuffFallback(side="left"){
-    const g=new THREE.Group(); g.name="VeilwatchProjectionCuff";
-    const dark=this.forgeMat(0x111820,.65,.3), silver=this.forgeMat(0xaeb8bf,.75,.25), yellow=this.forgeMat(0xe0b51f,.45,.28), glass=this.forgeMat(0x07141c,.72,.12);
-    const add=(geo,mat,pos,rot=[0,0,0])=>{const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.rotation.set(...rot);g.add(m);return m;};
-    add(new THREE.CylinderGeometry(.061,.066,.115,24),dark,[0,0,0]);
-    add(new THREE.BoxGeometry(.105,.09,.035),silver,[0,.005,.055]);
-    add(new THREE.BoxGeometry(.088,.072,.012),glass,[0,.007,.078]);
-    add(new THREE.BoxGeometry(.012,.095,.018),yellow,[-.055,.002,.063]); add(new THREE.BoxGeometry(.012,.095,.018),yellow,[.055,.002,.063]);
-    add(new THREE.CylinderGeometry(.020,.025,.018,20),glass,[0,-.055,.065],[Math.PI/2,0,0]);
-    const bone=side==='right'?'RightForeArm':'LeftForeArm';
-    return this.attachToBone(g,bone,[0,.115,0],[0,0,0]);
+  createCuffFallback(side="left", forge={}){
+    return this.createCuff(side, forge);
   }
 
-  createCuff(side="left"){
-    const generation=this._forgeGeneration||0;
-    const bone=side==='right'?'RightForeArm':'LeftForeArm';
-    this.loader.loadAsync(VEILWATCH_CUFF_ASSET).then(gltf=>{
-      if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-      const wrapper=new THREE.Group(); wrapper.name="VeilwatchProjectionCuff";
-      const model=gltf.scene.clone(true);
-      model.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
-      // Authored at forearm scale with Y following the forearm. Keep the model's
-      // origin at the band center so left/right attachment uses the same transform.
-      wrapper.add(model);
-      this.attachToBone(wrapper,bone,[0,.115,0],[0,0,0]);
-    }).catch(()=>{
-      if(generation===(this._forgeGeneration||0)) this.createCuffFallback(side);
+  createCuff(side="left", forge={}){
+    const g=new THREE.Group();
+    g.name="VeilwatchProjectionCuff_v2";
+    g.userData.requiredEquipment=true;
+    g.userData.design="tapered_low_profile_bracer";
+
+    const armSize=THREE.MathUtils.clamp(Number(forge.armSize ?? 50),0,100);
+    const armLength=THREE.MathUtils.clamp(Number(forge.armLength ?? 50),0,100);
+    const radial=.90 + (armSize/100)*.22;
+    const length=.145 * (.94 + (armLength/100)*.12);
+    const wristR=.044*radial;
+    const elbowR=.054*radial;
+
+    const shellMat=this.forgeMat(0x111820,.72,.28);
+    const trimMat=this.forgeMat(0x4b5963,.78,.22);
+    const emitterMat=new THREE.MeshStandardMaterial({
+      color:0x76dcff, emissive:0x2aaed8, emissiveIntensity:1.8,
+      metalness:.25, roughness:.22
     });
-    return null;
+
+    // Open-backed tapered hard-shell bracer. It hugs the forearm instead of
+    // reading as a wrist computer or a floating block.
+    const shell=new THREE.Mesh(
+      new THREE.CylinderGeometry(wristR,elbowR,length,14,1,true,-Math.PI*.73,Math.PI*1.46),
+      shellMat
+    );
+    shell.rotation.y=Math.PI;
+    g.add(shell);
+
+    const dorsal=new THREE.Mesh(new THREE.BoxGeometry(.048*radial,length*.70,.008),trimMat);
+    dorsal.position.set(0,0,elbowR*.88);
+    g.add(dorsal);
+
+    const seam=new THREE.Mesh(new THREE.BoxGeometry(.008,length*.54,.0045),emitterMat);
+    seam.position.set(.012*radial,0,elbowR*.98);
+    g.add(seam);
+
+    const emitter=new THREE.Mesh(new THREE.CylinderGeometry(.010,.010,.006,16),emitterMat);
+    emitter.rotation.x=Math.PI/2;
+    emitter.position.set(-.014*radial,length*.30,elbowR*1.02);
+    g.add(emitter);
+
+    const lowerBand=new THREE.Mesh(new THREE.TorusGeometry(wristR*.96,.0025,6,24,Math.PI*1.52),trimMat);
+    lowerBand.rotation.x=Math.PI/2; lowerBand.rotation.z=Math.PI*.24; lowerBand.position.y=-length*.43;
+    g.add(lowerBand);
+    const upperBand=new THREE.Mesh(new THREE.TorusGeometry(elbowR*.96,.0025,6,24,Math.PI*1.52),trimMat);
+    upperBand.rotation.x=Math.PI/2; upperBand.rotation.z=Math.PI*.24; upperBand.position.y=length*.43;
+    g.add(upperBand);
+
+    const bone=side==='right'?'RightForeArm':'LeftForeArm';
+    return this.attachToBone(g,bone,[0,.125,0],[0,0,0]);
   }
 
   weaponCarryTransform(carry){
@@ -1974,6 +2032,54 @@ class ProjectionRenderer {
     this._requestedAnimationName=requested;
   }
 
+  resolveMakeHumanSkinSurface(appearance={}){
+    const f=appearance?.forge||{};
+    const explicit=String(f.skinMaterial||"auto");
+    if(explicit && explicit!=="auto") return explicit;
+    const gender=String(f.frame||"masculine")==="feminine"?"female":"male";
+    const ageKey=String(f.age||"25_35");
+    const age=/60_plus/.test(ageKey)?"old":(/35_45|45_60/.test(ageKey)?"middleage":"young");
+    const tone=String(appearance.skinTone||"warm");
+    const family=/medium_brown|brown|dark_brown|deep/.test(tone)?"african":(/tan|olive/.test(tone)?"asian":"caucasian");
+    return `makehuman_system_assets:${age}_${family}_${gender}`;
+  }
+
+  resolveMakeHumanEyeSurface(appearance={}){
+    const f=appearance?.forge||{};
+    const explicit=String(f.eyeMaterial||"auto");
+    if(explicit && explicit!=="auto") return explicit;
+    return AUTO_MH_EYE_SURFACES[String(appearance.eyeColor||"brown")]||AUTO_MH_EYE_SURFACES.brown;
+  }
+
+  resolveMakeHumanNativeId(value,fallback=""){
+    const id=String(value||"");
+    return id.startsWith("mh_")?id:fallback;
+  }
+
+  async applyMakeHumanSurfaces(appearance,skinColor,eyeColor){
+    const runtime=this.makeHumanRuntime;
+    if(!runtime) return;
+    const skinId=this.resolveMakeHumanSkinSurface(appearance);
+    const eyeId=this.resolveMakeHumanEyeSurface(appearance);
+    await Promise.allSettled([
+      runtime.setSurface("skin",skinId,skinColor),
+      runtime.setSurface("eye",eyeId,eyeColor)
+    ]);
+  }
+
+  scheduleMakeHumanForge(appearance,hairColor){
+    this._pendingMakeHumanHairColor=hairColor?.clone?.() || hairColor;
+    if(this._makeHumanApplyTimer) clearTimeout(this._makeHumanApplyTimer);
+    this._makeHumanApplyTimer=setTimeout(()=>{
+      this._makeHumanApplyTimer=null;
+      if(!this.makeHumanRuntime || !this.currentObject) return;
+      const latest=this.profile?.appearance || appearance || {};
+      const color=this._pendingMakeHumanHairColor;
+      this._pendingMakeHumanHairColor=null;
+      void this.applyMakeHumanForge(latest,color);
+    },70);
+  }
+
   async applyMakeHumanForge(appearance,hairColor){
     const runtime=this.makeHumanRuntime;
     if(!runtime || !this.currentObject) return;
@@ -1983,7 +2089,23 @@ class ProjectionRenderer {
       const applied=await runtime.applyForge(f);
       if(!applied || serial!==this._makeHumanForgeSerial || runtime!==this.makeHumanRuntime || !this.currentObject) return;
 
-      // Every proportion update rebuilds the HM08 rest skeleton so equipment,
+      const hints=this.profile?.appearanceRender||{};
+      const hairId=this.resolveMakeHumanNativeId(hints.hairStyle?.assetId||appearance?.hairStyle,DEFAULT_MH_APPEARANCE.hair);
+      const beardRaw=hints.facialHairStyle?.assetId||appearance?.beardStyle;
+      const beardId=String(beardRaw||"")==="none"?"":this.resolveMakeHumanNativeId(beardRaw,"");
+      const browId=this.resolveMakeHumanNativeId(f.browStyle,DEFAULT_MH_APPEARANCE.brows);
+      const eyelashId=this.resolveMakeHumanNativeId(f.eyelashStyle,DEFAULT_MH_APPEARANCE.eyelashes);
+      const tint=hairColor?.isColor?`#${hairColor.getHexString()}`:hairColor;
+      const nativeRequests=[
+        hairId&&{slot:"hair",id:hairId,tint},
+        browId&&{slot:"brows",id:browId,tint},
+        eyelashId&&{slot:"eyelashes",id:eyelashId,tint},
+        beardId&&{slot:"facialHair",id:beardId,tint}
+      ].filter(Boolean);
+      await runtime.setNativeAssets(nativeRequests);
+      if(serial!==this._makeHumanForgeSerial || runtime!==this.makeHumanRuntime || !this.currentObject) return;
+
+      // Every proportion update refreshes the HM08 rest skeleton so equipment,
       // cuff placement, and retargeted animation all follow the real MakeHuman body.
       this.headBone=runtime.getBone("Head") || runtime.getBone("Neck");
       if(this.headBone){
@@ -1997,12 +2119,13 @@ class ProjectionRenderer {
       this.forgeRoot.name="VeilwatchMakeHumanForgeRoot";
       this.currentObject.add(this.forgeRoot);
 
-      // These are bone-driven and already compatible with the MakeHuman Mixamo rig.
-      // MakeHuman-native hair/clothes/accessories are wired in the next asset pass,
-      // rather than forcing the old Vitruvian-fitted meshes onto the new body.
-      this.createCuff(f.cuffArm||"left");
+      // Hair, brows, lashes, and facial hair are MakeHuman-native fitted meshes.
+      // Equipment below remains bone-driven and follows the same HM08 skeleton.
+      this.createCuff(f.cuffArm||"left", f);
       this.createWeapon(f.weaponPreview||"none",f.weaponCarry||"back");
+      this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
 
+      this.disposeMixer();
       this.mixer=new THREE.AnimationMixer(this.currentObject);
       this._requestedAnimationName="";
       this.applyAnimation(f.animation||"Idle",true);
@@ -2022,7 +2145,7 @@ class ProjectionRenderer {
     this.applyRuntimeFaceMorphs(f);
     this._forgeGeneration=(this._forgeGeneration||0)+1;
     this.clearForgeVisuals(); this.forgeRoot=new THREE.Group(); this.forgeRoot.name="VeilwatchForgeRoot"; this.currentObject.add(this.forgeRoot);
-    this.createCuff(f.cuffArm||'left');
+    this.createCuff(f.cuffArm||'left', f);
     this.createBrows(f.browStyle||'natural',hairColor);
     this.createFaceDetails(f);
     this.createBodyHair(f,hairColor);
@@ -2099,7 +2222,8 @@ class ProjectionRenderer {
     if(this.makeHumanRuntime && this.currentObject.userData?.makeHumanRuntime){
       this.makeHumanRuntime.setSkinColor(skinTarget);
       this.makeHumanRuntime.setEyeColor(eyeColor);
-      void this.applyMakeHumanForge(appearance,hairColor);
+      void this.applyMakeHumanSurfaces(appearance,skinTarget,eyeColor);
+      this.scheduleMakeHumanForge(appearance,hairColor);
       return;
     }
 

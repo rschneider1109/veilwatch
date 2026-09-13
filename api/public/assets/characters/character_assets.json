@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0-alpha.1",
+  "version": "5.0.0-makehuman-appearance",
   "characterStandard": "veilwatch_human_makehuman_v2",
   "species": [
     "human"
@@ -214,92 +214,287 @@
       "id": "bald",
       "label": "Bald",
       "kind": "none",
-      "variant": "none",
       "description": "No scalp hair"
     },
     {
-      "id": "classic_bob",
-      "label": "Classic Bob",
-      "kind": "asset",
-      "variant": "classic",
-      "description": "Original Vitruvian jaw-length card groom"
+      "id": "mh_hair02_ccby__elvs_short_side_do",
+      "label": "Elvs Short Side Do",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_short_side_do",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "buzz",
-      "label": "Buzz Cut",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/buzz.glb",
-      "description": "Very short fitted fiber cut"
+      "id": "mh_hair02_ccby__elvs_daisy_hair",
+      "label": "Elvs Daisy Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_daisy_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "close_crop",
-      "label": "Close Crop",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/close_crop.glb",
-      "description": "Short cropped fitted hair"
+      "id": "mh_hair02_ccby__elvs_lady_hippy_hair",
+      "label": "Elvs Lady Hippy Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_lady_hippy_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "short_messy",
-      "label": "Short Messy",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/short_messy.glb",
-      "description": "Short textured messy cut"
+      "id": "mh_hair02_ccby__elvs_braid_bun",
+      "label": "Elvs Braid Bun",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_braid_bun",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "side_part",
-      "label": "Side Part",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/side_part.glb",
-      "description": "Short side-parted style"
+      "id": "mh_hair02_ccby__elvs_maxwell_hair",
+      "label": "Elvs Maxwell Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_maxwell_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "slicked_back",
-      "label": "Slicked Back",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/slicked_back.glb",
-      "description": "Swept-back short style"
+      "id": "mh_hair02_ccby__elvs_island_princess_hair",
+      "label": "Elvs Island Princess Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_island_princess_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "classic_ponytail",
-      "label": "Ponytail",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/classic_ponytail.glb",
-      "description": "Tied-back ponytail"
+      "id": "mh_hair02_ccby__elvs_short_daisy_hair",
+      "label": "Elvs Short Daisy Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_short_daisy_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "high_bun",
-      "label": "High Bun",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/high_bun.glb",
-      "description": "Tied high bun"
+      "id": "mh_hair02_ccby__elvs_50s_updo",
+      "label": "Elvs 50s Updo",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_50s_updo",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "long_straight",
-      "label": "Long Straight",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/long_straight.glb",
-      "description": "Long straight shoulder-length hair"
+      "id": "mh_hair02_ccby__elvs_adrienne_hair",
+      "label": "Elvs Adrienne Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_adrienne_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "shoulder_waves",
-      "label": "Shoulder Waves",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/shoulder_waves.glb",
-      "description": "Medium-long wavy hair"
+      "id": "mh_hair02_ccby__elvs_lara_hair",
+      "label": "Elvs Lara Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_lara_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "locs",
-      "label": "Locs",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/locs.glb",
-      "description": "Individual loc strands"
+      "id": "mh_hair02_ccby__elvs_inverted_curly_bob",
+      "label": "Elvs Inverted Curly Bob",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_inverted_curly_bob",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "braids",
-      "label": "Braids",
-      "kind": "asset",
-      "path": "/assets/characters/hair/veilwatch_original/braids.glb",
-      "description": "Braided rows and lengths"
+      "id": "mh_hair02_ccby__elvs_keylth_hair",
+      "label": "Elvs Keylth Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_keylth_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_ashley_may_hair",
+      "label": "Elvs Ashley May Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_ashley_may_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_micky_afro",
+      "label": "Elvs Micky Afro",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_micky_afro",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_wavy_bob",
+      "label": "Elvs Wavy Bob",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_wavy_bob",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_witchy_lil_bob",
+      "label": "Elvs Witchy Lil Bob",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_witchy_lil_bob",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_hazel_hair",
+      "label": "Elvs Hazel Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_hazel_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_grump_hair",
+      "label": "Elvs Grump Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_grump_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_that_80s_babe_hair",
+      "label": "Elvs That 80s Babe Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_that_80s_babe_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_katherine_hair",
+      "label": "Elvs Katherine Hair",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_katherine_hair",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair02_ccby__elvs_braided_rows",
+      "label": "Elvs Braided Rows",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair02_ccby__elvs_braided_rows",
+      "sourcePack": "hair02_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_18",
+      "label": "Culturalibre Hair 18",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_18",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__punkduck_alpha7_curly",
+      "label": "Punkduck Alpha7 Curly",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__punkduck_alpha7_curly",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_12",
+      "label": "Culturalibre Hair 12",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_12",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__o4saken_curly01",
+      "label": "O4saken Curly01",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__o4saken_curly01",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "label": "Grinsegold Wig Bow Tie",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__punkduck_alpha7_curly2",
+      "label": "Punkduck Alpha7 Curly2",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__punkduck_alpha7_curly2",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_11",
+      "label": "Culturalibre Hair 11",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_11",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_13",
+      "label": "Culturalibre Hair 13",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_13",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__punkduck_alpha7_long",
+      "label": "Punkduck Alpha7 Long",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__punkduck_alpha7_long",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "label": "Grinsegold Wig Bun Blonde Braids",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__punkduck_alpha7_long2",
+      "label": "Punkduck Alpha7 Long2",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__punkduck_alpha7_long2",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_17",
+      "label": "Culturalibre Hair 17",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_17",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__o4saken_chinesebob01",
+      "label": "O4saken Chinesebob01",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__o4saken_chinesebob01",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
+    },
+    {
+      "id": "mh_hair03_ccby__culturalibre_hair_14",
+      "label": "Culturalibre Hair 14",
+      "kind": "makehuman_native",
+      "assetId": "mh_hair03_ccby__culturalibre_hair_14",
+      "sourcePack": "hair03_ccby.zip",
+      "license": "CC-BY"
     }
   ],
   "facialHairStyles": [
@@ -309,58 +504,76 @@
       "kind": "none"
     },
     {
-      "id": "stubble",
-      "label": "Stubble",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/stubble.glb"
+      "id": "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+      "label": "Rehmanpolanski Beard Viking",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "license": "CC0"
     },
     {
-      "id": "short_beard",
-      "label": "Short Beard",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/short_beard.glb"
+      "id": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "label": "Wdg Scruffy Beard",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "license": "CC0"
     },
     {
-      "id": "trimmed_beard",
-      "label": "Trimmed Beard",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/trimmed_beard.glb"
+      "id": "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "label": "Rehmanpolanski Moustache Viking",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "license": "CC0"
     },
     {
-      "id": "boxed_beard",
-      "label": "Boxed Beard",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/boxed_beard.glb"
+      "id": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "label": "Grinsegold Beard Sigmund Wip",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "license": "CC0"
     },
     {
-      "id": "full_beard",
-      "label": "Full Beard",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/full_beard.glb"
+      "id": "mh_bodyparts05_cc0__culturalibre_faun_beard",
+      "label": "Culturalibre Faun Beard",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts05_cc0__culturalibre_faun_beard",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "license": "CC0"
     },
     {
-      "id": "mustache",
-      "label": "Mustache",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/mustache.glb"
+      "id": "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+      "label": "Elvs Scruffy Beard1",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "goatee",
-      "label": "Goatee",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/goatee.glb"
+      "id": "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "label": "Grinsegold Moustache",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "circle_beard",
-      "label": "Circle Beard",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/circle_beard.glb"
+      "id": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "label": "Grinsegold Full Beard",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "license": "CC-BY"
     },
     {
-      "id": "soul_patch",
-      "label": "Soul Patch",
-      "kind": "asset",
-      "path": "/assets/characters/facial_hair/veilwatch_original/soul_patch.glb"
+      "id": "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
+      "label": "Culturalibre Dal Moustache",
+      "kind": "makehuman_native",
+      "assetId": "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "license": "CC-BY"
     }
   ],
   "aliases": {
@@ -381,27 +594,41 @@
       "weathered": "focused"
     },
     "hairStyles": {
-      "short": "close_crop",
-      "buzz": "buzz",
-      "fade": "close_crop",
-      "long_straight": "long_straight",
-      "wavy": "shoulder_waves",
-      "curly": "shoulder_waves",
-      "bun": "high_bun",
-      "ponytail": "classic_ponytail",
-      "bald": "bald",
-      "close_crop": "close_crop",
-      "short_bob": "classic_bob",
-      "long_bob": "long_straight",
-      "slicked_back": "slicked_back",
-      "side_part": "side_part",
-      "short_curls": "classic_bob",
-      "braids": "braids",
-      "locs": "locs"
+      "short": "mh_hair02_ccby__elvs_short_side_do",
+      "buzz": "mh_hair02_ccby__elvs_short_side_do",
+      "fade": "mh_hair02_ccby__elvs_short_side_do",
+      "close_crop": "mh_hair02_ccby__elvs_short_side_do",
+      "side_part": "mh_hair02_ccby__elvs_short_side_do",
+      "short_messy": "mh_hair02_ccby__elvs_short_daisy_hair",
+      "classic_bob": "mh_hair03_ccby__o4saken_chinesebob01",
+      "short_bob": "mh_hair03_ccby__o4saken_chinesebob01",
+      "wavy": "mh_hair02_ccby__elvs_wavy_bob",
+      "curly": "mh_hair03_ccby__punkduck_alpha7_curly",
+      "shoulder_waves": "mh_hair02_ccby__elvs_wavy_bob",
+      "slicked_back": "mh_hair02_ccby__elvs_maxwell_hair",
+      "bun": "mh_hair02_ccby__elvs_braid_bun",
+      "high_bun": "mh_hair02_ccby__elvs_braid_bun",
+      "ponytail": "mh_hair02_ccby__elvs_lara_hair",
+      "classic_ponytail": "mh_hair02_ccby__elvs_lara_hair",
+      "long_straight": "mh_hair03_ccby__punkduck_alpha7_long",
+      "long_bob": "mh_hair03_ccby__punkduck_alpha7_long2",
+      "braids": "mh_hair02_ccby__elvs_braided_rows",
+      "locs": "mh_hair02_ccby__elvs_braided_rows",
+      "bald": "bald"
     },
     "facialHairStyles": {
-      "trimmed": "trimmed_beard",
-      "full": "full_beard"
+      "stubble": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "short_beard": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "trimmed": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "trimmed_beard": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "boxed_beard": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "full": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "full_beard": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "mustache": "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "goatee": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "circle_beard": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "soul_patch": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "none": "none"
     }
   },
   "futureSlots": [
@@ -419,10 +646,5 @@
     "left_hip",
     "right_hip"
   ],
-  "foundation": {
-    "id": "makehuman_hm08",
-    "runtime": "browser-native",
-    "manualBlenderRequired": false,
-    "fallback": "vitruvian"
-  }
+  "foundation": "MakeHuman HM08 / MPFB 2.0.17 native appearance pipeline"
 }

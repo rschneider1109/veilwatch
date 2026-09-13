@@ -49,6 +49,41 @@ function ensureMakeHumanRuntimeData(){
   console.log(`MakeHuman runtime ready: ${rigBones.length} bones, ${targets.size} target files.`);
 }
 
+function ensureMakeHumanAppearanceData(){
+  const root = path.join("public", "assets", "characters", "makehuman");
+  const libraryCatalogPath = path.join(root, "library", "catalog.json");
+  const surfaceCatalogPath = path.join(root, "surfaces", "catalog.json");
+  if(!fs.existsSync(libraryCatalogPath)) throw new Error(`Missing MakeHuman appearance catalog: ${libraryCatalogPath}`);
+  if(!fs.existsSync(surfaceCatalogPath)) throw new Error(`Missing MakeHuman surface catalog: ${surfaceCatalogPath}`);
+
+  const library = JSON.parse(fs.readFileSync(libraryCatalogPath, "utf8"));
+  const requiredCounts = { hair:35, facialHair:9, brows:14, eyelashes:5 };
+  for(const [category, minimum] of Object.entries(requiredCounts)){
+    const count = (library.categories?.[category] || []).length;
+    if(count < minimum) throw new Error(`MakeHuman ${category} catalog incomplete (${count}/${minimum})`);
+  }
+  for(const row of library.packs || []){
+    const fp = path.join(root, "library", "packs", row.file);
+    if(!fs.existsSync(fp)) throw new Error(`Missing MakeHuman appearance pack: ${row.file}`);
+    if(fs.statSync(fp).size > 10 * 1024 * 1024) throw new Error(`MakeHuman appearance pack too large for stable browser loading: ${row.file}`);
+    const parsed = JSON.parse(zlib.gunzipSync(fs.readFileSync(fp)).toString("utf8"));
+    if(!(parsed.assets || []).length) throw new Error(`Empty MakeHuman appearance pack: ${row.file}`);
+  }
+
+  const surfaces = JSON.parse(fs.readFileSync(surfaceCatalogPath, "utf8"));
+  const surfaceRows = Object.values(surfaces.surfaces || {});
+  const skins = surfaceRows.filter(x => x.kind === "skin").length;
+  const eyes = surfaceRows.filter(x => x.kind === "eye").length;
+  if(skins < 50 || eyes < 20) throw new Error(`MakeHuman surface catalog incomplete (${skins} skins, ${eyes} eyes)`);
+  for(const file of new Set(surfaceRows.map(x => x.pack).filter(Boolean))){
+    const fp = path.join(root, "surfaces", "packs", file);
+    if(!fs.existsSync(fp)) throw new Error(`Missing MakeHuman surface pack: ${file}`);
+    const parsed = JSON.parse(zlib.gunzipSync(fs.readFileSync(fp)).toString("utf8"));
+    if(!(parsed.surfaces || []).length) throw new Error(`Empty MakeHuman surface pack: ${file}`);
+  }
+  console.log(`MakeHuman appearance ready: ${requiredCounts.hair} hair, ${requiredCounts.facialHair} facial hair, ${requiredCounts.brows} brows, ${requiredCounts.eyelashes} lashes, ${skins} skins, ${eyes} eye materials.`);
+}
+
 function rebuildChunkedAsset({ partsDir, partPrefix, outputFile }){
   if(fs.existsSync(outputFile)) return;
   if(!fs.existsSync(partsDir)) return;
@@ -194,6 +229,7 @@ async function ensureQuaterniusAnimationAssets(){
 
 async function main(){
   ensureMakeHumanRuntimeData();
+  ensureMakeHumanAppearanceData();
   rebuildChunkedAsset({
     partsDir: path.join("public", "assets", "characters", "bases", "chunks"),
     partPrefix: "vitruvian_body.glb.part",

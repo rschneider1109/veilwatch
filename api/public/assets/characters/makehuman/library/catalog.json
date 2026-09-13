@@ -1,0 +1,976 @@
+{
+  "version": 2,
+  "format": "veilwatch_makehuman_appearance_v2",
+  "assets": {
+    "mh_hair02_ccby__elvs_short_side_do": {
+      "id": "mh_hair02_ccby__elvs_short_side_do",
+      "label": "elvs_thejournalist1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "female hair",
+        "toon stylized"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_daisy_hair": {
+      "id": "mh_hair02_ccby__elvs_daisy_hair",
+      "label": "elvs_daisyhair1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "ladies hair",
+        "female",
+        "long hair",
+        "straight hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_lady_hippy_hair": {
+      "id": "mh_hair02_ccby__elvs_lady_hippy_hair",
+      "label": "elvs_ladies_hippyhair1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "female",
+        "long hair",
+        "hippy",
+        "straight hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_braid_bun": {
+      "id": "mh_hair02_ccby__elvs_braid_bun",
+      "label": "elvs_braid_bun_q1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "contemporary",
+        "hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_maxwell_hair": {
+      "id": "mh_hair02_ccby__elvs_maxwell_hair",
+      "label": "maxwell_hair_mh",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "mens",
+        "mens hair",
+        "fashion hair",
+        "modern"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_island_princess_hair": {
+      "id": "mh_hair02_ccby__elvs_island_princess_hair",
+      "label": "elvs_island_princess1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "female",
+        "long hair",
+        "island",
+        "straight hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_short_daisy_hair": {
+      "id": "mh_hair02_ccby__elvs_short_daisy_hair",
+      "label": "elvs_short_daisyh1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "ladies hair",
+        "female",
+        "short hair",
+        "straight hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_50s_updo": {
+      "id": "mh_hair02_ccby__elvs_50s_updo",
+      "label": "elv_50supdo1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "1950s",
+        "updo",
+        "female",
+        "classic"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_adrienne_hair": {
+      "id": "mh_hair02_ccby__elvs_adrienne_hair",
+      "label": "elvs_adrienne_hair1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "ladies hair",
+        "female",
+        "long hair",
+        "side part"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_lara_hair": {
+      "id": "mh_hair02_ccby__elvs_lara_hair",
+      "label": "elvs_laracroft_hair1a",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "leisure",
+        "contemporary",
+        "hair",
+        "braid"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_inverted_curly_bob": {
+      "id": "mh_hair02_ccby__elvs_inverted_curly_bob",
+      "label": "elvs_inverted_curlybob1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_keylth_hair": {
+      "id": "mh_hair02_ccby__elvs_keylth_hair",
+      "label": "elvs_keylth_hair_m1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "male",
+        "casual",
+        "leisure",
+        "hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_ashley_may_hair": {
+      "id": "mh_hair02_ccby__elvs_ashley_may_hair",
+      "label": "elvs_ashley_mayhair1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "ladies hair",
+        "female",
+        "short hair",
+        "feathered hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_micky_afro": {
+      "id": "mh_hair02_ccby__elvs_micky_afro",
+      "label": "elvs_mickey_afro",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "leisure",
+        "contemporary",
+        "hair",
+        "afro",
+        "buns",
+        "updo"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_wavy_bob": {
+      "id": "mh_hair02_ccby__elvs_wavy_bob",
+      "label": "elvscurly_bob1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "bob",
+        "curly",
+        "female"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_witchy_lil_bob": {
+      "id": "mh_hair02_ccby__elvs_witchy_lil_bob",
+      "label": "witchybob_elv2",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_hazel_hair": {
+      "id": "mh_hair02_ccby__elvs_hazel_hair",
+      "label": "elvs_hazel_hair",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "female",
+        "casual",
+        "leisure",
+        "contemporary",
+        "hair",
+        "ladies",
+        "long",
+        "wavy",
+        "fashion"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_grump_hair": {
+      "id": "mh_hair02_ccby__elvs_grump_hair",
+      "label": "elvs_grumphair",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "male",
+        "formal",
+        "profession",
+        "contemporary",
+        "hair",
+        "comb_over"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_that_80s_babe_hair": {
+      "id": "mh_hair02_ccby__elvs_that_80s_babe_hair",
+      "label": "elvs_that80sbabe_m1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "male",
+        "casual",
+        "leisure",
+        "traditional",
+        "hair",
+        "long_hair"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_katherine_hair": {
+      "id": "mh_hair02_ccby__elvs_katherine_hair",
+      "label": "elvs_katherinehair1",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "hair",
+        "ladies hair",
+        "female",
+        "short hair",
+        "asymmetrical"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair02_ccby__elvs_braided_rows": {
+      "id": "mh_hair02_ccby__elvs_braided_rows",
+      "label": "cornrowsofelv5",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "hair02_ccby.zip",
+      "tags": [
+        "quad",
+        "braids",
+        "hair",
+        "beads",
+        "cornrows"
+      ],
+      "pack": "hair02_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_18": {
+      "id": "mh_hair03_ccby__culturalibre_hair_18",
+      "label": "hair_08",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__punkduck_alpha7_curly": {
+      "id": "mh_hair03_ccby__punkduck_alpha7_curly",
+      "label": "curly",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_12": {
+      "id": "mh_hair03_ccby__culturalibre_hair_12",
+      "label": "hair_02",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__o4saken_curly01": {
+      "id": "mh_hair03_ccby__o4saken_curly01",
+      "label": "o4saken_curly01",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "female",
+        "curly",
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__grinsegold_wig_bow_tie": {
+      "id": "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "label": "wig_bow_tie",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "grinsegold",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair",
+        "female"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__punkduck_alpha7_curly2": {
+      "id": "mh_hair03_ccby__punkduck_alpha7_curly2",
+      "label": "curly2",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_11": {
+      "id": "mh_hair03_ccby__culturalibre_hair_11",
+      "label": "hair_01",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_13": {
+      "id": "mh_hair03_ccby__culturalibre_hair_13",
+      "label": "hair_03",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__punkduck_alpha7_long": {
+      "id": "mh_hair03_ccby__punkduck_alpha7_long",
+      "label": "long_alpha7",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids": {
+      "id": "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "label": "Wig_bun_blonde",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "grinsegold",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair",
+        "wig",
+        "female"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__punkduck_alpha7_long2": {
+      "id": "mh_hair03_ccby__punkduck_alpha7_long2",
+      "label": "long2_alpha7",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_17": {
+      "id": "mh_hair03_ccby__culturalibre_hair_17",
+      "label": "hair_07",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__o4saken_chinesebob01": {
+      "id": "mh_hair03_ccby__o4saken_chinesebob01",
+      "label": "o4saken_chinesebob01",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "punkduck",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "female",
+        "bob",
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_hair03_ccby__culturalibre_hair_14": {
+      "id": "mh_hair03_ccby__culturalibre_hair_14",
+      "label": "hair_04",
+      "category": "hair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "hair03_ccby.zip",
+      "tags": [
+        "hair"
+      ],
+      "pack": "hair03_ccby.vwpack.json.gz"
+    },
+    "mh_bodyparts05_cc0__rehmanpolanski_beard_viking": {
+      "id": "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+      "label": "BeardViking",
+      "category": "facialHair",
+      "license": "CC0",
+      "author": "RehmanPolanski",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "tags": [
+        "beard",
+        "viking",
+        "facialhair"
+      ],
+      "pack": "bodyparts05_cc0.vwpack.json.gz"
+    },
+    "mh_bodyparts05_cc0__wdg_scruffy_beard": {
+      "id": "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "label": "Scruffy_Beard",
+      "category": "facialHair",
+      "license": "CC0",
+      "author": "WDG",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "tags": [
+        "facialhair"
+      ],
+      "pack": "bodyparts05_cc0.vwpack.json.gz"
+    },
+    "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking": {
+      "id": "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "label": "MoustacheViking",
+      "category": "facialHair",
+      "license": "CC0",
+      "author": "RehmanPolanski",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "tags": [
+        "moustache",
+        "viking",
+        "facialhair"
+      ],
+      "pack": "bodyparts05_cc0.vwpack.json.gz"
+    },
+    "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip": {
+      "id": "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "label": "Beard_Sigmund",
+      "category": "facialHair",
+      "license": "CC0",
+      "author": "grinsegold",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "tags": [
+        "facialhair"
+      ],
+      "pack": "bodyparts05_cc0.vwpack.json.gz"
+    },
+    "mh_bodyparts05_cc0__culturalibre_faun_beard": {
+      "id": "mh_bodyparts05_cc0__culturalibre_faun_beard",
+      "label": "faun_beard",
+      "category": "facialHair",
+      "license": "CC0",
+      "author": "culturalibre",
+      "sourcePack": "bodyparts05_cc0.zip",
+      "tags": [
+        "facialhair"
+      ],
+      "pack": "bodyparts05_cc0.vwpack.json.gz"
+    },
+    "mh_bodyparts06_cc-by__elvs_scruffy_beard1": {
+      "id": "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+      "label": "elvs_beard1_longscruffy3",
+      "category": "facialHair",
+      "license": "CC-BY",
+      "author": "Elvaerwyn",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "tags": [
+        "male",
+        "casual",
+        "leisure",
+        "contemporary",
+        "beard",
+        "facialhair"
+      ],
+      "pack": "bodyparts06_cc-by.vwpack.json.gz"
+    },
+    "mh_bodyparts06_cc-by__grinsegold_moustache": {
+      "id": "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "label": "Moustache",
+      "category": "facialHair",
+      "license": "CC-BY",
+      "author": "grinsegold",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "tags": [
+        "male",
+        "beard",
+        "facialhair"
+      ],
+      "pack": "bodyparts06_cc-by.vwpack.json.gz"
+    },
+    "mh_bodyparts06_cc-by__grinsegold_full_beard": {
+      "id": "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "label": "Full_beard",
+      "category": "facialHair",
+      "license": "CC-BY",
+      "author": "grinsegold",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "tags": [
+        "male",
+        "beard",
+        "facialhair"
+      ],
+      "pack": "bodyparts06_cc-by.vwpack.json.gz"
+    },
+    "mh_bodyparts06_cc-by__culturalibre_dal_moustache": {
+      "id": "mh_bodyparts06_cc-by__culturalibre_dal_moustache",
+      "label": "dali_moustache",
+      "category": "facialHair",
+      "license": "CC-BY",
+      "author": "culturalibre",
+      "sourcePack": "bodyparts06_cc-by.zip",
+      "tags": [
+        "surrealism",
+        "moustache",
+        "facialhair"
+      ],
+      "pack": "bodyparts06_cc-by.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_11": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_11",
+      "label": "Mind_Eyebrows_11",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_03": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_03",
+      "label": "Mind_Eyebrows_03",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_14": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_14",
+      "label": "Mind_Eyebrows_14",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_09": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_09",
+      "label": "Mind_Eyebrows_09",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_02": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_02",
+      "label": "Mind_Eyebrows_02",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_10": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_10",
+      "label": "Mind_Eyebrows_10",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_04": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_04",
+      "label": "Mind_Eyebrows_04",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_07": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_07",
+      "label": "Mind_Eyebrows_07",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_06": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_06",
+      "label": "Mind_Eyebrows_06",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_01": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_01",
+      "label": "Mind_Eyebrows_01",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_12": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_12",
+      "label": "Mind_Eyebrows_12",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_08": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_08",
+      "label": "Mind_Eyebrows_08",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_13": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_13",
+      "label": "Mind_Eyebrows_13",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyebrows01_cc0__mindfront_eyebrows_05": {
+      "id": "mh_eyebrows01_cc0__mindfront_eyebrows_05",
+      "label": "Mind_Eyebrows_05",
+      "category": "brows",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyebrows01_cc0.zip",
+      "tags": [
+        "eyebrows"
+      ],
+      "pack": "eyebrows01_cc0.vwpack.json.gz"
+    },
+    "mh_eyelashes01_cc0__mindfront_eyelashes_02": {
+      "id": "mh_eyelashes01_cc0__mindfront_eyelashes_02",
+      "label": "Mind_Eyelashes_02",
+      "category": "eyelashes",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyelashes01_cc0.zip",
+      "tags": [
+        "eyelashes"
+      ],
+      "pack": "eyelashes01_cc0.vwpack.json.gz"
+    },
+    "mh_eyelashes01_cc0__mindfront_eyelashes_03": {
+      "id": "mh_eyelashes01_cc0__mindfront_eyelashes_03",
+      "label": "Mind_Eyelashes_03",
+      "category": "eyelashes",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyelashes01_cc0.zip",
+      "tags": [
+        "eyelashes"
+      ],
+      "pack": "eyelashes01_cc0.vwpack.json.gz"
+    },
+    "mh_eyelashes01_cc0__mindfront_eyelashes_01": {
+      "id": "mh_eyelashes01_cc0__mindfront_eyelashes_01",
+      "label": "Mind_Eyelashes_01",
+      "category": "eyelashes",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyelashes01_cc0.zip",
+      "tags": [
+        "eyelashes"
+      ],
+      "pack": "eyelashes01_cc0.vwpack.json.gz"
+    },
+    "mh_eyelashes01_cc0__mindfront_eyelashes_04": {
+      "id": "mh_eyelashes01_cc0__mindfront_eyelashes_04",
+      "label": "Mind_Eyelashes_04",
+      "category": "eyelashes",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyelashes01_cc0.zip",
+      "tags": [
+        "eyelashes"
+      ],
+      "pack": "eyelashes01_cc0.vwpack.json.gz"
+    },
+    "mh_eyelashes01_cc0__mindfront_eyelashes_05": {
+      "id": "mh_eyelashes01_cc0__mindfront_eyelashes_05",
+      "label": "Mind_Eyelashes_05",
+      "category": "eyelashes",
+      "license": "CC0",
+      "author": "Mindfront",
+      "sourcePack": "eyelashes01_cc0.zip",
+      "tags": [
+        "eyelashes"
+      ],
+      "pack": "eyelashes01_cc0.vwpack.json.gz"
+    }
+  },
+  "categories": {
+    "hair": [
+      "mh_hair02_ccby__elvs_short_side_do",
+      "mh_hair02_ccby__elvs_daisy_hair",
+      "mh_hair02_ccby__elvs_lady_hippy_hair",
+      "mh_hair02_ccby__elvs_braid_bun",
+      "mh_hair02_ccby__elvs_maxwell_hair",
+      "mh_hair02_ccby__elvs_island_princess_hair",
+      "mh_hair02_ccby__elvs_short_daisy_hair",
+      "mh_hair02_ccby__elvs_50s_updo",
+      "mh_hair02_ccby__elvs_adrienne_hair",
+      "mh_hair02_ccby__elvs_lara_hair",
+      "mh_hair02_ccby__elvs_inverted_curly_bob",
+      "mh_hair02_ccby__elvs_keylth_hair",
+      "mh_hair02_ccby__elvs_ashley_may_hair",
+      "mh_hair02_ccby__elvs_micky_afro",
+      "mh_hair02_ccby__elvs_wavy_bob",
+      "mh_hair02_ccby__elvs_witchy_lil_bob",
+      "mh_hair02_ccby__elvs_hazel_hair",
+      "mh_hair02_ccby__elvs_grump_hair",
+      "mh_hair02_ccby__elvs_that_80s_babe_hair",
+      "mh_hair02_ccby__elvs_katherine_hair",
+      "mh_hair02_ccby__elvs_braided_rows",
+      "mh_hair03_ccby__culturalibre_hair_18",
+      "mh_hair03_ccby__punkduck_alpha7_curly",
+      "mh_hair03_ccby__culturalibre_hair_12",
+      "mh_hair03_ccby__o4saken_curly01",
+      "mh_hair03_ccby__grinsegold_wig_bow_tie",
+      "mh_hair03_ccby__punkduck_alpha7_curly2",
+      "mh_hair03_ccby__culturalibre_hair_11",
+      "mh_hair03_ccby__culturalibre_hair_13",
+      "mh_hair03_ccby__punkduck_alpha7_long",
+      "mh_hair03_ccby__grinsegold_wig_bun_blonde_braids",
+      "mh_hair03_ccby__punkduck_alpha7_long2",
+      "mh_hair03_ccby__culturalibre_hair_17",
+      "mh_hair03_ccby__o4saken_chinesebob01",
+      "mh_hair03_ccby__culturalibre_hair_14"
+    ],
+    "facialHair": [
+      "mh_bodyparts05_cc0__rehmanpolanski_beard_viking",
+      "mh_bodyparts05_cc0__wdg_scruffy_beard",
+      "mh_bodyparts05_cc0__rehmanpolanski_moustache_viking",
+      "mh_bodyparts05_cc0__grinsegold_beard_sigmund_wip",
+      "mh_bodyparts05_cc0__culturalibre_faun_beard",
+      "mh_bodyparts06_cc-by__elvs_scruffy_beard1",
+      "mh_bodyparts06_cc-by__grinsegold_moustache",
+      "mh_bodyparts06_cc-by__grinsegold_full_beard",
+      "mh_bodyparts06_cc-by__culturalibre_dal_moustache"
+    ],
+    "brows": [
+      "mh_eyebrows01_cc0__mindfront_eyebrows_11",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_03",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_14",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_09",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_02",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_10",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_04",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_07",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_06",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_01",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_12",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_08",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_13",
+      "mh_eyebrows01_cc0__mindfront_eyebrows_05"
+    ],
+    "eyelashes": [
+      "mh_eyelashes01_cc0__mindfront_eyelashes_02",
+      "mh_eyelashes01_cc0__mindfront_eyelashes_03",
+      "mh_eyelashes01_cc0__mindfront_eyelashes_01",
+      "mh_eyelashes01_cc0__mindfront_eyelashes_04",
+      "mh_eyelashes01_cc0__mindfront_eyelashes_05"
+    ]
+  },
+  "packs": [
+    {
+      "file": "hair02_ccby.vwpack.json.gz",
+      "bytes": 7158260,
+      "count": 21,
+      "source": "hair02_ccby.zip"
+    },
+    {
+      "file": "hair03_ccby.vwpack.json.gz",
+      "bytes": 8712583,
+      "count": 14,
+      "source": "hair03_ccby.zip"
+    },
+    {
+      "file": "bodyparts05_cc0.vwpack.json.gz",
+      "bytes": 850308,
+      "count": 5,
+      "source": "bodyparts05_cc0.zip"
+    },
+    {
+      "file": "bodyparts06_cc-by.vwpack.json.gz",
+      "bytes": 307629,
+      "count": 4,
+      "source": "bodyparts06_cc-by.zip"
+    },
+    {
+      "file": "eyebrows01_cc0.vwpack.json.gz",
+      "bytes": 7357325,
+      "count": 14,
+      "source": "eyebrows01_cc0.zip"
+    },
+    {
+      "file": "eyelashes01_cc0.vwpack.json.gz",
+      "bytes": 2279824,
+      "count": 5,
+      "source": "eyelashes01_cc0.zip"
+    }
+  ]
+}

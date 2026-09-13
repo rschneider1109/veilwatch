@@ -10,7 +10,7 @@
     neckSize:50,torsoLength:50,armLength:50,legLength:50,handSize:50,footSize:50,
     breastSize:35,breastProjection:35,penisLength:50,penisGirth:50,testesSize:50,vulvaProminence:50,
     faceWidth:50,jawWidth:50,jawAngle:50,chinWidth:50,chinProjection:50,cheekboneHeight:50,cheekboneWidth:50,noseWidth:50,noseLength:50,noseProjection:50,eyeSpacing:50,eyeSize:50,browHeight:50,lipFullness:50,mouthWidth:50,earSize:50,
-    expressionIntensity:100,browStyle:"natural",piercing:"none",faceScar:"none",
+    expressionIntensity:100,browStyle:"auto",eyelashStyle:"auto",skinMaterial:"auto",eyeMaterial:"auto",piercing:"none",faceScar:"none",
     bodyHair:"none",bodyHairColor:"inherit",bodyScar:"none",tattoo:"none",
     clothing:{
       baseLayer:"boxer_briefs",top:"plain_tshirt",outerwear:"none",bottoms:"jeans_straight",onePiece:"none",socks:"crew_socks",shoes:"sneakers",gloves:"none",headwear:"none",eyewear:"none",neck:"none",belt:"civilian_belt",vest:"none",back:"none",
@@ -34,7 +34,10 @@
   }
   function merge(a,b){ const out=clone(a); for(const [k,v] of Object.entries(b||{})){ if(v&&typeof v==='object'&&!Array.isArray(v)&&out[k]&&typeof out[k]==='object'&&!Array.isArray(out[k])) out[k]=merge(out[k],v); else out[k]=v; } return out; }
   function patch(part){ const d=forge(); const next=merge(d,part); bridge()?.patchAppearance?.({forge:next,bodyType:next.frame==='feminine'?'female':'male'}); }
-  function sel(label,key,items,value){ return `<label>${label}<select data-ff-key="${key}">${(items||[]).map(x=>`<option value="${x}" ${x===value?'selected':''}>${title(x)}</option>`).join('')}</select></label>`; }
+  function sel(label,key,items,value){
+    const rows=(items||[]).map(x=>typeof x==='string'?{id:x,label:title(x)}:{id:String(x?.id??x?.value??''),label:String(x?.label??title(x?.id??x?.value??''))});
+    return `<label>${label}<select data-ff-key="${key}">${rows.map(x=>`<option value="${x.id}" ${x.id===String(value??'')?'selected':''}>${x.label}</option>`).join('')}</select></label>`;
+  }
   function range(label,key,value){ const v=Number.isFinite(Number(value))?Number(value):50; return `<label class="ff-range"><span>${label}<b data-ff-value="${key}">${v}</b></span><input type="range" min="0" max="100" value="${v}" data-ff-range="${key}"></label>`; }
   function section(titleText,html){ return `<div class="ff-section"><div class="projection-option-heading">${titleText}</div>${html}</div>`; }
   function weaponOptions(){ const w=window.VW_CHAR_CATALOG?.weapons||{}; const rows=[['none','None']]; Object.values(w).flat().forEach(x=>rows.push([x.id,x.name])); return rows; }
@@ -51,12 +54,16 @@
 
     const face=$('projectionFullForgeFace');
     if(face) face.innerHTML=
-      section('Eyebrows & Expression',`<div class="projection-form-grid projection-forge-two-col">${sel('Brow Style','browStyle',Object.keys(manifest.brows||{}),f.browStyle)}</div><div class="ff-range-grid">${range('Expression Intensity','expressionIntensity',f.expressionIntensity)}</div>`)+
+      section('Surface & Hair Detail',`<div class="projection-form-grid projection-forge-two-col">${sel('Skin Texture','skinMaterial',manifest.nativeAppearance?.skinMaterials||[{id:'auto',label:'Automatic'}],f.skinMaterial)}${sel('Eye Material','eyeMaterial',manifest.nativeAppearance?.eyeMaterials||[{id:'auto',label:'Automatic'}],f.eyeMaterial)}${sel('Brow Style','browStyle',manifest.nativeAppearance?.brows||Object.keys(manifest.brows||{}),f.browStyle)}${sel('Eyelashes','eyelashStyle',manifest.nativeAppearance?.eyelashes||[{id:'auto',label:'Automatic'}],f.eyelashStyle)}</div><div class="ff-range-grid">${range('Expression Intensity','expressionIntensity',f.expressionIntensity)}</div>`)+
       section('Face Structure',`<div class="ff-range-grid">${(manifest.face?.morphs||[]).map(k=>range(title(k),k,f[k])).join('')}</div>`)+
       section('Face Details',`<div class="projection-form-grid projection-forge-two-col">${sel('Piercing','piercing',manifest.face?.piercings||[],f.piercing)}${sel('Face Scar','faceScar',manifest.face?.faceScars||[],f.faceScar)}</div>`);
 
     const hair=$('projectionFullForgeHair');
-    if(hair) hair.innerHTML='<div class="mini">MakeHuman HM08 is now the character foundation. The uploaded MakeHuman hair packs are being connected through the native asset pipeline instead of forcing old Vitruvian-fitted meshes onto the new body.</div>';
+    if(hair){
+      const hairCount=(manifest.nativeAppearance?.hair||[]).length-1;
+      const beardCount=(manifest.nativeAppearance?.facialHair||[]).length-1;
+      hair.innerHTML=`<div class="mini">MakeHuman-native appearance pipeline online: ${Math.max(0,hairCount)} hairstyles and ${Math.max(0,beardCount)} facial-hair assets are available through the standard Hair / Facial Hair controls. Hair color also tints native brows, lashes, and facial hair.</div>`;
+    }
 
     const c=$('projectionFullForgeClothing');
     if(c){
