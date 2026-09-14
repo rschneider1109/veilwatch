@@ -1,5 +1,5 @@
 {
-  "version": "makehuman-section7c-compatibility",
+  "version": "makehuman-section07d-body-fit",
   "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
@@ -1795,7 +1795,33 @@
       "onePiece",
       "shoes",
       "gear"
-    ]
+    ],
+    "outerwearNativeMap": {
+      "zip_hoodie": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "bomber_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "denim_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "leather_jacket": "mh_shirts02_ccby__mindfront_lusekofta",
+      "field_jacket": "mh_shirts02_ccby__mindfront_lusekofta",
+      "rain_shell": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "winter_coat": "mh_dress03_cc-by__punkduck_winter_coat",
+      "blazer": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "tactical_jacket": "mh_shirts02_ccby__mindfront_lusekofta",
+      "softshell": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "lab_coat": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "high_vis_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "utility_vest": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "long_coat": "mh_dress03_cc-by__punkduck_winter_coat",
+      "parka": "mh_dress03_cc-by__punkduck_winter_coat",
+      "trench_coat": "mh_dress03_cc-by__punkduck_winter_coat",
+      "peacoat": "mh_dress03_cc-by__punkduck_winter_coat",
+      "varsity_jacket": "mh_shirts02_ccby__mindfront_lusekofta",
+      "motorcycle_jacket": "mh_shirts02_ccby__mindfront_lusekofta",
+      "puffer_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "fleece_jacket": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+      "windbreaker": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "suit_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "fire_resistant_jacket": "mh_shirts02_ccby__mindfront_lusekofta"
+    }
   },
   "cybernetics": {
     "eye": [
@@ -1861,9 +1887,9 @@
         "left",
         "right"
       ],
-      "style": "veilwatch_projection_cuff_v2",
-      "asset": "procedural://veilwatch_projection_cuff_v2",
-      "design": "tapered_low_profile_forearm_bracer_v2"
+      "style": "veilwatch_projection_cuff_v1_body_fitted",
+      "asset": "/assets/characters/equipment/veilwatch_projection_cuff_v1.glb",
+      "design": "tapered_low_profile_forearm_bracer_body_fitted"
     },
     "carry": [
       "right_hand",
@@ -1919,7 +1945,7 @@
         ]
       }
     },
-    "loadoutVersion": 2
+    "loadoutVersion": 3
   },
   "animations": [
     {
@@ -2593,7 +2619,7 @@
       "vest",
       "back"
     ],
-    "nativeClothingPackCacheLimit": 1,
+    "nativeClothingPackCacheLimit": 4,
     "makeHumanExtendedWardrobe": true,
     "quaterniusLocalAnimationLibrary": true,
     "quaterniusAnimationClips": 43,
@@ -2607,11 +2633,16 @@
     "quaterniusWeaponCount": 46,
     "equipmentLoadout": true,
     "cyberneticBodyReplacementMask": true,
-    "compatibilityLayer": true,
-    "outerwearCompatibility": true,
+    "bodyAwareEquipmentFit": true,
+    "projectionCuffGLB": true,
+    "weaponGripAnchors": true,
+    "weaponAuthoredScalePreservation": true,
+    "surfaceMountedCybernetics": true,
+    "bodyFittedCyberLimbs": true,
+    "headLocalCybernetics": true,
+    "safeGarmentBodyMasks": true,
     "weaponSocketArbitration": true,
-    "gearClearance": true,
-    "cyberGarmentSuppression": true
+    "makeHumanAnatomyMorphOnly": true
   },
   "nativeAppearance": {
     "skinMaterials": [
@@ -5570,60 +5601,5 @@
       "id": "q_ultimate_submachinegun_5",
       "label": "Submachine Gun 5 (Ultimate Guns)"
     }
-  ],
-  "compatibility": {
-    "outerwearAliases": {
-      "zip_hoodie": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "bomber_jacket": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
-      "denim_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "leather_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "field_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "rain_shell": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "winter_coat": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "blazer": "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
-      "tactical_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "softshell": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
-      "lab_coat": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "high_vis_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "utility_vest": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "long_coat": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "parka": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "trench_coat": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "peacoat": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
-      "varsity_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "motorcycle_jacket": "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "puffer_jacket": "mh_shirts02_ccby__mindfront_knitted_sweater_02",
-      "fleece_jacket": "mh_shirts02_ccby__mindfront_knitted_sweater_01",
-      "windbreaker": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "suit_jacket": "mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
-      "fire_resistant_jacket": "mh_shirts02_ccby__elvs_hooded_sweat_jacket1"
-    },
-    "weaponSocketPolicy": "exclusive_auto_relocate",
-    "gearClearance": {
-      "vest": "chest",
-      "back": "back",
-      "belt": [
-        "left_hip",
-        "right_hip"
-      ]
-    },
-    "cyberGarmentPolicy": {
-      "armReplacement": [
-        "gloves"
-      ],
-      "legReplacement": [
-        "shoes"
-      ],
-      "neckReplacement": [
-        "neck"
-      ],
-      "eyeOrTempleReplacement": [
-        "eyewear"
-      ],
-      "templeReplacementBulkyHeadwear": [
-        "headwear"
-      ]
-    },
-    "cuffCyberClearance": true
-  }
+  ]
 }

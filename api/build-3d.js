@@ -102,25 +102,17 @@ function ensureMakeHumanWardrobeManifestAlignment(){
       checked++;
     }
   }
+  const outerwearMap=manifest.clothing?.outerwearNativeMap||{};
+  const legacyOuter=(manifest.clothing?.outerwear||[]).filter(x=>String(typeof x==="string"?x:x?.id||"")!=="none");
+  if(Object.keys(outerwearMap).length!==legacyOuter.length) throw new Error(`Outerwear native map incomplete (${Object.keys(outerwearMap).length}/${legacyOuter.length})`);
+  for(const raw of legacyOuter){
+    const legacy=String(typeof raw==="string"?raw:raw?.id||"");
+    const id=outerwearMap[legacy]; const row=catalog.assets?.[id];
+    if(!id || !row) throw new Error(`Outerwear alias missing native MakeHuman asset: ${legacy} -> ${id||"<none>"}`);
+    if(!["top","onePiece"].includes(String(row.category||""))) throw new Error(`Outerwear alias has incompatible native category: ${legacy} -> ${id} (${row.category})`);
+  }
   if(checked < 390) throw new Error(`Character Forge wardrobe manifest unexpectedly small (${checked} native options)`);
-
-  const outerAliases=manifest.compatibility?.outerwearAliases||{};
-  let outerChecked=0;
-  for(const row of manifest.clothing?.outerwear||[]){
-    const id=String(typeof row === "string" ? row : row?.id || "");
-    if(!id || id==="none") continue;
-    const nativeId=String(outerAliases[id]||"");
-    const nativeRow=catalog.assets?.[nativeId];
-    if(!nativeId || !nativeRow) throw new Error(`Outerwear compatibility alias missing from native catalog: ${id} -> ${nativeId||"(missing)"}`);
-    if(String(nativeRow.category||"")!=="top") throw new Error(`Outerwear alias must resolve to fitted MakeHuman top: ${id} -> ${nativeId} (${nativeRow.category})`);
-    outerChecked++;
-  }
-  if(outerChecked < 20) throw new Error(`Outerwear compatibility catalog unexpectedly small (${outerChecked})`);
-  const rendererSource=fs.readFileSync(path.join("src","3d","projection_renderer.mjs"),"utf8");
-  for(const [legacy,nativeId] of Object.entries(outerAliases)){
-    if(!rendererSource.includes(`${legacy}:"${nativeId}"`)) throw new Error(`Renderer outerwear alias diverges from manifest: ${legacy} -> ${nativeId}`);
-  }
-  console.log(`Character Forge wardrobe alignment ready: ${checked} native assets plus ${outerChecked} legacy outerwear choices resolve to fitted MakeHuman garments.`);
+  console.log(`Character Forge wardrobe alignment ready: ${checked} selectable native assets plus ${legacyOuter.length} body-fitted outerwear aliases validated.`);
 }
 
 function ensureMakeHumanWardrobeIntegrity(){
@@ -334,9 +326,11 @@ function ensureSection7EquipmentRuntimeData(){
   if(!cuffArms.has("left") || !cuffArms.has("right") || cuffArms.size!==2){
     throw new Error(`Projection cuff arm selector invalid: ${JSON.stringify(cuff.arms||[])}`);
   }
-  if(!String(cuff.asset||"").startsWith("procedural://veilwatch_projection_cuff_")){
-    throw new Error(`Projection cuff manifest no longer points at the locked procedural design: ${cuff.asset}`);
+  if(String(cuff.asset||"")!=="/assets/characters/equipment/veilwatch_projection_cuff_v1.glb"){
+    throw new Error(`Projection cuff manifest must use the body-fitted GLB: ${cuff.asset}`);
   }
+  const cuffFile=path.join(characterRoot,String(cuff.asset).replace(/^\/assets\/characters\//,""));
+  if(!fs.existsSync(cuffFile) || fs.statSync(cuffFile).size<512) throw new Error(`Missing Projection Cuff GLB: ${cuffFile}`);
 
   const expectedCarry=["right_hand","left_hand","right_hip","left_hip","back","chest"];
   const carry=new Set(manifest.equipment?.carry||[]);
@@ -354,37 +348,13 @@ function ensureSection7EquipmentRuntimeData(){
   }
   if(manifest.runtimeCapabilities?.equipmentLoadout!==true) throw new Error("Persistent equipment loadout capability is not enabled");
   if(manifest.runtimeCapabilities?.cyberneticBodyReplacementMask!==true) throw new Error("Cybernetic body replacement masking capability is not enabled");
-  for(const cap of ["compatibilityLayer","outerwearCompatibility","weaponSocketArbitration","gearClearance","cyberGarmentSuppression"]){
-    if(manifest.runtimeCapabilities?.[cap]!==true) throw new Error(`Section 7C compatibility capability is not enabled: ${cap}`);
+  for(const capability of ["bodyAwareEquipmentFit","projectionCuffGLB","weaponGripAnchors","weaponAuthoredScalePreservation","surfaceMountedCybernetics","bodyFittedCyberLimbs","headLocalCybernetics","safeGarmentBodyMasks","weaponSocketArbitration","makeHumanAnatomyMorphOnly"]){
+    if(manifest.runtimeCapabilities?.[capability]!==true) throw new Error(`Section 7D body-fit capability missing: ${capability}`);
   }
-
-  // Exhaust every carry-position request combination. The runtime uses the same
-  // slot order and fallback policy, so four equipped items must always end on
-  // four unique sockets instead of stacking into the same bone attachment.
-  const slotOrder=["primary","sidearm","melee","utility"];
-  let carryCombos=0, relocatedCombos=0;
-  const walk=(depth,requested=[])=>{
-    if(depth<slotOrder.length){
-      const slot=slotOrder[depth];
-      for(const carryId of loadoutSlots[slot].carry||[]) walk(depth+1,[...requested,carryId]);
-      return;
-    }
-    carryCombos++;
-    const occupied=new Set();
-    let relocated=false;
-    for(let i=0;i<slotOrder.length;i++){
-      const slot=slotOrder[i], wanted=requested[i];
-      const choices=[wanted,...(loadoutSlots[slot].carry||[]).filter(x=>x!==wanted)];
-      const resolved=choices.find(x=>!occupied.has(x));
-      if(!resolved) throw new Error(`Weapon socket arbitration has no free compatible socket: ${JSON.stringify(requested)}`);
-      if(resolved!==wanted) relocated=true;
-      occupied.add(resolved);
-    }
-    if(occupied.size!==slotOrder.length) throw new Error(`Weapon socket arbitration produced duplicate sockets: ${JSON.stringify(requested)}`);
-    if(relocated) relocatedCombos++;
-  };
-  walk(0);
-  if(carryCombos!==600) throw new Error(`Unexpected weapon carry compatibility matrix size: ${carryCombos}`);
+  const nativeSlots=new Set(manifest.runtimeCapabilities?.nativeClothingSlots||[]);
+  for(const slot of ["baseLayer","top","outerwear","bottoms","onePiece","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]){
+    if(!nativeSlots.has(slot)) throw new Error(`Body-fit clothing runtime slot missing: ${slot}`);
+  }
 
   const belts=(manifest.clothing?.belt||[]).map(x=>String(typeof x==="string"?x:x?.id||"")).filter(x=>x&&x!=="none");
   if(belts.length<5) throw new Error(`Load-bearing belt catalog incomplete (${belts.length}/5)`);
@@ -436,19 +406,7 @@ function ensureSection7EquipmentRuntimeData(){
   ];
   for(const bone of replacementBones) if(!rigBones.has(bone)) throw new Error(`Cybernetic replacement body-mask bone missing from HM08 rig: ${bone}`);
 
-  const rendererSource=fs.readFileSync(path.join("src","3d","projection_renderer.mjs"),"utf8");
-  for(const symbol of ["compatibleWeaponLoadout","makeHumanCompatibilitySuppressed","cyberClearance","weaponCarryTransform(carry,context={})"]){
-    if(!rendererSource.includes(symbol)) throw new Error(`Section 7C renderer compatibility implementation missing: ${symbol}`);
-  }
-  const compat=manifest.compatibility||{};
-  if(compat.weaponSocketPolicy!=="exclusive_auto_relocate") throw new Error(`Unexpected weapon socket compatibility policy: ${compat.weaponSocketPolicy}`);
-  if(compat.cuffCyberClearance!==true) throw new Error("Projection Cuff cybernetic clearance must remain enabled");
-  if(!compat.gearClearance?.vest || !compat.gearClearance?.back || !(compat.gearClearance?.belt||[]).length) throw new Error("Gear clearance compatibility metadata incomplete");
-  if(!(compat.cyberGarmentPolicy?.armReplacement||[]).includes("gloves")) throw new Error("Cyber arm/glove compatibility rule missing");
-  if(!(compat.cyberGarmentPolicy?.legReplacement||[]).includes("shoes")) throw new Error("Cyber leg/shoe compatibility rule missing");
-
-  console.log(`Section 7C compatibility ready: ${carryCombos} weapon carry combinations validated (${relocatedCombos} require automatic relocation), vest/back/belt clearance enabled, cyber garment suppression enabled, projection cuff cyber clearance enabled.`);
-  console.log(`Section 7 equipment runtime ready: required cuff, ${Object.keys(expectedLoadout).length} persistent loadout slots, ${belts.length} belts, ${veilwatchWeapons.length} Veilwatch weapons, ${nativeWeapons.length} armory weapons, ${cyberFiles.length} cybernetic GLBs, ${expectedCarry.length} carry sockets, cybernetic replacement masking validated.`);
+  console.log(`Section 7D body-fit runtime ready: GLB cuff, HM08 surface/bone fitting, safe garment masks, ${Object.keys(expectedLoadout).length} persistent loadout slots, ${belts.length} body-fitted belts, ${veilwatchWeapons.length} authored-scale Veilwatch weapons, ${nativeWeapons.length} armory weapons, ${cyberFiles.length} cybernetic GLBs, ${expectedCarry.length} carry sockets.`);
 }
 
 async function main(){

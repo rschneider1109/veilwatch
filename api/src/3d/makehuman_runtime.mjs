@@ -937,9 +937,9 @@ export class MakeHumanRuntime {
     const slotBias={
       hair:80,brows:82,eyelashes:83,facialHair:84,
       clothing_baseLayer:0,clothing_socks:1,clothing_top:2,clothing_bottoms:2,
-      clothing_onePiece:3,clothing_shoes:4,clothing_gloves:5,
-      clothing_outerwear:6,clothing_headwear:6,clothing_eyewear:7,clothing_neck:7,
-      clothing_vest:8,clothing_back:9
+      clothing_onePiece:3,clothing_outerwear:4,clothing_shoes:5,clothing_gloves:6,
+      clothing_headwear:7,clothing_eyewear:8,clothing_neck:8,
+      clothing_vest:9,clothing_back:10
     }[String(slot||"")] ?? 0;
     return {zDepth,renderOrder:100+Math.round(zDepth)*10+slotBias};
   }
@@ -1026,6 +1026,60 @@ export class MakeHumanRuntime {
     return mesh;
   }
 
+  _safeDeleteVertices(asset,mesh,slot){
+    const authored=Array.from(asset?.delete||[],Number).filter(Number.isFinite);
+    const pos=mesh?.geometry?.getAttribute?.("position");
+    if(!authored.length || !pos?.count || !this.transformed?.length) return new Uint32Array(authored);
+    // Only the lower-body/full-body layers showed material delete-mask overshoot
+    // in the full wardrobe audit. Keep lightweight authored masks untouched for
+    // accessories/vests/headwear so rapid proportion edits stay responsive.
+    const guarded=new Set(["clothing_bottoms","clothing_onePiece","clothing_outerwear","clothing_shoes","clothing_socks"]);
+    if(!guarded.has(String(slot||""))) return new Uint32Array(authored);
+
+    // MakeHuman delete_verts files are authored against a particular body and a
+    // few community garments hide well beyond the geometry they actually cover.
+    // Keep a body vertex hidden only when fitted garment geometry is physically
+    // close to it. This prevents the blank crotch/leg holes seen on some boots,
+    // skirts and dresses while preserving normal anti-clipping masks.
+    const thresholds={
+      clothing_baseLayer:.040,clothing_socks:.035,clothing_shoes:.040,
+      clothing_gloves:.035,clothing_top:.050,clothing_bottoms:.055,
+      clothing_onePiece:.075,clothing_outerwear:.085,clothing_vest:.080,
+      clothing_back:.085,clothing_headwear:.050,clothing_eyewear:.035,
+      clothing_neck:.045
+    };
+    const maxDist=thresholds[String(slot||"")] ?? .060;
+    const cell=maxDist;
+    const grid=new Map();
+    const key=(x,y,z)=>`${Math.floor(x/cell)},${Math.floor(y/cell)},${Math.floor(z/cell)}`;
+    const garmentBox=new THREE.Box3();
+    const v=new THREE.Vector3();
+    for(let i=0;i<pos.count;i++){
+      v.fromBufferAttribute(pos,i); garmentBox.expandByPoint(v);
+      const k=key(v.x,v.y,v.z); let arr=grid.get(k); if(!arr){arr=[];grid.set(k,arr);} arr.push([v.x,v.y,v.z]);
+    }
+    garmentBox.expandByScalar(maxDist);
+    const maxDistSq=maxDist*maxDist;
+    const out=[];
+    for(const vi of authored){
+      const bi=vi*3;
+      if(bi<0 || bi+2>=this.transformed.length) continue;
+      const x=this.transformed[bi],y=this.transformed[bi+1],z=this.transformed[bi+2];
+      v.set(x,y,z); if(!garmentBox.containsPoint(v)) continue;
+      const ix=Math.floor(x/cell),iy=Math.floor(y/cell),iz=Math.floor(z/cell);
+      let covered=false;
+      for(let dx=-1;dx<=1 && !covered;dx++) for(let dy=-1;dy<=1 && !covered;dy++) for(let dz=-1;dz<=1 && !covered;dz++){
+        const arr=grid.get(`${ix+dx},${iy+dy},${iz+dz}`); if(!arr) continue;
+        for(const q of arr){
+          const ddx=x-q[0],ddy=y-q[1],ddz=z-q[2];
+          if(ddx*ddx+ddy*ddy+ddz*ddz<=maxDistSq){covered=true;break;}
+        }
+      }
+      if(covered) out.push(vi);
+    }
+    return new Uint32Array(out);
+  }
+
   _disposeNativeRoot(root){
     root?.traverse?.(obj=>{
       obj.geometry?.dispose?.();
@@ -1079,7 +1133,7 @@ export class MakeHumanRuntime {
     return masked.size;
   }
 
-  _compactNativeAsset(asset){
+  _compactNativeAsset(asset,mesh,slot){
     const rows=asset.mapping||[];
     const mappingIndices=new Int32Array(rows.length*3);
     const mappingValues=new Float32Array(rows.length*6);
@@ -1094,7 +1148,9 @@ export class MakeHumanRuntime {
       mappingValues,
       mhclo:asset.mhclo||{},
       category:asset.category||"",
-      delete:new Uint32Array(asset.delete||[]),
+      authoredDelete:new Uint32Array(asset.delete||[]),
+      delete:this._safeDeleteVertices(asset,mesh,slot),
+      slot:String(slot||""),
       material:asset.material||{}
     };
   }
@@ -1165,8 +1221,8 @@ export class MakeHumanRuntime {
             return false;
           }
 
-          const activeAsset=this._compactNativeAsset(asset);
-          const next={id:req.id,asset:activeAsset,root,mesh,tint:wantedAtCommit?.tint||null};
+          const activeAsset=this._compactNativeAsset(asset,mesh,slot);
+          const next={id:req.id,slot,asset:activeAsset,root,mesh,tint:wantedAtCommit?.tint||null};
           const old=this.nativeAssets.get(slot);
           if(old) this._disposeNativeRoot(old.root);
           this.root.add(root);
@@ -1220,6 +1276,12 @@ export class MakeHumanRuntime {
       }
       pos.needsUpdate=true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingBox(); mesh.geometry.computeBoundingSphere();
       if(mesh.skeleton!==this.skeleton) mesh.bind(this.skeleton,new THREE.Matrix4());
+      // Re-evaluate the conservative body mask after every proportion change so
+      // a mask that is safe on the default body cannot open a hole on a tall,
+      // heavy or otherwise differently proportioned HM08 character.
+      if(asset.authoredDelete){
+        asset.delete=this._safeDeleteVertices({delete:asset.authoredDelete},mesh,row.slot||asset.slot);
+      }
     }
     if(this.hiddenBodyVertices?.size) this._updateGeometries();
   }
@@ -1329,6 +1391,55 @@ export class MakeHumanRuntime {
       this.materials.eye.color.copy(base.lerp(this._eyeTint,.08));
     }else this.materials.eye.color.copy(new THREE.Color(0xf1ece4).lerp(this._eyeTint,.12));
     this.materials.eye.needsUpdate=true;
+  }
+
+  getBoneSegmentLength(name,childName){
+    const a=this.getBone(name), b=this.getBone(childName);
+    if(!a || !b) return 0;
+    this.root.updateMatrixWorld(true);
+    const av=new THREE.Vector3(),bv=new THREE.Vector3();
+    a.getWorldPosition(av); b.getWorldPosition(bv);
+    return av.distanceTo(bv);
+  }
+
+  getBoneLocalBodyBounds(name,minWeight=.08){
+    const bone=this.getBone(name); if(!bone || !this.transformed?.length) return null;
+    const boneIndex=this.getBoneIndex(bone.name);
+    if(boneIndex===undefined) return null;
+    this.root.updateMatrixWorld(true); bone.updateWorldMatrix(true,false);
+    const inv=new THREE.Matrix4().copy(bone.matrixWorld).invert();
+    const box=new THREE.Box3(); const local=new THREE.Vector3(),world=new THREE.Vector3();
+    const end=Math.min(Number(this.targetManifest?.bodyVertexRange?.[1] ?? 13379),this.transformed.length/3-1);
+    let count=0;
+    for(let vi=0;vi<=end;vi++){
+      const inf=this.vertexInfluences?.[vi]||[];
+      let w=0; for(const row of inf) if(row[0]===boneIndex){w=Number(row[1])||0;break;}
+      if(w<minWeight) continue;
+      const i=vi*3; local.set(this.transformed[i],this.transformed[i+1],this.transformed[i+2]);
+      world.copy(local).applyMatrix4(this.root.matrixWorld).applyMatrix4(inv);
+      box.expandByPoint(world); count++;
+    }
+    if(!count || box.isEmpty()) return null;
+    return {box,min:box.min.clone(),max:box.max.clone(),size:box.getSize(new THREE.Vector3()),center:box.getCenter(new THREE.Vector3()),count};
+  }
+
+  getBoneLocalBodyCrossSection(name,localY,halfHeight=.035,minWeight=.02){
+    const bone=this.getBone(name); if(!bone || !this.transformed?.length) return null;
+    const boneIndex=this.getBoneIndex(bone.name); if(boneIndex===undefined) return null;
+    this.root.updateMatrixWorld(true); bone.updateWorldMatrix(true,false);
+    const inv=new THREE.Matrix4().copy(bone.matrixWorld).invert();
+    const p=new THREE.Vector3(); const box=new THREE.Box3();
+    const end=Math.min(Number(this.targetManifest?.bodyVertexRange?.[1] ?? 13379),this.transformed.length/3-1);
+    let count=0;
+    for(let vi=0;vi<=end;vi++){
+      let w=0; for(const row of this.vertexInfluences?.[vi]||[]) if(row[0]===boneIndex){w=Number(row[1])||0;break;}
+      if(w<minWeight) continue;
+      const i=vi*3; p.set(this.transformed[i],this.transformed[i+1],this.transformed[i+2]).applyMatrix4(this.root.matrixWorld).applyMatrix4(inv);
+      if(Math.abs(p.y-localY)>halfHeight) continue;
+      box.expandByPoint(p); count++;
+    }
+    if(count<8 || box.isEmpty()) return this.getBoneLocalBodyBounds(name,minWeight);
+    return {box,min:box.min.clone(),max:box.max.clone(),size:box.getSize(new THREE.Vector3()),center:box.getCenter(new THREE.Vector3()),count};
   }
 
   getBone(name){

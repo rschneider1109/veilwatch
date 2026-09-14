@@ -234,29 +234,29 @@ const LEGACY_MH_CLOTHING = {
   },
   outerwear:{
     zip_hoodie:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    bomber_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
+    bomber_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
     denim_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    leather_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    field_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    leather_jacket:"mh_shirts02_ccby__mindfront_lusekofta",
+    field_jacket:"mh_shirts02_ccby__mindfront_lusekofta",
     rain_shell:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    winter_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    blazer:"mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
-    tactical_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    softshell:"mh_shirts02_ccby__mindfront_knitted_sweater_01",
+    winter_coat:"mh_dress03_cc-by__punkduck_winter_coat",
+    blazer:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    tactical_jacket:"mh_shirts02_ccby__mindfront_lusekofta",
+    softshell:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
     lab_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
     high_vis_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
     utility_vest:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    long_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    parka:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    trench_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    peacoat:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
-    varsity_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    motorcycle_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-    puffer_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
-    fleece_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_01",
+    long_coat:"mh_dress03_cc-by__punkduck_winter_coat",
+    parka:"mh_dress03_cc-by__punkduck_winter_coat",
+    trench_coat:"mh_dress03_cc-by__punkduck_winter_coat",
+    peacoat:"mh_dress03_cc-by__punkduck_winter_coat",
+    varsity_jacket:"mh_shirts02_ccby__mindfront_lusekofta",
+    motorcycle_jacket:"mh_shirts02_ccby__mindfront_lusekofta",
+    puffer_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    fleece_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
     windbreaker:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-    suit_jacket:"mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
-    fire_resistant_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1"
+    suit_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    fire_resistant_jacket:"mh_shirts02_ccby__mindfront_lusekofta"
   },
   bottoms:{
     jeans_straight:"mh_pants02_ccby__punkduck_male_classic_jeans",
@@ -1731,63 +1731,65 @@ class ProjectionRenderer {
   forgeMat(color,metalness=.05,roughness=.72){ return new THREE.MeshStandardMaterial({color,metalness,roughness,side:THREE.DoubleSide}); }
 
   createCuffFallback(side="left", forge={}){
-    return this.createCuff(side, forge);
+    const g=new THREE.Group();
+    g.name="VeilwatchProjectionCuff_Fallback";
+    g.userData.requiredEquipment=true;
+    const armSize=THREE.MathUtils.clamp(Number(forge.armSize ?? 50),0,100);
+    const armLength=THREE.MathUtils.clamp(Number(forge.armLength ?? 50),0,100);
+    const radial=.90 + (armSize/100)*.22;
+    const length=.145 * (.94 + (armLength/100)*.12);
+    const wristR=.044*radial, elbowR=.054*radial;
+    const shellMat=this.forgeMat(0x111820,.72,.28), trimMat=this.forgeMat(0x4b5963,.78,.22);
+    const emitterMat=new THREE.MeshStandardMaterial({color:0x76dcff,emissive:0x2aaed8,emissiveIntensity:1.8,metalness:.25,roughness:.22});
+    const shell=new THREE.Mesh(new THREE.CylinderGeometry(wristR,elbowR,length,14,1,true,-Math.PI*.73,Math.PI*1.46),shellMat);
+    shell.rotation.y=Math.PI; g.add(shell);
+    const dorsal=new THREE.Mesh(new THREE.BoxGeometry(.048*radial,length*.70,.008),trimMat); dorsal.position.set(0,0,-elbowR*.88); g.add(dorsal);
+    const seam=new THREE.Mesh(new THREE.BoxGeometry(.008,length*.54,.0045),emitterMat); seam.position.set(.012*radial,0,-elbowR*.98); g.add(seam);
+    const emitter=new THREE.Mesh(new THREE.CylinderGeometry(.010,.010,.006,16),emitterMat); emitter.rotation.x=Math.PI/2; emitter.position.set(-.014*radial,length*.30,-elbowR*1.02); g.add(emitter);
+    const boneName=side==='right'?'RightForeArm':'LeftForeArm';
+    const targetLength=this.makeHumanRuntime?.getBoneSegmentLength?.(boneName,side==='right'?'RightHand':'LeftHand')||.24;
+    return this.attachToBone(g,boneName,[0,targetLength*.50,0],[0,0,0]);
   }
 
   createCuff(side="left", forge={}){
-    const g=new THREE.Group();
-    g.name="VeilwatchProjectionCuff_v2";
-    g.userData.requiredEquipment=true;
-    g.userData.design="tapered_low_profile_bracer";
-
-    const armSize=THREE.MathUtils.clamp(Number(forge.armSize ?? 50),0,100);
-    const armLength=THREE.MathUtils.clamp(Number(forge.armLength ?? 50),0,100);
-    const cyberKey=side==='right'?'rightArm':'leftArm';
-    const cyberKind=String(forge?.cybernetics?.[cyberKey]||'none');
-    const cyberClearance=/cyber_forearm|full_cyber_arm/.test(cyberKind)?1.24:(cyberKind==='cyber_hand'?1.08:1);
-    const radial=(.90 + (armSize/100)*.22)*cyberClearance;
-    const length=.145 * (.94 + (armLength/100)*.12);
-    const wristR=.044*radial;
-    const elbowR=.054*radial;
-
-    const shellMat=this.forgeMat(0x111820,.72,.28);
-    const trimMat=this.forgeMat(0x4b5963,.78,.22);
-    const emitterMat=new THREE.MeshStandardMaterial({
-      color:0x76dcff, emissive:0x2aaed8, emissiveIntensity:1.8,
-      metalness:.25, roughness:.22
+    const boneName=side==='right'?'RightForeArm':'LeftForeArm';
+    const handName=side==='right'?'RightHand':'LeftHand';
+    const generation=this._forgeGeneration||0;
+    const runtime=this.makeHumanRuntime;
+    this.loader.loadAsync(VEILWATCH_CUFF_ASSET).then((gltf)=>{
+      if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
+      const wrapper=new THREE.Group(); wrapper.name=`VeilwatchProjectionCuff_${side}`; wrapper.userData.requiredEquipment=true;
+      const model=gltf.scene;
+      model.rotation.y=Math.PI; // authored display faces +Z; HM08 outer forearm surface is -Z.
+      model.updateMatrixWorld(true);
+      let box=new THREE.Box3().setFromObject(model,true), size=box.getSize(new THREE.Vector3());
+      const body=runtime?.getBoneLocalBodyBounds?.(boneName,.06);
+      const forearmLength=runtime?.getBoneSegmentLength?.(boneName,handName)||.24;
+      const targetLength=THREE.MathUtils.clamp(forearmLength*.62,.115,.175);
+      const cyber=forge?.cybernetics||{};
+      const cyberKind=side==='right'?cyber.rightArm:cyber.leftArm;
+      const clearance=(cyberKind&&cyberKind!=="none")?1.12:1.06;
+      const targetX=Math.max(.070,(body?.size?.x||.080)*clearance);
+      const targetZ=Math.max(.078,(body?.size?.z||.086)*clearance);
+      // Fit first, then recalculate bounds and center. Recentring before a
+      // non-uniform scale moves the apparent anchor whenever the source GLB
+      // origin is not already at its geometric center.
+      model.scale.set(
+        THREE.MathUtils.clamp(targetX/Math.max(size.x,1e-5),.45,1.35),
+        THREE.MathUtils.clamp(targetLength/Math.max(size.y,1e-5),.55,1.35),
+        THREE.MathUtils.clamp(targetZ/Math.max(size.z,1e-5),.42,1.25)
+      );
+      model.updateMatrixWorld(true);
+      box=new THREE.Box3().setFromObject(model,true);
+      model.position.sub(box.getCenter(new THREE.Vector3()));
+      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+      wrapper.add(model);
+      this.attachToBone(wrapper,boneName,[0,forearmLength*.50,0],[0,0,0]);
+    }).catch((err)=>{
+      console.warn("Projection cuff GLB unavailable; using procedural fallback:",err?.message||err);
+      if(generation===(this._forgeGeneration||0) && this.currentObject) this.createCuffFallback(side,forge);
     });
-
-    // Open-backed tapered hard-shell bracer. It hugs the forearm instead of
-    // reading as a wrist computer or a floating block.
-    const shell=new THREE.Mesh(
-      new THREE.CylinderGeometry(wristR,elbowR,length,14,1,true,-Math.PI*.73,Math.PI*1.46),
-      shellMat
-    );
-    shell.rotation.y=Math.PI;
-    g.add(shell);
-
-    const dorsal=new THREE.Mesh(new THREE.BoxGeometry(.048*radial,length*.70,.008),trimMat);
-    dorsal.position.set(0,0,elbowR*.88);
-    g.add(dorsal);
-
-    const seam=new THREE.Mesh(new THREE.BoxGeometry(.008,length*.54,.0045),emitterMat);
-    seam.position.set(.012*radial,0,elbowR*.98);
-    g.add(seam);
-
-    const emitter=new THREE.Mesh(new THREE.CylinderGeometry(.010,.010,.006,16),emitterMat);
-    emitter.rotation.x=Math.PI/2;
-    emitter.position.set(-.014*radial,length*.30,elbowR*1.02);
-    g.add(emitter);
-
-    const lowerBand=new THREE.Mesh(new THREE.TorusGeometry(wristR*.96,.0025,6,24,Math.PI*1.52),trimMat);
-    lowerBand.rotation.x=Math.PI/2; lowerBand.rotation.z=Math.PI*.24; lowerBand.position.y=-length*.43;
-    g.add(lowerBand);
-    const upperBand=new THREE.Mesh(new THREE.TorusGeometry(elbowR*.96,.0025,6,24,Math.PI*1.52),trimMat);
-    upperBand.rotation.x=Math.PI/2; upperBand.rotation.z=Math.PI*.24; upperBand.position.y=length*.43;
-    g.add(upperBand);
-
-    const bone=side==='right'?'RightForeArm':'LeftForeArm';
-    return this.attachToBone(g,bone,[0,(/cyber_forearm|full_cyber_arm/.test(cyberKind) ? .135 : .125),0],[0,0,0]);
+    return null;
   }
 
   normalizedWeaponLoadout(forge={}){
@@ -1812,37 +1814,24 @@ class ProjectionRenderer {
     return out;
   }
 
-  compatibleWeaponLoadout(forge={}){
+  createWeaponLoadout(forge={}){
     const loadout=this.normalizedWeaponLoadout(forge);
-    const allowed={
+    const alternatives={
       primary:["back","chest","right_hand","left_hand"],
-      sidearm:["right_hip","left_hip","right_hand","left_hand","chest"],
-      melee:["left_hip","right_hip","right_hand","left_hand","back"],
+      sidearm:["right_hip","left_hip","chest","right_hand","left_hand"],
+      melee:["left_hip","right_hip","back","left_hand","right_hand"],
       utility:["chest","right_hip","left_hip","back","right_hand","left_hand"]
     };
-    const occupied=new Set();
-    const resolved={};
+    const used=new Set();
     for(const slot of ["primary","sidearm","melee","utility"]){
-      const item={...(loadout[slot]||{})};
-      const id=String(item.id||"none");
-      const requested=String(item.carry||allowed[slot][0]);
-      if(id==="none"){ resolved[slot]={id,carry:requested,requestedCarry:requested,relocated:false}; continue; }
-      const choices=[requested,...allowed[slot].filter(x=>x!==requested)];
-      const carry=choices.find(x=>!occupied.has(x))||requested;
-      occupied.add(carry);
-      resolved[slot]={id,carry,requestedCarry:requested,relocated:carry!==requested};
+      const item=loadout[slot]||{}; const id=item.id||"none";
+      if(id==="none") continue;
+      const wanted=String(item.carry||alternatives[slot][0]);
+      let carry=wanted;
+      if(used.has(carry)) carry=alternatives[slot].find(x=>!used.has(x))||wanted;
+      used.add(carry);
+      this.createWeapon(id,carry,slot);
     }
-    return resolved;
-  }
-
-  createWeaponLoadout(forge={}){
-    const loadout=this.compatibleWeaponLoadout(forge);
-    this.lastResolvedWeaponLoadout=loadout;
-    for(const slot of ["primary","sidearm","melee","utility"]){
-      const item=loadout[slot]||{};
-      this.createWeapon(item.id||"none",item.carry||"back",slot,{forge,requestedCarry:item.requestedCarry,relocated:item.relocated});
-    }
-    return loadout;
   }
 
   cyberBodyMaskBones(cy={}){
@@ -1869,49 +1858,106 @@ class ProjectionRenderer {
     return [...new Set(bones)];
   }
 
-  weaponCarryTransform(carry,context={}){
-    const cl=context?.forge?.clothing||{};
-    const hasVest=String(cl.vest||"none")!=="none";
-    const hasBack=String(cl.back||"none")!=="none";
-    const hasBelt=String(cl.belt||"none")!=="none";
-    const map={
-      right_hand:['RightHand',[0,.06,.02],[Math.PI/2,0,0]],
-      left_hand:['LeftHand',[0,.06,.02],[Math.PI/2,0,0]],
-      right_hip:['RightUpLeg',[(hasBelt ? .045 : 0),.06,(hasBelt ? .135 : .08)],[0,0,0]],
-      left_hip:['LeftUpLeg',[(hasBelt ? -.045 : 0),.06,(hasBelt ? .135 : .08)],[0,0,0]],
-      chest:['Spine2',[0,.08,(hasVest ? .215 : .14)],[0,Math.PI/2,0]],
-      back:['Spine2',[(hasBack ? .055 : 0),.05,(hasBack ? -.285 : -.17)],[0,.25,.15]]
-    };
-    return map[carry]||map.back;
+  weaponIsMelee(id=""){
+    return /knife|crowbar|baton|hatchet|improvised|sword|axe|machete/i.test(String(id));
   }
 
   weaponTargetLength(id){
-    if(/sniper|marksman|dmr|hunting/.test(id)) return .86;
-    if(/rifle|shotgun|carbine|bullpup/.test(id)) return .72;
-    if(/smg|submachine|p90|machine_pistol/.test(id)) return .42;
-    return .24;
+    // Used only for centimeter/unit-agnostic third-party FBX assets. Veilwatch's
+    // bundled GLBs are already authored at useful real-world meter scale.
+    if(/sniper|marksman|dmr|hunting/i.test(id)) return 1.05;
+    if(/rifle|shotgun|carbine|bullpup/i.test(id)) return .92;
+    if(/smg|submachine|p90|machine_pistol/i.test(id)) return .62;
+    if(/pistol|revolver/i.test(id)) return .27;
+    return .42;
   }
 
-  prepareWeaponAsset(scene,id,slot="preview"){
+  weaponGripAnchor(model,id){
+    const explicit=[];
+    model.traverse(o=>{
+      if(!o.isMesh) return;
+      const n=String(o.name||"").toLowerCase();
+      if(/(^|[_ -])(grip|handle)([_ -]|$)/.test(n) && !/forearm/.test(n)) explicit.push(o);
+    });
+    const box=new THREE.Box3();
+    if(explicit.length){ for(const o of explicit) box.expandByObject(o,true); }
+    else box.setFromObject(model,true);
+    if(box.isEmpty()) return new THREE.Vector3();
+    if(explicit.length) return box.getCenter(new THREE.Vector3());
+    const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+    // Firearm fallback: the pistol/rifle grip is normally in the lower rear
+    // quarter of our authored models. Melee objects are generally gripped near
+    // the lower end of their longest handle axis.
+    if(this.weaponIsMelee(id)) return new THREE.Vector3(center.x,box.min.y+size.y*.22,center.z);
+    return new THREE.Vector3(center.x,box.min.y+size.y*.22,center.z+size.z*.16);
+  }
+
+  weaponCarryTransform(carry,id="",weaponRoot=null){
+    const runtime=this.makeHumanRuntime;
+    const f=this.profile?.appearance?.forge||{};
+    const cl=f.clothing||{};
+    const melee=this.weaponIsMelee(id);
+    const pad=Number(weaponRoot?.userData?.bodyClearance||.012);
+    if(carry==='right_hand' || carry==='left_hand'){
+      const right=carry==='right_hand'; const bone=right?'RightHand':'LeftHand';
+      const b=runtime?.getBoneLocalBodyBounds?.(bone,.04);
+      const c=b?.center||new THREE.Vector3(0,.055,0);
+      const rot=melee?[0,0,right?0:Math.PI]:[Math.PI/2,0,right?0:Math.PI];
+      return [bone,[c.x,c.y,c.z],rot];
+    }
+    if(carry==='right_hip' || carry==='left_hip'){
+      const right=carry==='right_hip'; const b=runtime?.getBoneLocalBodyBounds?.('Hips',.02);
+      const c=b?.center||new THREE.Vector3(); const size=b?.size||new THREE.Vector3(.34,.28,.24);
+      const x=c.x+(right?-1:1)*(size.x*.50+pad+.010);
+      const y=(b?.min?.y??-.12)+size.y*.28;
+      const z=c.z+size.z*.06;
+      const rot=melee?[0,0,right?.05:-.05]:[-Math.PI/2,0,right?.04:-.04];
+      return ['Hips',[x,y,z],rot];
+    }
+    const b=runtime?.getBoneLocalBodyBounds?.('Spine2',.025);
+    const c=b?.center||new THREE.Vector3(0,.08,0); const size=b?.size||new THREE.Vector3(.32,.30,.22);
+    if(carry==='chest'){
+      // Surface-aware clearance: plate carriers add only a few centimeters,
+      // not the old 7-10cm generic jump that made weapons visibly float.
+      const extra=(cl.vest&&cl.vest!=='none')?.024:0;
+      const z=(b?.max?.z??.12)+pad+extra;
+      return ['Spine2',[c.x,c.y,z],melee?[-.04,0,.28]:[-Math.PI/2,0,.22]];
+    }
+    const extra=(cl.back&&cl.back!=='none')?.032:0;
+    const z=(b?.min?.z??-.12)-pad-extra;
+    return ['Spine2',[c.x,c.y,z],melee?[.04,0,-.22]:[-Math.PI/2,Math.PI, -.18]];
+  }
+
+  prepareWeaponAsset(scene,id,slot="preview",carry="back",sourceKind="local"){
     const wrapper=new THREE.Group(); wrapper.name=`VeilwatchWeapon_${slot}_${id}`;
-    wrapper.userData.equipmentSlot=`weapon_${slot}`;
-    wrapper.userData.weaponId=id;
+    wrapper.userData.equipmentSlot=`weapon_${slot}`; wrapper.userData.weaponId=id;
     const model=scene;
     model.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
-    let box=new THREE.Box3().setFromObject(model);
-    const size=new THREE.Vector3(); box.getSize(size);
-    const dims=[size.x,size.y,size.z]; const longest=Math.max(...dims,1e-5);
-    const scale=this.weaponTargetLength(id)/longest; model.scale.setScalar(scale);
-    box=new THREE.Box3().setFromObject(model); const center=new THREE.Vector3(); box.getCenter(center);
-    model.position.sub(center);
-    // Normalize the longest authored axis toward local Z so the same carry
-    // sockets can be used across unrelated source models.
-    if(dims[0] >= dims[1] && dims[0] >= dims[2]) model.rotation.y=Math.PI/2;
-    else if(dims[1] >= dims[0] && dims[1] >= dims[2]) model.rotation.x=Math.PI/2;
-    wrapper.add(model); return wrapper;
+    model.updateMatrixWorld(true);
+    let box=new THREE.Box3().setFromObject(model,true), size=box.getSize(new THREE.Vector3());
+
+    if(sourceKind==='quaternius'){
+      const dims=[size.x,size.y,size.z];
+      // Normalize only unit-agnostic FBX imports. Bundled Veilwatch GLBs retain
+      // their authored real-world scale and are never shrunk to category presets.
+      if(dims[0]>=dims[1]&&dims[0]>=dims[2]) model.rotation.y+=Math.PI/2;
+      else if(dims[1]>=dims[0]&&dims[1]>=dims[2]) model.rotation.x+=Math.PI/2;
+      model.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(model,true); size=box.getSize(new THREE.Vector3());
+      const longest=Math.max(size.x,size.y,size.z,1e-5);
+      model.scale.multiplyScalar(this.weaponTargetLength(id)/longest);
+      model.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(model,true); size=box.getSize(new THREE.Vector3());
+    }
+
+    const useGrip=/hand|hip/.test(String(carry));
+    const anchor=useGrip?this.weaponGripAnchor(model,id):box.getCenter(new THREE.Vector3());
+    model.position.sub(anchor);
+    // A conservative physical clearance based on the model's thinnest dimension.
+    wrapper.userData.bodyClearance=THREE.MathUtils.clamp(Math.min(size.x,size.y,size.z)*.60,.008,.030);
+    wrapper.add(model);
+    return wrapper;
   }
 
-  createWeaponFallback(id,carry,slot="preview",context={}){
+  createWeaponFallback(id,carry,slot="preview"){
     if(!id || id==='none') return null;
     const g=new THREE.Group(); g.name=`VeilwatchWeapon_${slot}_${id}_Fallback`;
     g.userData.equipmentSlot=`weapon_${slot}`;
@@ -1932,46 +1978,52 @@ class ProjectionRenderer {
     else if(id==='improvised_weapon'){ add(new THREE.CylinderGeometry(.022,.026,.38,10),metal,[0,.02,0]); add(new THREE.BoxGeometry(.07,.05,.04),dark,[0,.20,0]); }
     else if(rifle){ add(new THREE.BoxGeometry(.07,.08,.58),dark,[0,0,-.1]); add(new THREE.CylinderGeometry(.012,.012,.38,12),metal,[0,.005,-.53],[Math.PI/2,0,0]); add(new THREE.BoxGeometry(.055,.16,.04),grip,[0,-.10,-.05],[.18,0,0]); if(/sniper|dmr|marksman/.test(id)) add(new THREE.CylinderGeometry(.018,.018,.18,16),metal,[0,.065,-.08],[Math.PI/2,0,0]); }
     else { add(new THREE.BoxGeometry(.055,.10,.20),dark,[0,0,-.06]); add(new THREE.BoxGeometry(.045,.14,.055),grip,[0,-.10,0],[.18,0,0]); }
-    const [bone,pos,rot]=this.weaponCarryTransform(carry,context); return this.attachToBone(g,bone,pos,rot);
+    const [bone,pos,rot]=this.weaponCarryTransform(carry,id,g); return this.attachToBone(g,bone,pos,rot);
   }
 
-  createWeapon(id,carry,slot="preview",context={}){
+  createWeapon(id,carry,slot="preview"){
     if(!id || id==='none') return null;
+    const generation=this._forgeGeneration||0;
     if(String(id).startsWith("q_")){
-      const generation=this._forgeGeneration||0;
       const url=`${QUATERNIUS_WEAPON_ROOT}/${id}.fbx`;
       this.fbxLoader.loadAsync(url).then(scene=>{
-        if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(scene); return; }
-        const g=this.prepareWeaponAsset(scene,id,slot);
-        const [bone,pos,rot]=this.weaponCarryTransform(carry,context);
+        if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(scene);return;}
+        const g=this.prepareWeaponAsset(scene,id,slot,carry,'quaternius');
+        const [bone,pos,rot]=this.weaponCarryTransform(carry,id,g);
         this.attachToBone(g,bone,pos,rot);
       }).catch(err=>{
         console.warn(`Quaternius weapon unavailable (${id}):`,err?.message||err);
-        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot,context);
+        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot);
       });
       return null;
     }
-    const asset=FPS_WEAPON_ASSETS[id] || LOCAL_WEAPON_ASSETS[id];
-    if(!asset) return this.createWeaponFallback(id,carry,slot,context);
-    const generation=this._forgeGeneration||0;
-    const root=LOCAL_WEAPON_ASSETS[id] ? LOCAL_WEAPON_ROOT : FPS_WEAPON_ROOT;
-    const url=`${root}/${asset}`;
-    this.loader.loadAsync(url).then(gltf=>{
-      if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-      const g=this.prepareWeaponAsset(gltf.scene,id,slot);
-      const [bone,pos,rot]=this.weaponCarryTransform(carry,context); this.attachToBone(g,bone,pos,rot);
-    }).catch(async()=>{
-      if(generation!==(this._forgeGeneration||0) || !this.currentObject) return;
-      const local=LOCAL_WEAPON_ASSETS[id];
-      if(root===FPS_WEAPON_ROOT && local){
-        try{
-          const gltf=await this.loader.loadAsync(`${LOCAL_WEAPON_ROOT}/${local}`);
-          if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-          const g=this.prepareWeaponAsset(gltf.scene,id,slot);
-          const [bone,pos,rot]=this.weaponCarryTransform(carry,context); this.attachToBone(g,bone,pos,rot); return;
-        }catch(e){}
-      }
-      this.createWeaponFallback(id,carry,slot,context);
+
+    // Prefer the repo-bundled Veilwatch GLB. Older code attempted a network-fed
+    // FPS path first even though those files are not present in the repo, then
+    // silently fell back after a failed request. The local GLB is authoritative.
+    const local=LOCAL_WEAPON_ASSETS[id];
+    if(local){
+      this.loader.loadAsync(`${LOCAL_WEAPON_ROOT}/${local}`).then(gltf=>{
+        if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
+        const g=this.prepareWeaponAsset(gltf.scene,id,slot,carry,'local');
+        const [bone,pos,rot]=this.weaponCarryTransform(carry,id,g);
+        this.attachToBone(g,bone,pos,rot);
+      }).catch(err=>{
+        console.warn(`Bundled Veilwatch weapon unavailable (${id}):`,err?.message||err);
+        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot);
+      });
+      return null;
+    }
+
+    const fps=FPS_WEAPON_ASSETS[id];
+    if(!fps) return this.createWeaponFallback(id,carry,slot);
+    this.loader.loadAsync(`${FPS_WEAPON_ROOT}/${fps}`).then(gltf=>{
+      if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
+      const g=this.prepareWeaponAsset(gltf.scene,id,slot,carry,'fps');
+      const [bone,pos,rot]=this.weaponCarryTransform(carry,id,g);
+      this.attachToBone(g,bone,pos,rot);
+    }).catch(()=>{
+      if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot);
     });
     return null;
   }
@@ -1994,77 +2046,164 @@ class ProjectionRenderer {
     });
   }
 
+  cyberChildBone(boneName){
+    const map={
+      LeftArm:'LeftForeArm',RightArm:'RightForeArm',LeftForeArm:'LeftHand',RightForeArm:'RightHand',
+      LeftUpLeg:'LeftLeg',RightUpLeg:'RightLeg',LeftLeg:'LeftFoot',RightLeg:'RightFoot'
+    };
+    return map[String(boneName||'')]||'';
+  }
+
+  createSurfaceCyberPiece(kind,boneName){
+    const url=CYBER_ASSET_PATHS[kind]; if(!url) return null;
+    const generation=this._forgeGeneration||0; const runtime=this.makeHumanRuntime;
+    this.loader.loadAsync(url).then(gltf=>{
+      if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
+      const model=gltf.scene; this.tuneCyberAsset(model); model.updateMatrixWorld(true);
+      const back=/spine_interface|spinal_interface/.test(kind);
+      const body=runtime?.getBoneLocalBodyBounds?.(boneName,.025);
+      const root=new THREE.Group(); root.name=`CyberSurface_${kind}`; root.add(model);
+      const mass=THREE.MathUtils.clamp(Number(this.profile?.appearance?.forge?.mass??50),0,100);
+      const shapeScale=.92+(mass/100)*.16; model.scale.setScalar(shapeScale);
+      // Scale the implant before choosing its skin-contact face. Otherwise the
+      // contact face shifts when scale is applied and the part sinks back into
+      // the torso/neck.
+      model.updateMatrixWorld(true);
+      const box=new THREE.Box3().setFromObject(model,true), center=box.getCenter(new THREE.Vector3());
+      const contactZ=back?box.max.z:box.min.z;
+      model.position.sub(new THREE.Vector3(center.x,center.y,contactZ));
+      const pos=body?.center?.clone?.()||new THREE.Vector3();
+      if(body){
+        pos.z=back?body.min.z-.004:body.max.z+.004;
+        if(kind==='data_port') pos.x+=(body.size.x||.08)*.18;
+        if(kind==='rib_reinforcement') pos.x+=(body.size.x||.25)*.18;
+      }
+      this.attachToBone(root,boneName,[pos.x,pos.y,pos.z],[0,0,0]);
+    }).catch(err=>{
+      console.warn(`Cyber surface asset unavailable (${kind}):`,err?.message||err);
+      if(generation===(this._forgeGeneration||0)) this.createCyberPieceFallback(kind,boneName);
+    });
+    return null;
+  }
+
   createCyberPiece(kind,boneName){
     if(!kind || kind==='none') return null;
+    if(/data_port|spinal_interface|chest_interface|rib_reinforcement|spine_interface/.test(kind)) return this.createSurfaceCyberPiece(kind,boneName);
     const url=CYBER_ASSET_PATHS[kind];
     if(!url) return this.createCyberPieceFallback(kind,boneName);
-    const generation=this._forgeGeneration||0;
+    const generation=this._forgeGeneration||0; const runtime=this.makeHumanRuntime;
     this.loader.loadAsync(url).then((gltf)=>{
-      if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-      this.tuneCyberAsset(gltf.scene);
-      gltf.scene.name=`Cyber_${kind}`;
-      this.attachToBone(gltf.scene,boneName,[0,0,0]);
-    }).catch(()=>{ if(generation===(this._forgeGeneration||0)) this.createCyberPieceFallback(kind,boneName); });
+      if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
+      const wrapper=new THREE.Group(); wrapper.name=`Cyber_${kind}`;
+      const model=gltf.scene; this.tuneCyberAsset(model);
+      // The foot asset is authored lengthwise on +Z while HM08 replacement
+      // segments grow along bone-local +Y. Rotate before measuring/fitting.
+      if(kind==='cyber_foot') model.rotation.x=-Math.PI/2;
+      model.updateMatrixWorld(true);
+      let box=new THREE.Box3().setFromObject(model,true), size=box.getSize(new THREE.Vector3());
+      const body=runtime?.getBoneLocalBodyBounds?.(boneName,.045);
+      const child=this.cyberChildBone(boneName);
+      let targetLength=child?(runtime?.getBoneSegmentLength?.(boneName,child)||0):0;
+      if(!targetLength) targetLength=body?.size?.y||size.y;
+      const targetX=Math.max(.045,(body?.size?.x||size.x)*.94);
+      const targetZ=Math.max(.045,(body?.size?.z||size.z)*.94);
+      const sx=THREE.MathUtils.clamp(targetX/Math.max(size.x,1e-5),.50,1.55);
+      const sy=THREE.MathUtils.clamp(targetLength/Math.max(size.y,1e-5),.45,1.75);
+      const sz=THREE.MathUtils.clamp(targetZ/Math.max(size.z,1e-5),.50,1.55);
+      model.scale.set(sx,sy,sz);
+      // Fit first, then anchor the fitted proximal face to the joint. This keeps
+      // the elbow/wrist/knee/ankle seam at y=0 after non-uniform scaling.
+      model.updateMatrixWorld(true);
+      box=new THREE.Box3().setFromObject(model,true);
+      const fittedCenter=box.getCenter(new THREE.Vector3());
+      model.position.sub(new THREE.Vector3(fittedCenter.x,box.min.y,fittedCenter.z));
+      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+      wrapper.userData.bodyFitted=true; wrapper.userData.targetBone=boneName; wrapper.add(model);
+      this.attachToBone(wrapper,boneName,[0,0,0],[0,0,0]);
+    }).catch(err=>{
+      console.warn(`Cyber limb asset unavailable (${kind}):`,err?.message||err);
+      if(generation===(this._forgeGeneration||0)) this.createCyberPieceFallback(kind,boneName);
+    });
     return null;
   }
 
   createCyberPieceFallback(kind,boneName){
     if(!kind || kind==='none') return null; const g=new THREE.Group(); g.name=`Cyber_${kind}`;
     const metal=this.forgeMat(0x4d5964,.9,.22), dark=this.forgeMat(0x10161b,.65,.35), glow=new THREE.MeshStandardMaterial({color:0x51d6ff,emissive:0x51d6ff,emissiveIntensity:1.2,roughness:.25});
-    const len=/leg/.test(kind)?.32:/arm|forearm/.test(kind)?.20:.10;
-    const core=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,len,14),metal); core.position.y=len*.45; g.add(core);
-    const plate=new THREE.Mesh(new THREE.BoxGeometry(.07,len*.65,.025),dark); plate.position.set(0,len*.45,.045); g.add(plate);
-    const light=new THREE.Mesh(new THREE.BoxGeometry(.012,len*.45,.006),glow); light.position.set(.02,len*.45,.06); g.add(light);
+    const child=this.cyberChildBone(boneName);
+    const measured=child?(this.makeHumanRuntime?.getBoneSegmentLength?.(boneName,child)||0):0;
+    const len=measured||(/leg/.test(kind)?.32:/arm|forearm/.test(kind)?.20:.10);
+    const core=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,len,14),metal); core.position.y=len*.50; g.add(core);
+    const plate=new THREE.Mesh(new THREE.BoxGeometry(.07,len*.65,.025),dark); plate.position.set(0,len*.50,.045); g.add(plate);
+    const light=new THREE.Mesh(new THREE.BoxGeometry(.012,len*.45,.006),glow); light.position.set(.02,len*.50,.06); g.add(light);
     return this.attachToBone(g,boneName,[0,0,0]);
   }
 
+  headCyberMount(zone="eye",sx=1){
+    const b=this.makeHumanRuntime?.getBoneLocalBodyBounds?.('Head',.025);
+    if(!b) return null;
+    const c=b.center, size=b.size;
+    if(zone==='eye') return {pos:[c.x+sx*size.x*.18,c.y+size.y*.06,b.max.z+.002],rot:[0,0,0],surface:'front'};
+    if(zone==='temple') return {pos:[c.x+sx*(size.x*.50+.002),c.y+size.y*.10,c.z+size.z*.08],rot:[0,sx*.52,0],surface:'side'};
+    if(zone==='ear') return {pos:[c.x+sx*(size.x*.53+.003),c.y,c.z-size.z*.02],rot:[0,sx*.12,0],surface:'side'};
+    return {pos:[c.x+sx*size.x*.30,c.y-size.y*.22,b.max.z-.010],rot:[0,0,sx*.28],surface:'front'};
+  }
+
   createHeadCyberPiece(kind,zone="eye",side="right"){
-    if(!kind || kind==='none' || !this.headBone || !this.headBindInverse) return null;
+    if(!kind || kind==='none' || !this.headBone) return null;
     const url=HEAD_CYBER_ASSET_PATHS[kind];
-    // The subtle iris ring is intentionally kept as a lightweight generated
-    // overlay because it is a material-level augmentation rather than a full implant.
     if(!url) return this.createHeadCyberPieceFallback(kind,zone,side);
     const generation=this._forgeGeneration||0;
     this.loader.loadAsync(url).then((gltf)=>{
-      if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
+      if(generation!==(this._forgeGeneration||0) || !this.currentObject){disposeObject(gltf.scene);return;}
       const sides=side==='both'?[-1,1]:[side==='left'?-1:1];
       for(const sx of sides){
-        const root=gltf.scene.clone(true);
-        this.tuneCyberAsset(root);
-        if(zone==='eye') root.position.x=sx*.038;
-        else if(zone==='temple'){ root.position.x=sx*.103; root.rotation.y=sx*.55; }
-        else if(zone==='ear') root.position.x=sx*.112;
-        else if(zone==='jaw'){ root.position.x=sx*.078; root.rotation.z=sx*.28; }
-        const mounted=this.bindWorldAuthoredRootToHead(root);
-        if(mounted){ mounted.name=`CyberHead_${zone}_${kind}_${sx<0?'L':'R'}`; this.forgeVisuals ||= []; this.forgeVisuals.push(mounted); }
+        const model=gltf.scene.clone(true); this.tuneCyberAsset(model);
+        const mount=this.headCyberMount(zone,sx);
+        if(!mount){
+          // Non-MakeHuman fallback retains legacy world-authored placement.
+          const legacy=model; if(zone==='eye') legacy.position.x=sx*.038; else if(zone==='temple'){legacy.position.x=sx*.103;legacy.rotation.y=sx*.55;} else if(zone==='ear') legacy.position.x=sx*.112; else {legacy.position.x=sx*.078;legacy.rotation.z=sx*.28;}
+          const mounted=this.bindWorldAuthoredRootToHead(legacy); if(mounted){this.forgeVisuals||=[];this.forgeVisuals.push(mounted);} continue;
+        }
+        model.updateMatrixWorld(true);
+        const box=new THREE.Box3().setFromObject(model,true), center=box.getCenter(new THREE.Vector3());
+        let anchor;
+        if(mount.surface==='side') anchor=new THREE.Vector3(sx>0?box.min.x:box.max.x,center.y,center.z);
+        else anchor=new THREE.Vector3(center.x,center.y,box.min.z);
+        model.position.sub(anchor);
+        const root=new THREE.Group(); root.name=`CyberHead_${zone}_${kind}_${sx<0?'L':'R'}`; root.add(model);
+        this.attachToBone(root,'Head',mount.pos,mount.rot);
       }
-    }).catch(()=>{ if(generation===(this._forgeGeneration||0)) this.createHeadCyberPieceFallback(kind,zone,side); });
+    }).catch(err=>{
+      console.warn(`Head cybernetic unavailable (${kind}):`,err?.message||err);
+      if(generation===(this._forgeGeneration||0)) this.createHeadCyberPieceFallback(kind,zone,side);
+    });
     return null;
   }
 
   createHeadCyberPieceFallback(kind,zone="eye",side="right"){
-    if(!kind || kind==='none' || !this.headBone || !this.headBindInverse) return null;
+    if(!kind || kind==='none' || !this.headBone) return null;
     const sides=side==='both'?[-1,1]:[side==='left'?-1:1];
-    const root=new THREE.Group(); root.name=`CyberHead_${zone}_${kind}`;
     const metal=this.forgeMat(0x55616c,.9,.22), dark=this.forgeMat(0x111820,.6,.34);
     const glow=new THREE.MeshStandardMaterial({color:0x51d6ff,emissive:0x51d6ff,emissiveIntensity:1.35,roughness:.22,metalness:.45});
     for(const sx of sides){
+      const mount=this.headCyberMount(zone,sx); if(!mount) continue;
+      const g=new THREE.Group(); g.name=`CyberHead_${zone}_${kind}_${sx<0?'L':'R'}_Fallback`;
       if(zone==='eye'){
-        const x=sx*.038, y=1.646, z=.125;
-        const ring=new THREE.Mesh(new THREE.TorusGeometry(kind==='subtle_iris_ring'?.022:.027,kind==='subtle_iris_ring'?.0025:.005,8,28),kind==='subtle_iris_ring'?glow:metal); ring.position.set(x,y,z); root.add(ring);
-        if(kind==='camera_eye'){ const lens=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.009,24),glow); lens.rotation.x=Math.PI/2; lens.position.set(x,y,z+.006); root.add(lens); }
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(kind==='subtle_iris_ring'?.022:.027,kind==='subtle_iris_ring'?.0025:.005,8,28),kind==='subtle_iris_ring'?glow:metal); g.add(ring);
+        if(kind==='camera_eye'){const lens=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.009,24),glow);lens.rotation.x=Math.PI/2;lens.position.z=.006;g.add(lens);}
       }else if(zone==='temple'){
-        const plate=new THREE.Mesh(new THREE.BoxGeometry(.018,.065,.055),kind==='sensor_plate'?metal:dark); plate.position.set(sx*.103,1.675,.055); plate.rotation.y=sx*.55; root.add(plate);
-        const node=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.008,16),glow); node.rotation.z=Math.PI/2; node.position.set(sx*.113,1.68,.075); root.add(node);
+        const plate=new THREE.Mesh(new THREE.BoxGeometry(.018,.065,.055),kind==='sensor_plate'?metal:dark);g.add(plate);
+        const node=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.008,16),glow);node.rotation.z=Math.PI/2;node.position.z=.018;g.add(node);
       }else if(zone==='ear'){
-        const ring=new THREE.Mesh(new THREE.TorusGeometry(.027,.006,8,20),metal); ring.rotation.y=Math.PI/2; ring.position.set(sx*.112,1.626,.005); root.add(ring);
-        const bud=new THREE.Mesh(new THREE.BoxGeometry(.025,.045,.02),dark); bud.position.set(sx*.118,1.62,.02); root.add(bud);
-      }else if(zone==='jaw'){
-        const plate=new THREE.Mesh(new THREE.BoxGeometry(.018,.085,.07),metal); plate.position.set(sx*.078,1.555,.058); plate.rotation.z=sx*.28; root.add(plate);
-        const strip=new THREE.Mesh(new THREE.BoxGeometry(.005,.045,.008),glow); strip.position.set(sx*.088,1.56,.096); strip.rotation.z=sx*.28; root.add(strip);
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(.027,.006,8,20),metal);ring.rotation.y=Math.PI/2;g.add(ring);
+      }else{
+        const plate=new THREE.Mesh(new THREE.BoxGeometry(.018,.085,.07),metal);g.add(plate);
+        const strip=new THREE.Mesh(new THREE.BoxGeometry(.005,.045,.008),glow);strip.position.z=.038;g.add(strip);
       }
+      this.attachToBone(g,'Head',mount.pos,mount.rot);
     }
-    const mounted=this.bindWorldAuthoredRootToHead(root); if(mounted){ this.forgeVisuals ||= []; this.forgeVisuals.push(mounted); } return mounted;
+    return null;
   }
 
   applyCyberLimb(side,kind,limb="arm"){
@@ -2312,35 +2451,36 @@ class ProjectionRenderer {
   createMakeHumanBelt(cl={}, forge={}){
     const id=String(cl?.belt||"none");
     if(!id || id==="none") return null;
-
-    const g=new THREE.Group();
-    g.name=`VeilwatchBelt_${id}`;
-    g.userData.equipmentSlot="belt";
+    const g=new THREE.Group(); g.name=`VeilwatchBelt_${id}`; g.userData.equipmentSlot="belt";
     const gearHex=this.clothingColor(cl?.colors?.gear || cl?.color || "black");
     const beltMat=this.forgeMat(gearHex,/dress|civilian/.test(id)?.18:.34,/dress/.test(id)?.42:.62);
     const hardware=this.forgeMat(/dress/.test(id)?0x9b8a69:0x68727b,.78,.26);
     const pouchMat=this.forgeMat(new THREE.Color(gearHex).multiplyScalar(.72).getHex(),.22,.72);
 
-    // Keep the generated belt independent from native garment masking. It is
-    // rigid-mounted to the MakeHuman pelvis so it follows body proportions,
-    // poses and future animation without becoming another MHCLO layer.
-    const hips=THREE.MathUtils.clamp(Number(forge?.hips??50),0,100);
-    const waist=THREE.MathUtils.clamp(Number(forge?.waist??50),0,100);
-    const radius=.145 + ((hips*.65+waist*.35)/100)*.045;
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.010,10,48),beltMat);
-    ring.rotation.x=Math.PI/2; ring.position.y=.075; g.add(ring);
+    const runtime=this.makeHumanRuntime;
+    const pelvis=runtime?.getBoneLocalBodyBounds?.('Hips',.015);
+    const beltY=pelvis?(pelvis.min.y+pelvis.size.y*.62):.075;
+    const cross=runtime?.getBoneLocalBodyCrossSection?.('Hips',beltY,.035,.010)||pelvis;
+    const halfW=Math.max(.135,(cross?.size?.x||.29)*.52)+.008;
+    const halfD=Math.max(.095,(cross?.size?.z||.20)*.52)+.008;
+    const center=cross?.center||new THREE.Vector3();
+
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(halfW,.010,10,56),beltMat);
+    ring.scale.y=halfD/halfW; ring.rotation.x=Math.PI/2; ring.position.y=beltY; g.add(ring);
     const buckle=new THREE.Mesh(new THREE.BoxGeometry(.042,.031,.014),hardware);
-    buckle.position.set(0,.075,radius); g.add(buckle);
+    buckle.position.set(0,beltY,halfD+.006); g.add(buckle);
 
     const addPouch=(x,z=.0,w=.052,h=.068,d=.034)=>{
       const pouch=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),pouchMat);
-      pouch.position.set(x,.068,radius*.93+z); g.add(pouch);
+      pouch.position.set(x,beltY-.007,halfD+z+d*.30); g.add(pouch);
     };
-    if(/duty/.test(id)){ addPouch(-.105,.002); addPouch(.105,.002); addPouch(-.155,-.030,.042,.060,.030); }
-    else if(/tactical/.test(id)){ addPouch(-.115,.004,.060,.074,.040); addPouch(.115,.004,.060,.074,.040); addPouch(0,-radius*1.78,.072,.064,.038); }
-    else if(/utility/.test(id)){ addPouch(-.11,.004,.057,.073,.038); addPouch(.11,.004,.057,.073,.038); }
+    if(/duty/.test(id)){addPouch(-halfW*.58,.002);addPouch(halfW*.58,.002);addPouch(-halfW*.82,-.018,.042,.060,.030);}
+    else if(/tactical/.test(id)){addPouch(-halfW*.62,.004,.060,.074,.040);addPouch(halfW*.62,.004,.060,.074,.040);}
+    else if(/utility/.test(id)){addPouch(-halfW*.60,.004,.057,.073,.038);addPouch(halfW*.60,.004,.057,.073,.038);}
 
-    return this.attachToBone(g,'Hips');
+    g.userData.bodyFitted=true;
+    g.userData.waistHalfWidth=halfW; g.userData.waistHalfDepth=halfD;
+    return this.attachToBone(g,'Hips',[center.x,0,center.z]);
   }
 
   createClothingExtras(cl={}){
@@ -2591,20 +2731,6 @@ class ProjectionRenderer {
     return LEGACY_MH_CLOTHING?.[slot]?.[raw] || DEFAULT_MH_CLOTHING?.[slot] || "";
   }
 
-  resolveMakeHumanOuterwearId(value,underTopId=""){
-    const id=this.resolveMakeHumanClothingId("outerwear",value);
-    if(!id || id!==underTopId) return id;
-    // Top and outerwear are both fitted MakeHuman meshes. Never mount the exact
-    // same source garment twice because that produces perfect coplanar overlap.
-    const alternatives=[
-      "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
-      "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
-      "mh_shirts02_ccby__mindfront_knitted_sweater_02",
-      "mh_shirts02_ccby__mindfront_knitted_sweater_01"
-    ];
-    return alternatives.find(x=>x!==underTopId)||"";
-  }
-
   makeHumanClothingTint(clothing,slot){
     // Preserve authored colors for eyewear and jewelry. Other wardrobe pieces
     // can use the Character Forge palette without multiplying every accessory
@@ -2626,18 +2752,6 @@ class ProjectionRenderer {
       runtime.setSurface("skin",skinId,skinColor),
       runtime.setSurface("eye",eyeId,eyeColor)
     ]);
-  }
-
-  makeHumanCompatibilitySuppressed(slot,id,forge={}){
-    const cy=forge?.cybernetics||{};
-    const leftArm=String(cy.leftArm||"none"), rightArm=String(cy.rightArm||"none");
-    const leftLeg=String(cy.leftLeg||"none"), rightLeg=String(cy.rightLeg||"none");
-    if(slot==="gloves" && (leftArm!=="none" || rightArm!=="none")) return true;
-    if(slot==="shoes" && (leftLeg!=="none" || rightLeg!=="none")) return true;
-    if(slot==="neck" && String(cy.neck||"none")!=="none") return true;
-    if(slot==="eyewear" && (/synthetic_eye|camera_eye/.test(String(cy.eye||"none")) || String(cy.temple||"none")!=="none")) return true;
-    if(slot==="headwear" && String(cy.temple||"none")!=="none" && /helmet|hard_hat|headgear/i.test(String(id||""))) return true;
-    return false;
   }
 
   scheduleMakeHumanForge(appearance,hairColor){
@@ -2674,14 +2788,18 @@ class ProjectionRenderer {
       // Dresses and full suits replace separate top/bottom geometry while selected.
       // The saved shirt/pants choices are left intact so they return immediately
       // when the one-piece item is removed.
-      const clothingSlots=onePieceId
+      const cy=f.cybernetics||{};
+      const suppressGloves=[cy.leftArm,cy.rightArm].some(v=>v&&v!=="none");
+      const suppressShoes=[cy.leftLeg,cy.rightLeg].some(v=>v&&v!=="none");
+      const suppressEyewear=[cy.eye,cy.temple].some(v=>v&&v!=="none");
+      const suppressNeck=!!(cy.neck&&cy.neck!=="none");
+      const clothingSlots=(onePieceId
         ? ["baseLayer","onePiece","outerwear","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]
-        : ["baseLayer","top","outerwear","bottoms","socks","shoes","gloves","headwear","eyewear","neck","vest","back"];
-      const underTopId=onePieceId||this.resolveMakeHumanClothingId("top",cl?.top);
+        : ["baseLayer","top","bottoms","outerwear","socks","shoes","gloves","headwear","eyewear","neck","vest","back"])
+        .filter(slot=>!(slot==="gloves"&&suppressGloves) && !(slot==="shoes"&&suppressShoes) && !(slot==="eyewear"&&suppressEyewear) && !(slot==="neck"&&suppressNeck));
       const clothingRequests=clothingSlots.map((slot)=>{
-        const id=slot==="onePiece"?onePieceId:(slot==="outerwear"?this.resolveMakeHumanOuterwearId(cl?.outerwear,underTopId):this.resolveMakeHumanClothingId(slot,cl?.[slot]));
-        if(!id || this.makeHumanCompatibilitySuppressed(slot,id,f)) return null;
-        return {slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)};
+        const id=slot==="onePiece"?onePieceId:this.resolveMakeHumanClothingId(slot,cl?.[slot]);
+        return id?{slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)}:null;
       }).filter(Boolean);
       const nativeRequests=[
         hairId&&{slot:"hair",id:hairId,tint},
@@ -2720,7 +2838,9 @@ class ProjectionRenderer {
       this.createMakeHumanBelt(cl, f);
       this.createWeaponLoadout(f);
       this.applyCybernetics(f.cybernetics||{});
-      this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
+      // HM08 already applies penis/testes or vulva morphology directly to the
+      // MakeHuman body. Do not stack the legacy standalone anatomy GLB on top;
+      // that duplicated geometry and buried a second mesh inside the pelvis.
 
       this.disposeMixer();
       this.mixer=new THREE.AnimationMixer(this.currentObject);
