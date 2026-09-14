@@ -1760,6 +1760,60 @@ class ProjectionRenderer {
     return this.attachToBone(g,bone,[0,.125,0],[0,0,0]);
   }
 
+  normalizedWeaponLoadout(forge={}){
+    const defaults={
+      primary:{id:"none",carry:"back"},
+      sidearm:{id:"none",carry:"right_hip"},
+      melee:{id:"none",carry:"left_hip"},
+      utility:{id:"none",carry:"chest"}
+    };
+    const raw=forge?.weaponLoadout||{};
+    const out={};
+    for(const slot of Object.keys(defaults)) out[slot]={...defaults[slot],...(raw?.[slot]||{})};
+    // Backward compatibility for profiles created before the persistent loadout.
+    if(!forge?.weaponLoadout && forge?.weaponPreview && forge.weaponPreview!=="none"){
+      const id=String(forge.weaponPreview);
+      let slot="primary";
+      if(/pistol|revolver/i.test(id)) slot="sidearm";
+      else if(/knife|crowbar|baton|hatchet|improvised/i.test(id)) slot="melee";
+      else if(/taser|pepper|shield|grenade|charge/i.test(id)) slot="utility";
+      out[slot]={id,carry:String(forge.weaponCarry||defaults[slot].carry)};
+    }
+    return out;
+  }
+
+  createWeaponLoadout(forge={}){
+    const loadout=this.normalizedWeaponLoadout(forge);
+    for(const slot of ["primary","sidearm","melee","utility"]){
+      const item=loadout[slot]||{};
+      this.createWeapon(item.id||"none",item.carry||"back",slot);
+    }
+  }
+
+  cyberBodyMaskBones(cy={}){
+    const bones=[];
+    const hand=(side)=>[
+      `mixamorig:${side}Hand`,
+      ...["Thumb","Index","Middle","Ring","Pinky"].flatMap(name=>[1,2,3].map(n=>`mixamorig:${side}Hand${name}${n}`))
+    ];
+    const arm=(side,kind)=>{
+      if(!kind||kind==="none") return;
+      if(kind==="cyber_hand") bones.push(...hand(side));
+      else if(kind==="cyber_forearm") bones.push(`mixamorig:${side}ForeArm`,...hand(side));
+      else if(kind==="full_cyber_arm") bones.push(`mixamorig:${side}Arm`,`mixamorig:${side}ForeArm`,...hand(side));
+    };
+    const leg=(side,kind)=>{
+      if(!kind||kind==="none") return;
+      const foot=[`mixamorig:${side}Foot`,`mixamorig:${side}ToeBase`];
+      if(kind==="cyber_foot") bones.push(...foot);
+      else if(kind==="cyber_lower_leg") bones.push(`mixamorig:${side}Leg`,...foot);
+      else if(kind==="full_cyber_leg") bones.push(`mixamorig:${side}UpLeg`,`mixamorig:${side}Leg`,...foot);
+    };
+    arm("Left",cy.leftArm); arm("Right",cy.rightArm);
+    leg("Left",cy.leftLeg); leg("Right",cy.rightLeg);
+    return [...new Set(bones)];
+  }
+
   weaponCarryTransform(carry){
     const map={
       right_hand:['RightHand',[0,.06,.02],[Math.PI/2,0,0]],
@@ -1779,9 +1833,11 @@ class ProjectionRenderer {
     return .24;
   }
 
-  prepareWeaponAsset(scene,id){
-    const wrapper=new THREE.Group(); wrapper.name=`VeilwatchWeapon_${id}`;
-    const model=scene.clone(true);
+  prepareWeaponAsset(scene,id,slot="preview"){
+    const wrapper=new THREE.Group(); wrapper.name=`VeilwatchWeapon_${slot}_${id}`;
+    wrapper.userData.equipmentSlot=`weapon_${slot}`;
+    wrapper.userData.weaponId=id;
+    const model=scene;
     model.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
     let box=new THREE.Box3().setFromObject(model);
     const size=new THREE.Vector3(); box.getSize(size);
@@ -1796,9 +1852,11 @@ class ProjectionRenderer {
     wrapper.add(model); return wrapper;
   }
 
-  createWeaponFallback(id,carry){
+  createWeaponFallback(id,carry,slot="preview"){
     if(!id || id==='none') return null;
-    const g=new THREE.Group(); g.name=`VeilwatchWeapon_${id}_Fallback`;
+    const g=new THREE.Group(); g.name=`VeilwatchWeapon_${slot}_${id}_Fallback`;
+    g.userData.equipmentSlot=`weapon_${slot}`;
+    g.userData.weaponId=id;
     const dark=this.forgeMat(0x20252b,.75,.35), metal=this.forgeMat(0x515962,.85,.25), grip=this.forgeMat(0x17191c,.15,.8), accent=this.forgeMat(0x8a949d,.6,.35);
     const add=(geo,mat,pos,rot=[0,0,0])=>{const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.rotation.set(...rot);g.add(m);};
     const rifle=/rifle|smg|shotgun|carbine|dmr|sniper/.test(id);
@@ -1818,30 +1876,30 @@ class ProjectionRenderer {
     const [bone,pos,rot]=this.weaponCarryTransform(carry); return this.attachToBone(g,bone,pos,rot);
   }
 
-  createWeapon(id,carry){
+  createWeapon(id,carry,slot="preview"){
     if(!id || id==='none') return null;
     if(String(id).startsWith("q_")){
       const generation=this._forgeGeneration||0;
       const url=`${QUATERNIUS_WEAPON_ROOT}/${id}.fbx`;
       this.fbxLoader.loadAsync(url).then(scene=>{
         if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(scene); return; }
-        const g=this.prepareWeaponAsset(scene,id);
+        const g=this.prepareWeaponAsset(scene,id,slot);
         const [bone,pos,rot]=this.weaponCarryTransform(carry);
         this.attachToBone(g,bone,pos,rot);
       }).catch(err=>{
         console.warn(`Quaternius weapon unavailable (${id}):`,err?.message||err);
-        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry);
+        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot);
       });
       return null;
     }
     const asset=FPS_WEAPON_ASSETS[id] || LOCAL_WEAPON_ASSETS[id];
-    if(!asset) return this.createWeaponFallback(id,carry);
+    if(!asset) return this.createWeaponFallback(id,carry,slot);
     const generation=this._forgeGeneration||0;
     const root=LOCAL_WEAPON_ASSETS[id] ? LOCAL_WEAPON_ROOT : FPS_WEAPON_ROOT;
     const url=`${root}/${asset}`;
     this.loader.loadAsync(url).then(gltf=>{
       if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-      const g=this.prepareWeaponAsset(gltf.scene,id);
+      const g=this.prepareWeaponAsset(gltf.scene,id,slot);
       const [bone,pos,rot]=this.weaponCarryTransform(carry); this.attachToBone(g,bone,pos,rot);
     }).catch(async()=>{
       if(generation!==(this._forgeGeneration||0) || !this.currentObject) return;
@@ -1850,11 +1908,11 @@ class ProjectionRenderer {
         try{
           const gltf=await this.loader.loadAsync(`${LOCAL_WEAPON_ROOT}/${local}`);
           if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
-          const g=this.prepareWeaponAsset(gltf.scene,id);
+          const g=this.prepareWeaponAsset(gltf.scene,id,slot);
           const [bone,pos,rot]=this.weaponCarryTransform(carry); this.attachToBone(g,bone,pos,rot); return;
         }catch(e){}
       }
-      this.createWeaponFallback(id,carry);
+      this.createWeaponFallback(id,carry,slot);
     });
     return null;
   }
@@ -2548,6 +2606,11 @@ class ProjectionRenderer {
       await runtime.setNativeAssets(nativeRequests);
       if(serial!==this._makeHumanForgeSerial || runtime!==this.makeHumanRuntime || !this.currentObject) return;
 
+      // Full cybernetic limbs are replacements, not armor shells. Mask body
+      // vertices whose skinning belongs to the replaced HM08 limb while keeping
+      // garment delete_verts in the same combined body-mask pipeline.
+      runtime.setExternalBodyMaskBones?.(this.cyberBodyMaskBones(f.cybernetics||{}),.34);
+
       // Every proportion update refreshes the HM08 rest skeleton so equipment,
       // cuff placement, and retargeted animation all follow the real MakeHuman body.
       this.headBone=runtime.getBone("Head") || runtime.getBone("Neck");
@@ -2568,7 +2631,7 @@ class ProjectionRenderer {
       // static poses and the future animation rebuild.
       this.createCuff(f.cuffArm||"left", f);
       this.createMakeHumanBelt(cl, f);
-      this.createWeapon(f.weaponPreview||"none",f.weaponCarry||"back");
+      this.createWeaponLoadout(f);
       this.applyCybernetics(f.cybernetics||{});
       this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
 
@@ -2599,7 +2662,7 @@ class ProjectionRenderer {
     this.createBodyHair(f,hairColor);
     this.createBodyDetails(f);
     const cy=f.cybernetics||{}; this.applyCybernetics(cy);
-    this.createWeapon(f.weaponPreview||'none',f.weaponCarry||'back');
+    this.createWeaponLoadout(f);
     const cl=f.clothing||{};
     const parametricClothes=this.createParametricClothing(cl);
     this.createClothingExtras(cl);

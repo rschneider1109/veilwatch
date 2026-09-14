@@ -325,6 +325,19 @@ function ensureSection7EquipmentRuntimeData(){
   const carry=new Set(manifest.equipment?.carry||[]);
   for(const id of expectedCarry) if(!carry.has(id)) throw new Error(`Missing equipment carry socket: ${id}`);
 
+  const expectedLoadout={primary:"back",sidearm:"right_hip",melee:"left_hip",utility:"chest"};
+  const loadoutSlots=manifest.equipment?.loadoutSlots||{};
+  for(const [slot,defaultCarry] of Object.entries(expectedLoadout)){
+    const row=loadoutSlots[slot];
+    if(!row) throw new Error(`Missing persistent weapon loadout slot: ${slot}`);
+    if(row.defaultCarry!==defaultCarry) throw new Error(`Unexpected default carry for ${slot}: ${row.defaultCarry}`);
+    const allowed=new Set(row.carry||[]);
+    if(!allowed.has(defaultCarry)) throw new Error(`Loadout slot ${slot} does not allow its default carry socket ${defaultCarry}`);
+    for(const socket of allowed) if(!carry.has(socket)) throw new Error(`Loadout slot ${slot} references unknown carry socket: ${socket}`);
+  }
+  if(manifest.runtimeCapabilities?.equipmentLoadout!==true) throw new Error("Persistent equipment loadout capability is not enabled");
+  if(manifest.runtimeCapabilities?.cyberneticBodyReplacementMask!==true) throw new Error("Cybernetic body replacement masking capability is not enabled");
+
   const belts=(manifest.clothing?.belt||[]).map(x=>String(typeof x==="string"?x:x?.id||"")).filter(x=>x&&x!=="none");
   if(belts.length<5) throw new Error(`Load-bearing belt catalog incomplete (${belts.length}/5)`);
 
@@ -364,7 +377,18 @@ function ensureSection7EquipmentRuntimeData(){
 
   const cyberChoices=Object.values(manifest.cybernetics||{}).flat().filter(x=>x&&x!=="none");
   if(cyberChoices.length<24) throw new Error(`Cybernetic selector manifest unexpectedly small (${cyberChoices.length})`);
-  console.log(`Section 7 equipment runtime ready: required cuff, ${belts.length} belts, ${veilwatchWeapons.length} Veilwatch weapons, ${nativeWeapons.length} armory weapons, ${cyberFiles.length} cybernetic GLBs, ${expectedCarry.length} carry sockets.`);
+
+  const rig=JSON.parse(fs.readFileSync(path.join(characterRoot,"makehuman","runtime","rig.mixamo.json"),"utf8"));
+  const rigBones=new Set(Object.keys(rig.bones||{}));
+  const replacementBones=[
+    "mixamorig:LeftArm","mixamorig:LeftForeArm","mixamorig:LeftHand",
+    "mixamorig:RightArm","mixamorig:RightForeArm","mixamorig:RightHand",
+    "mixamorig:LeftUpLeg","mixamorig:LeftLeg","mixamorig:LeftFoot",
+    "mixamorig:RightUpLeg","mixamorig:RightLeg","mixamorig:RightFoot"
+  ];
+  for(const bone of replacementBones) if(!rigBones.has(bone)) throw new Error(`Cybernetic replacement body-mask bone missing from HM08 rig: ${bone}`);
+
+  console.log(`Section 7 equipment runtime ready: required cuff, ${Object.keys(expectedLoadout).length} persistent loadout slots, ${belts.length} belts, ${veilwatchWeapons.length} Veilwatch weapons, ${nativeWeapons.length} armory weapons, ${cyberFiles.length} cybernetic GLBs, ${expectedCarry.length} carry sockets, cybernetic replacement masking validated.`);
 }
 
 async function main(){

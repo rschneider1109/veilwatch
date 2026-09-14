@@ -243,6 +243,10 @@ export class MakeHumanRuntime {
     this._nativePending = new Map();
     this._nativeDesired = new Map();
     this.hiddenBodyVertices = new Set();
+    // Additional body masking requested by non-clothing equipment such as full
+    // cybernetic limb replacements. This stays separate from garment delete_verts
+    // so wardrobe changes cannot accidentally resurrect a replaced biological limb.
+    this.externalHiddenBodyVertices = new Set();
 
     // Surface textures are separate from mesh assets so changing skin/eyes never
     // rebuilds geometry. Only the active textures are retained on GPU.
@@ -1032,10 +1036,47 @@ export class MakeHumanRuntime {
   }
 
   _refreshNativeBodyMask(){
-    const next=new Set();
+    const next=new Set(this.externalHiddenBodyVertices||[]);
     for(const row of this.nativeAssets.values()) for(const vi of row.asset?.delete||[]) next.add(Number(vi));
     this.hiddenBodyVertices=next;
     this._updateGeometries();
+  }
+
+  setExternalBodyMaskVertices(vertices=[]){
+    this.externalHiddenBodyVertices=new Set((vertices||[]).map(Number).filter(Number.isFinite));
+    this._refreshNativeBodyMask();
+    return this.externalHiddenBodyVertices.size;
+  }
+
+  setExternalBodyMaskBones(boneNames=[],threshold=.34){
+    const names=new Set((boneNames||[]).map(String));
+    if(!names.size || !this.vertexInfluences?.length){
+      this.externalHiddenBodyVertices=new Set();
+      this._refreshNativeBodyMask();
+      return 0;
+    }
+    const selected=new Set();
+    for(const name of names){
+      const exact=this.boneIndexByName.get(name);
+      if(exact!==undefined){selected.add(exact);continue;}
+      const wanted=String(name).replace(/^mixamorig:/,'').toLowerCase();
+      for(const [candidate,index] of this.boneIndexByName.entries()){
+        if(String(candidate).replace(/^mixamorig:/,'').toLowerCase()===wanted){selected.add(index);break;}
+      }
+    }
+    const cut=THREE.MathUtils.clamp(Number(threshold)||.34,.05,.95);
+    const masked=new Set();
+    for(let vi=0;vi<this.vertexInfluences.length;vi++){
+      const influences=this.vertexInfluences[vi]||[];
+      let total=0, chosen=0;
+      for(const [bi,wRaw] of influences){
+        const w=Number(wRaw)||0; total+=w; if(selected.has(bi)) chosen+=w;
+      }
+      if(total>1e-8 && chosen/total>=cut) masked.add(vi);
+    }
+    this.externalHiddenBodyVertices=masked;
+    this._refreshNativeBodyMask();
+    return masked.size;
   }
 
   _compactNativeAsset(asset){

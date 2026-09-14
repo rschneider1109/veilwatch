@@ -17,12 +17,30 @@
       color:"charcoal",
       colors:{baseLayer:"charcoal",top:"charcoal",outerwear:"black",bottoms:"navy",onePiece:"charcoal",shoes:"black",gear:"black"}
     },
-    cuffArm:"left",weaponPreview:"none",weaponCarry:"back",
+    cuffArm:"left",
+    weaponLoadout:{
+      primary:{id:"none",carry:"back"},
+      sidearm:{id:"none",carry:"right_hip"},
+      melee:{id:"none",carry:"left_hip"},
+      utility:{id:"none",carry:"chest"}
+    },
+    // Legacy single-preview fields stay readable so older saved characters can
+    // be upgraded in-memory the first time the Forge opens.
+    weaponPreview:"none",weaponCarry:"back",
     cybernetics:{eye:"none",eyeSide:"right",temple:"none",templeSide:"right",ear:"none",earSide:"right",jaw:"none",jawSide:"right",neck:"none",leftArm:"none",rightArm:"none",leftLeg:"none",rightLeg:"none",torso:"none"},
     animation:"none",posePreview:"none",showAnatomy:false
   };
   const clone=o=>JSON.parse(JSON.stringify(o||{}));
   function bridge(){ return window.VeilwatchForgeBridge; }
+  function weaponSlotFor(id){
+    id=String(id||"none");
+    const w=window.VW_CHAR_CATALOG?.weapons||{};
+    const has=(key)=>(w[key]||[]).some(x=>String(x?.id||"")===id);
+    if(has("sidearms") || /pistol|revolver/i.test(id)) return "sidearm";
+    if(has("melee") || /knife|crowbar|baton|hatchet|improvised/i.test(id)) return "melee";
+    if(has("nonlethal") || has("heavy_restricted") || /taser|pepper|shield|grenade|charge/i.test(id)) return "utility";
+    return "primary";
+  }
   function forge(){
     const d=bridge()?.getDraft?.()||{};
     const raw=d.forge||{};
@@ -38,6 +56,16 @@
       f.clothing[slot]=aliases[current]||manifest?.nativeClothing?.defaults?.[slot]||'none';
     }
     f.cybernetics=Object.assign({},DEFAULT.cybernetics,raw.cybernetics||{});
+    f.weaponLoadout={};
+    for(const slot of ["primary","sidearm","melee","utility"]){
+      f.weaponLoadout[slot]=Object.assign({},DEFAULT.weaponLoadout[slot],raw.weaponLoadout?.[slot]||{});
+    }
+    // Section 07B migration: the old Forge stored one preview weapon. Preserve
+    // that choice by moving it into the matching persistent loadout slot.
+    if(!raw.weaponLoadout && raw.weaponPreview && raw.weaponPreview!=="none"){
+      const slot=weaponSlotFor(raw.weaponPreview);
+      f.weaponLoadout[slot]={id:String(raw.weaponPreview),carry:String(raw.weaponCarry||DEFAULT.weaponLoadout[slot].carry)};
+    }
     // Upgrade animation IDs saved by pre-Section-5 characters. The renderer
     // keeps the same aliases too, but upgrading here makes the selector show
     // the exact active UAL clip instead of an obsolete placeholder value.
@@ -54,13 +82,29 @@
   }
   function range(label,key,value){ const v=Number.isFinite(Number(value))?Number(value):50; return `<label class="ff-range"><span>${label}<b data-ff-value="${key}">${v}</b></span><input type="range" min="0" max="100" value="${v}" data-ff-range="${key}"></label>`; }
   function section(titleText,html){ return `<div class="ff-section"><div class="projection-option-heading">${titleText}</div>${html}</div>`; }
-  function weaponOptions(){
+  function weaponOptions(slot="primary"){
     const w=window.VW_CHAR_CATALOG?.weapons||{};
-    const rows=[['none','None']], seen=new Set(['none']);
-    const add=(id,label)=>{ id=String(id||''); if(!id||seen.has(id)) return; seen.add(id); rows.push([id,String(label||title(id))]); };
-    Object.values(w).flat().forEach(x=>add(x.id,x.name));
-    (manifest?.nativeWeapons||[]).forEach(x=>add(x.id,x.label));
+    const rows=[["none","None"]], seen=new Set(["none"]);
+    const add=(id,label)=>{ id=String(id||""); if(!id||seen.has(id)) return; seen.add(id); rows.push([id,String(label||title(id))]); };
+    const localCategories={
+      primary:["primaries"],
+      sidearm:["sidearms"],
+      melee:["melee"],
+      utility:["nonlethal","heavy_restricted"]
+    };
+    for(const key of localCategories[slot]||[]) for(const x of w[key]||[]) add(x.id,x.name);
+    // The bundled Quaternius armory is firearm-focused. Route pistol/revolver
+    // models to Sidearm and long guns to Primary so each selector stays useful.
+    for(const x of manifest?.nativeWeapons||[]){
+      const id=String(x?.id||""), label=String(x?.label||title(id));
+      if(!id || id==="none") continue;
+      const sidearm=/pistol|revolver/i.test(`${id} ${label}`);
+      if((slot==="sidearm"&&sidearm)||(slot==="primary"&&!sidearm)) add(id,label);
+    }
     return rows;
+  }
+  function loadoutCarryOptions(slot){
+    return manifest?.equipment?.loadoutSlots?.[slot]?.carry || manifest?.equipment?.carry || [];
   }
   function render(){
     if(!manifest||!bridge()) return;
@@ -106,17 +150,23 @@
 
     const e=$('projectionFullForgeEquipment');
     if(e){
-      const wp=weaponOptions(); const cl=f.clothing||{}; const colors=cl.colors||{};
+      const cl=f.clothing||{}; const colors=cl.colors||{}; const loadout=f.weaponLoadout||DEFAULT.weaponLoadout;
       const nativeGear=Math.max(0,(manifest.clothing?.vest||[]).length-1)+Math.max(0,(manifest.clothing?.back||[]).length-1);
+      const slotLabels={primary:'Primary Weapon',sidearm:'Sidearm',melee:'Melee',utility:'Non-Lethal / Utility'};
+      const loadoutHtml=["primary","sidearm","melee","utility"].map(slot=>{
+        const item=loadout[slot]||DEFAULT.weaponLoadout[slot];
+        const wp=weaponOptions(slot);
+        return `<div class="ff-section"><div class="projection-option-heading">${slotLabels[slot]}</div><div class="projection-form-grid projection-forge-two-col"><label>Weapon<select data-ff-key="weaponLoadout.${slot}.id">${wp.map(([id,n])=>`<option value="${id}" ${id===String(item.id||'none')?'selected':''}>${n}</option>`).join('')}</select></label>${sel('Carry Position',`weaponLoadout.${slot}.carry`,loadoutCarryOptions(slot),item.carry)}</div></div>`;
+      }).join('');
       e.innerHTML=
       section('Required Veilwatch Cuff',`<div class="projection-form-grid">${sel('Cuff Arm','cuffArm',manifest.equipment.cuff.arms,f.cuffArm)}</div><div class="ff-required">AUTO-EQUIPPED · REQUIRED · NON-REMOVABLE</div>`)+
       section('Load Bearing & Gear',`<div class="projection-form-grid projection-forge-two-col">${sel('Belt / Load Bearing','clothing.belt',manifest.clothing.belt||[],cl.belt)}${sel('Vest / Rig','clothing.vest',manifest.clothing.vest||[],cl.vest)}${sel('Carried / Utility Gear','clothing.back',manifest.clothing.back||[],cl.back)}${sel('Gear Color','clothing.colors.gear',manifest.clothing.colors||[],colors.gear||'black')}</div><div class="mini">${nativeGear} MakeHuman-native gear assets use the fitted wardrobe runtime; belts are pelvis-mounted equipment and follow the HM08 rig.</div>`)+
-      section('Weapon Preview',`<div class="projection-form-grid projection-forge-two-col"><label>Weapon<select data-ff-key="weaponPreview">${wp.map(([id,n])=>`<option value="${id}" ${id===f.weaponPreview?'selected':''}>${n}</option>`).join('')}</select></label>${sel('Carry Position','weaponCarry',manifest.equipment.carry,f.weaponCarry)}</div><div class="mini">${Math.max(0,wp.length-1)} weapon previews are available across Veilwatch and the bundled armory library, with procedural fallback if an optional model cannot load.</div>`);
+      `<div class="mini">Persistent loadout online: primary, sidearm, melee and non-lethal/utility equipment can be carried at independent sockets. Each selected item remains part of the saved character instead of acting as a temporary preview.</div>${loadoutHtml}`;
     }
 
     const cy=$('projectionFullForgeCybernetics');
     if(cy){ const x=f.cybernetics; const sideKeys=manifest.cyberneticsSides||{}; cy.innerHTML=
-      `<div class="mini">Cybernetic equipment is now mounted to the active MakeHuman HM08 skeleton, including bilateral head/face placement and segmented arm/leg replacements.</div>`+
+      `<div class="mini">Cybernetic equipment is mounted to the active MakeHuman HM08 skeleton. Arm and leg replacements also mask the covered biological limb by HM08 skin weights, so full replacements no longer render as metal shells over flesh.</div>`+
       section('Augmentation',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(manifest.cybernetics||{}).map(k=>sel(title(k),`cybernetics.${k}`,manifest.cybernetics[k],x[k])).join('')}</div>`)+
       section('Head / Face Side',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(sideKeys).map(k=>sel(`${title(k)} Side`,`cybernetics.${k}Side`,sideKeys[k],x[`${k}Side`]||'right')).join('')}</div>`);
     }

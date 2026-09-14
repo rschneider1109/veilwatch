@@ -1,5 +1,5 @@
 {
-  "version": "makehuman-section5",
+  "version": "makehuman-section7b",
   "standard": "veilwatch_character_forge_makehuman_v2",
   "body": {
     "frames": [
@@ -1872,9 +1872,229 @@
       "left_hip",
       "back",
       "chest"
-    ]
+    ],
+    "loadoutSlots": {
+      "primary": {
+        "label": "Primary Weapon",
+        "defaultCarry": "back",
+        "carry": [
+          "back",
+          "chest",
+          "right_hand",
+          "left_hand"
+        ]
+      },
+      "sidearm": {
+        "label": "Sidearm",
+        "defaultCarry": "right_hip",
+        "carry": [
+          "right_hip",
+          "left_hip",
+          "right_hand",
+          "left_hand",
+          "chest"
+        ]
+      },
+      "melee": {
+        "label": "Melee",
+        "defaultCarry": "left_hip",
+        "carry": [
+          "left_hip",
+          "right_hip",
+          "right_hand",
+          "left_hand",
+          "back"
+        ]
+      },
+      "utility": {
+        "label": "Non-Lethal / Utility",
+        "defaultCarry": "chest",
+        "carry": [
+          "chest",
+          "right_hip",
+          "left_hip",
+          "back",
+          "right_hand",
+          "left_hand"
+        ]
+      }
+    },
+    "loadoutVersion": 2
   },
-  "animations": [],
+  "animations": [
+    {
+      "id": "Idle_Loop",
+      "label": "Idle"
+    },
+    {
+      "id": "Idle_Talking_Loop",
+      "label": "Idle - Talking"
+    },
+    {
+      "id": "Idle_Torch_Loop",
+      "label": "Idle - Torch"
+    },
+    {
+      "id": "Walk_Loop",
+      "label": "Walk"
+    },
+    {
+      "id": "Walk_Formal_Loop",
+      "label": "Walk - Formal"
+    },
+    {
+      "id": "Jog_Fwd_Loop",
+      "label": "Jog Forward"
+    },
+    {
+      "id": "Sprint_Loop",
+      "label": "Sprint"
+    },
+    {
+      "id": "Crouch_Idle_Loop",
+      "label": "Crouch - Idle"
+    },
+    {
+      "id": "Crouch_Fwd_Loop",
+      "label": "Crouch - Move Forward"
+    },
+    {
+      "id": "Sitting_Enter",
+      "label": "Sit - Enter"
+    },
+    {
+      "id": "Sitting_Idle_Loop",
+      "label": "Sit - Idle"
+    },
+    {
+      "id": "Sitting_Talking_Loop",
+      "label": "Sit - Talking"
+    },
+    {
+      "id": "Sitting_Exit",
+      "label": "Sit - Exit"
+    },
+    {
+      "id": "Jump_Start",
+      "label": "Jump - Start"
+    },
+    {
+      "id": "Jump_Loop",
+      "label": "Jump - Air"
+    },
+    {
+      "id": "Jump_Land",
+      "label": "Jump - Land"
+    },
+    {
+      "id": "Roll",
+      "label": "Combat Roll"
+    },
+    {
+      "id": "Interact",
+      "label": "Interact"
+    },
+    {
+      "id": "PickUp_Table",
+      "label": "Pick Up From Table"
+    },
+    {
+      "id": "Fixing_Kneeling",
+      "label": "Kneeling - Work / Repair"
+    },
+    {
+      "id": "Dance_Loop",
+      "label": "Dance"
+    },
+    {
+      "id": "Punch_Jab",
+      "label": "Punch - Jab"
+    },
+    {
+      "id": "Punch_Cross",
+      "label": "Punch - Cross"
+    },
+    {
+      "id": "Push_Loop",
+      "label": "Push"
+    },
+    {
+      "id": "Hit_Chest",
+      "label": "Hit Reaction - Chest"
+    },
+    {
+      "id": "Hit_Head",
+      "label": "Hit Reaction - Head"
+    },
+    {
+      "id": "Pistol_Idle_Loop",
+      "label": "Pistol - Idle"
+    },
+    {
+      "id": "Pistol_Aim_Neutral",
+      "label": "Pistol - Aim"
+    },
+    {
+      "id": "Pistol_Aim_Up",
+      "label": "Pistol - Aim Up"
+    },
+    {
+      "id": "Pistol_Aim_Down",
+      "label": "Pistol - Aim Down"
+    },
+    {
+      "id": "Pistol_Reload",
+      "label": "Pistol - Reload"
+    },
+    {
+      "id": "Pistol_Shoot",
+      "label": "Pistol - Fire"
+    },
+    {
+      "id": "Sword_Idle",
+      "label": "Melee - Idle"
+    },
+    {
+      "id": "Sword_Attack",
+      "label": "Melee - Attack"
+    },
+    {
+      "id": "Spell_Simple_Enter",
+      "label": "Projection Gesture - Enter"
+    },
+    {
+      "id": "Spell_Simple_Idle_Loop",
+      "label": "Projection Gesture - Idle"
+    },
+    {
+      "id": "Spell_Simple_Shoot",
+      "label": "Projection Gesture - Activate"
+    },
+    {
+      "id": "Spell_Simple_Exit",
+      "label": "Projection Gesture - Exit"
+    },
+    {
+      "id": "Driving_Loop",
+      "label": "Driving"
+    },
+    {
+      "id": "Swim_Idle_Loop",
+      "label": "Swim - Idle"
+    },
+    {
+      "id": "Swim_Fwd_Loop",
+      "label": "Swim Forward"
+    },
+    {
+      "id": "Death01",
+      "label": "Death"
+    },
+    {
+      "id": "A_TPose",
+      "label": "T-Pose (Calibration)"
+    }
+  ],
   "cyberneticsSides": {
     "eye": [
       "left",
@@ -2376,7 +2596,9 @@
     "makeHumanVisemes": true,
     "makeHumanVisemeCount": 37,
     "quaterniusWeaponLibrary": true,
-    "quaterniusWeaponCount": 46
+    "quaterniusWeaponCount": 46,
+    "equipmentLoadout": true,
+    "cyberneticBodyReplacementMask": true
   },
   "nativeAppearance": {
     "skinMaterials": [
@@ -5335,12 +5557,5 @@
       "id": "q_ultimate_submachinegun_5",
       "label": "Submachine Gun 5 (Ultimate Guns)"
     }
-  ],
-  "features": {
-    "quaterniusRetargeting": false,
-    "quaterniusLocalAnimationLibrary": false,
-    "quaterniusAnimationClips": 0,
-    "animationPlaybackEnabled": false,
-    "animationStatus": "parked_pending_makehuman_native_conversion"
-  }
+  ]
 }
