@@ -192,6 +192,7 @@ const DEFAULT_MH_APPEARANCE = {
 const DEFAULT_MH_CLOTHING = {
   baseLayer:"mh_underwear02_cc0__punkduck_sport_briefs",
   top:"mh_shirts01_cc0__toigo_basic_tucked_t-shirt",
+  outerwear:"",
   bottoms:"mh_pants01_cc0__cortu_cargo_pants",
   onePiece:"",
   socks:"mh_underwear04_cc0__joepal_crude_low_socks",
@@ -230,6 +231,32 @@ const LEGACY_MH_CLOTHING = {
     graphic_tshirt:"mh_shirts02_ccby__punkduck_deathnote_t-shirt",
     crop_top:"mh_shirts03_ccby__punkduck_sleeveless_crop_top",
     athletic_top:"mh_shirts03_ccby__elvs_male_athletic_tank1"
+  },
+  outerwear:{
+    zip_hoodie:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    bomber_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
+    denim_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    leather_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    field_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    rain_shell:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    winter_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    blazer:"mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+    tactical_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    softshell:"mh_shirts02_ccby__mindfront_knitted_sweater_01",
+    lab_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    high_vis_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    utility_vest:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    long_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    parka:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    trench_coat:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    peacoat:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
+    varsity_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    motorcycle_jacket:"mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+    puffer_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_02",
+    fleece_jacket:"mh_shirts02_ccby__mindfront_knitted_sweater_01",
+    windbreaker:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+    suit_jacket:"mh_shirts02_ccby__elvs_male_shirt_tie_tucked1",
+    fire_resistant_jacket:"mh_shirts02_ccby__elvs_hooded_sweat_jacket1"
   },
   bottoms:{
     jeans_straight:"mh_pants02_ccby__punkduck_male_classic_jeans",
@@ -1715,7 +1742,10 @@ class ProjectionRenderer {
 
     const armSize=THREE.MathUtils.clamp(Number(forge.armSize ?? 50),0,100);
     const armLength=THREE.MathUtils.clamp(Number(forge.armLength ?? 50),0,100);
-    const radial=.90 + (armSize/100)*.22;
+    const cyberKey=side==='right'?'rightArm':'leftArm';
+    const cyberKind=String(forge?.cybernetics?.[cyberKey]||'none');
+    const cyberClearance=/cyber_forearm|full_cyber_arm/.test(cyberKind)?1.24:(cyberKind==='cyber_hand'?1.08:1);
+    const radial=(.90 + (armSize/100)*.22)*cyberClearance;
     const length=.145 * (.94 + (armLength/100)*.12);
     const wristR=.044*radial;
     const elbowR=.054*radial;
@@ -1757,7 +1787,7 @@ class ProjectionRenderer {
     g.add(upperBand);
 
     const bone=side==='right'?'RightForeArm':'LeftForeArm';
-    return this.attachToBone(g,bone,[0,.125,0],[0,0,0]);
+    return this.attachToBone(g,bone,[0,(/cyber_forearm|full_cyber_arm/.test(cyberKind) ? .135 : .125),0],[0,0,0]);
   }
 
   normalizedWeaponLoadout(forge={}){
@@ -1782,12 +1812,37 @@ class ProjectionRenderer {
     return out;
   }
 
-  createWeaponLoadout(forge={}){
+  compatibleWeaponLoadout(forge={}){
     const loadout=this.normalizedWeaponLoadout(forge);
+    const allowed={
+      primary:["back","chest","right_hand","left_hand"],
+      sidearm:["right_hip","left_hip","right_hand","left_hand","chest"],
+      melee:["left_hip","right_hip","right_hand","left_hand","back"],
+      utility:["chest","right_hip","left_hip","back","right_hand","left_hand"]
+    };
+    const occupied=new Set();
+    const resolved={};
+    for(const slot of ["primary","sidearm","melee","utility"]){
+      const item={...(loadout[slot]||{})};
+      const id=String(item.id||"none");
+      const requested=String(item.carry||allowed[slot][0]);
+      if(id==="none"){ resolved[slot]={id,carry:requested,requestedCarry:requested,relocated:false}; continue; }
+      const choices=[requested,...allowed[slot].filter(x=>x!==requested)];
+      const carry=choices.find(x=>!occupied.has(x))||requested;
+      occupied.add(carry);
+      resolved[slot]={id,carry,requestedCarry:requested,relocated:carry!==requested};
+    }
+    return resolved;
+  }
+
+  createWeaponLoadout(forge={}){
+    const loadout=this.compatibleWeaponLoadout(forge);
+    this.lastResolvedWeaponLoadout=loadout;
     for(const slot of ["primary","sidearm","melee","utility"]){
       const item=loadout[slot]||{};
-      this.createWeapon(item.id||"none",item.carry||"back",slot);
+      this.createWeapon(item.id||"none",item.carry||"back",slot,{forge,requestedCarry:item.requestedCarry,relocated:item.relocated});
     }
+    return loadout;
   }
 
   cyberBodyMaskBones(cy={}){
@@ -1814,14 +1869,18 @@ class ProjectionRenderer {
     return [...new Set(bones)];
   }
 
-  weaponCarryTransform(carry){
+  weaponCarryTransform(carry,context={}){
+    const cl=context?.forge?.clothing||{};
+    const hasVest=String(cl.vest||"none")!=="none";
+    const hasBack=String(cl.back||"none")!=="none";
+    const hasBelt=String(cl.belt||"none")!=="none";
     const map={
       right_hand:['RightHand',[0,.06,.02],[Math.PI/2,0,0]],
       left_hand:['LeftHand',[0,.06,.02],[Math.PI/2,0,0]],
-      right_hip:['RightUpLeg',[0,.06,.08],[0,0,0]],
-      left_hip:['LeftUpLeg',[0,.06,.08],[0,0,0]],
-      chest:['Spine2',[0,.08,.14],[0,Math.PI/2,0]],
-      back:['Spine2',[0,.05,-.17],[0,.25,.15]]
+      right_hip:['RightUpLeg',[(hasBelt ? .045 : 0),.06,(hasBelt ? .135 : .08)],[0,0,0]],
+      left_hip:['LeftUpLeg',[(hasBelt ? -.045 : 0),.06,(hasBelt ? .135 : .08)],[0,0,0]],
+      chest:['Spine2',[0,.08,(hasVest ? .215 : .14)],[0,Math.PI/2,0]],
+      back:['Spine2',[(hasBack ? .055 : 0),.05,(hasBack ? -.285 : -.17)],[0,.25,.15]]
     };
     return map[carry]||map.back;
   }
@@ -1852,7 +1911,7 @@ class ProjectionRenderer {
     wrapper.add(model); return wrapper;
   }
 
-  createWeaponFallback(id,carry,slot="preview"){
+  createWeaponFallback(id,carry,slot="preview",context={}){
     if(!id || id==='none') return null;
     const g=new THREE.Group(); g.name=`VeilwatchWeapon_${slot}_${id}_Fallback`;
     g.userData.equipmentSlot=`weapon_${slot}`;
@@ -1873,10 +1932,10 @@ class ProjectionRenderer {
     else if(id==='improvised_weapon'){ add(new THREE.CylinderGeometry(.022,.026,.38,10),metal,[0,.02,0]); add(new THREE.BoxGeometry(.07,.05,.04),dark,[0,.20,0]); }
     else if(rifle){ add(new THREE.BoxGeometry(.07,.08,.58),dark,[0,0,-.1]); add(new THREE.CylinderGeometry(.012,.012,.38,12),metal,[0,.005,-.53],[Math.PI/2,0,0]); add(new THREE.BoxGeometry(.055,.16,.04),grip,[0,-.10,-.05],[.18,0,0]); if(/sniper|dmr|marksman/.test(id)) add(new THREE.CylinderGeometry(.018,.018,.18,16),metal,[0,.065,-.08],[Math.PI/2,0,0]); }
     else { add(new THREE.BoxGeometry(.055,.10,.20),dark,[0,0,-.06]); add(new THREE.BoxGeometry(.045,.14,.055),grip,[0,-.10,0],[.18,0,0]); }
-    const [bone,pos,rot]=this.weaponCarryTransform(carry); return this.attachToBone(g,bone,pos,rot);
+    const [bone,pos,rot]=this.weaponCarryTransform(carry,context); return this.attachToBone(g,bone,pos,rot);
   }
 
-  createWeapon(id,carry,slot="preview"){
+  createWeapon(id,carry,slot="preview",context={}){
     if(!id || id==='none') return null;
     if(String(id).startsWith("q_")){
       const generation=this._forgeGeneration||0;
@@ -1884,23 +1943,23 @@ class ProjectionRenderer {
       this.fbxLoader.loadAsync(url).then(scene=>{
         if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(scene); return; }
         const g=this.prepareWeaponAsset(scene,id,slot);
-        const [bone,pos,rot]=this.weaponCarryTransform(carry);
+        const [bone,pos,rot]=this.weaponCarryTransform(carry,context);
         this.attachToBone(g,bone,pos,rot);
       }).catch(err=>{
         console.warn(`Quaternius weapon unavailable (${id}):`,err?.message||err);
-        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot);
+        if(generation===(this._forgeGeneration||0) && this.currentObject) this.createWeaponFallback(id,carry,slot,context);
       });
       return null;
     }
     const asset=FPS_WEAPON_ASSETS[id] || LOCAL_WEAPON_ASSETS[id];
-    if(!asset) return this.createWeaponFallback(id,carry,slot);
+    if(!asset) return this.createWeaponFallback(id,carry,slot,context);
     const generation=this._forgeGeneration||0;
     const root=LOCAL_WEAPON_ASSETS[id] ? LOCAL_WEAPON_ROOT : FPS_WEAPON_ROOT;
     const url=`${root}/${asset}`;
     this.loader.loadAsync(url).then(gltf=>{
       if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
       const g=this.prepareWeaponAsset(gltf.scene,id,slot);
-      const [bone,pos,rot]=this.weaponCarryTransform(carry); this.attachToBone(g,bone,pos,rot);
+      const [bone,pos,rot]=this.weaponCarryTransform(carry,context); this.attachToBone(g,bone,pos,rot);
     }).catch(async()=>{
       if(generation!==(this._forgeGeneration||0) || !this.currentObject) return;
       const local=LOCAL_WEAPON_ASSETS[id];
@@ -1909,10 +1968,10 @@ class ProjectionRenderer {
           const gltf=await this.loader.loadAsync(`${LOCAL_WEAPON_ROOT}/${local}`);
           if(generation!==(this._forgeGeneration||0) || !this.currentObject){ disposeObject(gltf.scene); return; }
           const g=this.prepareWeaponAsset(gltf.scene,id,slot);
-          const [bone,pos,rot]=this.weaponCarryTransform(carry); this.attachToBone(g,bone,pos,rot); return;
+          const [bone,pos,rot]=this.weaponCarryTransform(carry,context); this.attachToBone(g,bone,pos,rot); return;
         }catch(e){}
       }
-      this.createWeaponFallback(id,carry,slot);
+      this.createWeaponFallback(id,carry,slot,context);
     });
     return null;
   }
@@ -2532,6 +2591,20 @@ class ProjectionRenderer {
     return LEGACY_MH_CLOTHING?.[slot]?.[raw] || DEFAULT_MH_CLOTHING?.[slot] || "";
   }
 
+  resolveMakeHumanOuterwearId(value,underTopId=""){
+    const id=this.resolveMakeHumanClothingId("outerwear",value);
+    if(!id || id!==underTopId) return id;
+    // Top and outerwear are both fitted MakeHuman meshes. Never mount the exact
+    // same source garment twice because that produces perfect coplanar overlap.
+    const alternatives=[
+      "mh_shirts02_ccby__mindfront_cardigan_long_open_front",
+      "mh_shirts02_ccby__elvs_hooded_sweat_jacket1",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_02",
+      "mh_shirts02_ccby__mindfront_knitted_sweater_01"
+    ];
+    return alternatives.find(x=>x!==underTopId)||"";
+  }
+
   makeHumanClothingTint(clothing,slot){
     // Preserve authored colors for eyewear and jewelry. Other wardrobe pieces
     // can use the Character Forge palette without multiplying every accessory
@@ -2553,6 +2626,18 @@ class ProjectionRenderer {
       runtime.setSurface("skin",skinId,skinColor),
       runtime.setSurface("eye",eyeId,eyeColor)
     ]);
+  }
+
+  makeHumanCompatibilitySuppressed(slot,id,forge={}){
+    const cy=forge?.cybernetics||{};
+    const leftArm=String(cy.leftArm||"none"), rightArm=String(cy.rightArm||"none");
+    const leftLeg=String(cy.leftLeg||"none"), rightLeg=String(cy.rightLeg||"none");
+    if(slot==="gloves" && (leftArm!=="none" || rightArm!=="none")) return true;
+    if(slot==="shoes" && (leftLeg!=="none" || rightLeg!=="none")) return true;
+    if(slot==="neck" && String(cy.neck||"none")!=="none") return true;
+    if(slot==="eyewear" && (/synthetic_eye|camera_eye/.test(String(cy.eye||"none")) || String(cy.temple||"none")!=="none")) return true;
+    if(slot==="headwear" && String(cy.temple||"none")!=="none" && /helmet|hard_hat|headgear/i.test(String(id||""))) return true;
+    return false;
   }
 
   scheduleMakeHumanForge(appearance,hairColor){
@@ -2590,11 +2675,13 @@ class ProjectionRenderer {
       // The saved shirt/pants choices are left intact so they return immediately
       // when the one-piece item is removed.
       const clothingSlots=onePieceId
-        ? ["baseLayer","onePiece","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]
-        : ["baseLayer","top","bottoms","socks","shoes","gloves","headwear","eyewear","neck","vest","back"];
+        ? ["baseLayer","onePiece","outerwear","socks","shoes","gloves","headwear","eyewear","neck","vest","back"]
+        : ["baseLayer","top","outerwear","bottoms","socks","shoes","gloves","headwear","eyewear","neck","vest","back"];
+      const underTopId=onePieceId||this.resolveMakeHumanClothingId("top",cl?.top);
       const clothingRequests=clothingSlots.map((slot)=>{
-        const id=slot==="onePiece"?onePieceId:this.resolveMakeHumanClothingId(slot,cl?.[slot]);
-        return id?{slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)}:null;
+        const id=slot==="onePiece"?onePieceId:(slot==="outerwear"?this.resolveMakeHumanOuterwearId(cl?.outerwear,underTopId):this.resolveMakeHumanClothingId(slot,cl?.[slot]));
+        if(!id || this.makeHumanCompatibilitySuppressed(slot,id,f)) return null;
+        return {slot:`clothing_${slot}`,id,tint:this.makeHumanClothingTint(cl,slot)};
       }).filter(Boolean);
       const nativeRequests=[
         hairId&&{slot:"hair",id:hairId,tint},

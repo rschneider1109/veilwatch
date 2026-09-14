@@ -938,7 +938,7 @@ export class MakeHumanRuntime {
       hair:80,brows:82,eyelashes:83,facialHair:84,
       clothing_baseLayer:0,clothing_socks:1,clothing_top:2,clothing_bottoms:2,
       clothing_onePiece:3,clothing_shoes:4,clothing_gloves:5,
-      clothing_headwear:6,clothing_eyewear:7,clothing_neck:7,
+      clothing_outerwear:6,clothing_headwear:6,clothing_eyewear:7,clothing_neck:7,
       clothing_vest:8,clothing_back:9
     }[String(slot||"")] ?? 0;
     return {zDepth,renderOrder:100+Math.round(zDepth)*10+slotBias};

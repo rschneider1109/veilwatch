@@ -106,6 +106,21 @@
   function loadoutCarryOptions(slot){
     return manifest?.equipment?.loadoutSlots?.[slot]?.carry || manifest?.equipment?.carry || [];
   }
+  function compatibilityNotes(f){
+    const notes=[];
+    const cl=f.clothing||{}, cy=f.cybernetics||{}, loadout=f.weaponLoadout||{};
+    if(String(cl.gloves||'none')!=='none' && (String(cy.leftArm||'none')!=='none'||String(cy.rightArm||'none')!=='none')) notes.push('Gloves are temporarily hidden while a cybernetic arm/hand replacement is equipped.');
+    if(String(cl.shoes||'none')!=='none' && (String(cy.leftLeg||'none')!=='none'||String(cy.rightLeg||'none')!=='none')) notes.push('Shoes are temporarily hidden while a cybernetic leg/foot replacement is equipped.');
+    if(String(cl.neck||'none')!=='none' && String(cy.neck||'none')!=='none') notes.push('Neck jewelry is temporarily hidden while a neck cybernetic is equipped.');
+    if(String(cl.eyewear||'none')!=='none' && (/synthetic_eye|camera_eye/.test(String(cy.eye||'none'))||String(cy.temple||'none')!=='none')) notes.push('Eyewear is temporarily hidden for the selected eye/temple cybernetic.');
+    const seen=new Map(); let duplicate=false;
+    for(const slot of ['primary','sidearm','melee','utility']){
+      const item=loadout[slot]||{}; if(String(item.id||'none')==='none') continue;
+      const carry=String(item.carry||''); if(seen.has(carry)) duplicate=true; else seen.set(carry,slot);
+    }
+    if(duplicate) notes.push('Duplicate weapon carry points are automatically reassigned to the next compatible free socket.');
+    return notes;
+  }
   function render(){
     if(!manifest||!bridge()) return;
     const f=forge();
@@ -134,16 +149,16 @@
     const c=$('projectionFullForgeClothing');
     if(c){
       const cl=f.clothing;
-      const coreKeys=['baseLayer','top','bottoms','onePiece','socks','shoes'];
+      const coreKeys=['baseLayer','top','outerwear','bottoms','onePiece','socks','shoes'];
       const accessoryKeys=['gloves','headwear','eyewear','neck'];
       const colors=cl.colors||{};
       const cc=manifest.nativeClothing?.counts||{};
-      const totalCount=[...coreKeys,...accessoryKeys,'vest','back'].reduce((n,k)=>n+Number(cc[k]||0),0);
-      const colorKeys=['baseLayer','top','bottoms','onePiece','shoes'];
+      const totalCount=[...coreKeys.filter(k=>k!=='outerwear'),...accessoryKeys,'vest','back'].reduce((n,k)=>n+Number(cc[k]||0),0)+Math.max(0,(manifest.clothing?.outerwear||[]).length-1);
+      const colorKeys=['baseLayer','top','outerwear','bottoms','onePiece','shoes'];
       const onePieceActive=String(cl.onePiece||'none')!=='none';
       const blockedByOnePiece=k=>onePieceActive&&(k==='top'||k==='bottoms');
       c.innerHTML=`<div class="mini">MakeHuman wardrobe online: ${totalCount} fitted garments and accessories. Native .mhclo fitting keeps equipped assets attached while body proportions change, and inactive assets are disposed instead of accumulating in memory.</div>`+
-        section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${coreKeys.map(k=>sel(k==='onePiece'?'Dresses / Suits':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k],blockedByOnePiece(k))).join('')}</div>${onePieceActive?'<div class="mini">Top and Bottoms are preserved but temporarily inactive while a dress / suit is equipped.</div>':''}`)+
+        section('Wardrobe',`<div class="projection-form-grid projection-forge-two-col">${coreKeys.map(k=>sel(k==='onePiece'?'Dresses / Suits':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k],blockedByOnePiece(k))).join('')}</div>${onePieceActive?'<div class="mini">Top and Bottoms are preserved but temporarily inactive while a dress / suit is equipped.</div>':''}${compatibilityNotes(f).length?`<div class="mini">${compatibilityNotes(f).join(' ')}</div>`:''}`)+
         section('Accessories',`<div class="projection-form-grid projection-forge-two-col">${accessoryKeys.map(k=>sel(k==='neck'?'Jewelry':title(k),`clothing.${k}`,manifest.clothing[k]||[],cl[k])).join('')}</div>`)+
         section('Garment Colors',`<div class="projection-form-grid projection-forge-two-col">${colorKeys.map(k=>sel(`${k==='onePiece'?'Dresses / Suits':title(k)} Color`,`clothing.colors.${k}`,manifest.clothing.colors||[],colors[k]||cl.color||'charcoal',blockedByOnePiece(k))).join('')}</div>`);
     }
@@ -161,12 +176,12 @@
       e.innerHTML=
       section('Required Veilwatch Cuff',`<div class="projection-form-grid">${sel('Cuff Arm','cuffArm',manifest.equipment.cuff.arms,f.cuffArm)}</div><div class="ff-required">AUTO-EQUIPPED · REQUIRED · NON-REMOVABLE</div>`)+
       section('Load Bearing & Gear',`<div class="projection-form-grid projection-forge-two-col">${sel('Belt / Load Bearing','clothing.belt',manifest.clothing.belt||[],cl.belt)}${sel('Vest / Rig','clothing.vest',manifest.clothing.vest||[],cl.vest)}${sel('Carried / Utility Gear','clothing.back',manifest.clothing.back||[],cl.back)}${sel('Gear Color','clothing.colors.gear',manifest.clothing.colors||[],colors.gear||'black')}</div><div class="mini">${nativeGear} MakeHuman-native gear assets use the fitted wardrobe runtime; belts are pelvis-mounted equipment and follow the HM08 rig.</div>`)+
-      `<div class="mini">Persistent loadout online: primary, sidearm, melee and non-lethal/utility equipment can be carried at independent sockets. Each selected item remains part of the saved character instead of acting as a temporary preview.</div>${loadoutHtml}`;
+      `<div class="mini">Persistent loadout online: primary, sidearm, melee and non-lethal/utility equipment use exclusive carry sockets. If two equipped items request the same socket, Veilwatch automatically moves the later item to the next compatible free socket. Vests, backpacks and belts also add clearance to chest, back and hip mounts.</div>${loadoutHtml}`;
     }
 
     const cy=$('projectionFullForgeCybernetics');
     if(cy){ const x=f.cybernetics; const sideKeys=manifest.cyberneticsSides||{}; cy.innerHTML=
-      `<div class="mini">Cybernetic equipment is mounted to the active MakeHuman HM08 skeleton. Arm and leg replacements also mask the covered biological limb by HM08 skin weights, so full replacements no longer render as metal shells over flesh.</div>`+
+      `<div class="mini">Cybernetic equipment is mounted to the active MakeHuman HM08 skeleton. Arm and leg replacements mask the covered biological limb by HM08 skin weights. Conflicting gloves, shoes, eyewear or neck jewelry are temporarily hidden rather than deleted, and the mandatory Projection Cuff expands around cyber forearms.</div>`+
       section('Augmentation',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(manifest.cybernetics||{}).map(k=>sel(title(k),`cybernetics.${k}`,manifest.cybernetics[k],x[k])).join('')}</div>`)+
       section('Head / Face Side',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(sideKeys).map(k=>sel(`${title(k)} Side`,`cybernetics.${k}Side`,sideKeys[k],x[`${k}Side`]||'right')).join('')}</div>`);
     }
