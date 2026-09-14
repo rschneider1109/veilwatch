@@ -305,6 +305,68 @@ function ensureSection5RuntimeData(){
   console.log(`Section 5 runtime ready (animations parked): ${(poseCatalog.poses||[]).length} poses, ${(facialCatalog.faceUnits||[]).length} faceunits, ${(facialCatalog.visemes||[]).length} visemes, ${(weaponCatalog.weapons||[]).length} Quaternius weapons.`);
 }
 
+
+function ensureSection7EquipmentRuntimeData(){
+  const characterRoot=path.join("public","assets","characters");
+  const manifestPath=path.join(characterRoot,"character_forge_manifest.json");
+  const manifest=JSON.parse(fs.readFileSync(manifestPath,"utf8"));
+
+  const cuff=manifest.equipment?.cuff||{};
+  if(cuff.required!==true) throw new Error("Veilwatch projection cuff must remain required");
+  const cuffArms=new Set(cuff.arms||[]);
+  if(!cuffArms.has("left") || !cuffArms.has("right") || cuffArms.size!==2){
+    throw new Error(`Projection cuff arm selector invalid: ${JSON.stringify(cuff.arms||[])}`);
+  }
+  if(!String(cuff.asset||"").startsWith("procedural://veilwatch_projection_cuff_")){
+    throw new Error(`Projection cuff manifest no longer points at the locked procedural design: ${cuff.asset}`);
+  }
+
+  const expectedCarry=["right_hand","left_hand","right_hip","left_hip","back","chest"];
+  const carry=new Set(manifest.equipment?.carry||[]);
+  for(const id of expectedCarry) if(!carry.has(id)) throw new Error(`Missing equipment carry socket: ${id}`);
+
+  const belts=(manifest.clothing?.belt||[]).map(x=>String(typeof x==="string"?x:x?.id||"")).filter(x=>x&&x!=="none");
+  if(belts.length<5) throw new Error(`Load-bearing belt catalog incomplete (${belts.length}/5)`);
+
+  const cyberRoot=path.join(characterRoot,"cybernetics","veilwatch_original");
+  const cyberFiles=[
+    "synthetic_eye.glb","camera_eye.glb","temple_port.glb","ear_comms.glb","jaw_plate.glb",
+    "neck_port.glb","chest_interface.glb","spine_interface.glb","cyber_hand.glb","cyber_forearm.glb",
+    "full_cyber_arm.glb","cyber_foot.glb","cyber_lower_leg.glb","full_cyber_leg.glb"
+  ];
+  for(const file of cyberFiles){
+    const fp=path.join(cyberRoot,file);
+    if(!fs.existsSync(fp) || fs.statSync(fp).size<512) throw new Error(`Missing cybernetic equipment asset: ${file}`);
+  }
+
+  const catalogPath=path.resolve("public","js","veilwatch_catalog.js");
+  delete require.cache[catalogPath];
+  const charCatalog=require(catalogPath);
+  const veilwatchWeapons=Object.values(charCatalog.weapons||{}).flat().filter(x=>x?.id);
+  if(veilwatchWeapons.length<26) throw new Error(`Veilwatch weapon catalog incomplete (${veilwatchWeapons.length}/26)`);
+  const localWeaponRoot=path.join(characterRoot,"weapons","veilwatch_local");
+  for(const row of veilwatchWeapons){
+    const fp=path.join(localWeaponRoot,`${row.id}.glb`);
+    if(!fs.existsSync(fp) || fs.statSync(fp).size<512) throw new Error(`Missing bundled Veilwatch weapon model: ${row.id}.glb`);
+  }
+
+  const qRoot=path.join(characterRoot,"weapons","quaternius_fbx");
+  const qCatalog=JSON.parse(fs.readFileSync(path.join(qRoot,"catalog.json"),"utf8"));
+  const qById=new Map((qCatalog.weapons||[]).map(row=>[String(row.id),row]));
+  const nativeWeapons=(manifest.nativeWeapons||[]).filter(row=>row?.id&&row.id!=="none");
+  if(nativeWeapons.length<46) throw new Error(`Character Forge armory manifest incomplete (${nativeWeapons.length}/46)`);
+  for(const row of nativeWeapons){
+    const q=qById.get(String(row.id));
+    if(!q) throw new Error(`Character Forge weapon missing from Quaternius catalog: ${row.id}`);
+    const fp=path.join(qRoot,q.file);
+    if(!fs.existsSync(fp) || fs.statSync(fp).size<512) throw new Error(`Character Forge weapon file missing: ${q.file}`);
+  }
+
+  const cyberChoices=Object.values(manifest.cybernetics||{}).flat().filter(x=>x&&x!=="none");
+  if(cyberChoices.length<24) throw new Error(`Cybernetic selector manifest unexpectedly small (${cyberChoices.length})`);
+  console.log(`Section 7 equipment runtime ready: required cuff, ${belts.length} belts, ${veilwatchWeapons.length} Veilwatch weapons, ${nativeWeapons.length} armory weapons, ${cyberFiles.length} cybernetic GLBs, ${expectedCarry.length} carry sockets.`);
+}
+
 async function main(){
   ensureMakeHumanRuntimeData();
   ensureMakeHumanAppearanceData();
@@ -312,6 +374,7 @@ async function main(){
   ensureMakeHumanWardrobeIntegrity();
   await ensureFpsWeaponAssets();
   ensureSection5RuntimeData();
+  ensureSection7EquipmentRuntimeData();
 
   await esbuild.build({
     entryPoints: ["src/3d/projection_renderer.mjs"],

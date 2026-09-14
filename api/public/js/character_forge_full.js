@@ -54,7 +54,14 @@
   }
   function range(label,key,value){ const v=Number.isFinite(Number(value))?Number(value):50; return `<label class="ff-range"><span>${label}<b data-ff-value="${key}">${v}</b></span><input type="range" min="0" max="100" value="${v}" data-ff-range="${key}"></label>`; }
   function section(titleText,html){ return `<div class="ff-section"><div class="projection-option-heading">${titleText}</div>${html}</div>`; }
-  function weaponOptions(){ const w=window.VW_CHAR_CATALOG?.weapons||{}; const rows=[['none','None']]; Object.values(w).flat().forEach(x=>rows.push([x.id,x.name])); (manifest?.nativeWeapons||[]).filter(x=>x.id&&x.id!=='none').forEach(x=>rows.push([x.id,x.label||title(x.id)])); return rows; }
+  function weaponOptions(){
+    const w=window.VW_CHAR_CATALOG?.weapons||{};
+    const rows=[['none','None']], seen=new Set(['none']);
+    const add=(id,label)=>{ id=String(id||''); if(!id||seen.has(id)) return; seen.add(id); rows.push([id,String(label||title(id))]); };
+    Object.values(w).flat().forEach(x=>add(x.id,x.name));
+    (manifest?.nativeWeapons||[]).forEach(x=>add(x.id,x.label));
+    return rows;
+  }
   function render(){
     if(!manifest||!bridge()) return;
     const f=forge();
@@ -98,14 +105,18 @@
     }
 
     const e=$('projectionFullForgeEquipment');
-    if(e){ const wp=weaponOptions(); const cl=f.clothing||{}; const colors=cl.colors||{}; e.innerHTML=
+    if(e){
+      const wp=weaponOptions(); const cl=f.clothing||{}; const colors=cl.colors||{};
+      const nativeGear=Math.max(0,(manifest.clothing?.vest||[]).length-1)+Math.max(0,(manifest.clothing?.back||[]).length-1);
+      e.innerHTML=
       section('Required Veilwatch Cuff',`<div class="projection-form-grid">${sel('Cuff Arm','cuffArm',manifest.equipment.cuff.arms,f.cuffArm)}</div><div class="ff-required">AUTO-EQUIPPED · REQUIRED · NON-REMOVABLE</div>`)+
-      section('MakeHuman Gear',`<div class="projection-form-grid projection-forge-two-col">${sel('Vest / Rig','clothing.vest',manifest.clothing.vest||[],cl.vest)}${sel('Carried Gear','clothing.back',manifest.clothing.back||[],cl.back)}${sel('Gear Color','clothing.colors.gear',manifest.clothing.colors||[],colors.gear||'black')}</div><div class="mini">Equipment 03 is fitted through the same bounded MakeHuman asset loader as clothing.</div>`)+
-      section('Weapon Preview',`<div class="projection-form-grid projection-forge-two-col"><label>Weapon<select data-ff-key="weaponPreview">${wp.map(([id,n])=>`<option value="${id}" ${id===f.weaponPreview?'selected':''}>${n}</option>`).join('')}</select></label>${sel('Carry Position','weaponCarry',manifest.equipment.carry,f.weaponCarry)}</div><div class="mini">Every current Veilwatch weapon ID has a visual model or bundled fallback.</div>`);
+      section('Load Bearing & Gear',`<div class="projection-form-grid projection-forge-two-col">${sel('Belt / Load Bearing','clothing.belt',manifest.clothing.belt||[],cl.belt)}${sel('Vest / Rig','clothing.vest',manifest.clothing.vest||[],cl.vest)}${sel('Carried / Utility Gear','clothing.back',manifest.clothing.back||[],cl.back)}${sel('Gear Color','clothing.colors.gear',manifest.clothing.colors||[],colors.gear||'black')}</div><div class="mini">${nativeGear} MakeHuman-native gear assets use the fitted wardrobe runtime; belts are pelvis-mounted equipment and follow the HM08 rig.</div>`)+
+      section('Weapon Preview',`<div class="projection-form-grid projection-forge-two-col"><label>Weapon<select data-ff-key="weaponPreview">${wp.map(([id,n])=>`<option value="${id}" ${id===f.weaponPreview?'selected':''}>${n}</option>`).join('')}</select></label>${sel('Carry Position','weaponCarry',manifest.equipment.carry,f.weaponCarry)}</div><div class="mini">${Math.max(0,wp.length-1)} weapon previews are available across Veilwatch and the bundled armory library, with procedural fallback if an optional model cannot load.</div>`);
     }
 
     const cy=$('projectionFullForgeCybernetics');
     if(cy){ const x=f.cybernetics; const sideKeys=manifest.cyberneticsSides||{}; cy.innerHTML=
+      `<div class="mini">Cybernetic equipment is now mounted to the active MakeHuman HM08 skeleton, including bilateral head/face placement and segmented arm/leg replacements.</div>`+
       section('Augmentation',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(manifest.cybernetics||{}).map(k=>sel(title(k),`cybernetics.${k}`,manifest.cybernetics[k],x[k])).join('')}</div>`)+
       section('Head / Face Side',`<div class="projection-form-grid projection-forge-two-col">${Object.keys(sideKeys).map(k=>sel(`${title(k)} Side`,`cybernetics.${k}Side`,sideKeys[k],x[`${k}Side`]||'right')).join('')}</div>`);
     }

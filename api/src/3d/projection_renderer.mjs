@@ -47,7 +47,6 @@ const LOCAL_WEAPON_ROOT = "/assets/characters/weapons/veilwatch_local";
 const QUATERNIUS_ANIMATION_ROOT = "/assets/characters/animations/quaternius";
 const QUATERNIUS_UAL1 = `${QUATERNIUS_ANIMATION_ROOT}/UAL1_Standard.glb`;
 const QUATERNIUS_WEAPON_ROOT = "/assets/characters/weapons/quaternius_fbx";
-const FORGE_ANIMATIONS_ENABLED = false; // Parked until MakeHuman-native clips are validated.
 const MAKEHUMAN_POSE_ROOT = "/assets/characters/makehuman/poses";
 const FORGE_EXTERNAL_ANIMATION_NAMES = new Set([
   "A_TPose", "Crouch_Fwd_Loop", "Crouch_Idle_Loop", "Dance_Loop", "Death01", "Driving_Loop",
@@ -67,7 +66,7 @@ const FORGE_ANIMATION_ALIASES = {
   Walk:"Walk_Loop",
   Wave:"Idle_Talking_Loop"
 };
-const UAL_TO_MAKEHUMAN_BONES = {
+const UAL_TO_VITRUVIAN_BONES = {
   pelvis:"Hips",
   spine01:"Spine", spine02:"Spine1", spine03:"Spine2",
   neck01:"Neck", head:"Head",
@@ -530,7 +529,6 @@ class ProjectionRenderer {
     this.activeAnimationName = "";
     this._requestedAnimationName = "";
     this._forgeAnimationPromise = null;
-    this._activePreparedClip = null;
     this._poseCatalog = null;
     this._poseCatalogPromise = null;
     this._posePackCache = new Map();
@@ -569,13 +567,11 @@ class ProjectionRenderer {
     if(!this.mixer) return;
     try{
       this.mixer.stopAllAction?.();
-      if(this._activePreparedClip) this.mixer.uncacheClip?.(this._activePreparedClip);
       if(this.currentObject) this.mixer.uncacheRoot?.(this.currentObject);
     }catch(err){
       console.warn("Veilwatch animation mixer cleanup warning:", err?.message || err);
     }
     this.mixer = null;
-    this._activePreparedClip = null;
     this.activeAnimationName = "";
     this._requestedAnimationName = "";
   }
@@ -1592,220 +1588,39 @@ class ProjectionRenderer {
   }
 
   retargetQuaterniusClip(clip,sourceRoot){
-    if(!clip || !sourceRoot || !this.currentObject) return null;
-
-    // Retarget motion as a LOCAL rest-pose delta, then conjugate that delta from
-    // the UAL bone basis into the MakeHuman bone basis.  The previous world-space
-    // retarget preserved absolute orientations but massively amplified local joint
-    // rotations on fingers, feet and arms (for example a 0° source finger could
-    // become ~170° on MakeHuman).  This formulation preserves the actual joint
-    // motion magnitude while still accounting for the T-pose -> A-pose basis
-    // difference:
-    //
-    //   D_source = inverse(S_local_rest) * S_local_anim
-    //   B        = inverse(T_world_rest) * S_world_rest
-    //   D_target = B * D_source * inverse(B)
-    //   T_local_anim = T_local_rest * D_target
-    //
-    // Quaternion conjugation changes only the axis representation, not the
-    // rotation angle, so every mapped joint keeps the authored UAL motion.
-    sourceRoot.updateMatrixWorld?.(true);
-    this.currentObject.updateMatrixWorld?.(true);
-
-    const sourceNodes=new Map();
-    sourceRoot.traverse?.(obj=>{
-      const key=this.normalizeRigName(obj.name);
-      if(key && !sourceNodes.has(key)) sourceNodes.set(key,obj);
-    });
-
-    const tracksByKey=new Map();
-    for(const track of clip.tracks||[]){
-      const key=this.normalizeRigName(this.animationTrackNodeName(track.name));
-      if(!key) continue;
-      if(/\.quaternion$/i.test(track.name)) tracksByKey.set(`${key}:quaternion`,track);
-      else if(/\.position$/i.test(track.name)) tracksByKey.set(`${key}:position`,track);
-    }
-
-    const interpolants=new Map();
-    const interpolantFor=(key,property)=>{
-      const cacheKey=`${key}:${property}`;
-      if(interpolants.has(cacheKey)) return interpolants.get(cacheKey);
-      const track=tracksByKey.get(cacheKey);
-      const value=track?.createInterpolant?.()||null;
-      interpolants.set(cacheKey,value);
-      return value;
-    };
-
-    const sourceRestWorld=new Map();
-    for(const [key,node] of sourceNodes){
-      const q=new THREE.Quaternion();
-      node.getWorldQuaternion(q);
-      sourceRestWorld.set(key,q.normalize());
-    }
-
-    const mapped=[];
-    for(const [sourceKey,targetShort] of Object.entries(UAL_TO_MAKEHUMAN_BONES)){
-      const sourceNode=sourceNodes.get(sourceKey);
-      const sourceTrack=tracksByKey.get(`${sourceKey}:quaternion`);
-      const sourceWorldRest=sourceRestWorld.get(sourceKey);
-      const targetBone=this.boneByName(targetShort);
-      const targetWorldSaved=targetBone?.userData?.makeHumanRestWorldQuaternion;
-      const targetLocalSaved=targetBone?.userData?.makeHumanRestQuaternion;
-      if(!sourceNode || !sourceTrack || !sourceWorldRest || !targetBone || !Array.isArray(targetWorldSaved) || !Array.isArray(targetLocalSaved)) continue;
-
-      const sourceLocalRest=sourceNode.quaternion.clone().normalize();
-      const targetWorldRest=new THREE.Quaternion().fromArray(targetWorldSaved).normalize();
-      const targetLocalRest=new THREE.Quaternion().fromArray(targetLocalSaved).normalize();
-      // Maps a rotation axis expressed in UAL bone-local coordinates into the
-      // corresponding MakeHuman bone-local coordinates.
-      const basis=targetWorldRest.clone().invert().multiply(sourceWorldRest).normalize();
-      mapped.push({sourceKey,sourceNode,sourceTrack,sourceLocalRest,targetBone,targetLocalRest,basis});
-    }
-    if(!mapped.length) return null;
-
-    const out=[];
-    for(const row of mapped){
-      const times=row.sourceTrack.times.slice();
-      const values=new Float32Array(times.length*4);
-      const qi=interpolantFor(row.sourceKey,"quaternion");
-      const basisInv=row.basis.clone().invert();
-      const sourceRestInv=row.sourceLocalRest.clone().invert();
-
-      for(let frame=0;frame<times.length;frame++){
-        const sample=qi.evaluate(times[frame]);
-        const sourceLocalAnim=new THREE.Quaternion(sample[0],sample[1],sample[2],sample[3]).normalize();
-        const sourceDelta=sourceRestInv.clone().multiply(sourceLocalAnim).normalize();
-        const targetDelta=row.basis.clone().multiply(sourceDelta).multiply(basisInv).normalize();
-        const targetLocalAnim=row.targetLocalRest.clone().multiply(targetDelta).normalize();
-        targetLocalAnim.toArray(values,frame*4);
-      }
-      out.push(new THREE.QuaternionKeyframeTrack(`${row.targetBone.name}.quaternion`,times,values));
-    }
-
-    // Preserve authored UAL pelvis/root translation as a source-space delta.
-    // It is converted to the current character scale only when a clip is played.
-    let pelvisMotion=null;
-    const pelvisNode=sourceNodes.get("pelvis");
-    const rootNode=sourceNodes.get("root");
-    const pelvisPos=tracksByKey.get("pelvis:position");
-    if(pelvisNode && pelvisPos){
-      const times=pelvisPos.times.slice();
-      const deltas=new Float32Array(times.length*3);
-      const pelvisInterp=interpolantFor("pelvis","position");
-      const rootPosInterp=interpolantFor("root","position");
-      const rootRotInterp=interpolantFor("root","quaternion");
-      const sourceRestWorldPosition=new THREE.Vector3();
-      pelvisNode.getWorldPosition(sourceRestWorldPosition);
-      for(let i=0;i<times.length;i++){
-        const time=times[i];
-        const pv=pelvisInterp.evaluate(time);
-        const point=new THREE.Vector3(pv[0],pv[1],pv[2]);
-        let rootQ=rootNode?.quaternion?.clone?.()||new THREE.Quaternion();
-        if(rootRotInterp){
-          const q=rootRotInterp.evaluate(time);
-          rootQ.set(q[0],q[1],q[2],q[3]).normalize();
-        }
-        let rootP=rootNode?.position?.clone?.()||new THREE.Vector3();
-        if(rootPosInterp){
-          const r=rootPosInterp.evaluate(time);
-          rootP.set(r[0],r[1],r[2]);
-        }
-        point.applyQuaternion(rootQ).add(rootP).sub(sourceRestWorldPosition).toArray(deltas,i*3);
-      }
-      pelvisMotion={times,deltas};
-    }
-
-    const result=new THREE.AnimationClip(clip.name,clip.duration,out);
-    result.userData={...(result.userData||{}),veilwatchPelvisMotion:pelvisMotion};
-    return result;
-  }
-
-  validateQuaterniusAnimationLibrary(byName){
-    const expected=FORGE_EXTERNAL_ANIMATION_NAMES.size;
-    const mappedBones=Object.keys(UAL_TO_MAKEHUMAN_BONES).length;
-    const failures=[];
-
-    for(const name of FORGE_EXTERNAL_ANIMATION_NAMES){
-      const clip=byName.get(name);
-      if(!clip){ failures.push(`${name}: missing clip`); continue; }
-      const qTracks=(clip.tracks||[]).filter(t=>/\.quaternion$/i.test(t.name));
-      if(qTracks.length!==mappedBones) failures.push(`${name}: ${qTracks.length}/${mappedBones} rotation tracks`);
-      for(const track of qTracks){
-        const values=track.values||[];
-        for(let i=0;i+3<values.length;i+=4){
-          const x=values[i],y=values[i+1],z=values[i+2],w=values[i+3];
-          const norm=Math.hypot(x,y,z,w);
-          if(!Number.isFinite(norm) || Math.abs(norm-1)>.02){
-            failures.push(`${name}: invalid quaternion track ${track.name}`);
-            break;
-          }
-        }
-      }
-      const motion=clip.userData?.veilwatchPelvisMotion;
-      if(!motion?.times || !motion?.deltas) failures.push(`${name}: missing pelvis motion metadata`);
-    }
-
-    // Calibration is authored as the UAL rest pose. After rest-offset retargeting
-    // it must resolve back to MakeHuman's own authored A-pose rest quaternions.
-    // Treat a mismatch as a hard failure instead of silently deploying a bad rig.
-    const calibration=byName.get("A_TPose");
-    if(calibration){
-      for(const track of calibration.tracks||[]){
-        if(!/\.quaternion$/i.test(track.name) || track.values.length<4) continue;
-        const nodeName=this.animationTrackNodeName(track.name);
-        const bone=this.currentObject?.getObjectByName?.(nodeName) || this.boneByName(nodeName);
-        const rest=bone?.userData?.makeHumanRestQuaternion;
-        if(!bone?.isBone || !Array.isArray(rest)) continue;
-        const sample=new THREE.Quaternion().fromArray(track.values,0).normalize();
-        const restQ=new THREE.Quaternion().fromArray(rest).normalize();
-        if(THREE.MathUtils.radToDeg(sample.angleTo(restQ))>.75){
-          failures.push(`A_TPose calibration mismatch: ${track.name}`);
-        }
-      }
-    }
-
-    if(failures.length) throw new Error(`UAL1 validation failed (${failures.slice(0,8).join("; ")})`);
-    return expected;
-  }
-
-  prepareAnimationForCurrentBody(clip){
-    const motion=clip?.userData?.veilwatchPelvisMotion;
-    const hips=this.boneByName("Hips");
-    if(!motion?.times || !motion?.deltas || !hips) return clip;
-
-    const rest=new THREE.Vector3().fromArray(hips.userData?.makeHumanRestPosition||[hips.position.x,hips.position.y,hips.position.z]);
-    const scale=Number(this.makeHumanRuntime?.getAnimationTranslationScale?.()||0.1);
-    const values=new Float32Array(motion.deltas.length);
-    for(let i=0;i<motion.deltas.length;i+=3){
-      values[i]=rest.x+motion.deltas[i]*scale;
-      values[i+1]=rest.y+motion.deltas[i+1]*scale;
-      values[i+2]=rest.z+motion.deltas[i+2]*scale;
-    }
-    const positionTrack=new THREE.VectorKeyframeTrack(`${hips.name}.position`,motion.times,values);
-    const prepared=new THREE.AnimationClip(clip.name,clip.duration,[...(clip.tracks||[]),positionTrack]);
-    prepared.userData={...(clip.userData||{}),veilwatchPrepared:true};
-    return prepared;
+    return this.retargetExternalClip(clip,sourceRoot,UAL_TO_VITRUVIAN_BONES);
   }
 
   async ensureForgeAnimationLibrary(token=this._loadToken){
-    // Section 5 safety gate: external animation playback is intentionally parked.
-    // Keep the source assets in the repo, but do not load/retarget them at runtime
-    // until MakeHuman-native clips have been validated visually in Veilwatch.
-    this._forgeAnimationPromise = null;
-    this.availableAnimations = [];
-    this.disposeMixer();
-    this.restoreMakeHumanRestPose();
-    this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
-    return null;
+    if(this._forgeAnimationPromise) return this._forgeAnimationPromise;
+    this._forgeAnimationPromise=(async()=>{
+      try{
+        const gltf=await this.loader.loadAsync(QUATERNIUS_UAL1);
+        if(token!==this._loadToken || !this.currentObject){ disposeObject(gltf.scene||gltf.scenes?.[0]); return; }
+        const byName=new Map((this.availableAnimations||[]).map(c=>[c.name,c]));
+        let count=0;
+        const sourceRoot=gltf.scene||gltf.scenes?.[0];
+        const wanted=(gltf.animations||[]).filter(c=>FORGE_EXTERNAL_ANIMATION_NAMES.has(c.name));
+        for(const clip of wanted){ const retargeted=this.retargetQuaterniusClip(clip,sourceRoot); if(retargeted){byName.set(retargeted.name,retargeted);count++;} }
+        disposeObject(sourceRoot);
+        this.availableAnimations=[...byName.values()];
+        const forge=this.profile?.appearance?.forge||{};
+        this._requestedAnimationName="";
+        if(String(forge.posePreview||"none")!=="none") await this.applyMakeHumanPose(forge.posePreview,true);
+        else this.applyAnimation(forge.animation||"Idle_Loop",true);
+        console.info(`Veilwatch animation library online: ${count} local CC0 clips retargeted.`);
+      }catch(err){
+        console.warn("Veilwatch external animation library unavailable; using native clips:",err?.message||err);
+      }finally{ this._forgeAnimationPromise=null; }
+    })();
+    return this._forgeAnimationPromise;
   }
 
   restoreMakeHumanRestPose(){
     if(!this.currentObject) return;
     this.currentObject.traverse?.(obj=>{
       if(!obj.isBone) return;
-      const p=obj.userData?.makeHumanRestPosition;
       const q=obj.userData?.makeHumanRestQuaternion;
-      if(Array.isArray(p) && p.length===3) obj.position.fromArray(p);
       if(Array.isArray(q) && q.length===4) obj.quaternion.fromArray(q);
     });
     this.currentObject.updateMatrixWorld?.(true);
@@ -2377,6 +2192,40 @@ class ProjectionRenderer {
     const map={black:0x181a1d,charcoal:0x30343a,slate:0x59636d,white:0xe7e8e7,cream:0xd8d0bd,navy:0x1e2a42,blue:0x355b82,olive:0x596044,sage:0x7e8d73,tan:0xa98e68,khaki:0x9c9475,brown:0x654a36,burgundy:0x6c2835,red:0x8b3030,mustard:0xaa8532,teal:0x2e6b70}; return map[name]||map.charcoal;
   }
 
+  createMakeHumanBelt(cl={}, forge={}){
+    const id=String(cl?.belt||"none");
+    if(!id || id==="none") return null;
+
+    const g=new THREE.Group();
+    g.name=`VeilwatchBelt_${id}`;
+    g.userData.equipmentSlot="belt";
+    const gearHex=this.clothingColor(cl?.colors?.gear || cl?.color || "black");
+    const beltMat=this.forgeMat(gearHex,/dress|civilian/.test(id)?.18:.34,/dress/.test(id)?.42:.62);
+    const hardware=this.forgeMat(/dress/.test(id)?0x9b8a69:0x68727b,.78,.26);
+    const pouchMat=this.forgeMat(new THREE.Color(gearHex).multiplyScalar(.72).getHex(),.22,.72);
+
+    // Keep the generated belt independent from native garment masking. It is
+    // rigid-mounted to the MakeHuman pelvis so it follows body proportions,
+    // poses and future animation without becoming another MHCLO layer.
+    const hips=THREE.MathUtils.clamp(Number(forge?.hips??50),0,100);
+    const waist=THREE.MathUtils.clamp(Number(forge?.waist??50),0,100);
+    const radius=.145 + ((hips*.65+waist*.35)/100)*.045;
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.010,10,48),beltMat);
+    ring.rotation.x=Math.PI/2; ring.position.y=.075; g.add(ring);
+    const buckle=new THREE.Mesh(new THREE.BoxGeometry(.042,.031,.014),hardware);
+    buckle.position.set(0,.075,radius); g.add(buckle);
+
+    const addPouch=(x,z=.0,w=.052,h=.068,d=.034)=>{
+      const pouch=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),pouchMat);
+      pouch.position.set(x,.068,radius*.93+z); g.add(pouch);
+    };
+    if(/duty/.test(id)){ addPouch(-.105,.002); addPouch(.105,.002); addPouch(-.155,-.030,.042,.060,.030); }
+    else if(/tactical/.test(id)){ addPouch(-.115,.004,.060,.074,.040); addPouch(.115,.004,.060,.074,.040); addPouch(0,-radius*1.78,.072,.064,.038); }
+    else if(/utility/.test(id)){ addPouch(-.11,.004,.057,.073,.038); addPouch(.11,.004,.057,.073,.038); }
+
+    return this.attachToBone(g,'Hips');
+  }
+
   createClothingExtras(cl={}){
     const color=this.clothingColor(cl.colors?.gear || cl.color), outerColor=this.clothingColor(cl.colors?.outerwear || cl.color), cloth=this.garmentMaterial(color,'accessory'), outerCloth=this.garmentMaterial(outerColor,'outerwear'), dark=this.forgeMat(0x22262b,.18,.72);
     const addBone=(bone,geo,pos=[0,0,0],rot=[0,0,0],mat=cloth)=>{const g=new THREE.Group(),m=new THREE.Mesh(geo,mat);g.add(m);return this.attachToBone(g,bone,pos,rot);};
@@ -2566,15 +2415,32 @@ class ProjectionRenderer {
     return null;
   }
 
-  applyAnimation(name="none", force=false){
-    // Runtime animation playback is intentionally disabled for the stability build.
-    // Static MakeHuman poses remain available through applyMakeHumanPose().
-    this.disposeMixer();
-    this.availableAnimations = [];
-    this.activeAnimationName = "";
-    this._requestedAnimationName = "";
-    if(String(this.activePoseId||"none")==="none") this.restoreMakeHumanRestPose();
-    return false;
+  applyAnimation(name="Idle_Loop", force=false){
+    if(!this.mixer || !this.availableAnimations?.length) return;
+    const rawRequested=String(name||"Idle_Loop");
+    const requested=FORGE_ANIMATION_ALIASES[rawRequested] || rawRequested;
+    if(!force && this._requestedAnimationName===requested && this.activeAnimationName) return;
+    // Never use a fuzzy `idle` search here. The UAL library contains several
+    // unrelated idle clips (crouch, sitting, pistol, swim, spell). A fuzzy
+    // match made legacy "Idle" requests consistently select Crouch_Idle_Loop.
+    const clip=this.availableAnimations.find(a=>a.name===requested)
+      || this.availableAnimations.find(a=>a.name==="Idle_Loop")
+      || this.availableAnimations[0];
+    if(!clip) return;
+    this.restoreMakeHumanRestPose();
+    this.activePoseId="none";
+    this.mixer.stopAllAction();
+    const action=this.mixer.clipAction(clip).reset().fadeIn(.18);
+    if(/death|punch|roll|interact|jump/i.test(clip.name)){
+      action.setLoop(THREE.LoopOnce,1);
+      action.clampWhenFinished=true;
+    }else{
+      action.setLoop(THREE.LoopRepeat,Infinity);
+      action.clampWhenFinished=false;
+    }
+    action.play();
+    this.activeAnimationName=clip.name;
+    this._requestedAnimationName=requested;
   }
 
   resolveMakeHumanSkinSurface(appearance={}){
@@ -2696,18 +2562,22 @@ class ProjectionRenderer {
       this.forgeRoot.name="VeilwatchMakeHumanForgeRoot";
       this.currentObject.add(this.forgeRoot);
 
-      // Hair, brows, lashes, and facial hair are MakeHuman-native fitted meshes.
-      // Equipment below remains bone-driven and follows the same HM08 skeleton.
+      // Hair, brows, lashes, facial hair, vest/rig and carried gear are
+      // MakeHuman-native fitted meshes. The remaining equipment is bone-driven
+      // from the same HM08 Mixamo skeleton so everything follows proportions,
+      // static poses and the future animation rebuild.
       this.createCuff(f.cuffArm||"left", f);
+      this.createMakeHumanBelt(cl, f);
       this.createWeapon(f.weaponPreview||"none",f.weaponCarry||"back");
+      this.applyCybernetics(f.cybernetics||{});
       this.createAnatomyPreview(f, this.colorFromHint(this.profile.appearanceRender?.skinHex, 0xcc9874));
 
       this.disposeMixer();
-      this.availableAnimations=[];
+      this.mixer=new THREE.AnimationMixer(this.currentObject);
       this._requestedAnimationName="";
       if(String(f.posePreview||"none")!=="none") await this.applyMakeHumanPose(f.posePreview,true);
-      else this.restoreMakeHumanRestPose();
-      this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
+      else this.applyAnimation(f.animation||"Idle_Loop",true);
+      this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
     }catch(err){
       console.error("Veilwatch MakeHuman morph update failed:",err);
       if(serial===this._makeHumanForgeSerial) this.setStatus("MAKEHUMAN MORPH UPDATE FAILED", "error");
@@ -2778,7 +2648,7 @@ class ProjectionRenderer {
         if(mat) mat.needsUpdate=true;
       });
     });
-    if(String(f.posePreview||'none')==='none') this.restoreMakeHumanRestPose();
+    this.applyAnimation(f.animation||'Idle_Loop');
   }
 
   applyAppearance(){
@@ -2955,12 +2825,13 @@ class ProjectionRenderer {
     }
     this.world.add(this.currentObject);
     this.availableAnimations=[];
-    this.disposeMixer();
+    this.mixer=new THREE.AnimationMixer(this.currentObject);
 
     this.frameObject(this.currentObject);
     this.applyProfile(this.profile);
     this.setView(this.viewName||"body");
-    this.setStatus("MAKEHUMAN FOUNDATION ONLINE · ANIMATIONS PARKED", "linked");
+    this.setStatus("MAKEHUMAN FOUNDATION ONLINE", "linked");
+    void this.ensureForgeAnimationLibrary(token);
   }
 
   async loadVitruvianBundle(token){
